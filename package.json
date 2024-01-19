@@ -45,7 +45,9 @@
 	"type": "module",
 	"dependencies": {
 		"@lucia-auth/adapter-prisma": "^3.0.2",
+		"jsqr": "^1.4.0",
 		"lucia": "^2.7.6",
-		"lucide-svelte": "^0.312.0"
+		"lucide-svelte": "^0.312.0",
+		"tailwind-merge": "^2.2.0"
 	}
 }
