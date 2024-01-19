@@ -1,5 +1,9 @@
 <script>
 	import '../app.pcss';
+	import NavBar from '../components/NavBar.svelte';
 </script>
 
-<slot />
+<div class="min-h-[100svh] dark:bg-gray-800">
+	<NavBar />
+	<slot />
+</div>
