@@ -2,7 +2,6 @@
     import { DarkMode, Drawer, CloseButton } from "flowbite-svelte";
 	import { AlignJustify } from 'lucide-svelte';
 	import Logo from "./Logo.svelte";
-	import MenuSide from "./MenuSide.svelte";
   	import { sineIn } from 'svelte/easing';
 
 
