@@ -51,8 +51,9 @@
 			Menu
 		</h4>
 		<CloseButton on:click={() => (hidden = true)} class="mb-4 dark:text-white" />
-	  </div>
-	<div class="flex flex-col gap-4">
+	</div>
+	<hr class="dark:border-gray-600"/>
+	<div class="flex flex-col gap-4 mt-5">
 		{#each routes as route}
 			{#if route.role == currentRole || currentRole == "ADMIN"}
 				<a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>{route.label}</a>
