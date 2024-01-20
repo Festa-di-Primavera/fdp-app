@@ -1,9 +1,8 @@
 <script lang="ts">
     import { DarkMode, Drawer, CloseButton } from "flowbite-svelte";
-	import { AlignJustify } from 'lucide-svelte';
+	import { AlignJustify, DollarSign, Home, ScanLine } from 'lucide-svelte';
 	import Logo from "./Logo.svelte";
   	import { sineIn } from 'svelte/easing';
-
 
 	import { page } from '$app/stores';  
 	
@@ -13,17 +12,20 @@
 		{
 			label: 'Dashboard',
 			slug: "/dashboard",
-			role: "ADMIN" 
+			role: "ADMIN",
+			icon: Home
 		},
 		{
 			label: 'Sell',
 			slug: "/sell",
-			role: "SELLER" 
+			role: "SELLER",
+			icon: DollarSign
 		},
 		{
 			label: 'Check-in',
 			slug: "/check-in",
-			role: "CHECKER"
+			role: "CHECKER",
+			icon: ScanLine
 		}
 	]
 
@@ -47,7 +49,7 @@
 </navbar>
 <Drawer placement="right" transitionType="fly" transitionParams={transitionParamsRight} width="w-72" bind:hidden>
 	<div class="flex items-center">
-		<h4 class=" items-center mb-4 text-xl font-semibold text-gray-500 dark:text-gray-400">
+		<h4 class=" items-center mb-4 text-3xl font-semibold text-gray-500 dark:text-gray-400">
 			Menu
 		</h4>
 		<CloseButton on:click={() => (hidden = true)} class="mb-4 dark:text-white" />
@@ -56,7 +58,12 @@
 	<div class="flex flex-col gap-4 mt-5">
 		{#each routes as route}
 			{#if route.role == currentRole || currentRole == "ADMIN"}
-				<a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>{route.label}</a>
+				<a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>
+					<span class="flex gap-4 w-full text-2xl items-center">
+						<svelte:component this={route.icon}/>
+						{route.label}
+					</span>
+				</a>
 			{/if}
 		{/each}
 	</div>
