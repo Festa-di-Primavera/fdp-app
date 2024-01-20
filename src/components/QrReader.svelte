@@ -1,6 +1,7 @@
 <script lang="ts">
     import jsQR, { type QRCode } from 'jsqr';
     import { onMount } from 'svelte';
+    import { X } from 'lucide-svelte';
 
 	export let videoWidth: number = 900;
 	export let videoHeight: number = 900;
@@ -161,9 +162,9 @@
 	<canvas on:click={openScanner} id="canvas" class="w-full rounded-lg {aspectClass}" width={videoWidth} height={videoHeight}>
     </canvas>
     {#if opened}
-        <button class="absolute top-2 right-2 z-10 bg-slate-400 bg-opacity-5 p-2 rounded-md" on:click={closeScanner}>
-            <!-- <CloseSolid class="w-4 h-4 text-primary-600" /> -->
-            CHIUDI
+        <button type="button" class="flex items-center gap-1 text-primary-400 absolute top-2 right-2 z-10 bg-slate-400 bg-opacity-40 p-1 rounded-md" on:click={closeScanner}>
+            Chiudi
+            <X class="w-5 h-5 text-primary-400" />
         </button>
     {/if}
 </div>
