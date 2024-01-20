@@ -36,12 +36,12 @@
 	};
 </script>
 	
-<navbar class="flex items-center justify-between w-full bg-gray-100 dark:bg-gray-900">
+<navbar class="sticky top-0 flex items-center justify-between w-full bg-gray-100 dark:bg-gray-900">
 	<a class="ml-[1%] my-2" href="/">
 		<Logo/>
 	</a>
 	<div class="flex items-center justify-end gap-4">
-		<DarkMode btnClass='mx-3 md:mx-8 text-gray-500 dark:text-gray-400 rounded-lg text-sm p-2.5'/>
+		<DarkMode btnClass='mx-3 md:mr-1 text-gray-500 dark:text-gray-400 rounded-lg text-sm p-2.5'/>
 		<button on:click={()=> {hidden = false}}><AlignJustify class="text-gray-500 dark:text-gray-400 mr-5"/></button>
 	</div>
 </navbar>
