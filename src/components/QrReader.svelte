@@ -32,6 +32,8 @@
         if(!opened || code){
             opened = true;
             alreadyFound = false;
+            codeResult = '';
+            code = null;
 
             video = document.createElement("video");
             canvasElement = document.getElementById("canvas") as HTMLCanvasElement;
