@@ -89,8 +89,8 @@
 		<TableHead>
 			<TableHeadCell>Nome</TableHeadCell>
 			<TableHeadCell>Email</TableHeadCell>
-			<TableHeadCell>Role</TableHeadCell>
-			<TableHeadCell class="text-center">Delete</TableHeadCell>
+			<TableHeadCell>Ruolo</TableHeadCell>
+			<TableHeadCell class="text-center">Elimina</TableHeadCell>
 		</TableHead>
 		<TableBody tableBodyClass="divide-y">
 			{#each filteredItems as item}
