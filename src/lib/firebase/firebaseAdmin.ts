@@ -1,4 +1,4 @@
-import { CLIENT_EMAIL, PRIVATE_KEY, VITE_PROJECT_ID, VITE_STORAGE_BUCKET } from "$env/static/private";
+import { CLIENT_EMAIL, PRIVATE_KEY } from "$env/static/private";
 import admin from "firebase-admin";
 
 interface FirebaseAdminAppParams {
@@ -35,10 +35,10 @@ export function createAdminApp(params: FirebaseAdminAppParams){
 
 export function initAdmin(){
 	const params: FirebaseAdminAppParams = {
-		projectId: VITE_PROJECT_ID as string,
+		projectId: import.meta.env.VITE_PROJECT_ID as string,
 		clientEmail: CLIENT_EMAIL as string,
 		privateKey: PRIVATE_KEY as string,
-		storageBucket: VITE_STORAGE_BUCKET as string,
+		storageBucket: import.meta.env.VITE_STORAGE_BUCKET as string,
 	};
 
     return createAdminApp(params);
