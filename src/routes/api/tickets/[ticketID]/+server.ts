@@ -1,30 +1,78 @@
 import { db } from '$lib/firebase/firebase.js';
 import { json } from '@sveltejs/kit';
-import { collection, documentId, getDocs, query, where } from 'firebase/firestore';
+import { Timestamp, updateDoc, doc, getDoc } from 'firebase/firestore';
+import type { Ticket } from '../../../../models/ticket';
 
 export async function GET( { params } ) {
-	const q = query(collection(db, "tickets"), where(documentId(), "in",
-	[
-	  params.ticketID
-	]));
+	const ticketDoc = (await getDoc(doc(db, "tickets", params.ticketID)));
 
-	const querySnapshot = await getDocs(q);
-	
-	const tickets = querySnapshot.docs.map(doc => {
-        return (
-			{
-				id: doc.id,
-				name: doc.data().name,
-				surname: doc.data().surname,
-				checkIn: doc.data().checkIn ? doc.data().checkIn.toDate() : null,
+	if(!ticketDoc.exists()) {
+		return json({
+			status: 404,
+			body: {
+				message: "Invalid ticket ID"
 			}
-		);
+		});
+	}
+
+	const ticket: Ticket = {
+		ticketID: ticketDoc.id,
+		name: ticketDoc.data().name,
+		surname: ticketDoc.data().surname,
+		checkIn: ticketDoc.data().checkIn ? ticketDoc.data().checkIn.toDate().toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : null,
+		soldAt: ticketDoc.data().soldAt ? ticketDoc.data().soldAt.toDate().toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : null,
+		seller: ticketDoc.data().seller
+	} as Ticket;
+	
+	return json({
+		status: 200,
+		body: {
+			ticket
+		}
 	});
+}
+
+export async function PUT( { params } ) {
+	const ticketID = params.ticketID;
+
+	let ticketDoc = (await getDoc(doc(db, "tickets", ticketID)));
+
+	if(!ticketDoc.exists()) {
+		return json({
+			status: 404,
+			body: {
+				message: "Invalid ticket ID"
+			}
+		});
+	}
+
+	await updateDoc(doc(db, "tickets", ticketID), {
+		checkIn: Timestamp.fromDate(new Date())
+	});
+	ticketDoc = (await getDoc(doc(db, "tickets", ticketID)));
+
+	if(!ticketDoc.exists()) {
+		return json({
+			status: 404,
+			body: {
+				message: "Invalid ticket ID"
+			}
+		});
+	}
+
+	const ticket: Ticket = {
+		ticketID: ticketDoc.id,
+		name: ticketDoc.data().name,
+		surname: ticketDoc.data().surname,
+		checkIn: ticketDoc.data().checkIn ? ticketDoc.data().checkIn.toDate().toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : null,
+		soldAt: ticketDoc.data().soldAt ? ticketDoc.data().soldAt.toDate().toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : null,
+		seller: ticketDoc.data().seller
+	} as Ticket;
 
 	return json({
 		status: 200,
 		body: {
-			tickets
+			ticket
 		}
 	});
 }
