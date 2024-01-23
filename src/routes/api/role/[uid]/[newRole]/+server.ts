@@ -2,14 +2,23 @@ import { initAdmin } from '$lib/firebase/firebaseAdmin';
 import { json } from '@sveltejs/kit';
 
 export async function PUT({params}) {
-    console.log(params);
 	const app = initAdmin();
 
-	app.auth().setCustomUserClaims(params.uid, { role: params.newRole });
-	
-    // TODO: Check if user has been updated
-
-	return json({
-		status: 200
-	});
+	try{
+		app.auth().setCustomUserClaims(params.uid, { role: params.newRole });
+		return json({
+			status: 200,
+			body: {
+				message: 'User role updated'
+			}
+		});
+	}
+	catch(e){
+		return json({
+			status: 500,
+			body: {
+				message: e.message
+			}
+		});
+	}
 }
