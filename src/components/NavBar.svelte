@@ -45,7 +45,7 @@
 	};
 </script>
 	
-<navbar class="sticky top-0 flex items-center justify-between w-full bg-gray-100 dark:bg-gray-900">
+<navbar class="z-[99] sticky top-0 flex items-center justify-between w-full bg-gray-100 dark:bg-gray-900">
 	<a class="ml-[1%] my-2" href="/">
 		<Logo/>
 	</a>
@@ -56,7 +56,7 @@
 		{/if}
 	</div>
 </navbar>
-<Drawer placement="right" transitionType="fly" transitionParams={transitionParamsRight} width="w-72" bind:hidden>
+<Drawer class="z-[100]" placement="right" transitionType="fly" transitionParams={transitionParamsRight} width="w-72" bind:hidden>
 	<div class="h-full w-full flex flex-col">	
 		<div class="flex items-center">
 			<h4 class=" items-center mb-4 text-2xl font-semibold text-gray-500 dark:text-gray-400">
