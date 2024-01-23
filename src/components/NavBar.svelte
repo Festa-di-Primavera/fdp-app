@@ -1,6 +1,6 @@
 <script lang="ts">
     import { DarkMode, Drawer, CloseButton } from "flowbite-svelte";
-	import { AlignJustify, DollarSign, Home, LogOut, ScanLine } from 'lucide-svelte';
+	import { AlignJustify, DollarSign, Home, LogOut, ScanLine, User } from 'lucide-svelte';
 	import Logo from "./Logo.svelte";
   	import { sineIn } from 'svelte/easing';
 
@@ -15,6 +15,12 @@
 			slug: "/dashboard",
 			role: "ADMIN",
 			icon: Home
+		},
+		{
+			label: 'Utenti',
+			slug: "/users",
+			role: "SUPERADMIN",
+			icon: User
 		},
 		{
 			label: 'Vendi',
