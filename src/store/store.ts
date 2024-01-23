@@ -1,4 +1,5 @@
 import { goto } from "$app/navigation";
+//import type { ListUsersResult } from "firebase-admin/auth";
 import { getAuth, signOut, type User } from "firebase/auth";
 import { writable, type Writable } from "svelte/store";
 
@@ -12,3 +13,5 @@ export const handleSignOut = async () => {
 	  console.error(error);
 	}
   }
+
+//export const usersList: Writable<ListUsersResult | null> = writable(null);
