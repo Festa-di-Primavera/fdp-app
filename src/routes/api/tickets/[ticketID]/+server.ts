@@ -1,10 +1,10 @@
-import { db } from '$lib/firebase/firebase.js';
+import { clientDB } from '$lib/firebase/firebase.js';
 import { json } from '@sveltejs/kit';
 import { Timestamp, updateDoc, doc, getDoc } from 'firebase/firestore';
 import type { Ticket } from '../../../../models/ticket';
 
 export async function GET( { params } ) {
-	const ticketDoc = (await getDoc(doc(db, "tickets", params.ticketID)));
+	const ticketDoc = (await getDoc(doc(clientDB, "tickets", params.ticketID)));
 
 	if(!ticketDoc.exists()) {
 		return json({
@@ -35,7 +35,7 @@ export async function GET( { params } ) {
 export async function PUT( { params } ) {
 	const ticketID = params.ticketID;
 
-	let ticketDoc = (await getDoc(doc(db, "tickets", ticketID)));
+	let ticketDoc = (await getDoc(doc(clientDB, "tickets", ticketID)));
 
 	if(!ticketDoc.exists()) {
 		return json({
@@ -46,10 +46,10 @@ export async function PUT( { params } ) {
 		});
 	}
 
-	await updateDoc(doc(db, "tickets", ticketID), {
+	await updateDoc(doc(clientDB, "tickets", ticketID), {
 		checkIn: Timestamp.fromDate(new Date())
 	});
-	ticketDoc = (await getDoc(doc(db, "tickets", ticketID)));
+	ticketDoc = (await getDoc(doc(clientDB, "tickets", ticketID)));
 
 	if(!ticketDoc.exists()) {
 		return json({

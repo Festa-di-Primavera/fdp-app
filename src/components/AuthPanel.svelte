@@ -1,13 +1,13 @@
 <script lang="ts">
     import { signInWithRedirect, GoogleAuthProvider, type User, onAuthStateChanged } from "firebase/auth";
-	import { auth } from '$lib/firebase/firebase';
+	import { clientAuth } from '$lib/firebase/firebase';
 	import { Button } from "flowbite-svelte";
 
     let currentUser: User | null = null;
 	const provider = new GoogleAuthProvider();
 
     const handleSignIn = async () => {
-        signInWithRedirect(auth, provider)
+        signInWithRedirect(clientAuth, provider)
         .then((result: any) => {
             const credential = GoogleAuthProvider.credentialFromResult(result);
 
@@ -23,7 +23,7 @@
         });
     }
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(clientAuth, (user) => {
         currentUser = user;
     });
 

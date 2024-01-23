@@ -1,9 +1,9 @@
-import { db } from '$lib/firebase/firebase.js';
+import { clientDB } from '$lib/firebase/firebase.js';
 import { json } from '@sveltejs/kit';
 import { collection, getDocs, query } from 'firebase/firestore';
 
 export async function GET() {
-	const q = query(collection(db, "tickets"));
+	const q = query(collection(clientDB, "tickets"));
 
 	const querySnapshot = await getDocs(q);
 	

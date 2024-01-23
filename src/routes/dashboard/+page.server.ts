@@ -1,8 +1,8 @@
-import { db } from "$lib/firebase/firebase";
+import { clientDB} from "$lib/firebase/firebase";
 import { collection, query,  getDocs } from "firebase/firestore";
 
 export async function load() {
-	const q = query(collection(db, "tickets"));
+	const q = query(collection(clientDB, "tickets"));
 
 	const querySnapshot = await getDocs(q);
 	
