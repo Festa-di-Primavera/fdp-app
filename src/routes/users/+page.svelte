@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { UserRecord, type ListUsersResult } from 'firebase-admin/auth';
 	import {
 		TableBody,
 		TableBodyCell,
@@ -18,23 +17,21 @@
 	import { Search, Filter, Trash2, ChevronsUpDown  } from 'lucide-svelte';
 	
 	export let data;
-	let users: UserRecord[] = (JSON.parse(data.usersList) as ListUsersResult).users;
-	console.log(users[0]);
+	let users = JSON.parse(data.usersList).users;
 
 	let modalOpen: boolean = false;
 	let dropdownOpenMap: { [key: string]: boolean } = {};
-	users.forEach((user: UserRecord) => {
+	users.forEach((user: any) => {
 		dropdownOpenMap = {...dropdownOpenMap, [user.uid]: false}
 	});
 	
-	const handleRoleChange = async (user: UserRecord, role: string) => {
+	const handleRoleChange = async (user: any, role: string) => {
 		if (user.customClaims?.role !== role){
-			console.log(user.uid, role);
 			await fetch(`/api/role/${user.uid}/${role}`, {method: 'PUT', headers: {'Content-Type': 'application/json'}})
 			.then(() => {
 				users = users.map((item: any) => {
 					if (item.uid === user.uid) {
-						item.customClaims.role = role;
+						item.customClaims? item.customClaims.role = role : item.customClaims = {role: role};
 					}
 					return item;
 				});
@@ -46,11 +43,19 @@
 
 		dropdownOpenMap = { ...dropdownOpenMap, [user.uid]: false };
 	};
+
+	const handleUserDelete = async (user: any) => {
+		let res = await (await fetch(`/api/users/${user.uid}`, {method: 'DELETE', headers: {'Content-Type': 'application/json'}})).json();
+		
+		if(res.status === 200){
+			users = users.filter((item: any) => item.uid !== user.uid);
+		}
+	};
 	
 	let searchTerm = '';
 	let filter = 'name';
 
-	$: filteredItems = users?.filter((item: UserRecord) => {
+	$: filteredItems = users?.filter((item: any) => {
 		if (filter === 'name')
 			return item.displayName?.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
 		else if (filter === 'email')
@@ -58,9 +63,9 @@
 		else if (filter === 'role')
 			return item.customClaims?.role.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
 		else return true;
-	}) as UserRecord[];
+	});
 
-	let currUserDelete: UserRecord | undefined = undefined;
+	let currUserDelete: any | undefined = undefined;
 </script>
 
 <div class="mx-5 mt-5">
@@ -80,7 +85,7 @@
 	</Input>
 </div>
 <div class="mx-5 mt-5">
-	<Table hoverable={true} class="relative overflow-x-auto rounded-md shadow-md sm:rounded-lg pb-32">
+	<Table hoverable={true} class="relative overflow-x-auto rounded-md shadow-md sm:rounded-lg mb-48">
 		<TableHead>
 			<TableHeadCell>Nome</TableHeadCell>
 			<TableHeadCell>Email</TableHeadCell>
@@ -132,21 +137,22 @@
 		</TableBody>
 	</Table>
 </div>
-
-<Modal bind:open={modalOpen} class="z-50">
-	<!-- <p class="text-md font-semibold">Sei sicuro di voler eliminare l'utente {currUserDelete?.displayName}?</p> -->
-	<!-- <p class="text-sm">UID: {currUserDelete?.uid}</p>
-	<p class="text-sm">Nome: {currUserDelete?.displayName}</p>
-	<p class="text-sm">E-mail: {currUserDelete?.email}</p>
-	<p class="text-sm">Ruolo: {currUserDelete?.customClaims?.role}</p> -->
-	<div class="flex flex-col items-center justify-center">
-		<div class="flex gap-4 mt-5">
-			<Button class="px-2 py-1 dark:bg-red-500 bg-red-500" on:click={() => (modalOpen = false)}>
-				Annulla
-			</Button>
-			<Button class="px-2 py-1 dark:bg-red-500 bg-red-500" on:click={() => (modalOpen = false)}>
+{#if currUserDelete !== undefined}
+	<Modal title={`Elimina ${currUserDelete?.displayName}`} bind:open={modalOpen} class="z-50">
+		<span class="text-md">Vuoi eliminare l'utente <b>{currUserDelete?.displayName}</b>?</span>
+		<div class="flex flex-col gap-2">
+			<span class="text-sm">UID: {currUserDelete?.uid}</span>
+			<span class="text-sm">Nome: {currUserDelete?.displayName}</span>
+			<span class="text-sm">E-mail: {currUserDelete?.email}</span>
+			<span class="text-sm">Ruolo: {currUserDelete?.customClaims?.role}</span>
+		</div>
+		<svelte:fragment slot="footer">
+			<Button class="dark:bg-red-500 bg-red-500" on:click={() => {handleUserDelete(currUserDelete); modalOpen = false}}>
 				Elimina
 			</Button>
-		</div>
-	</div>
-</Modal>
+			<Button color="alternative" on:click={() => (modalOpen = false)}>
+				Annulla
+			</Button>
+		</svelte:fragment>
+	</Modal>
+{/if}
