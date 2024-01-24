@@ -2,8 +2,11 @@ import { clientDB } from '$lib/firebase/firebase.js';
 import { json } from '@sveltejs/kit';
 import { Timestamp, updateDoc, doc, getDoc } from 'firebase/firestore';
 import type { Ticket } from '../../../../models/ticket';
+import { initAdmin } from '$lib/firebase/firebaseAdmin';
 
 export async function GET( { params } ) {
+	const adminApp = initAdmin();
+
 	const ticketDoc = (await getDoc(doc(clientDB, "tickets", params.ticketID)));
 
 	if(!ticketDoc.exists()) {
@@ -15,13 +18,17 @@ export async function GET( { params } ) {
 		});
 	}
 
+	const sellerID = ticketDoc.data().seller;
+	const sellerUser = await adminApp.auth().getUser(sellerID);
+	const sellerName = sellerUser.customClaims?.alias;
+
 	const ticket: Ticket = {
 		ticketID: ticketDoc.id,
 		name: ticketDoc.data().name,
 		surname: ticketDoc.data().surname,
 		checkIn: ticketDoc.data().checkIn ? ticketDoc.data().checkIn.toDate().toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : null,
 		soldAt: ticketDoc.data().soldAt ? ticketDoc.data().soldAt.toDate().toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : null,
-		seller: ticketDoc.data().seller
+		seller: sellerName
 	} as Ticket;
 	
 	return json({
@@ -33,6 +40,7 @@ export async function GET( { params } ) {
 }
 
 export async function PUT( { params } ) {
+	const adminApp = initAdmin();
 	const ticketID = params.ticketID;
 
 	let ticketDoc = (await getDoc(doc(clientDB, "tickets", ticketID)));
@@ -60,13 +68,17 @@ export async function PUT( { params } ) {
 		});
 	}
 
+	const sellerID = ticketDoc.data().seller;
+	const sellerUser = await adminApp.auth().getUser(sellerID);
+	const sellerName = sellerUser.customClaims?.alias;
+
 	const ticket: Ticket = {
 		ticketID: ticketDoc.id,
 		name: ticketDoc.data().name,
 		surname: ticketDoc.data().surname,
 		checkIn: ticketDoc.data().checkIn ? ticketDoc.data().checkIn.toDate().toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : null,
 		soldAt: ticketDoc.data().soldAt ? ticketDoc.data().soldAt.toDate().toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : null,
-		seller: ticketDoc.data().seller
+		seller: sellerName
 	} as Ticket;
 
 	return json({
