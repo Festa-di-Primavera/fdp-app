@@ -3,6 +3,11 @@
     import { Toast, Card } from "flowbite-svelte";
     import { CheckCircle2, XCircle, AlertCircle } from 'lucide-svelte';
 	import type { Ticket } from "../../models/ticket";
+	import { onMount } from "svelte";
+	import { onAuthStateChanged } from "firebase/auth";
+	import { clientAuth } from "$lib/firebase/firebase";
+    import { user } from "../../store/store";
+    import { goto } from "$app/navigation";
 
 	let ticketCode: string;
 
@@ -79,6 +84,16 @@
         color = 'green';
     }
 
+    onMount(async() => {
+		onAuthStateChanged(clientAuth, (newUser) => {
+			$user = newUser;
+			if($user === null){
+				goto("/");
+				return;
+			}
+		});
+	});
+
     $:{
         if(ticketCode !== '' && ticketCode !== undefined){
             checkTicket(ticketCode)
@@ -89,48 +104,49 @@
     }
 </script>
 
-<section class="w-full h-full flex flex-col items-center gap-4">
-	<div class="w-full px-5 pt-5 flex flex-col gap-4 items-start max-w-96 pb-12">
-		<h1 class="text-primary-600 font-bold text-4xl">Check-in</h1>
-		<p class="dark:text-white text-justify">Scansionare il QR e verificare la validità del biglietto</p>
-		<div>
-			<div class="w-full my-6 flex items-center justify-center">
-				<QrReader bind:codeResult={ticketCode}/>
-			</div>
+{#if $user}
+    <section class="w-full h-full flex flex-col items-center gap-4">
+        <div class="w-full px-5 pt-5 flex flex-col gap-4 items-start max-w-96 pb-12">
+            <h1 class="text-primary-600 font-bold text-4xl">Check-in</h1>
+            <p class="dark:text-white text-justify">Scansionare il QR e verificare la validità del biglietto</p>
+            <div>
+                <div class="w-full my-6 flex items-center justify-center">
+                    <QrReader bind:codeResult={ticketCode}/>
+                </div>
 
-            <Card class="w-full flex flex-col text-lg p-3">
-                <span class="text-black dark:text-white w-full flex justify-between">
-                    <span>N° biglietto:</span>
-                    <span>{ticket.ticketID}</span>
-                </span>
-                <span class="text-black dark:text-white w-full flex justify-between">
-                    <span>Nominativo:</span>
-                    <span>{ticket.name + ' ' + ticket.surname}</span>
-                </span>
-                <span class="text-black dark:text-white w-full flex justify-between">
-                    <span>Ingresso:</span>
-                    <span class="text-{color}-400 font-bold">{ticket.checkIn}</span>
-                </span>
-                <span class="text-black dark:text-white w-full flex justify-between">
-                    <span>Venditore:</span>
-                    <span>{ticket.seller}</span>
-                </span>
-                <span class="text-black dark:text-white w-full flex justify-between">
-                    <span>Venduto:</span>
-                    <span>{ticket.soldAt}</span>
-                </span>
-            </Card>
-		</div>
-    </div>
-</section>
-
-<Toast bind:open color={color} class="w-max absolute bottom-5 mx-auto right-0 left-0" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
-    <svelte:component this={notFound ? XCircle : (alreadyChecked ? AlertCircle : CheckCircle2)} class="w-6 h-6  text-{color}-400" slot="icon"/>
-    {#if notFound}
-        <span class={`text-${color}-400 font-semibold`}>Codice biglietto errato</span>
-    {:else if alreadyChecked}
-        <span class={`text-${color}-400 font-semibold`}>Biglietto già validato</span>
-    {:else}
-        <span class={`text-${color}-400 font-semibold`}>Biglietto validato</span>
-    {/if}
-</Toast>
+                <Card class="w-full flex flex-col text-lg p-3">
+                    <span class="text-black dark:text-white w-full flex justify-between">
+                        <span>N° biglietto:</span>
+                        <span>{ticket.ticketID}</span>
+                    </span>
+                    <span class="text-black dark:text-white w-full flex justify-between">
+                        <span>Nominativo:</span>
+                        <span>{ticket.name + ' ' + ticket.surname}</span>
+                    </span>
+                    <span class="text-black dark:text-white w-full flex justify-between">
+                        <span>Ingresso:</span>
+                        <span class="text-{color}-400 font-bold">{ticket.checkIn}</span>
+                    </span>
+                    <span class="text-black dark:text-white w-full flex justify-between">
+                        <span>Venditore:</span>
+                        <span>{ticket.seller}</span>
+                    </span>
+                    <span class="text-black dark:text-white w-full flex justify-between">
+                        <span>Venduto:</span>
+                        <span>{ticket.soldAt}</span>
+                    </span>
+                </Card>
+                <Toast bind:open color={color} class="w-max mt-5 mx-auto right-0 left-0" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
+                    <svelte:component this={notFound ? XCircle : (alreadyChecked ? AlertCircle : CheckCircle2)} class="w-6 h-6  text-{color}-400" slot="icon"/>
+                    {#if notFound}
+                        <span class={`text-${color}-400 font-semibold`}>Codice biglietto errato</span>
+                    {:else if alreadyChecked}
+                        <span class={`text-${color}-400 font-semibold`}>Biglietto già validato</span>
+                    {:else}
+                        <span class={`text-${color}-400 font-semibold`}>Biglietto validato</span>
+                    {/if}
+                </Toast>
+            </div>
+        </div>
+    </section>
+{/if}

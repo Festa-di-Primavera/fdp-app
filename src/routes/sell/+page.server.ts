@@ -1,6 +1,6 @@
 import { clientDB} from "$lib/firebase/firebase";
 import type { Actions } from "./$types";
-import { /* collection, */ doc, setDoc, /* Timestamp */ } from "firebase/firestore"; 
+import { /* collection, */ Timestamp, doc, setDoc, /* Timestamp */ } from "firebase/firestore"; 
 
 
 export const actions: Actions = {
@@ -10,11 +10,16 @@ export const actions: Actions = {
 		const name = formData.get("name");
 		const surname = formData.get("surname");
 		const code = formData.get("code");
+		const seller = formData.get("user");
+
+		const soldAt = Timestamp.fromDate(new Date());
 
 		await setDoc(doc(clientDB, "tickets", `${code}`), {
 			name: name,
 			surname: surname,
-			checkIn: null
+			checkIn: null,
+			soldAt: soldAt,
+			seller: seller
 		});
 	}
 };
