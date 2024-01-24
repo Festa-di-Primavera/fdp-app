@@ -17,7 +17,7 @@ export async function PUT({params}) {
 		return json({
 			status: 500,
 			body: {
-				message: e.message
+				message: (e as Error).message
 			}
 		});
 	}
