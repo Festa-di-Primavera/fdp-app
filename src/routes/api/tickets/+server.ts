@@ -1,6 +1,6 @@
 import { clientDB } from '$lib/firebase/firebase.js';
 import { json } from '@sveltejs/kit';
-import { collection, getDocs, query } from 'firebase/firestore';
+import { collection, getDocs, query, setDoc, doc } from 'firebase/firestore';
 import type { Ticket } from '../../../models/ticket';
 
 export async function GET() {
@@ -27,4 +27,24 @@ export async function GET() {
 			tickets
 		}
 	});
+}
+
+export async function POST(request) {
+	const body = await request.request.json();
+
+	for (const code of body) {
+		const ticketRef = doc(clientDB, "tickets", code);
+		await setDoc(ticketRef, {
+			checkIn: null,
+			name: null,
+			seller: null,
+			soldAt: null,
+			surname: null
+		});
+	}
+
+	return json({
+		status: 200 // TODO: check if all tickets were added
+	});
+
 }
