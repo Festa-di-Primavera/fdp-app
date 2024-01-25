@@ -13,8 +13,11 @@
 	let currAccessLevel: number | null = null;
 
 	onIdTokenChanged(clientAuth, async (user) => {
+		$user = user;
 		const claims = (await $user?.getIdTokenResult(true))?.claims;
-		currAccessLevel = (claims?.accessLevel as number);
+		if($user !== null){
+			currAccessLevel = (claims?.accessLevel as number);
+		}
 	});
 
 	const routes = [
