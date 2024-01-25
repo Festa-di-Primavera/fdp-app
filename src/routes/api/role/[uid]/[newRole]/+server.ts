@@ -14,7 +14,7 @@ export async function PUT({params}) {
 	};
 
 	try{
-		app.auth().setCustomUserClaims(params.uid, {...(await app.auth().getUser(params.uid)).customClaims, role: params.newRole, accessLevel: enumBindings[params.newRole]});
+		app.auth().setCustomUserClaims(params.uid, {...(await app.auth().getUser(params.uid)).customClaims, role: params.newRole, accessLevel: enumBindings[params.newRole]}); // TODO: valutare se modificare la stringa e utilizzare il numero
 		return json({
 			status: 200,
 			body: {
