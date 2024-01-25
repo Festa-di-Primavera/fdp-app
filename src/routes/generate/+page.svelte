@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { Ticket } from '../../models/ticket';
-	import { Select, Label, Checkbox, Input, Button, Toast } from 'flowbite-svelte';
+	import { Select, Label, Checkbox, Button, Toast, NumberInput } from 'flowbite-svelte';
 	import { XCircle, CheckCircle2 } from 'lucide-svelte';
 
 	import axios from 'axios';
@@ -14,7 +14,7 @@
 	];
 	let codeType = 'numeric';
 	let includeSpecialChars = false;
-	let codeLength = 8; /* Lunghezza predefinita dei codici */
+	let codeLength = 4;
 	let numberOfCodes = 10;
 	let codes: string[] = [];
 	let codesInDB: Set<string>;
@@ -147,12 +147,12 @@
 
 			<Label for="first_name" class="flex items-start gap-4 py-4">
 				Lunghezza dei codici:
-				<Input type="number" bind:value={codeLength} />
+				<NumberInput on:blur={() => {if(codeLength < 4) codeLength=4}} min="4" bind:value={codeLength}  />
 			</Label>
 
 			<Label for="first_name" class="flex items-start gap-4 py-4">
 				Quantità di codici:
-				<Input type="number" bind:value={numberOfCodes} />
+				<NumberInput on:blur={() => {if(numberOfCodes > 2000) numberOfCodes=2000}} max="2000" bind:value={numberOfCodes}  />
 			</Label>
 
 			<Label class="flex flex-col items-start py-4">
