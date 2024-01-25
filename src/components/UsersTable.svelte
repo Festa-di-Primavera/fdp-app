@@ -27,6 +27,7 @@
 	// TODO: toast con errori/successo
 	const handleRoleChange = async (user: any, role: string) => {
 		let roleEnum = enumBindings[role];
+		dropdownOpenMap = { ...dropdownOpenMap, [user.uid]: false };
 
 		if (user.customClaims?.role !== role){
 			await fetch(`/api/role/${user.uid}/${role}`, {method: 'PUT', headers: {'Content-Type': 'application/json'}})
@@ -56,8 +57,6 @@
 				console.log(error);
 			});
 		}
-
-		dropdownOpenMap = { ...dropdownOpenMap, [user.uid]: false };
 	};
 
 	const triggerAliasModal = async (user: any) => {
@@ -68,16 +67,31 @@
 	// search and filter variables
 	let searchTerm = '';
 	let filter = 'name';
+	let filteredItems: any[] = [];
 
-	$: filteredItems = users?.filter((item: any) => {
-		if (filter === 'name')
-			return item.displayName?.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
-		else if (filter === 'email')
-			return item.email?.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
-		else if (filter === 'role')
-			return item.customClaims?.role.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
-		else return true;
-	});
+	$: {
+		filteredItems = (users?.filter((item: any) => {
+			if (filter === 'name')
+				return item.displayName?.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
+			else if (filter === 'email')
+				return item.email?.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
+			else if (filter === 'role')
+				return item.customClaims?.role.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
+			else return true;
+		}));
+
+		filteredItems.sort((a, b) => {
+			if (a.displayName < b.displayName) {
+				return -1;
+			}
+			if (a.displayName > b.displayName) {
+				return 1;
+			}
+			return a.email < b.email ? -1 : 1;
+		});
+	}
+
+
 </script>
 
 {#if $user}
@@ -115,39 +129,43 @@
 						</TableBodyCell>
 						<TableBodyCell>{item.email}</TableBodyCell>
 						<TableBodyCell>
-							<button class="flex w-[8.25rem] justify-between border-gray-200 border-[1px] rounded-md px-2 py-1">
-								{item.customClaims?.role ? item.customClaims?.role.toUpperCase() : 'NORMAL'}
-								<ChevronsUpDown class="aspect-square w-4" />
-							</button>
-							<Dropdown placement="bottom" class="z-50" bind:open={dropdownOpenMap[item.uid]}>
-								<DropdownItem class={(item.customClaims?.role === undefined || item.customClaims?.role === 'normal') ? `text-primary-600` : ''}>
-									<button on:click={() => handleRoleChange(item, 'normal')}> NORMAL </button>
-								</DropdownItem>
-								<DropdownItem class={item.customClaims?.role === 'seller' ? `text-primary-600` : ''}>
-									<button on:click={() => handleRoleChange(item, 'seller')}> SELLER </button>
-								</DropdownItem>
-								<DropdownItem
-								class={item.customClaims?.role === 'check-in' ? `text-primary-600` : ''}
-								>
-								<button on:click={() => handleRoleChange(item, 'check-in')}> CHECK-IN </button>
-								</DropdownItem>
-								<DropdownItem class={item.customClaims?.role === 'admin' ? `text-primary-600` : ''}>
-									<button on:click={() => handleRoleChange(item, 'admin')}> ADMIN </button>
-								</DropdownItem>
-								<DropdownItem
-								class={item.customClaims?.role === 'superadmin' ? `text-primary-600` : ''}
-								>
-									<button on:click={() => handleRoleChange(item, 'superadmin')}> SUPERADMIN </button>
-								</DropdownItem>
-							</Dropdown>
+							{#if item.email === 'rickybenevelli@gmail.com' || item.email === 'isaia.tonini@gmail.com' || item.uid === $user?.uid}
+								<span class="text-gray-400 dark:text-gray-500 cursor-not-allowed">{item.customClaims?.role ? item.customClaims?.role.toUpperCase() : 'NORMAL'}</span>
+							{:else}
+								<button class="flex w-[8.25rem] justify-between border-gray-200 border-[1px] rounded-md px-2 py-1">
+									{item.customClaims?.role ? item.customClaims?.role.toUpperCase() : 'NORMAL'}
+									<ChevronsUpDown class="aspect-square w-4" />
+								</button>
+								<Dropdown placement="bottom" class="z-50" bind:open={dropdownOpenMap[item.uid]}>
+									<DropdownItem class={(item.customClaims?.role === undefined || item.customClaims?.role === 'normal') ? `text-primary-600` : ''}>
+										<button on:click={() => handleRoleChange(item, 'normal')}> NORMAL </button>
+									</DropdownItem>
+									<DropdownItem class={item.customClaims?.role === 'seller' ? `text-primary-600` : ''}>
+										<button on:click={() => handleRoleChange(item, 'seller')}> SELLER </button>
+									</DropdownItem>
+									<DropdownItem
+									class={item.customClaims?.role === 'check-in' ? `text-primary-600` : ''}
+									>
+									<button on:click={() => handleRoleChange(item, 'check-in')}> CHECK-IN </button>
+									</DropdownItem>
+									<DropdownItem class={item.customClaims?.role === 'admin' ? `text-primary-600` : ''}>
+										<button on:click={() => handleRoleChange(item, 'admin')}> ADMIN </button>
+									</DropdownItem>
+									<DropdownItem
+									class={item.customClaims?.role === 'superadmin' ? `text-primary-600` : ''}
+									>
+										<button on:click={() => handleRoleChange(item, 'superadmin')}> SUPERADMIN </button>
+									</DropdownItem>
+								</Dropdown>
+							{/if}
 						</TableBodyCell>
 						<TableBodyCell>
-							<div class="flex gap-3 w-full justify-between">
-								{item.customClaims?.alias}
-								<button on:click={() => triggerAliasModal(item)}>
-									<PenBox />
-								</button>
-							</div>
+								<div class="flex gap-3 w-full justify-between">
+									{item.customClaims?.alias}
+									<button on:click={() => triggerAliasModal(item)}>
+										<PenBox />
+									</button>
+								</div>
 						</TableBodyCell>
 						<TableBodyCell class="flex items-center justify-center">
 							<Button class="px-2 py-1 dark:bg-red-500 bg-red-500" on:click={()=> {currSelectedUser=item; deleteModalOpen = true; }}>
