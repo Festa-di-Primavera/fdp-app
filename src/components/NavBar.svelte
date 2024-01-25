@@ -6,40 +6,48 @@
 
 	import { page } from '$app/stores';  
 	import { handleSignOut, user } from "../store/store";
+	import { onIdTokenChanged } from "firebase/auth";
+	import { clientAuth } from "$lib/firebase/firebase";
+	import { roles } from "../models/role";
 	
-	const currentRole = "ADMIN";
+	let currAccessLevel: number | null = null;
+
+	onIdTokenChanged(clientAuth, async (user) => {
+		const claims = (await $user?.getIdTokenResult(true))?.claims;
+		currAccessLevel = (claims?.accessLevel as number);
+	});
 
 	const routes = [
 		{
 			label: 'Dashboard',
 			slug: "/dashboard",
-			role: "ADMIN",
+			role: roles.ADMIN,
 			icon: Home
 		},
 		{
 			label: 'Utenti',
 			slug: "/users",
-			role: "SUPERADMIN",
+			role: roles.SUPERADMIN,
 			icon: User
+		},
+		{
+			label: 'Generate',
+			slug: "/generate",
+			role: roles.SUPERADMIN,
+			icon: Ticket
 		},
 		{
 			label: 'Vendi',
 			slug: "/sell",
-			role: "SELLER",
+			role: roles.SELLER,
 			icon: DollarSign
 		},
 		{
 			label: 'Check-in',
 			slug: "/check-in",
-			role: "CHECKER",
+			role: roles.CHECKIN,
 			icon: ScanLine
 		},
-		{
-			label: 'Generate',
-			slug: "/generate",
-			role: "ADMIN",
-			icon: Ticket
-		}
 	]
 
 
@@ -72,23 +80,25 @@
 		</div>
 		<hr class="dark:border-gray-600"/>
 		<div class="flex flex-col justify-between h-full">
-			<div class="flex flex-col gap-4 mt-5">
-				{#each routes as route}
-					{#if route.role == currentRole || currentRole == "ADMIN"}
-						<a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>
-							<span class="flex gap-4 w-full text-xl items-center">
-								<svelte:component this={route.icon}/>
-								{route.label}
-							</span>
-						</a>
-					{/if}
-				{/each}
-			</div>
+			{#if currAccessLevel !== null}
+				<div class="flex flex-col gap-4 mt-5">
+					{#each routes as route}
+						{#if route.role <= currAccessLevel}
+							<a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>
+								<span class="flex gap-4 w-full text-xl items-center">
+									<svelte:component this={route.icon}/>
+									{route.label}
+								</span>
+							</a>
+						{/if}
+					{/each}
+				</div>
+			{/if}
 			{#if $user !== null}
 				<div class="dark:text-white flex text-md items-center self-baseline w-full justify-between p-3 rounded-lg bg-gray-100 dark:bg-gray-600">
 					<div class="flex gap-4 text-md items-center truncate overflow-ellipsis">
-						<img src={$user?.photoURL} alt="Profile" class="w-10 aspect-square rounded-full">
-						<span>{$user?.displayName}</span>
+						<img referrerpolicy="no-referrer" src={$user.photoURL} alt="Profile" class="w-10 aspect-square rounded-full">
+						<span>{$user.displayName}</span>
 					</div>
 					
 					<button on:click={() => {handleSignOut(); hidden=true}}>
