@@ -1,11 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { handleSignOut, user } from '../../store/store';
-	import { getAuth, onAuthStateChanged } from 'firebase/auth';
 	import type { Ticket } from '../../models/ticket';
-	import { Card } from 'flowbite-svelte';
 	import { Select, Label, Checkbox, Input, Button, Toast } from 'flowbite-svelte';
-	import { CheckCircleSolid, CloseCircleSolid } from 'flowbite-svelte-icons';
+	import { XCircle, CheckCircle2 } from 'lucide-svelte';
 
 	import axios from 'axios';
 
@@ -193,10 +190,10 @@
 >
 	<svelte:fragment slot="icon">
 		{#if color == 'green'}
-			<CheckCircleSolid class="h-5 w-5" />
+			<CheckCircle2 class="h-5 w-5" />
 			<span class="sr-only">Check icon</span>
 		{:else}
-			<CloseCircleSolid class="h-5 w-5" />
+			<XCircle class="h-5 w-5" />
 			<span class="sr-only">Error icon</span>
 		{/if}
 	</svelte:fragment>
