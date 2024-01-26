@@ -1,21 +1,52 @@
 <script lang="ts">
-	import { Card, Chart } from "flowbite-svelte";
+	import { Card, Chart } from 'flowbite-svelte';
 
 	export let mappings: Map<string, number>;
 	// create an array of {x: string, y: number} objects from mappings
-	$: dataset = Array.from(mappings, ([x, y]) => ({x, y}));
+	$: dataset = Array.from(mappings, ([x, y]) => ({ x, y }));
 
 	let options: ApexCharts.ApexOptions | null = null;
 
-	$:{
+	$: {
 		options = {
-		chart: {
-			type: 'bar'
-		},
-		series: [{
-			data: dataset
-		}]
-		}
+			colors: ['#F05252'],
+			chart: {
+				type: 'bar'
+			},
+			series: [
+				{
+					data: dataset
+				}
+			],
+			xaxis: {
+				floating: false,
+				labels: {
+					show: true,
+					style: {
+						fontFamily: 'Inter, sans-serif',
+						cssClass: 'text-xs font-normal fill-gray-500 dark:fill-gray-400'
+					}
+				},
+				axisBorder: {
+					show: false
+				},
+				axisTicks: {
+					show: false
+				}
+			},
+			yaxis: {
+				labels: {
+					show: true,
+					style: {
+						fontFamily: 'Inter, sans-serif',
+						cssClass: 'text-xs font-normal fill-gray-500 dark:fill-gray-400'
+					}
+				},
+			},
+			fill: {
+				opacity: 1
+			}
+		};
 	}
 </script>
 
