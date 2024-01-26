@@ -7,11 +7,15 @@
 	import { clientAuth } from '../../lib/firebase/firebase';
 	import { goto } from '$app/navigation';
 	import Tickets from '../../components/graphs/Tickets.svelte';
+	import TicketsPerPerson from '../../components/graphs/TicketsPerPerson.svelte';
 
 	let tickets: Ticket[];
+
 	let checkedTicketsCount: number;
 	let notCheckedTicketsCount: number;
 	let notSoldTicketsCount: number;
+
+	let mappings: Map<string, number> = new Map();
 
 	onMount(async() => {
 		onAuthStateChanged(clientAuth, (newUser) => {
@@ -24,9 +28,17 @@
 
 		const res = await fetch("/api/tickets");
 		tickets = (await res.json()).body.tickets;
+
 		checkedTicketsCount = tickets.filter(ticket => ticket.checkIn !== null).length;
 		notCheckedTicketsCount = tickets.filter(ticket => ticket.soldAt !== null).length - checkedTicketsCount;
 		notSoldTicketsCount = tickets.filter(ticket => ticket.soldAt === null).length;
+
+		tickets.forEach(ticket => {
+			if(ticket.seller !== null){
+				mappings.set(ticket.seller, (mappings.get(ticket.seller) || 0) + 1);
+			}
+		});
+		mappings = mappings;
 	});
 </script>
 
@@ -54,6 +66,7 @@
 			</div>
 
 			<Tickets bind:checkedTicketsCount bind:notSoldTicketsCount bind:notCheckedTicketsCount/>
+			<TicketsPerPerson bind:mappings/>
 		</div>
 	</section>
 {/if}
