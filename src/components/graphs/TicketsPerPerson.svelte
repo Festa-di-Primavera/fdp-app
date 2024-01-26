@@ -11,13 +11,23 @@
 		options = {
 			colors: ['#F05252'],
 			chart: {
-				type: 'bar'
+				type: 'bar',
+				height: '320px',
+				fontFamily: 'Inter, sans-serif',
+				toolbar: {
+					show: false
+				}
 			},
 			series: [
 				{
+					name: 'Biglietti venduti',
+					color: '#F05252',
 					data: dataset
 				}
 			],
+			tooltip:{
+				enabled: false
+			},
 			xaxis: {
 				floating: false,
 				labels: {
@@ -54,7 +64,7 @@
 	<div class="flex w-full items-start justify-between">
 		<div class="flex-col items-center">
 			<div class="mb-1 flex items-center">
-				<h5 class="me-1 text-xl font-bold leading-none text-gray-900 dark:text-white">Test</h5>
+				<h5 class="me-1 text-xl font-bold leading-none text-gray-900 dark:text-white">Biglietti venduti a persona</h5>
 			</div>
 		</div>
 	</div>
