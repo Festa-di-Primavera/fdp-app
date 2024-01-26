@@ -6,6 +6,7 @@
 	import { Card } from 'flowbite-svelte';
 	import { clientAuth } from '../../lib/firebase/firebase';
 	import { goto } from '$app/navigation';
+	import Tickets from '../../components/graphs/Tickets.svelte';
 
 	let tickets: Ticket[];
 	let checkedTicketsCount: number;
@@ -43,7 +44,7 @@
 
 				<Card class="w-full aspect-square flex flex-col gap-5 items-center pt-6">
 					<h1 class="text-primary-600 font-bold text-5xl text-center">{notCheckedTicketsCount !== undefined ? notCheckedTicketsCount : '--'}</h1>
-					<p class="dark:text-white text-center">Biglietti venduti<br> non controllati</p>
+					<p class="dark:text-white text-center">Biglietti venduti non validati</p>
 				</Card>
 
 				<Card class="w-full aspect-square flex flex-col gap-5 items-center pt-6">
@@ -51,6 +52,8 @@
 					<p class="dark:text-white text-center">Biglietti non venduti</p>
 				</Card>
 			</div>
+
+			<Tickets bind:checkedTicketsCount bind:notSoldTicketsCount bind:notCheckedTicketsCount/>
 		</div>
 	</section>
 {/if}
