@@ -8,6 +8,12 @@
 	import { goto } from '$app/navigation';
 	import Tickets from '../../components/graphs/Tickets.svelte';
 	import TicketsPerPerson from '../../components/graphs/TicketsPerPerson.svelte';
+	import CheckInPerTime from '../../components/graphs/CheckInPerTime.svelte';
+
+	export let data;
+
+	let ticketsCheckIn: { x: string, y: number }[] = JSON.parse(data.checkIn);
+	let numberOfCheckIns: number = data.numberOfCheckIns;
 
 	let tickets: Ticket[];
 
@@ -67,6 +73,7 @@
 
 			<Tickets bind:checkedTicketsCount bind:notSoldTicketsCount bind:notCheckedTicketsCount/>
 			<TicketsPerPerson bind:mappings/>
+			<CheckInPerTime bind:ticketsCheckIn bind:numberOfCheckIns/>
 		</div>
 	</section>
 {/if}
