@@ -5,6 +5,10 @@
 	import { XCircle, CheckCircle2 } from 'lucide-svelte';
 
 	import axios from 'axios';
+	import { onAuthStateChanged } from 'firebase/auth';
+	import { clientAuth } from '$lib/firebase/firebase';
+	import { user } from '../../store/store';
+	import { goto } from '$app/navigation';
 
 	const codeTypesList = [
 		{ value: 'numeric', name: 'Numerico' },
@@ -123,11 +127,15 @@
 		codesInDB = new Set<string>(tickets.map((ticket) => ticket.ticketID));
 	});
 
-	// const auth = getAuth();
-
-	// onAuthStateChanged(auth, (newUser) => {
-	//   $user = newUser;
-	// });
+	onMount(async() => {
+		onAuthStateChanged(clientAuth, (newUser) => {
+			$user = newUser;
+			if($user === null){
+				goto("/");
+				return;
+			}
+		});
+	});
 </script>
 
 <section class="flex h-full w-full flex-col items-center gap-4">

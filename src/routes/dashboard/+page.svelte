@@ -47,6 +47,16 @@
 	}
 	
 	computeData(tickets);
+
+	onMount(async() => {
+		onAuthStateChanged(clientAuth, (newUser) => {
+			$user = newUser;
+			if($user === null){
+				goto("/");
+				return;
+			}
+		});
+	});
 </script>
 
 {#if $user}
