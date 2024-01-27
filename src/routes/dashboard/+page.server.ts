@@ -29,29 +29,4 @@ export async function load() {
     return {
         strTicketData: JSON.stringify(ticketData)
     };
-
-
-    /* // aggregate checkins by hour
-    const checkInsByHour: { x: string, y: number }[] = []; 
-
-    let currentHour = 0;
-    let currentHourCheckIns = 0;
-
-    for (const ticket of ticketData) {
-        const ticketDate = new Date(ticket.checkIn.toMillis());
-        const ticketHour = ticketDate.getHours();
-
-        if (ticketHour !== currentHour) {
-            checkInsByHour.push({ x: ticketHour.toString(), y: currentHourCheckIns });
-            currentHour = ticketHour;
-            currentHourCheckIns = 0;
-        }
-        currentHourCheckIns++;
-    }
-
-
-	return {
-		checkIn: JSON.stringify(checkInsByHour),
-        numberOfCheckIns: ticketData.length,
-	} */
 }
