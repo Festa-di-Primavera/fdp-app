@@ -87,13 +87,7 @@
 			}
 		},
 		yaxis: {
-			labels: {
-				show: true,
-				style: {
-					fontFamily: 'Inter, sans-serif',
-					cssClass: 'text-xs font-normal fill-gray-500 dark:fill-gray-400'
-				}
-			},
+			show: false
 		},
 		fill: {
 			opacity: 1
