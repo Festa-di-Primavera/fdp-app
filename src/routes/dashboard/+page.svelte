@@ -10,42 +10,43 @@
 	import TicketsPerPerson from '../../components/graphs/TicketsPerPerson.svelte';
 	import CheckInPerTime from '../../components/graphs/CheckInPerTime.svelte';
 
-	export let data;
+	export let data: { strTicketData: string };
 
-	let ticketsCheckIn: { x: string, y: number }[] = JSON.parse(data.checkIn);
-	let numberOfCheckIns: number = data.numberOfCheckIns;
+	let tickets: Ticket[] = JSON.parse(data.strTicketData) as Ticket[];
+	
+	let numberOfCheckIns: number = 0;
+	let ticketsCheckIn: { x: string, y: number }[] = [];
 
-	let tickets: Ticket[];
-
-	let checkedTicketsCount: number;
-	let notCheckedTicketsCount: number;
-	let notSoldTicketsCount: number;
+	let checkedTicketsCount: number = tickets.filter(ticket => ticket.checkIn !== null).length;
+	let notCheckedTicketsCount: number = tickets.filter(ticket => ticket.soldAt !== null).length - checkedTicketsCount;
+	let notSoldTicketsCount: number = tickets.filter(ticket => ticket.soldAt === null).length;
 
 	let mappings: Map<string, number> = new Map();
-
-	onMount(async() => {
-		onAuthStateChanged(clientAuth, (newUser) => {
-			$user = newUser;
-			if($user === null){
-				goto("/");
-				return;
+	function computeData(tickets: Ticket[]): void {
+		const mapHourToCount: Map<string, number> = new Map();
+		
+		for(let ticket of tickets){
+			if(ticket.checkIn !== null){
+				const date = new Date(ticket.checkIn);
+				const hour = date.getHours();
+				const count = mapHourToCount.get(hour.toString()) || 0;
+				mapHourToCount.set(hour.toString(), count + 1);
+				numberOfCheckIns++;
 			}
-		});
 
-		const res = await fetch("/api/tickets");
-		tickets = (await res.json()).body.tickets;
-
-		checkedTicketsCount = tickets.filter(ticket => ticket.checkIn !== null).length;
-		notCheckedTicketsCount = tickets.filter(ticket => ticket.soldAt !== null).length - checkedTicketsCount;
-		notSoldTicketsCount = tickets.filter(ticket => ticket.soldAt === null).length;
-
-		tickets.forEach(ticket => {
 			if(ticket.seller !== null){
 				mappings.set(ticket.seller, (mappings.get(ticket.seller) || 0) + 1);
 			}
+		}
+		
+		mapHourToCount.forEach((value, key) => {
+			ticketsCheckIn.push({ x: key, y: value });
 		});
-		mappings = mappings;
-	});
+		ticketsCheckIn.sort((a, b) => parseInt(a.x) - parseInt(b.x));
+		ticketsCheckIn = ticketsCheckIn;
+	}
+	
+	computeData(tickets);
 </script>
 
 {#if $user}
