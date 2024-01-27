@@ -41,7 +41,7 @@
 			if(res.status === 200){
 				users = users.map((item: any) => {
 					if (item.uid === user.uid) {
-						if(item.customClaims.alias)
+						if(item.customClaims?.alias)
 							item.customClaims.alias = alias
 						else
 							item.customClaims = {...item.customClaims, alias: alias};
