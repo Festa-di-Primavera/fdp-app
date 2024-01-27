@@ -73,10 +73,10 @@
             ticketID: '',
             name: '',
             surname: '',
-            checkIn: '',
-            soldAt: '',
+            checkIn: null,
+            soldAt: null,
             seller: ''
-        };
+        } as Ticket;
 
         open = false;
         notFound = false;
@@ -125,7 +125,7 @@
                     </span>
                     <span class="text-black dark:text-white w-full flex justify-between">
                         <span>Ingresso:</span>
-                        <span class="text-{color}-400 font-bold">{ticket.checkIn}</span>
+                        <span class="text-{color}-400 font-bold">{ticket.checkIn ? (new Date(ticket.checkIn)).toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : ''}</span>
                     </span>
                     <span class="text-black dark:text-white w-full flex justify-between">
                         <span>Venditore:</span>
@@ -133,7 +133,7 @@
                     </span>
                     <span class="text-black dark:text-white w-full flex justify-between">
                         <span>Venduto:</span>
-                        <span>{ticket.soldAt}</span>
+                        <span>{ticket.soldAt ? (new Date(ticket.soldAt)).toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : ''}</span>
                     </span>
                 </Card>
                 <Toast bind:open color={color} class="w-max mt-5 mx-auto right-0 left-0" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>

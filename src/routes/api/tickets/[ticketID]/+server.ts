@@ -26,8 +26,8 @@ export async function GET( { params } ) {
 		ticketID: ticketDoc.id,
 		name: ticketDoc.data().name,
 		surname: ticketDoc.data().surname,
-		checkIn: ticketDoc.data().checkIn ? ticketDoc.data().checkIn.toDate().toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : null,
-		soldAt: ticketDoc.data().soldAt ? ticketDoc.data().soldAt.toDate().toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : null,
+		checkIn: ticketDoc.data().checkIn?.toDate(),
+		soldAt: ticketDoc.data().soldAt?.toDate(),
 		seller: sellerName
 	} as Ticket;
 	
@@ -76,8 +76,8 @@ export async function PUT( { params } ) {
 		ticketID: ticketDoc.id,
 		name: ticketDoc.data().name,
 		surname: ticketDoc.data().surname,
-		checkIn: ticketDoc.data().checkIn ? ticketDoc.data().checkIn.toDate().toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : null,
-		soldAt: ticketDoc.data().soldAt ? ticketDoc.data().soldAt.toDate().toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : null,
+		checkIn: ticketDoc.data().checkIn?.toDate(),
+		soldAt: ticketDoc.data().soldAt?.toDate(),
 		seller: sellerName
 	} as Ticket;
 

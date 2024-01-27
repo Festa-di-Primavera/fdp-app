@@ -12,19 +12,16 @@ export async function GET() {
 	const users = await app.auth().listUsers();
 	const sellers = users.users.filter((user) => user.customClaims?.accessLevel >= roles.SELLER);
 
-
 	const querySnapshot = await getDocs(q);
 
-	
-	
-	const tickets = querySnapshot.docs.map((ticketDoc) => {
+	const tickets: Ticket[] = querySnapshot.docs.map((ticketDoc) => {
     	return (
 			{
 				ticketID: ticketDoc.id,
 				name: ticketDoc.data().name,
 				surname: ticketDoc.data().surname,
-				checkIn: ticketDoc.data().checkIn ? ticketDoc.data().checkIn.toDate().toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : null,
-				soldAt: ticketDoc.data().soldAt ? ticketDoc.data().soldAt.toDate().toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : null,
+				checkIn: ticketDoc.data().checkIn?.toDate(),
+				soldAt: ticketDoc.data().soldAt?.toDate(),
 				seller: ticketDoc.data().seller ? sellers.find((seller) => seller.uid === ticketDoc.data().seller)?.customClaims?.alias : null
 			} as Ticket
 		);
@@ -49,7 +46,7 @@ export async function POST(request) {
 			seller: null,
 			soldAt: null,
 			surname: null
-		});
+		} as Ticket);
 	}
 
 	return json({
