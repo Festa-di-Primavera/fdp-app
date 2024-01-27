@@ -129,7 +129,7 @@
 						</TableBodyCell>
 						<TableBodyCell>{item.email}</TableBodyCell>
 						<TableBodyCell>
-							{#if item.email === 'rickybenevelli@gmail.com' || item.email === 'isaia.tonini@gmail.com' || item.uid === $user?.uid}
+							{#if item.email === import.meta.env.VITE_ADMIN_EMAIL1 || item.email === import.meta.env.VITE_ADMIN_EMAIL2 || item.uid === $user?.uid}
 								<span class="text-gray-400 dark:text-gray-500 cursor-not-allowed">{item.customClaims?.role ? item.customClaims?.role.toUpperCase() : 'NORMAL'}</span>
 							{:else}
 								<button class="flex w-[8.25rem] justify-between border-gray-200 border-[1px] rounded-md px-2 py-1">
