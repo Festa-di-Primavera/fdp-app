@@ -1,4 +1,4 @@
-import { deleteApp, getApps, getApp, initializeApp } from 'firebase/app';
+import { getApps, getApp, initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import {
 	getAuth,
@@ -8,7 +8,6 @@ import {
 	isSignInWithEmailLink,
 	signInWithEmailLink
 } from 'firebase/auth';
-import { redirect } from '@sveltejs/kit';
 
 const clientConfig = {
 	apiKey: import.meta.env.VITE_API_KEY,

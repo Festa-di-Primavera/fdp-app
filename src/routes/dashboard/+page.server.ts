@@ -1,14 +1,15 @@
+import { getAuth } from 'firebase-admin/auth';
 import { collection, getDocs, query } from 'firebase/firestore';
 
-import { initAdmin } from '$lib/firebase/admin';
+import { getAdminApp } from '$lib/firebase/admin';
 import { getClientDB } from '$lib/firebase/client';
 
 import { roles } from '../../models/role';
 import type { Ticket } from '../../models/ticket';
 
 export async function load() {
-	const app = initAdmin();
-	const users = await app.auth().listUsers();
+	const app = getAuth(getAdminApp());
+	const users = await app.listUsers();
     
     const q = query(collection(getClientDB(), "tickets"));
 	const querySnapshot = await getDocs(q);
