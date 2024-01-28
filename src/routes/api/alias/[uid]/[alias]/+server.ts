@@ -1,10 +1,9 @@
-import { initAdmin } from '$lib/firebase/firebaseAdmin.js';
+import { getAdminApp } from '$lib/firebase/admin.js';
+import {getAuth} from 'firebase-admin/auth'
 import { json } from '@sveltejs/kit';
 
 export async function PUT({ params }) {
-	const adminApp = initAdmin();
-
-	const allUsers = await adminApp.auth().listUsers();
+	const allUsers = await getAuth(getAdminApp()).listUsers();
 	let aliasAlreadyExists = false;
 
 	allUsers.users.forEach(async (userRecord) => {
@@ -24,10 +23,10 @@ export async function PUT({ params }) {
 
 	const userID = params.uid;
 
-	const user = await adminApp.auth().getUser(userID);
+	const user = await getAuth(getAdminApp()).getUser(userID);
 	
 	try{
-		adminApp.auth().setCustomUserClaims(userID, {...user.customClaims, alias: params.alias});
+		getAuth(getAdminApp()).setCustomUserClaims(userID, {...user.customClaims, alias: params.alias});
 		return json({
 			status: 200,
 			body: {

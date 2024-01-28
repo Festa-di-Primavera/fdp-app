@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { clientAuth } from '$lib/firebase/firebase.js';
-	import { onAuthStateChanged } from 'firebase/auth';
-	import { Input, Button, Modal } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
-	import { user } from '../../store/store.js';
+	import { Input, Button, Modal } from 'flowbite-svelte';
+	import { onAuthStateChanged, getAuth } from 'firebase/auth';
+	
+	import { getClientApp } from '$lib/firebase/client.js';
 	import { goto } from '$app/navigation';
+
+	import { user } from '../../store/store.js';
 	import UsersTable from '../../components/UsersTable.svelte';
 	
 	// fetch all users
@@ -63,7 +65,7 @@
 
 
 	onMount(async() => {
-		onAuthStateChanged(clientAuth, (newUser) => {
+		onAuthStateChanged(getAuth(getClientApp()), (newUser) => {
 			$user = newUser;
 			if($user === null){
 				goto("/");

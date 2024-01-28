@@ -1,10 +1,13 @@
-import { initAdmin } from '$lib/firebase/firebaseAdmin.js';
 import { json } from '@sveltejs/kit';
 
+import { getAuth } from 'firebase-admin/auth';
+
+import { getAdminApp } from '$lib/firebase/admin';
+
 export async function DELETE({ params }){
-	const app = initAdmin();
+	const app = getAuth(getAdminApp());
 	try{
-		app.auth().deleteUser(params.uid)
+		app.deleteUser(params.uid)
 		return json({
 			status: 200,
 			body: {

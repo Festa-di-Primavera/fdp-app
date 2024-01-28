@@ -1,8 +1,12 @@
-import { initAdmin } from '$lib/firebase/firebaseAdmin.js';
 import { json } from '@sveltejs/kit';
+import type { RequestHandler } from '@sveltejs/kit';
+
+import { getAuth } from 'firebase-admin/auth';
+
+import { getAdminApp } from '$lib/firebase/admin.js';
 
 export async function POST(request) {
-	const adminApp = initAdmin();
+	const adminApp = getAuth(getAdminApp());
 
 	const req = await request.json();
 	const idToken = req.idToken.toString();
@@ -25,7 +29,6 @@ export async function POST(request) {
 	// To only allow session cookie setting on recent sign-in, auth_time in ID token
 	// can be checked to ensure user was recently signed in before creating a session cookie.
 	adminApp
-		.auth()
 		.createSessionCookie(idToken, { expiresIn })
 		.then(
 			(sessionCookie) => {
@@ -88,3 +91,5 @@ export const DELETE: RequestHandler = () => {
 		},
 	}
 }
+
+// TODO: gestire anche il refresh del cookie

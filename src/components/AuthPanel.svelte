@@ -3,12 +3,13 @@
 		type User,
 		onAuthStateChanged,
 		createUserWithEmailAndPassword,
-		signInWithEmailAndPassword
+		signInWithEmailAndPassword,
+		getAuth
 	} from 'firebase/auth';
-	import { clientAuth } from '$lib/firebase/firebase';
-
-	import { Button, Input, Label, Card, Helper, Toast } from 'flowbite-svelte';
 	import { Eye, EyeOff, XCircle } from 'lucide-svelte';
+	import { Button, Input, Label, Card, Helper, Toast } from 'flowbite-svelte';
+	
+	import { getClientApp, sendMagicLink } from '$lib/firebase/client';
 
 	let currentUser: User | null = null;
 
@@ -27,13 +28,13 @@
 		}
 	}
 
-	const handleSubmission = () => {
+	const handleSubmission = async () => {
 		if (option === 'login') {
-			signInWithEmailAndPassword(clientAuth, email, password)
+			signInWithEmailAndPassword(getAuth(getClientApp()), email, password)
 				.then((userCredential) => {
 					// Signed in
 					const user = userCredential.user;
-					console.log(userCredential)
+					console.log(userCredential);
 					// ...
 				})
 				.catch((error) => {
@@ -41,11 +42,11 @@
 					const errorMessage = error.message;
 				});
 		} else {
-			createUserWithEmailAndPassword(clientAuth, email, password)
+			createUserWithEmailAndPassword(getAuth(getClientApp()), email, password)
 				.then((userCredential) => {
 					// Signed up
 					const user = userCredential.user;
-					console.log(userCredential)
+					console.log(userCredential);
 					// ...
 				})
 				.catch((error) => {
@@ -53,10 +54,20 @@
 					const errorMessage = error.message;
 					console.log(error);
 				});
+
+			// TODO: do logout after registration
+
+			const redirectUrl = `${window.location.origin}/auth/confirm`;
+
+			try {
+				await sendMagicLink(email, redirectUrl);
+			} catch (error) {
+				console.error(error);
+			}
 		}
 	};
 
-	onAuthStateChanged(clientAuth, (user) => {
+	onAuthStateChanged(getAuth(getClientApp()), (user) => {
 		currentUser = user;
 	});
 </script>
@@ -67,13 +78,13 @@
 			on:click={() => (option = 'login')}
 			class="w-[40%] border-b-2 {option == 'register'
 				? 'border-transparent'
-				: 'border-primary-500 text-white'} pb-3">Login</button
+				: 'border-primary-500 text-black dark:text-white'} pb-3">Login</button
 		>
 		<button
 			on:click={() => (option = 'register')}
 			class="w-[40%] border-b-2 {option == 'login'
 				? 'border-transparent'
-				: 'border-primary-500 text-white'} pb-3">Registrati</button
+				: 'border-primary-500 text-black dark:text-white'} pb-3">Registrati</button
 		>
 	</div>
 
@@ -151,7 +162,7 @@
 			</Label>
 		{/if}
 
-		<Button class="w-full mt-5" on:click={handleSubmission} bind:disabled={validatorError}
+		<Button class="mt-5 w-full" on:click={handleSubmission} bind:disabled={validatorError}
 			>{option === 'login' ? 'Accedi' : 'Registrati'}</Button
 		>
 	</div>

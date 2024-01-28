@@ -1,13 +1,15 @@
 <script lang="ts">
-	import QrReader from "../../components/QrReader.svelte";
+	import { onMount } from "svelte";
     import { Toast, Card } from "flowbite-svelte";
     import { CheckCircle2, XCircle, AlertCircle } from 'lucide-svelte';
-	import type { Ticket } from "../../models/ticket";
-	import { onMount } from "svelte";
-	import { onAuthStateChanged } from "firebase/auth";
-	import { clientAuth } from "$lib/firebase/firebase";
-    import { user } from "../../store/store";
+	import { onAuthStateChanged, getAuth } from "firebase/auth";
+    
     import { goto } from "$app/navigation";
+	import { getClientApp } from "$lib/firebase/client";
+    
+    import { user } from "../../store/store";
+	import type { Ticket } from "../../models/ticket";
+	import QrReader from "../../components/QrReader.svelte";
 
 	let ticketCode: string;
 
@@ -85,7 +87,7 @@
     }
 
     onMount(async() => {
-		onAuthStateChanged(clientAuth, (newUser) => {
+		onAuthStateChanged(getAuth(getClientApp()), (newUser) => {
 			$user = newUser;
 			if($user === null){
 				goto("/");

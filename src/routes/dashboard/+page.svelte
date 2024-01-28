@@ -1,14 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { user } from '../../store/store';
-	import { onAuthStateChanged } from 'firebase/auth';
-	import type { Ticket } from '../../models/ticket';
 	import { Card } from 'flowbite-svelte';
-	import { clientAuth } from '../../lib/firebase/firebase';
+	import { onAuthStateChanged, getAuth } from 'firebase/auth';
+
 	import { goto } from '$app/navigation';
+	import { getClientApp } from '$lib/firebase/client';
+
+	import { user } from '../../store/store';
+	import type { Ticket } from '../../models/ticket';
 	import Tickets from '../../components/graphs/Tickets.svelte';
-	import TicketsPerPerson from '../../components/graphs/TicketsPerPerson.svelte';
 	import CheckInPerTime from '../../components/graphs/CheckInPerTime.svelte';
+	import TicketsPerPerson from '../../components/graphs/TicketsPerPerson.svelte';
 
 	export let data: { strTicketData: string };
 
@@ -49,7 +51,7 @@
 	computeData(tickets);
 
 	onMount(async() => {
-		onAuthStateChanged(clientAuth, (newUser) => {
+		onAuthStateChanged(getAuth(getClientApp()), (newUser) => {
 			$user = newUser;
 			if($user === null){
 				goto("/");

@@ -1,18 +1,20 @@
 <script lang="ts">
-	import QrReader from "../../components/QrReader.svelte";
 	import { Button, Label, Input, Helper } from "flowbite-svelte"
-	import { enhance } from "$app/forms";
+	import { getAuth, onAuthStateChanged } from "firebase/auth";
 	import { Ticket } from 'lucide-svelte';
 	import { onMount } from "svelte";
-	import { onAuthStateChanged } from "firebase/auth";
-	import { clientAuth } from "$lib/firebase/firebase";
-	import { user } from "../../store/store";
+
+	import { enhance } from "$app/forms";
 	import { goto } from "$app/navigation";
+	import { getClientApp } from "$lib/firebase/client";
+	
+	import { user } from "../../store/store";
+	import QrReader from "../../components/QrReader.svelte";
 
 	let ticketCode: string;
 
 	onMount(async() => {
-		onAuthStateChanged(clientAuth, (newUser) => {
+		onAuthStateChanged(getAuth(getClientApp()), (newUser) => {
 			$user = newUser;
 			if($user === null){
 				goto("/");

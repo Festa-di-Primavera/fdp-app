@@ -1,14 +1,16 @@
-import { initAdmin } from '$lib/firebase/firebaseAdmin';
 import { collection, getDocs, query } from 'firebase/firestore';
-import type { Ticket } from '../../models/ticket';
-import { clientDB } from '$lib/firebase/firebase';
+
+import { initAdmin } from '$lib/firebase/admin';
+import { getClientDB } from '$lib/firebase/client';
+
 import { roles } from '../../models/role';
+import type { Ticket } from '../../models/ticket';
 
 export async function load() {
 	const app = initAdmin();
 	const users = await app.auth().listUsers();
     
-    const q = query(collection(clientDB, "tickets"));
+    const q = query(collection(getClientDB(), "tickets"));
 	const querySnapshot = await getDocs(q);
     
 	const sellers = users.users.filter((user) => user.customClaims?.accessLevel >= roles.SELLER);

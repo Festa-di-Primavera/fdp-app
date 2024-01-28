@@ -1,15 +1,19 @@
-import { clientDB } from '$lib/firebase/firebase.js';
 import { json } from '@sveltejs/kit';
+
+import { getAuth } from 'firebase-admin/auth';
 import { collection, getDocs, query, setDoc, doc } from 'firebase/firestore';
-import type { Ticket } from '../../../models/ticket';
-import { initAdmin } from '$lib/firebase/firebaseAdmin';
+
+import { getAdminApp } from '$lib/firebase/admin';
+import { getClientDB } from '$lib/firebase/client.js';
+
 import { roles } from '../../../models/role';
+import type { Ticket } from '../../../models/ticket';
 
 export async function GET() {
-	const q = query(collection(clientDB, "tickets"));
+	const q = query(collection(getClientDB(), "tickets"));
 
-	const app = initAdmin();
-	const users = await app.auth().listUsers();
+	const app = getAuth(getAdminApp());
+	const users = await app.listUsers();
 	const sellers = users.users.filter((user) => user.customClaims?.accessLevel >= roles.SELLER);
 
 	const querySnapshot = await getDocs(q);
@@ -39,7 +43,7 @@ export async function POST(request) {
 	const body = await request.request.json();
 
 	for (const code of body) {
-		const ticketRef = doc(clientDB, "tickets", code);
+		const ticketRef = doc(getClientDB(), "tickets", code);
 		await setDoc(ticketRef, {
 			checkIn: null,
 			name: null,

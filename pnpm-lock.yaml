@@ -32,11 +32,14 @@ devDependencies:
     specifier: ^3.0.0
     version: 3.1.1(@sveltejs/kit@2.4.3)
   '@sveltejs/kit':
-    specifier: ^2.0.0
+    specifier: ^2.4.3
     version: 2.4.3(@sveltejs/vite-plugin-svelte@3.0.1)(svelte@4.2.9)(vite@5.0.12)
   '@sveltejs/vite-plugin-svelte':
     specifier: ^3.0.0
     version: 3.0.1(svelte@4.2.9)(vite@5.0.12)
+  '@types/dotenv-flow':
+    specifier: ^3.3.3
+    version: 3.3.3
   '@types/eslint':
     specifier: 8.56.0
     version: 8.56.0
@@ -49,6 +52,9 @@ devDependencies:
   autoprefixer:
     specifier: ^10.4.16
     version: 10.4.17(postcss@8.4.33)
+  dotenv-flow:
+    specifier: ^4.1.0
+    version: 4.1.0
   eslint:
     specifier: ^8.56.0
     version: 8.56.0
@@ -1299,6 +1305,10 @@ packages:
     resolution: {integrity: sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==}
     dev: true
 
+  /@types/dotenv-flow@3.3.3:
+    resolution: {integrity: sha512-aJjBsKw4bfGjvaRwrxBtEOfYZxCAq+LiFTpZ4DGTEK2b9eLVt/IAClapSxMfgV4Mi/2bIBKKjoTCO0lOh4ACLg==}
+    dev: true
+
   /@types/eslint@8.56.0:
     resolution: {integrity: sha512-FlsN0p4FhuYRjIxpbdXovvHQhtlG05O1GG/RNWvdAxTboR438IOTwmrY/vLA+Xfgg06BTkP045M3vpFwTMv1dg==}
     dependencies:
@@ -2040,6 +2050,18 @@ packages:
     engines: {node: '>=6.0.0'}
     dependencies:
       esutils: 2.0.3
+    dev: true
+
+  /dotenv-flow@4.1.0:
+    resolution: {integrity: sha512-0cwP9jpQBQfyHwvE0cRhraZMkdV45TQedA8AAUZMsFzvmLcQyc1HPv+oX0OOYwLFjIlvgVepQ+WuQHbqDaHJZg==}
+    engines: {node: '>= 12.0.0'}
+    dependencies:
+      dotenv: 16.4.1
+    dev: true
+
+  /dotenv@16.4.1:
+    resolution: {integrity: sha512-CjA3y+Dr3FyFDOAMnxZEGtnW9KBR2M0JvvUtXNW+dYJL5ROWxP9DUHCwgFqpMk0OXCc0ljhaNTr2w/kutYIcHQ==}
+    engines: {node: '>=12'}
     dev: true
 
   /duplexify@4.1.2:

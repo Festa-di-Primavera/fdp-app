@@ -1,9 +1,10 @@
-import { initAdmin } from '$lib/firebase/firebaseAdmin';
+import { getAdminApp } from '$lib/firebase/admin';
+import { getAuth } from 'firebase-admin/auth';
 import { json } from '@sveltejs/kit';
 import { roles } from '../../../../../models/role';
 
 export async function PUT({params}) {
-	const app = initAdmin();
+	const app = getAuth(getAdminApp());
 	
 	const enumBindings: {[key: string]: roles} = {
 		'normal': roles.NORMAL,
@@ -14,7 +15,7 @@ export async function PUT({params}) {
 	};
 
 	try{
-		app.auth().setCustomUserClaims(params.uid, {...(await app.auth().getUser(params.uid)).customClaims, role: params.newRole, accessLevel: enumBindings[params.newRole]}); // TODO: valutare se modificare la stringa e utilizzare il numero
+		app.setCustomUserClaims(params.uid, {...(await app.getUser(params.uid)).customClaims, role: params.newRole, accessLevel: enumBindings[params.newRole]}); // TODO: valutare se modificare la stringa e utilizzare il numero
 		return json({
 			status: 200,
 			body: {

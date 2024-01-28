@@ -1,13 +1,16 @@
-import { clientDB } from '$lib/firebase/firebase.js';
 import { json } from '@sveltejs/kit';
+import { getAuth } from 'firebase-admin/auth';
 import { Timestamp, updateDoc, doc, getDoc } from 'firebase/firestore';
+
+import { getAdminApp } from '$lib/firebase/admin';
+import { getClientDB } from '$lib/firebase/client.js';
+
 import type { Ticket } from '../../../../models/ticket';
-import { initAdmin } from '$lib/firebase/firebaseAdmin';
 
 export async function GET( { params } ) {
-	const adminApp = initAdmin();
+	const adminApp = getAuth(getAdminApp());
 
-	const ticketDoc = (await getDoc(doc(clientDB, "tickets", params.ticketID)));
+	const ticketDoc = (await getDoc(doc(getClientDB(), "tickets", params.ticketID)));
 
 	if(!ticketDoc.exists()) {
 		return json({
@@ -19,7 +22,7 @@ export async function GET( { params } ) {
 	}
 
 	const sellerID = ticketDoc.data().seller;
-	const sellerUser = await adminApp.auth().getUser(sellerID);
+	const sellerUser = await adminApp.getUser(sellerID);
 	const sellerName = sellerUser.customClaims?.alias;
 
 	const ticket: Ticket = {
@@ -40,10 +43,10 @@ export async function GET( { params } ) {
 }
 
 export async function PUT( { params } ) {
-	const adminApp = initAdmin();
+	const adminApp = getAuth(getAdminApp());
 	const ticketID = params.ticketID;
 
-	let ticketDoc = (await getDoc(doc(clientDB, "tickets", ticketID)));
+	let ticketDoc = (await getDoc(doc(getClientDB(), "tickets", ticketID)));
 
 	if(!ticketDoc.exists()) {
 		return json({
@@ -54,10 +57,10 @@ export async function PUT( { params } ) {
 		});
 	}
 
-	await updateDoc(doc(clientDB, "tickets", ticketID), {
+	await updateDoc(doc(getClientDB(), "tickets", ticketID), {
 		checkIn: Timestamp.fromDate(new Date())
 	});
-	ticketDoc = (await getDoc(doc(clientDB, "tickets", ticketID)));
+	ticketDoc = (await getDoc(doc(getClientDB(), "tickets", ticketID)));
 
 	if(!ticketDoc.exists()) {
 		return json({
@@ -69,7 +72,7 @@ export async function PUT( { params } ) {
 	}
 
 	const sellerID = ticketDoc.data().seller;
-	const sellerUser = await adminApp.auth().getUser(sellerID);
+	const sellerUser = await adminApp.getUser(sellerID);
 	const sellerName = sellerUser.customClaims?.alias;
 
 	const ticket: Ticket = {

@@ -6,13 +6,13 @@
 
 	import { page } from '$app/stores';  
 	import { handleSignOut, user } from "../store/store";
-	import { onIdTokenChanged } from "firebase/auth";
-	import { clientAuth } from "$lib/firebase/firebase";
+	import { onIdTokenChanged, getAuth } from "firebase/auth";
+	import { getClientApp } from "$lib/firebase/client";
 	import { roles } from "../models/role";
 	
 	let currAccessLevel: number | null = null;
 
-	onIdTokenChanged(clientAuth, async (user) => {
+	onIdTokenChanged(getAuth(getClientApp()), async (user) => {
 		$user = user;
 		const claims = (await $user?.getIdTokenResult(true))?.claims;
 		if($user !== null){

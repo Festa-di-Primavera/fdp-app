@@ -1,6 +1,7 @@
-import { clientDB} from "$lib/firebase/firebase";
-import type { Actions } from "./$types";
 import { /* collection, */ Timestamp, doc, setDoc, /* Timestamp */ } from "firebase/firestore"; 
+
+import type { Actions } from "./$types";
+import { getClientDB } from "$lib/firebase/client";
 
 
 export const actions: Actions = {
@@ -14,7 +15,7 @@ export const actions: Actions = {
 
 		const soldAt = Timestamp.fromDate(new Date());
 
-		await setDoc(doc(clientDB, "tickets", `${code}`), {
+		await setDoc(doc(getClientDB(), "tickets", `${code}`), {
 			name: name,
 			surname: surname,
 			checkIn: null,

@@ -1,14 +1,15 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import type { Ticket } from '../../models/ticket';
-	import { Select, Label, Checkbox, Button, Toast, NumberInput } from 'flowbite-svelte';
-	import { XCircle, CheckCircle2 } from 'lucide-svelte';
-
 	import axios from 'axios';
-	import { onAuthStateChanged } from 'firebase/auth';
-	import { clientAuth } from '$lib/firebase/firebase';
-	import { user } from '../../store/store';
+	import { onMount } from 'svelte';
+	import { getAuth, onAuthStateChanged } from 'firebase/auth';
+	import { XCircle, CheckCircle2 } from 'lucide-svelte';
+	import { Select, Label, Checkbox, Button, Toast, NumberInput } from 'flowbite-svelte';
+	
 	import { goto } from '$app/navigation';
+	import { getClientApp } from '$lib/firebase/client';
+	
+	import { user } from '../../store/store';
+	import type { Ticket } from '../../models/ticket';
 
 	const codeTypesList = [
 		{ value: 'numeric', name: 'Numerico' },
@@ -128,7 +129,7 @@
 	});
 
 	onMount(async() => {
-		onAuthStateChanged(clientAuth, (newUser) => {
+		onAuthStateChanged(getAuth(getClientApp()), (newUser) => {
 			$user = newUser;
 			if($user === null){
 				goto("/");
