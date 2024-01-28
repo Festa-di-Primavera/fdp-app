@@ -4,11 +4,13 @@
 		onAuthStateChanged,
 		createUserWithEmailAndPassword,
 		signInWithEmailAndPassword,
-		getAuth
+		getAuth,
+		signOut
 	} from 'firebase/auth';
 	import { Eye, EyeOff, XCircle } from 'lucide-svelte';
 	import { Button, Input, Label, Card, Helper, Toast } from 'flowbite-svelte';
-	
+
+	import { setMagicEmail } from '$lib/localStorage/magicEmail';
 	import { getClientApp, sendMagicLink } from '$lib/firebase/client';
 
 	let currentUser: User | null = null;
@@ -30,6 +32,10 @@
 
 	const handleSubmission = async () => {
 		if (option === 'login') {
+			/*
+			L'utente può effettuare il login anche se non ha verificato la mail. Per impedirlo bisogna verificare il campo emailVerified
+			*/
+			console.log('AuthPanel: login');
 			signInWithEmailAndPassword(getAuth(getClientApp()), email, password)
 				.then((userCredential) => {
 					// Signed in
@@ -42,27 +48,46 @@
 					const errorMessage = error.message;
 				});
 		} else {
+			console.log('AuthPanel: register');
+
 			createUserWithEmailAndPassword(getAuth(getClientApp()), email, password)
 				.then((userCredential) => {
 					// Signed up
 					const user = userCredential.user;
 					console.log(userCredential);
-					// ...
+
+					// TODO: do logout after registration (WARNING: non sembra funzionare)
+					signOut(getAuth(getClientApp()))
+						.then(() => {
+							// Sign-out successful.
+							console.log('logout');
+						})
+						.catch((error) => {
+							// An error happened.
+							console.error(error);
+						});
 				})
 				.catch((error) => {
+					// un esempio di errore è: "password must be at least 6 characters"
 					const errorCode = error.code;
 					const errorMessage = error.message;
 					console.log(error);
 				});
 
-			// TODO: do logout after registration
-
+			// FIX: inviare il magic link solo se la registrazione è andata a buon fine
 			const redirectUrl = `${window.location.origin}/auth/confirm`;
 
 			try {
+				console.log('AuthPanel: sendMagicLink');
 				await sendMagicLink(email, redirectUrl);
+				setMagicEmail(email);
 			} catch (error) {
-				console.error(error);
+				if (error instanceof Error) {
+					console.error(error.message);
+				} else {
+					console.log(error);
+					console.error('something went wrong sending the magic link 😞');
+				}
 			}
 		}
 	};
