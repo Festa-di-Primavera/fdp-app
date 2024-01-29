@@ -89,6 +89,8 @@
 					console.error('something went wrong sending the magic link 😞');
 				}
 			}
+
+			// TODO: reindirizzare l'utente verso una pagina che lo informi della mail inviata
 		}
 	};
 

@@ -47,7 +47,7 @@ import { createSessionCookie, verifyIdToken /* , getAdminApp */ } from '$lib/fir
 
 // POST /auth/session
 export const POST: RequestHandler = async ({ request }) => {
-	const authHeader = request.headers.get('Authorization') || '';
+	const authHeader = request.headers.get('Authorization') ?? '';
 	const [scheme, token] = authHeader.split(' ');
 	if (scheme !== 'Bearer' || !token) {
 		return json({ status: 401, body: 'invalid authorization header' });
