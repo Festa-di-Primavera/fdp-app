@@ -12,7 +12,7 @@
 </script>
 
 <section
-	class="flex w-full items-center justify-center px-5 py-10 text-xl text-black dark:text-white"
+	class="flex flex-col w-full items-center justify-center px-5 py-10 text-xl text-black dark:text-white"
 >
 	{#if $user === null || $user.emailVerified === false}
 		<AuthPanel />
