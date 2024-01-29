@@ -5,7 +5,6 @@
 		createUserWithEmailAndPassword,
 		signInWithEmailAndPassword,
 		getAuth,
-		signOut,
 		sendEmailVerification
 	} from 'firebase/auth';
 	import { Eye, EyeOff, XCircle } from 'lucide-svelte';
@@ -32,24 +31,12 @@
 
 	const handleSubmission = async () => {
 		if (option === 'login') {
-			/*
-			L'utente può effettuare il login anche se non ha verificato la mail. Per impedirlo bisogna verificare il campo emailVerified
-			*/
-			console.log('AuthPanel: login');
-			signInWithEmailAndPassword(getAuth(getClientApp()), email, password)
-				.then((userCredential) => {
-					// Signed in
-					const user = userCredential.user;
-					console.log(userCredential);
-					// ...
-				})
-				.catch((error) => {
-					const errorCode = error.code;
-					const errorMessage = error.message;
-				});
+			try {
+				await signInWithEmailAndPassword(getAuth(getClientApp()), email, password);
+			} catch (error) {
+				console.error(error);
+			}
 		} else {
-			console.log('AuthPanel: register');
-
 			try {
 				const userCredential = await createUserWithEmailAndPassword(
 					getAuth(getClientApp()),
@@ -57,26 +44,14 @@
 					password
 				);
 				const user = userCredential.user;
-				console.log(userCredential);
 
-				// sendEmailVerification(getAuth(getClientApp()).currentUser as User);
 				await sendEmailVerification(user);
 
-				// Email verification sent!
-				console.log('email verification sent');
-
-				// TODO: do logout after registration (WARNING: non sembra funzionare)
-				await signOut(getAuth(getClientApp()));
-
-				// Sign-out successful.
-				console.log('logout');
+				console.log('email verification sent'); // TODO: add toast
 			} catch (error) {
-				// An error occurred
 				// un esempio di errore è: "password must be at least 6 characters"
-				console.error(error);
+				console.error(error); // TODO: add toast
 			}
-
-			// TODO: reindirizzare l'utente verso una pagina che lo informi della mail inviata
 		}
 	};
 
@@ -85,74 +60,46 @@
 	});
 </script>
 
-<Card class="flex w-full max-w-96 flex-col items-center justify-center">
-	<div class="mb-5 flex w-full justify-around">
-		<button
-			on:click={() => (option = 'login')}
-			class="w-[40%] border-b-2 {option == 'register'
-				? 'border-transparent'
-				: 'border-primary-500 text-black dark:text-white'} pb-3">Login</button
-		>
-		<button
-			on:click={() => (option = 'register')}
-			class="w-[40%] border-b-2 {option == 'login'
-				? 'border-transparent'
-				: 'border-primary-500 text-black dark:text-white'} pb-3">Registrati</button
-		>
-	</div>
-
-	<div class="flex w-full flex-col gap-3">
-		<h1 class="w-max text-3xl font-semibold text-primary-600">
-			{option === 'login' ? 'Accedi' : 'Registrati'}
-		</h1>
-
-		<Label>
-			Email address
-			<Input
-				type="email"
-				placeholder="john.doe@company.com"
-				bind:value={email}
-				required
-				class="mt-2"
-			/>
-		</Label>
-
-		<Label>
-			Password
-			<Input
-				id="password"
-				name="password"
-				type={pwVisible ? 'text' : 'password'}
-				bind:value={password}
-				class="mt-2"
+{#if currentUser === null}
+	<Card class="flex w-full max-w-96 flex-col items-center justify-center">
+		<div class="mb-5 flex w-full justify-around">
+			<button
+				on:click={() => (option = 'login')}
+				class="w-[40%] border-b-2 {option == 'register'
+					? 'border-transparent'
+					: 'border-primary-500 text-black dark:text-white'} pb-3">Login</button
 			>
-				<button
-					type="button"
-					slot="right"
-					class="flex items-center justify-center"
-					tabindex="-1"
-					on:click={() => (pwVisible = !pwVisible)}
-				>
-					{#if pwVisible}
-						<EyeOff />
-					{:else}
-						<Eye />
-					{/if}
-				</button>
-			</Input>
-			<!-- TODO: add check of security of password -->
-		</Label>
+			<button
+				on:click={() => (option = 'register')}
+				class="w-[40%] border-b-2 {option == 'login'
+					? 'border-transparent'
+					: 'border-primary-500 text-black dark:text-white'} pb-3">Registrati</button
+			>
+		</div>
 
-		{#if option === 'register'}
+		<div class="flex w-full flex-col gap-3">
+			<h1 class="w-max text-3xl font-semibold text-primary-600">
+				{option === 'login' ? 'Accedi' : 'Registrati'}
+			</h1>
+
 			<Label>
-				Conferma password
+				Email address
 				<Input
-					id="repeat-pw"
+					type="email"
+					placeholder="john.doe@company.com"
+					bind:value={email}
+					required
+					class="mt-2"
+				/>
+			</Label>
+
+			<Label>
+				Password
+				<Input
+					id="password"
 					name="password"
-					type={rpPwVisible ? 'text' : 'password'}
-					color={!validatorError ? 'base' : 'red'}
-					bind:value={repeatPassword}
-					on:blur={() => (validatorError = !(password === repeatPassword))}
+					type={pwVisible ? 'text' : 'password'}
+					bind:value={password}
 					class="mt-2"
 				>
 					<button
@@ -160,23 +107,57 @@
 						slot="right"
 						class="flex items-center justify-center"
 						tabindex="-1"
-						on:click={() => (rpPwVisible = !rpPwVisible)}
+						on:click={() => (pwVisible = !pwVisible)}
 					>
-						{#if rpPwVisible}
+						{#if pwVisible}
 							<EyeOff />
 						{:else}
 							<Eye />
 						{/if}
 					</button>
 				</Input>
-				{#if validatorError}
-					<Helper class="mt-2" color="red">Le password non coincidono</Helper>
-				{/if}
+				<!-- TODO: add check of security of password -->
 			</Label>
-		{/if}
 
-		<Button class="mt-5 w-full" on:click={handleSubmission} bind:disabled={validatorError}
-			>{option === 'login' ? 'Accedi' : 'Registrati'}</Button
-		>
+			{#if option === 'register'}
+				<Label>
+					Conferma password
+					<Input
+						id="repeat-pw"
+						name="password"
+						type={rpPwVisible ? 'text' : 'password'}
+						color={!validatorError ? 'base' : 'red'}
+						bind:value={repeatPassword}
+						on:blur={() => (validatorError = !(password === repeatPassword))}
+						class="mt-2"
+					>
+						<button
+							type="button"
+							slot="right"
+							class="flex items-center justify-center"
+							tabindex="-1"
+							on:click={() => (rpPwVisible = !rpPwVisible)}
+						>
+							{#if rpPwVisible}
+								<EyeOff />
+							{:else}
+								<Eye />
+							{/if}
+						</button>
+					</Input>
+					{#if validatorError}
+						<Helper class="mt-2" color="red">Le password non coincidono</Helper>
+					{/if}
+				</Label>
+			{/if}
+
+			<Button class="mt-5 w-full" on:click={handleSubmission} bind:disabled={validatorError}
+				>{option === 'login' ? 'Accedi' : 'Registrati'}</Button
+			>
+		</div>
+	</Card>
+{:else if currentUser.emailVerified === false}
+	<div>
+		<p>Ti è stata mandata una mail di verifica all'indirizzo {currentUser.email}</p>
 	</div>
-</Card>
+{/if}
