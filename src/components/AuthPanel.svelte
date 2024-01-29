@@ -7,10 +7,11 @@
 		getAuth,
 		sendEmailVerification
 	} from 'firebase/auth';
-	import { Eye, EyeOff, XCircle } from 'lucide-svelte';
+	import { AlertCircle, CheckCircle2, Eye, EyeOff, XCircle } from 'lucide-svelte';
 	import { Button, Input, Label, Card, Helper, Toast } from 'flowbite-svelte';
 
 	import { getClientApp } from '$lib/firebase/client';
+	import { FirebaseError } from 'firebase/app';
 
 	let currentUser: User | null = null;
 
@@ -23,6 +24,21 @@
 	let rpPwVisible: boolean = false;
 	let validatorError: boolean = true;
 
+	let open: boolean = false;
+	let color: 'green' | 'red' | 'yellow' = 'green';
+	
+	enum ToastMessages {
+		INVALID_EMAIL_ERROR = 'Email non valida',
+		ALREADY_USED_EMAIL_ERROR = 'Email già in uso',
+		WEAK_PASSWORD_ERROR = 'Password troppo debole',
+		INVALID_CREDENTIAL_ERROR = 'Credenziali non valide',
+		NETWORK_REQUEST_FAILED_ERROR = 'Errore di rete',
+		UNKNOWN_ERROR = 'Errore sconosciuto',
+		EMAIL_VERIFICATION_SENT = 'Email di verifica inviata',
+	}
+
+	let toastMessage: ToastMessages = ToastMessages.UNKNOWN_ERROR;
+
 	$: {
 		if (validatorError) {
 			validatorError = !(password === repeatPassword);
@@ -34,7 +50,20 @@
 			try {
 				await signInWithEmailAndPassword(getAuth(getClientApp()), email, password);
 			} catch (error) {
-				console.error(error);
+				if((error as FirebaseError).code === 'auth/invalid-email'){
+					toastMessage = ToastMessages.INVALID_EMAIL_ERROR;
+				}
+				else if((error as FirebaseError).code === 'auth/invalid-credential'){
+					toastMessage = ToastMessages.INVALID_CREDENTIAL_ERROR;
+				}
+				else if((error as FirebaseError).code === 'auth/network-request-failed'){
+					toastMessage = ToastMessages.NETWORK_REQUEST_FAILED_ERROR;
+				}
+				else{
+					toastMessage = ToastMessages.UNKNOWN_ERROR;
+				}
+				open = true;
+				color = 'red';
 			}
 		} else {
 			try {
@@ -47,10 +76,27 @@
 
 				await sendEmailVerification(user);
 
-				console.log('email verification sent'); // TODO: add toast
+				toastMessage = ToastMessages.EMAIL_VERIFICATION_SENT;
+				open = true;
+				color = 'green';
 			} catch (error) {
-				// un esempio di errore è: "password must be at least 6 characters"
-				console.error(error); // TODO: add toast
+				if((error as FirebaseError).code === 'auth/invalid-email'){
+					toastMessage = ToastMessages.INVALID_EMAIL_ERROR;
+				}
+				else if((error as FirebaseError).code === 'auth/email-already-in-use'){
+					toastMessage = ToastMessages.ALREADY_USED_EMAIL_ERROR;
+				}
+				else if((error as FirebaseError).code === 'auth/weak-password'){
+					toastMessage = ToastMessages.WEAK_PASSWORD_ERROR;
+				}
+				else if((error as FirebaseError).code === 'auth/network-request-failed'){
+					toastMessage = ToastMessages.NETWORK_REQUEST_FAILED_ERROR;
+				}
+				else{
+					toastMessage = ToastMessages.UNKNOWN_ERROR;
+				}
+				open = true;
+				color = 'red';
 			}
 		}
 	};
@@ -161,3 +207,8 @@
 		<p>Ti è stata mandata una mail di verifica all'indirizzo {currentUser.email}</p>
 	</div>
 {/if}
+
+<Toast bind:open color={color} class="w-max mt-10 mb-5 mx-auto right-0 left-0" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
+	<svelte:component this={toastMessage !== ToastMessages.EMAIL_VERIFICATION_SENT ? XCircle : CheckCircle2} class="w-6 h-6  text-{color}-400" slot="icon"/>
+	<span class={`text-${color}-400 font-semibold`}>{toastMessage}</span>
+</Toast>
