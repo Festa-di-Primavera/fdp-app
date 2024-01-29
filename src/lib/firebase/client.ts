@@ -3,10 +3,7 @@ import { getFirestore } from 'firebase/firestore';
 import {
 	getAuth,
 	inMemoryPersistence,
-	sendSignInLinkToEmail,
-	setPersistence,
-	isSignInWithEmailLink,
-	signInWithEmailLink
+	setPersistence
 } from 'firebase/auth';
 
 const clientConfig = {
@@ -34,24 +31,3 @@ export const getClientApp = () => {
 export const clientAuth = getAuth(firebaseApp); */
 
 export const getClientDB = () => getFirestore(getClientApp());
-
-export const isMagicLink = (link: string) => {
-	const auth = getAuth(getClientApp());
-
-	return isSignInWithEmailLink(auth, link);
-};
-
-export const signInWithMagicLink = (email: string, link: string) => {
-	const auth = getAuth(getClientApp());
-
-	return signInWithEmailLink(auth, email, link);
-};
-
-export const sendMagicLink = (email: string, redirectUrl: string) => {
-	const auth = getAuth(getClientApp());
-	const actionCodeSettings = {
-		url: redirectUrl,
-		handleCodeInApp: true
-	};
-	return sendSignInLinkToEmail(auth, email, actionCodeSettings);
-};

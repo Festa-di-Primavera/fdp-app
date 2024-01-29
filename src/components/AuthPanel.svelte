@@ -5,13 +5,13 @@
 		createUserWithEmailAndPassword,
 		signInWithEmailAndPassword,
 		getAuth,
-		signOut
+		signOut,
+		sendEmailVerification
 	} from 'firebase/auth';
 	import { Eye, EyeOff, XCircle } from 'lucide-svelte';
 	import { Button, Input, Label, Card, Helper, Toast } from 'flowbite-svelte';
 
-	import { setMagicEmail } from '$lib/localStorage/magicEmail';
-	import { getClientApp, sendMagicLink } from '$lib/firebase/client';
+	import { getClientApp } from '$lib/firebase/client';
 
 	let currentUser: User | null = null;
 
@@ -50,44 +50,30 @@
 		} else {
 			console.log('AuthPanel: register');
 
-			createUserWithEmailAndPassword(getAuth(getClientApp()), email, password)
-				.then((userCredential) => {
-					// Signed up
-					const user = userCredential.user;
-					console.log(userCredential);
-
-					// TODO: do logout after registration (WARNING: non sembra funzionare)
-					signOut(getAuth(getClientApp()))
-						.then(() => {
-							// Sign-out successful.
-							console.log('logout');
-						})
-						.catch((error) => {
-							// An error happened.
-							console.error(error);
-						});
-				})
-				.catch((error) => {
-					// un esempio di errore è: "password must be at least 6 characters"
-					const errorCode = error.code;
-					const errorMessage = error.message;
-					console.log(error);
-				});
-
-			// FIX: inviare il magic link solo se la registrazione è andata a buon fine
-			const redirectUrl = `${window.location.origin}/auth/confirm`;
-
 			try {
-				console.log('AuthPanel: sendMagicLink');
-				await sendMagicLink(email, redirectUrl);
-				setMagicEmail(email);
+				const userCredential = await createUserWithEmailAndPassword(
+					getAuth(getClientApp()),
+					email,
+					password
+				);
+				const user = userCredential.user;
+				console.log(userCredential);
+
+				// sendEmailVerification(getAuth(getClientApp()).currentUser as User);
+				await sendEmailVerification(user);
+
+				// Email verification sent!
+				console.log('email verification sent');
+
+				// TODO: do logout after registration (WARNING: non sembra funzionare)
+				await signOut(getAuth(getClientApp()));
+
+				// Sign-out successful.
+				console.log('logout');
 			} catch (error) {
-				if (error instanceof Error) {
-					console.error(error.message);
-				} else {
-					console.log(error);
-					console.error('something went wrong sending the magic link 😞');
-				}
+				// An error occurred
+				// un esempio di errore è: "password must be at least 6 characters"
+				console.error(error);
 			}
 
 			// TODO: reindirizzare l'utente verso una pagina che lo informi della mail inviata
