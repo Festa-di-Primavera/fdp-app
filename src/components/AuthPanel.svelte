@@ -7,11 +7,11 @@
 		getAuth,
 		sendEmailVerification
 	} from 'firebase/auth';
-	import { AlertCircle, CheckCircle2, Eye, EyeOff, XCircle } from 'lucide-svelte';
+	import { FirebaseError } from 'firebase/app';
+	import { CheckCircle2, Eye, EyeOff, XCircle } from 'lucide-svelte';
 	import { Button, Input, Label, Card, Helper, Toast } from 'flowbite-svelte';
 
 	import { getClientApp } from '$lib/firebase/client';
-	import { FirebaseError } from 'firebase/app';
 
 	let currentUser: User | null = null;
 
@@ -48,7 +48,19 @@
 	const handleSubmission = async () => {
 		if (option === 'login') {
 			try {
-				await signInWithEmailAndPassword(getAuth(getClientApp()), email, password);
+				const credential = await signInWithEmailAndPassword(getAuth(getClientApp()), email, password);
+				const token = await credential.user.getIdToken();
+
+				const user = await fetch('/api/session',
+					{
+						method: 'POST',
+						headers: {
+							authorization: `Bearer ${token}`,
+						}
+					}
+				);
+
+				currentUser = (await user.json());
 			} catch (error) {
 				if((error as FirebaseError).code === 'auth/invalid-email'){
 					toastMessage = ToastMessages.INVALID_EMAIL_ERROR;
@@ -72,9 +84,19 @@
 					email,
 					password
 				);
-				const user = userCredential.user;
 
-				await sendEmailVerification(user);
+				const token = await userCredential.user.getIdToken();
+				const user = await fetch('/api/session',
+					{
+						method: 'POST',
+						headers: {
+							authorization: `Bearer ${token}`,
+						}
+					}
+				);
+				currentUser = (await user.json());
+
+				await sendEmailVerification(userCredential.user);
 
 				toastMessage = ToastMessages.EMAIL_VERIFICATION_SENT;
 				open = true;
@@ -129,7 +151,7 @@
 			</h1>
 
 			<Label>
-				Email address
+				Email
 				<Input
 					type="email"
 					placeholder="john.doe@company.com"
@@ -202,9 +224,9 @@
 			>
 		</div>
 	</Card>
-{:else if currentUser.emailVerified === false}
+{:else if !currentUser?.emailVerified}
 	<div>
-		<p>Ti è stata mandata una mail di verifica all'indirizzo {currentUser.email}</p>
+		<p>Ti è stata mandata una mail di verifica all'indirizzo {currentUser?.email}</p>
 	</div>
 {/if}
 
