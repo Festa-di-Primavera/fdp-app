@@ -1,4 +1,3 @@
-/* import { FIREBASE_ADMIN_CLIENT_EMAIL, FIREBASE_ADMIN_PRIVATE_KEY } from '$env/static/private'; */
 import { initializeApp, getApps, getApp, cert, type App } from 'firebase-admin/app';
 
 import { getAuth, type DecodedIdToken } from 'firebase-admin/auth';
@@ -35,7 +34,6 @@ export const createSessionCookie = async (token: string, maxAge: number) => {
 
 	return `session=${session}; SameSite=Strict; Path=/; HttpOnly; Max-Age=${maxAge};`;
 };
-// TODO: gestire l'aggiornamento dei cookie
 
 export const createSessionCookieForUserId = async (userId: string, maxAge: number) => {
 	const auth = getAuth(getAdminApp());
