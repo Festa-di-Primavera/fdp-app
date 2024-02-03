@@ -2,6 +2,25 @@ import { /* collection, */ Timestamp, doc, setDoc, /* Timestamp */ } from "fireb
 
 import type { Actions } from "./$types";
 import { getClientDB } from "$lib/firebase/client";
+import { getAuth } from "firebase-admin/auth";
+import { getAdminApp, getClaimsFromIdToken } from "$lib/firebase/admin";
+import { roles } from "../../models/role";
+import { redirect } from "@sveltejs/kit";
+
+export async function load({cookies}) {
+	const app = getAuth(getAdminApp());
+	const user = await getClaimsFromIdToken(cookies);
+
+	if (user?.accessLevel >= roles.SELLER) {
+		const tok = await app.createCustomToken(user?.uid || '');
+
+		return {
+			token: tok
+		};
+	}
+
+	throw redirect(302, '/');
+}
 
 
 export const actions: Actions = {
