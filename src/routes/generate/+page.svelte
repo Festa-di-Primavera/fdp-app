@@ -1,15 +1,16 @@
 <script lang="ts">
 	import axios from 'axios';
 	import { onMount } from 'svelte';
-	import { getAuth, onAuthStateChanged } from 'firebase/auth';
+	import { getAuth, signInWithCustomToken } from 'firebase/auth';
 	import { XCircle, CheckCircle2 } from 'lucide-svelte';
-	import { Select, Label, Checkbox, Button, Toast, NumberInput } from 'flowbite-svelte';
+	import { Select, Label, Checkbox, Button, Toast, NumberInput, Spinner } from 'flowbite-svelte';
 	
-	import { goto } from '$app/navigation';
 	import { getClientApp } from '$lib/firebase/client';
 	
 	import { user } from '../../store/store';
 	import type { Ticket } from '../../models/ticket';
+
+	export let data: { token: string };
 
 	const codeTypesList = [
 		{ value: 'numeric', name: 'Numerico' },
@@ -123,71 +124,80 @@
 	let tickets: Ticket[];
 
 	onMount(async () => {
-		const res = await fetch('/api/tickets');
-		tickets = (await res.json()).body.tickets;
-		codesInDB = new Set<string>(tickets.map((ticket) => ticket.ticketID));
+		
 	});
 
 	onMount(async() => {
-		onAuthStateChanged(getAuth(getClientApp()), (newUser) => {
-			$user = newUser;
-			if($user === null){
-				goto("/");
-				return;
-			}
-		});
+		const res = await fetch('/api/tickets');
+		tickets = (await res.json()).body.tickets;
+		codesInDB = new Set<string>(tickets.map((ticket) => ticket.ticketID));
+
+		if(getAuth(getClientApp()).currentUser === null && data.token){
+			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
+				$user = userCredential.user;
+			}).catch((error) => {
+				// TODO: ERROR HANDLING
+			});
+		}
 	});
 </script>
 
-<section class="flex h-full w-full flex-col items-center gap-4">
-	<div class="flex w-full max-w-96 flex-col items-start gap-4 px-5 pb-12 pt-5">
-		<h1 class="text-4xl font-bold text-primary-600">Generator</h1>
-		<p class="text-justify dark:text-white">
-			Attraverso questa pagina è possibile generare ed inserire nel database un numero di biglietti
-			desiderato
-		</p>
+<section class="flex h-full w-full flex-col items-center gap-4 flex-grow">
+	<div class="flex w-full max-w-96 flex-col items-start gap-4 px-5 pb-12 pt-5 flex-grow">
+		{#if $user}
+			<h1 class="text-4xl font-bold text-primary-600">Generator</h1>
+			<p class="text-justify dark:text-white">
+				Attraverso questa pagina è possibile generare ed inserire nel database un numero di biglietti
+				desiderato
+			</p>
 
-		<main class="w-full text-center">
-			<Label class="flex flex-col items-start py-4">
-				Tipologia dei codici:
-				<Select class="mt-2" items={codeTypesList} bind:value={codeType} placeholder="" />
-			</Label>
-			<Checkbox bind:checked={includeSpecialChars}>Includi i caratteri speciali</Checkbox>
+			<main class="w-full text-center">
+				<Label class="flex flex-col items-start py-4">
+					Tipologia dei codici:
+					<Select class="mt-2" items={codeTypesList} bind:value={codeType} placeholder="" />
+				</Label>
+				<Checkbox bind:checked={includeSpecialChars}>Includi i caratteri speciali</Checkbox>
 
-			<Label for="first_name" class="flex items-start gap-4 py-4">
-				Lunghezza dei codici:
-				<NumberInput on:blur={() => {if(codeLength < 4) codeLength=4}} min="4" bind:value={codeLength}  />
-			</Label>
+				<Label for="first_name" class="flex items-start gap-4 py-4">
+					Lunghezza dei codici:
+					<NumberInput on:blur={() => {if(codeLength < 4) codeLength=4}} min="4" bind:value={codeLength}  />
+				</Label>
 
-			<Label for="first_name" class="flex items-start gap-4 py-4">
-				Quantità di codici:
-				<NumberInput on:blur={() => {if(numberOfCodes > 2000) numberOfCodes=2000}} max="2000" bind:value={numberOfCodes}  />
-			</Label>
+				<Label for="first_name" class="flex items-start gap-4 py-4">
+					Quantità di codici:
+					<NumberInput on:blur={() => {if(numberOfCodes > 2000) numberOfCodes=2000}} max="2000" bind:value={numberOfCodes}  />
+				</Label>
 
-			<Label class="flex flex-col items-start py-4">
-				Modalità di generazione:
-				<Select
-					class="mt-2"
-					items={[
-						{ name: 'casuale', value: 'casuale' },
-						{ name: 'progressiva', value: 'progressiva' }
-					]}
-					placeholder=""
-					bind:value={generativeMode}
-				/>
-			</Label>
+				<Label class="flex flex-col items-start py-4">
+					Modalità di generazione:
+					<Select
+						class="mt-2"
+						items={[
+							{ name: 'casuale', value: 'casuale' },
+							{ name: 'progressiva', value: 'progressiva' }
+						]}
+						placeholder=""
+						bind:value={generativeMode}
+					/>
+				</Label>
 
-			<div class="flex w-full justify-between py-2">
-				<Button on:click={generateCodes} class="rounded text-white">Genera Codici</Button>
-				<Button on:click={insertCodes} class="rounded text-white">Inserisci Codici</Button>
+				<div class="flex w-full justify-between py-2">
+					<Button on:click={generateCodes} class="rounded text-white">Genera Codici</Button>
+					<Button on:click={insertCodes} class="rounded text-white">Inserisci Codici</Button>
+				</div>
+
+				<ul class="mt-4 grid grid-cols-3 gap-2">
+					{#each codes as code (code)}
+						<li class="rounded border p-2 dark:text-white">{code}</li>
+					{/each}
+				</ul>
+			</main>
+		{:else}
+			<div class="w-full flex flex-col flex-grow gap-5 items-center justify-center mt-10">
+				<Spinner size="sm" class="max-w-12 self-center"/>
+				<span class="text-primary-600 font-semibold text-2xl">Attendere...</span>
 			</div>
-
-			<ul class="mt-4 grid grid-cols-3 gap-2">
-				{#each codes as code (code)}
-					<li class="rounded border p-2 dark:text-white">{code}</li>
-				{/each}
-			</ul>
-		</main>
+		{/if}
 	</div>
 </section>
 

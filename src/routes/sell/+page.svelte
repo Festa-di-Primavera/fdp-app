@@ -1,32 +1,33 @@
 <script lang="ts">
-	import { Button, Label, Input, Helper } from "flowbite-svelte"
-	import { getAuth, onAuthStateChanged } from "firebase/auth";
+	import { Button, Label, Input, Spinner } from "flowbite-svelte"
+	import { getAuth, signInWithCustomToken } from "firebase/auth";
 	import { Ticket } from 'lucide-svelte';
 	import { onMount } from "svelte";
 
-	import { enhance } from "$app/forms";
-	import { goto } from "$app/navigation";
 	import { getClientApp } from "$lib/firebase/client";
+
+	import { enhance } from "$app/forms";
 	
 	import { user } from "../../store/store";
 	import QrReader from "../../components/QrReader.svelte";
 
+	export let data: {token: string};
 	let ticketCode: string;
 
 	onMount(async() => {
-		onAuthStateChanged(getAuth(getClientApp()), (newUser) => {
-			$user = newUser;
-			if($user === null){
-				goto("/");
-				return;
-			}
-		});
+		if(getAuth(getClientApp()).currentUser === null && data.token){
+			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
+				$user = userCredential.user;
+			}).catch((error) => {
+				// TODO: ERROR HANDLING
+			});
+		}
 	});
 </script>
 
-{#if $user}
-	<section class="w-full h-full flex flex-col items-center gap-4 ">
-		<div class="w-full px-5 pt-5 flex flex-col gap-4 items-start max-w-96 pb-12">
+<section class="w-full h-full flex flex-col items-center gap-4 flex-grow">
+	<div class="w-full px-5 pt-5 flex flex-col gap-4 items-start max-w-96 pb-12 flex-grow">
+		{#if $user}
 			<h1 class="text-primary-600 font-bold text-4xl">Vendi</h1>
 			<p class="dark:text-white text-justify">Inserire nome, cognome e, scansionando il QR, il codice del biglietto.</p>
 			<form method="post" class="flex flex-col gap-4 w-full" use:enhance>
@@ -52,6 +53,11 @@
 				</div>
 				<Button class="w-full mt-6" type="submit">Vendi</Button>
 			</form>
-		</div>
-	</section>
-{/if}
+		{:else}
+            <div class="w-full flex flex-col flex-grow gap-5 items-center justify-center mt-10">
+                <Spinner size="sm" class="max-w-12 self-center"/>
+                <span class="text-primary-600 font-semibold text-2xl">Attendere...</span>
+            </div>
+        {/if}
+	</div>
+</section>

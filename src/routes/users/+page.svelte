@@ -1,17 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Input, Button, Modal } from 'flowbite-svelte';
-	import { onAuthStateChanged, getAuth } from 'firebase/auth';
+	import { Input, Button, Modal, Spinner } from 'flowbite-svelte';
+	import { getAuth, signInWithCustomToken } from 'firebase/auth';
 	
 	import { getClientApp } from '$lib/firebase/client.js';
-	import { goto } from '$app/navigation';
 
 	import { user } from '../../store/store.js';
 	import UsersTable from '../../components/UsersTable.svelte';
 	
-	// fetch all users
 	export let data;
-	let users = JSON.parse(data.usersList).users;
+	// fetch all users
+	let users = JSON.parse(data.usersList || '')?.users;
 
 	// modal state variable
 	let deleteModalOpen: boolean = false;
@@ -63,15 +62,14 @@
 		alias = '';
 	};
 
-
 	onMount(async() => {
-		onAuthStateChanged(getAuth(getClientApp()), (newUser) => {
-			$user = newUser;
-			if($user === null){
-				goto("/");
-				return;
-			}
-		});
+		if(getAuth(getClientApp()).currentUser === null && data.token){
+			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
+				$user = userCredential.user;
+			}).catch((error) => {
+				// TODO: ERROR HANDLING
+			});
+		}
 	});
 </script>
 
@@ -116,4 +114,9 @@
 			</svelte:fragment>
 		</Modal>
 	{/if}
+{:else}
+	<div class="w-full flex flex-col flex-grow gap-5 items-center justify-center mt-10">
+		<Spinner size="sm" class="max-w-12 self-center"/>
+		<span class="text-primary-600 font-semibold text-2xl">Attendere...</span>
+	</div>
 {/if}

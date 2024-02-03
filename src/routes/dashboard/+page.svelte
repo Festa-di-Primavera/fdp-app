@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Card } from 'flowbite-svelte';
-	import { onAuthStateChanged, getAuth } from 'firebase/auth';
+	import { Card, Spinner } from 'flowbite-svelte';
+	import { getAuth, signInWithCustomToken } from 'firebase/auth';
 
-	import { goto } from '$app/navigation';
 	import { getClientApp } from '$lib/firebase/client';
 
 	import { user } from '../../store/store';
@@ -12,7 +11,7 @@
 	import CheckInPerTime from '../../components/graphs/CheckInPerTime.svelte';
 	import TicketsPerPerson from '../../components/graphs/TicketsPerPerson.svelte';
 
-	export let data: { strTicketData: string };
+	export let data: { token:string, strTicketData: string };
 
 	let tickets: Ticket[] = JSON.parse(data.strTicketData) as Ticket[];
 	
@@ -51,19 +50,19 @@
 	computeData(tickets);
 
 	onMount(async() => {
-		onAuthStateChanged(getAuth(getClientApp()), (newUser) => {
-			$user = newUser;
-			if($user === null){
-				goto("/");
-				return;
-			}
-		});
+		if(getAuth(getClientApp()).currentUser === null && data.token){
+			signInWithCustomToken(getAuth(getClientApp()), data.token).then((userCredential) => {
+				$user = userCredential.user;
+			}).catch((error) => {
+				// TODO: ERROR HANDLING
+			});
+		}
 	});
 </script>
 
-{#if $user}
-	<section class="w-full h-full flex flex-col items-center gap-4">
-		<div class="w-full px-5 pt-5 flex flex-col gap-4 items-start max-w-96 pb-12">
+<section class="w-full h-full flex flex-col items-center gap-4 flex-grow">
+	<div class="w-full px-5 pt-5 flex flex-col gap-4 max-w-96 pb-12 flex-grow">
+		{#if $user}
 			<h1 class="text-primary-600 font-bold text-4xl">Dashboard</h1>
 			<p class="dark:text-white text-justify">Informazioni relative ai biglietti</p>
 			
@@ -87,6 +86,11 @@
 			<Tickets bind:checkedTicketsCount bind:notSoldTicketsCount bind:notCheckedTicketsCount/>
 			<TicketsPerPerson bind:mappings/>
 			<CheckInPerTime bind:ticketsCheckIn bind:numberOfCheckIns/>
-		</div>
-	</section>
-{/if}
+		{:else}
+			<div class="w-full flex flex-col flex-grow gap-5 items-center justify-center mt-10">
+				<Spinner size="sm" class="max-w-12 self-center"/>
+				<span class="text-primary-600 font-semibold text-2xl">Attendere...</span>
+			</div>
+		{/if}
+	</div>
+</section>
