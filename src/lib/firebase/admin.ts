@@ -2,6 +2,7 @@ import { initializeApp, getApps, getApp, cert, type App } from 'firebase-admin/a
 
 import { getAuth, type DecodedIdToken } from 'firebase-admin/auth';
 import { getServerOnlyEnvVar } from '$lib/getServerOnlyEnvVar';
+import type { Cookies } from '@sveltejs/kit';
 
 const projectId = import.meta.env.VITE_PROJECT_ID;
 const clientEmail = getServerOnlyEnvVar('FIREBASE_ADMIN_CLIENT_EMAIL');
@@ -65,4 +66,11 @@ export const getIdTokenFromSessionCookie = async (
 	const auth = getAuth(getAdminApp());
 
 	return auth.verifySessionCookie(sessionCookie, true).catch(() => null);
+};
+
+export const getClaimsFromIdToken = async (cookies: Cookies): Promise<DecodedIdToken | null> => {
+	const cookie = cookies.get('session');
+	const user = await getIdTokenFromSessionCookie(cookie || null);
+
+	return user;
 };
