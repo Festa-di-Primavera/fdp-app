@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-    import { Toast, Card, Spinner } from "flowbite-svelte";
-    import { CheckCircle2, XCircle, AlertCircle } from 'lucide-svelte';
+    import { Toast, Card, Spinner, Label, Input } from "flowbite-svelte";
+    import { CheckCircle2, XCircle, AlertCircle, Ticket as TicketIcon, Check, X } from 'lucide-svelte';
 	import { getAuth, signInWithCustomToken } from "firebase/auth";
     
 	import { getClientApp } from "$lib/firebase/client";
@@ -12,7 +12,8 @@
 
     export let data: { token: string };
 
-	let ticketCode: string;
+	let ticketCode: string = '';
+	let ticketCodeInput: string = '';
 
     let ticket: Ticket;
     let open: boolean = false;
@@ -22,13 +23,21 @@
     let notSold: boolean = false;
     let color: 'green' | 'red' | 'yellow' = 'green';
 
-    async function checkTicket(ticketCode: string){
-        const res = await (await fetch(`/api/tickets/${ticketCode}`)).json()
+    async function checkTicket(code: string){
+        const res = await (await fetch(`/api/tickets/${code}`)).json()
         
         if(res.status == 404){
             notFound = true;
             color = 'red';
             open = true;
+            ticket = {
+                ticketID: code,
+                name: '',
+                surname: '',
+                checkIn: null,
+                soldAt: null,
+                seller: ''
+            } as Ticket;
             return
         }
         
@@ -40,7 +49,7 @@
             open = true;
 
             ticket = {
-                ticketID: ticketCode,
+                ticketID: code,
                 name: tick.name,
                 surname: tick.surname,
                 checkIn: tick.checkIn,
@@ -57,7 +66,7 @@
             open = true;
 
             ticket = {
-                ticketID: ticketCode,
+                ticketID: code,
                 name: tick.name,
                 surname: tick.surname,
                 checkIn: tick.checkIn,
@@ -67,7 +76,7 @@
             return
         }
 
-        const response = await fetch(`/api/tickets/${ticketCode}`,
+        const response = await fetch(`/api/tickets/${code}`,
             {
                 method: 'PUT',
                 headers: {
@@ -79,7 +88,7 @@
         tick = (await response.json()).body.ticket
 
         ticket = {
-            ticketID: ticketCode,
+            ticketID: code,
             name: tick.name,
             surname: tick.surname,
             checkIn: tick.checkIn,
@@ -99,6 +108,8 @@
             seller: ''
         } as Ticket;
 
+        ticketCodeInput = '';
+        ticketCode = '';
         open = false;
         notFound = false;
         alreadyChecked = false;
@@ -117,7 +128,7 @@
 	});
 
     $:{
-        if(ticketCode !== '' && ticketCode !== undefined){
+        if(ticketCode !== ''){
             checkTicket(ticketCode)
         }
         else{
@@ -132,6 +143,23 @@
             <h1 class="text-primary-600 font-bold text-4xl">Check-in</h1>
             <p class="dark:text-white text-justify">Scansionare il QR e verificare la validità del biglietto</p>
             <div>
+                <Label class="text-black dark:text-white font-medium text-md">
+					Codice Biglietto <span class="text-primary-700">*</span>
+					<Input required class="mt-1" bind:value={ticketCodeInput} name="code" autocomplete="off">
+						<TicketIcon slot="left" class="w-6 h-6 text-primary-600 dark:text-white"/>
+
+                        <div slot="right" class="h-full flex items-center gap-2">
+                            {#if ticketCodeInput !== ''}
+                                <button on:click={() => checkTicket(ticketCodeInput)}>
+                                    <Check color="green"/>
+                                </button>
+                                <button on:click={reset}>
+                                    <X color="indianred"/>
+                                </button>
+                            {/if}
+                        </div>
+					</Input>
+				</Label>
                 <div class="w-full my-6 flex items-center justify-center">
                     <QrReader bind:codeResult={ticketCode}/>
                 </div>
@@ -139,7 +167,7 @@
                 <Card class="w-full flex flex-col text-lg p-3">
                     <span class="text-black dark:text-white w-full flex justify-between">
                         <span>N° biglietto:</span>
-                        <span>{ticket.ticketID || ticketCode}</span>
+                        <span>{ticket.ticketID || ticketCode || ticketCodeInput}</span>
                     </span>
                     <span class="text-black dark:text-white w-full flex justify-between">
                         <span>Nominativo:</span>
