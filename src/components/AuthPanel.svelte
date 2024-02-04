@@ -12,11 +12,11 @@
 	import { Button, Input, Label, Card, Helper, Toast } from 'flowbite-svelte';
 
 	import { getClientApp } from '$lib/firebase/client';
-
-	let currentUser: User | null = null;
+	import { user } from '../store/store';
 
 	let option: 'login' | 'register' = 'login';
 
+	let username: string = '';
 	let email: string = '';
 	let password: string = '';
 	let repeatPassword: string = '';
@@ -51,7 +51,7 @@
 				const credential = await signInWithEmailAndPassword(getAuth(getClientApp()), email, password);
 				const token = await credential.user.getIdToken();
 
-				const user = await fetch('/api/session',
+				const userSessuion = await fetch('/api/session',
 					{
 						method: 'POST',
 						headers: {
@@ -60,7 +60,7 @@
 					}
 				);
 
-				currentUser = (await user.json());
+				$user = (await userSessuion.json());
 			} catch (error) {
 				if((error as FirebaseError).code === 'auth/invalid-email'){
 					toastMessage = ToastMessages.INVALID_EMAIL_ERROR;
@@ -86,15 +86,16 @@
 				);
 
 				const token = await userCredential.user.getIdToken();
-				const user = await fetch('/api/session',
+				const userSessuion = await fetch('/api/session',
 					{
 						method: 'POST',
 						headers: {
 							authorization: `Bearer ${token}`,
-						}
+						},
+						body: JSON.stringify({ name: username })
 					}
 				);
-				currentUser = (await user.json());
+				$user = (await userSessuion.json());
 
 				await sendEmailVerification(userCredential.user);
 
@@ -124,11 +125,11 @@
 	};
 
 	onAuthStateChanged(getAuth(getClientApp()), (user) => {
-		currentUser = user;
+		$user = user;
 	});
 </script>
 
-{#if currentUser === null}
+{#if $user === null}
 	<Card class="flex w-full max-w-96 flex-col items-center justify-center">
 		<div class="mb-5 flex w-full justify-around">
 			<button
@@ -149,6 +150,17 @@
 			<h1 class="w-max text-3xl font-semibold text-primary-600">
 				{option === 'login' ? 'Accedi' : 'Registrati'}
 			</h1>
+
+			{#if option === 'register'}
+				<Label>
+					Nome utente
+					<Input
+						name="username"
+						bind:value={username}
+						class="mt-2"
+					/>
+				</Label>
+			{/if}
 
 			<Label>
 				Email
@@ -191,7 +203,6 @@
 				<Label>
 					Conferma password
 					<Input
-						id="repeat-pw"
 						name="password"
 						type={rpPwVisible ? 'text' : 'password'}
 						color={!validatorError ? 'base' : 'red'}
@@ -224,9 +235,9 @@
 			>
 		</div>
 	</Card>
-{:else if !currentUser?.emailVerified}
+{:else if !$user?.emailVerified}
 	<div>
-		<p>Ti è stata mandata una mail di verifica all'indirizzo {currentUser?.email}</p>
+		<p>Ti è stata mandata una mail di verifica all'indirizzo {$user?.email}</p>
 	</div>
 {/if}
 
