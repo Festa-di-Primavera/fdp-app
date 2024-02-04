@@ -114,6 +114,9 @@
 	let counter = 4;
 	let color: 'green' | 'red' | 'yellow' = 'red';
 
+	let toastOpen: boolean = false;
+	let toastMessage: string = '';
+
 	const trigger = () => {
 		open = true;
 		counter = 6;
@@ -127,20 +130,25 @@
 
 	let tickets: Ticket[];
 
-	onMount(async () => {
-		
-	});
-
 	onMount(async() => {
 		const res = await fetch('/api/tickets');
 		tickets = (await res.json()).body.tickets;
 		codesInDB = new Set<string>(tickets.map((ticket) => ticket.ticketID));
 
-		if(getAuth(getClientApp()).currentUser === null && data.token){
+		if(getAuth(getClientApp()).currentUser === null){
 			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
 				$user = userCredential.user;
 			}).catch((error) => {
-				// TODO: ERROR HANDLING
+				if(error.code === 'auth/invalid-custom-token'){
+					toastMessage = 'Token non valido';
+				}
+				else if(error.code === 'auth/network-request-failed'){
+					toastMessage = 'Errore di rete';
+				}
+				else{
+					toastMessage = 'Errore sconosciuto';
+				}
+				toastOpen = true;
 			});
 		}
 	});
@@ -225,4 +233,9 @@
 	{:else}
 		Errore nell'inserimento dei codici
 	{/if}
+</Toast>
+
+<Toast bind:open={toastOpen} color="red" class="w-max mt-10 mb-5 mx-auto right-0 left-0" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
+	<XCircle class="w-6 h-6  text-red-400" slot="icon"/>
+	<span class='text-red-400 font-semibold'>{toastMessage}</span>
 </Toast>

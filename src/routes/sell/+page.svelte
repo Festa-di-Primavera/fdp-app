@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Button, Label, Input, Spinner } from "flowbite-svelte"
+	import { Button, Label, Input, Spinner, Toast } from "flowbite-svelte"
 	import { getAuth, signInWithCustomToken } from "firebase/auth";
-	import { Ticket } from 'lucide-svelte';
+	import { Ticket, XCircle } from 'lucide-svelte';
 	import { onMount } from "svelte";
 
 	import { getClientApp } from "$lib/firebase/client";
@@ -14,12 +14,24 @@
 	export let data: {token: string};
 	let ticketCode: string;
 
+	let toastOpen: boolean = false;
+	let toastMessage: string = '';
+
 	onMount(async() => {
-		if(getAuth(getClientApp()).currentUser === null && data.token){
+		if(getAuth(getClientApp()).currentUser === null){
 			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
 				$user = userCredential.user;
 			}).catch((error) => {
-				// TODO: ERROR HANDLING
+				if(error.code === 'auth/invalid-custom-token'){
+					toastMessage = 'Token non valido';
+				}
+				else if(error.code === 'auth/network-request-failed'){
+					toastMessage = 'Errore di rete';
+				}
+				else{
+					toastMessage = 'Errore sconosciuto';
+				}
+				toastOpen = true;
 			});
 		}
 	});
@@ -61,3 +73,8 @@
         {/if}
 	</div>
 </section>
+
+<Toast bind:open={toastOpen} color="red" class="w-max mt-10 mb-5 mx-auto right-0 left-0" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
+	<XCircle class="w-6 h-6  text-red-400" slot="icon"/>
+	<span class='text-red-400 font-semibold'>{toastMessage}</span>
+</Toast>

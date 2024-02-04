@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Card, Spinner } from 'flowbite-svelte';
+	import { Card, Spinner, Toast } from 'flowbite-svelte';
 	import { getAuth, signInWithCustomToken } from 'firebase/auth';
 
 	import { getClientApp } from '$lib/firebase/client';
@@ -10,8 +10,12 @@
 	import Tickets from '../../components/graphs/Tickets.svelte';
 	import CheckInPerTime from '../../components/graphs/CheckInPerTime.svelte';
 	import TicketsPerPerson from '../../components/graphs/TicketsPerPerson.svelte';
+	import { XCircle } from 'lucide-svelte';
 
 	export let data: { token:string, strTicketData: string };
+	
+	let toastOpen: boolean = false;
+	let toastMessage: string = '';
 
 	let tickets: Ticket[] = JSON.parse(data.strTicketData) as Ticket[];
 	
@@ -50,11 +54,20 @@
 	computeData(tickets);
 
 	onMount(async() => {
-		if(getAuth(getClientApp()).currentUser === null && data.token){
-			signInWithCustomToken(getAuth(getClientApp()), data.token).then((userCredential) => {
+		if(getAuth(getClientApp()).currentUser === null){
+			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
 				$user = userCredential.user;
 			}).catch((error) => {
-				// TODO: ERROR HANDLING
+				if(error.code === 'auth/invalid-custom-token'){
+					toastMessage = 'Token non valido';
+				}
+				else if(error.code === 'auth/network-request-failed'){
+					toastMessage = 'Errore di rete';
+				}
+				else{
+					toastMessage = 'Errore sconosciuto';
+				}
+				toastOpen = true;
 			});
 		}
 	});
@@ -94,3 +107,8 @@
 		{/if}
 	</div>
 </section>
+
+<Toast bind:open={toastOpen} color="red" class="w-max mt-10 mb-5 mx-auto right-0 left-0" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
+	<XCircle class="w-6 h-6  text-red-400" slot="icon"/>
+	<span class='text-red-400 font-semibold'>{toastMessage}</span>
+</Toast>
