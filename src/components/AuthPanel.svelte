@@ -36,14 +36,34 @@
 		UNKNOWN_ERROR = 'Errore sconosciuto',
 		EMAIL_VERIFICATION_SENT = 'Email di verifica inviata',
 	}
-
+	
 	let toastMessage: ToastMessages = ToastMessages.UNKNOWN_ERROR;
+	let lessThanEightChars = false;
+	let noUpperCase = false;
+	let noNumber = false;
+	let noSpecialChar = false;
 
 	$: {
 		if (validatorError) {
 			validatorError = !(password === repeatPassword);
 		}
+
+		if(option === 'register'){
+			if (lessThanEightChars)
+				lessThanEightChars = password.length < 8;
+
+			if (noUpperCase)
+				noUpperCase = !/[A-Z]/.test(password);
+
+			if (noNumber)
+				noNumber = !/[0-9]/.test(password);
+
+			if (noSpecialChar)
+				noSpecialChar = !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password);
+		}
+		
 	}
+
 
 	const handleSubmission = async () => {
 		if (option === 'login') {
@@ -60,7 +80,8 @@
 					}
 				);
 
-				$user = (await userSessuion.json());
+				$user = credential.user;
+				console.log($user);
 			} catch (error) {
 				if((error as FirebaseError).code === 'auth/invalid-email'){
 					toastMessage = ToastMessages.INVALID_EMAIL_ERROR;
@@ -86,7 +107,7 @@
 				);
 
 				const token = await userCredential.user.getIdToken();
-				const userSessuion = await fetch('/api/session',
+				await fetch('/api/session',
 					{
 						method: 'POST',
 						headers: {
@@ -95,9 +116,9 @@
 						body: JSON.stringify({ name: username })
 					}
 				);
-				$user = (await userSessuion.json());
+				$user = userCredential.user;
 
-				await sendEmailVerification(userCredential.user);
+				await sendEmailVerification($user);
 
 				toastMessage = ToastMessages.EMAIL_VERIFICATION_SENT;
 				open = true;
@@ -180,6 +201,12 @@
 					name="password"
 					type={pwVisible ? 'text' : 'password'}
 					bind:value={password}
+					on:blur={() => {
+						lessThanEightChars = password.length < 8;
+						noUpperCase = !/[A-Z]/.test(password);
+						noNumber = !/[0-9]/.test(password);
+						noSpecialChar = !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password)
+					}}
 					class="mt-2"
 				>
 					<button
@@ -196,7 +223,32 @@
 						{/if}
 					</button>
 				</Input>
-				<!-- TODO: add check of security of password -->
+				{#if option === 'register'}
+					{#if lessThanEightChars}
+						<Helper class="mt-1 flex items-center gap-1" color='gray'>
+							<svelte:component this={lessThanEightChars ? XCircle : CheckCircle2} class="w-3 h-3"/>
+							La password deve contenere almeno 8 caratteri
+						</Helper>
+					{/if}
+					{#if noUpperCase}
+						<Helper class="mt-1 flex items-center gap-1" color='gray'>
+							<svelte:component this={noUpperCase ? XCircle : CheckCircle2} class="w-3 h-3"/>
+							La password deve contenere almeno una lettera maiuscola
+						</Helper>
+					{/if}
+					{#if noNumber}
+						<Helper class="mt-1 flex items-center gap-1" color='gray'>
+							<svelte:component this={noNumber ? XCircle : CheckCircle2} class="w-3 h-3"/>
+							La password deve contenere almeno un numero
+						</Helper>
+					{/if}
+					{#if noSpecialChar}
+						<Helper class="mt-1 flex items-center gap-1" color='gray'>
+							<svelte:component this={noSpecialChar ? XCircle : CheckCircle2} class="w-3 h-3"/>
+							La password deve contenere almeno un carattere speciale
+						</Helper>
+					{/if}
+				{/if}
 			</Label>
 
 			{#if option === 'register'}
@@ -225,7 +277,10 @@
 						</button>
 					</Input>
 					{#if validatorError}
-						<Helper class="mt-2" color="red">Le password non coincidono</Helper>
+					<Helper class="mt-1 flex items-center gap-1" color='gray'>
+						<svelte:component this={noSpecialChar ? XCircle : CheckCircle2} class="w-3 h-3"/>
+						Le password non corrispondono
+					</Helper>
 					{/if}
 				</Label>
 			{/if}
