@@ -96,6 +96,7 @@
 				track.stop();
             });
 			canvas?.clearRect(0, 0, canvasElement!.width, canvasElement!.height);
+            drawReaderIcon(canvasElement!, canvas!);
 
 			opened = false;
         }
