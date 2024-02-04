@@ -1,5 +1,4 @@
 <script lang="ts">
-	import axios from 'axios';
 	import { onMount } from 'svelte';
 	import { getAuth, signInWithCustomToken } from 'firebase/auth';
 	import { XCircle, CheckCircle2 } from 'lucide-svelte';
@@ -93,8 +92,13 @@
 	};
 
 	const insertCodes = async () => {
-		await axios
-			.post('/api/tickets', codes)
+		await fetch('/api/tickets', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(codes)
+		})
 			.then((res) => {
 				color = 'green';
 				trigger();
