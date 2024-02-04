@@ -148,6 +148,8 @@
 	onAuthStateChanged(getAuth(getClientApp()), (user) => {
 		$user = user;
 	});
+
+	$: disableButton = validatorError || (option === 'register' && (lessThanEightChars || noUpperCase || noNumber || noSpecialChar));
 </script>
 
 {#if $user === null}
@@ -285,7 +287,7 @@
 				</Label>
 			{/if}
 
-			<Button class="mt-5 w-full" on:click={handleSubmission} bind:disabled={validatorError}
+			<Button class="mt-5 w-full" on:click={handleSubmission} bind:disabled={disableButton}
 				>{option === 'login' ? 'Accedi' : 'Registrati'}</Button
 			>
 		</div>
