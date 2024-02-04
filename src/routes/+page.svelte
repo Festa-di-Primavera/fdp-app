@@ -26,7 +26,7 @@
 		<div class="flex flex-col items-center">
 			<div class="flex flex-col items-center gap-4 text-center">
 				<h1 class="text-3xl font-semibold text-primary-600">Home</h1>
-				<p class="text-center text-2xl">Ciao <b>{$user?.email}</b>!</p>
+				<p class="text-center text-2xl">Ciao <b>{$user?.displayName}</b>!</p>
 				<p class="text-center">Questa è solo la home page!</p>
 				<p class="flex items-end">
 					Per iniziare ad usare l'applicazione usa il menu in alto a destra
