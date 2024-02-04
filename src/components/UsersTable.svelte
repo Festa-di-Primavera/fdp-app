@@ -3,6 +3,7 @@
 	import { ChevronsUpDown, Filter, PenBox, Search, Trash2 } from "lucide-svelte";
 	import { roles } from "../models/role";
 	import { user } from "../store/store";
+	import { createProfileImage } from "$lib/profileImage";
 	
 	export let users: any;
 	export let currSelectedUser: any | undefined;
@@ -90,8 +91,6 @@
 			return a.email < b.email ? -1 : 1;
 		});
 	}
-
-
 </script>
 
 {#if $user}
@@ -123,8 +122,8 @@
 			<TableBody tableBodyClass="divide-y">
 				{#each filteredItems as item}
 					<TableBodyRow>
-						<TableBodyCell tdClass="px-6 py-4 whitespace-nowrap font-medium flex gap-2">
-							<img referrerpolicy="no-referrer" src={item.photoURL} alt="Profile" class="h-5 w-5 rounded-full" />
+						<TableBodyCell tdClass="px-6 py-4 whitespace-nowrap font-medium flex items-center gap-4">
+							<img referrerpolicy="no-referrer" src={createProfileImage(item.displayName || 'U', item.customClaims?.color)} alt="Profile" class="h-7 w-7 rounded-full" />
 							<span class="mr-4">{item.displayName}</span>
 						</TableBodyCell>
 						<TableBodyCell>{item.email}</TableBodyCell>

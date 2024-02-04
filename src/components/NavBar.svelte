@@ -9,14 +9,17 @@
 	import { onIdTokenChanged, getAuth } from "firebase/auth";
 	import { getClientApp } from "$lib/firebase/client";
 	import { roles } from "../models/role";
+	import { createProfileImage } from "$lib/profileImage";
 	
 	let currAccessLevel: number | null = null;
+	let color: string = '#000';
 
 	onIdTokenChanged(getAuth(getClientApp()), async (user) => {
-		$user = user;
-		const claims = (await $user?.getIdTokenResult(true))?.claims;
-		if($user !== null){
+		if(user !== null){
+			$user = user;
+			const claims = (await user.getIdTokenResult(true))?.claims;
 			currAccessLevel = (claims?.accessLevel as number);
+			color = claims?.color as string;
 		}
 	});
 
@@ -52,7 +55,6 @@
 			icon: DollarSign
 		},
 	]
-
 
 	let hidden: boolean = true;
 	let transitionParamsRight = {
@@ -100,7 +102,7 @@
 			{#if $user !== null}
 				<div class="dark:text-white flex text-md items-center self-baseline w-full justify-between p-3 rounded-lg bg-gray-100 dark:bg-gray-600">
 					<div class="flex gap-4 text-md items-center truncate overflow-ellipsis">
-						<img referrerpolicy="no-referrer" src={$user.photoURL} alt="Profile" class="w-10 aspect-square rounded-full">
+						<img referrerpolicy="no-referrer" src={createProfileImage($user.displayName || 'U', color)} alt="Profile" class="w-10 aspect-square rounded-full">
 						<span>{$user.displayName}</span>
 					</div>
 					
