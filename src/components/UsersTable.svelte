@@ -66,17 +66,19 @@
 
 	// search and filter variables
 	let searchTerm = '';
-	let filter = 'name';
+	let filter = 'nome';
 	let filteredItems: any[] = [];
 
 	$: {
 		filteredItems = (users?.filter((item: any) => {
-			if (filter === 'name')
+			if (filter === 'nome')
 				return item.displayName?.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
 			else if (filter === 'email')
 				return item.email?.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
-			else if (filter === 'role')
+			else if (filter === 'ruolo')
 				return item.customClaims?.role.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
+			else if (filter === 'alias')
+				return item.customClaims?.alias.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
 			else return true;
 		}));
 
@@ -96,16 +98,17 @@
 
 {#if $user}
 	<div class="mx-5 mt-5">
-		<Input placeholder="Cerca per nome" bind:value={searchTerm}>
+		<Input placeholder={`Cerca per ${filter}`} bind:value={searchTerm}>
 			<Search slot="left" />
 			<button slot="right">
 				<Filter />
 				<Popover placement="bottom-end" class="z-50 p-0" defaultClass="pt-2">
 					Filtra per
 					<ul class="w-48 divide-y divide-gray-200 dark:divide-gray-600">
-						<li><Radio class="p-3" bind:group={filter} value="name">Nome</Radio></li>
+						<li><Radio class="p-3" bind:group={filter} value="nome">Nome</Radio></li>
 						<li><Radio class="p-3" bind:group={filter} value="email">E-Mail</Radio></li>
-						<li><Radio class="p-3" bind:group={filter} value="role">Ruolo</Radio></li>
+						<li><Radio class="p-3" bind:group={filter} value="ruolo">Ruolo</Radio></li>
+						<li><Radio class="p-3" bind:group={filter} value="alias">Alias</Radio></li>
 					</ul>
 				</Popover>
 			</button>
