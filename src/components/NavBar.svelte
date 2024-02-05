@@ -9,7 +9,6 @@
 	import { onIdTokenChanged, getAuth } from "firebase/auth";
 	import { getClientApp } from "$lib/firebase/client";
 	import { roles } from "../models/role";
-	import { createProfileImage } from "$lib/profileImage";
 	
 	let currAccessLevel: number | null = null;
 	let color: string = '#000';
@@ -102,7 +101,9 @@
 			{#if $user !== null}
 				<div class="dark:text-white flex text-md items-center self-baseline w-full justify-between p-3 rounded-lg bg-gray-100 dark:bg-gray-600">
 					<div class="flex gap-4 text-md items-center truncate overflow-ellipsis">
-						<img referrerpolicy="no-referrer" src={createProfileImage($user.displayName || 'U', color)} alt="Profile" class="w-10 aspect-square rounded-full">
+						<div style="background: {color || '#000'};" class="h-7 w-7 rounded-full flex items-center justify-center" >
+							{$user.displayName?.charAt(0).toUpperCase() || 'U'}
+						</div>
 						<span>{$user.displayName}</span>
 					</div>
 					
