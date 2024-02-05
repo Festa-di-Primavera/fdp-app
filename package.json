@@ -45,7 +45,6 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"canvas": "^2.11.2",
 		"firebase": "^10.7.2",
 		"firebase-admin": "^12.0.0",
 		"jsqr": "^1.4.0",
