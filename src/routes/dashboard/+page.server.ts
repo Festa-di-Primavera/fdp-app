@@ -24,6 +24,19 @@ export async function load({cookies}) {
 		const sellers = users.users.filter((user) => user.customClaims?.accessLevel >= roles.SELLER);
 
 		const ticketData: Ticket[] = querySnapshot.docs.map((ticketDoc) => {
+
+			let currSeller: string = "";
+
+			if(!ticketDoc.data().seller) {
+				currSeller = "";
+			} else {
+				if(sellers.find((seller) => seller.uid === ticketDoc.data().seller)) {
+					currSeller = sellers.find((seller) => seller.uid === ticketDoc.data().seller)?.customClaims?.alias;
+				} else {
+					currSeller = "AnOnImO";
+				}
+			}
+
 			return (
 				{
 					ticketID: ticketDoc.id,
@@ -31,7 +44,7 @@ export async function load({cookies}) {
 					surname: ticketDoc.data().surname,
 					checkIn: ticketDoc.data().checkIn?.toDate() || null,
 					soldAt: ticketDoc.data().soldAt?.toDate() || null,
-					seller: ticketDoc.data().seller ? sellers.find((seller) => seller.uid === ticketDoc.data().seller)?.customClaims?.alias : "AnOnImO"
+					seller: currSeller,
 				} as Ticket
 			);
 		});
