@@ -1,6 +1,6 @@
 import { getAdminApp } from '$lib/firebase/admin.js';
-import {getAuth} from 'firebase-admin/auth'
-import { json } from '@sveltejs/kit';
+import {getAuth} from 'firebase-admin/auth';
+import type { FirebaseError } from 'firebase/app';
 
 export async function PUT({ params }) {
 	const allUsers = await getAuth(getAdminApp()).listUsers();
@@ -13,33 +13,59 @@ export async function PUT({ params }) {
 	});
 
 	if(aliasAlreadyExists){
-		return json({
+		const response = new Response('L\'alias inserito è già in uso', {
 			status: 409,
-			body: {
-				message: 'L\'alias inserito è già in uso'
+			headers: {
+				'Content-Type': 'text/plain'
 			}
 		});
+
+		return response;
 	}
 
 	const userID = params.uid;
-
-	const user = await getAuth(getAdminApp()).getUser(userID);
 	
 	try{
-		getAuth(getAdminApp()).setCustomUserClaims(userID, {...user.customClaims, alias: params.alias});
-		return json({
+		const user = await getAuth(getAdminApp()).getUser(userID);
+		await getAuth(getAdminApp()).setCustomUserClaims(userID, {...user.customClaims, alias: params.alias});
+
+		const response = new Response(JSON.stringify({message: 'Alias aggiornato'}), {
 			status: 200,
-			body: {
-				message: 'Alias aggiornato'
+			headers: {
+				'Content-Type': 'text/plain'
 			}
 		});
+		
+		return response;
 	}
 	catch(e){
-		return json({
-			status: 500,
-			body: {
-				message: (e as Error).message
+		let message = 'Errore sconosciuto';
+		let code = 500;
+
+		switch((e as FirebaseError).code){
+			case 'auth/user-not-found':
+				message = 'Utente non trovato';
+				code = 404;
+				break;
+			case 'auth/invalid-uid':
+				message = 'UID non valido';
+				break;
+			case 'app/network-error':
+				message = 'Errore di rete';
+				break;
+			default:
+				message = 'Errore sconosciuto';
+				break;
+		}
+
+
+		const response = new Response(JSON.stringify({message: message}), {
+			status: code,
+			headers: {
+				'Content-Type': 'text/plain'
 			}
 		});
+
+		return response;
 	}
 }

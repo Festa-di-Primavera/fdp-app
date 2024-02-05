@@ -7,16 +7,16 @@
 		getAuth,
 		sendEmailVerification
 	} from 'firebase/auth';
-	import { AlertCircle, CheckCircle2, Eye, EyeOff, XCircle } from 'lucide-svelte';
+	import { FirebaseError } from 'firebase/app';
+	import { CheckCircle2, Eye, EyeOff, XCircle } from 'lucide-svelte';
 	import { Button, Input, Label, Card, Helper, Toast } from 'flowbite-svelte';
 
 	import { getClientApp } from '$lib/firebase/client';
-	import { FirebaseError } from 'firebase/app';
-
-	let currentUser: User | null = null;
+	import { user } from '../store/store';
 
 	let option: 'login' | 'register' = 'login';
 
+	let username: string = '';
 	let email: string = '';
 	let password: string = '';
 	let repeatPassword: string = '';
@@ -36,19 +36,51 @@
 		UNKNOWN_ERROR = 'Errore sconosciuto',
 		EMAIL_VERIFICATION_SENT = 'Email di verifica inviata',
 	}
-
+	
 	let toastMessage: ToastMessages = ToastMessages.UNKNOWN_ERROR;
+	let lessThanEightChars = false;
+	let noUpperCase = false;
+	let noNumber = false;
+	let noSpecialChar = false;
 
 	$: {
 		if (validatorError) {
 			validatorError = !(password === repeatPassword);
 		}
+
+		if(option === 'register'){
+			if (lessThanEightChars)
+				lessThanEightChars = password.length < 8;
+
+			if (noUpperCase)
+				noUpperCase = !/[A-Z]/.test(password);
+
+			if (noNumber)
+				noNumber = !/[0-9]/.test(password);
+
+			if (noSpecialChar)
+				noSpecialChar = !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password);
+		}
+		
 	}
+
 
 	const handleSubmission = async () => {
 		if (option === 'login') {
 			try {
-				await signInWithEmailAndPassword(getAuth(getClientApp()), email, password);
+				const credential = await signInWithEmailAndPassword(getAuth(getClientApp()), email, password);
+				const token = await credential.user.getIdToken();
+
+				const userSessuion = await fetch('/api/session',
+					{
+						method: 'POST',
+						headers: {
+							authorization: `Bearer ${token}`,
+						}
+					}
+				);
+
+				$user = credential.user;
 			} catch (error) {
 				if((error as FirebaseError).code === 'auth/invalid-email'){
 					toastMessage = ToastMessages.INVALID_EMAIL_ERROR;
@@ -72,9 +104,20 @@
 					email,
 					password
 				);
-				const user = userCredential.user;
 
-				await sendEmailVerification(user);
+				const token = await userCredential.user.getIdToken();
+				await fetch('/api/session',
+					{
+						method: 'POST',
+						headers: {
+							authorization: `Bearer ${token}`,
+						},
+						body: JSON.stringify({ name: username })
+					}
+				);
+				$user = userCredential.user;
+
+				await sendEmailVerification($user);
 
 				toastMessage = ToastMessages.EMAIL_VERIFICATION_SENT;
 				open = true;
@@ -102,11 +145,13 @@
 	};
 
 	onAuthStateChanged(getAuth(getClientApp()), (user) => {
-		currentUser = user;
+		$user = user;
 	});
+
+	$: disableButton = validatorError || (option === 'register' && (lessThanEightChars || noUpperCase || noNumber || noSpecialChar));
 </script>
 
-{#if currentUser === null}
+{#if $user === null}
 	<Card class="flex w-full max-w-96 flex-col items-center justify-center">
 		<div class="mb-5 flex w-full justify-around">
 			<button
@@ -128,8 +173,19 @@
 				{option === 'login' ? 'Accedi' : 'Registrati'}
 			</h1>
 
+			{#if option === 'register'}
+				<Label>
+					Nome utente
+					<Input
+						name="username"
+						bind:value={username}
+						class="mt-2"
+					/>
+				</Label>
+			{/if}
+
 			<Label>
-				Email address
+				Email
 				<Input
 					type="email"
 					placeholder="john.doe@company.com"
@@ -146,6 +202,12 @@
 					name="password"
 					type={pwVisible ? 'text' : 'password'}
 					bind:value={password}
+					on:blur={() => {
+						lessThanEightChars = password.length < 8;
+						noUpperCase = !/[A-Z]/.test(password);
+						noNumber = !/[0-9]/.test(password);
+						noSpecialChar = !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password)
+					}}
 					class="mt-2"
 				>
 					<button
@@ -162,14 +224,38 @@
 						{/if}
 					</button>
 				</Input>
-				<!-- TODO: add check of security of password -->
+				{#if option === 'register'}
+					{#if lessThanEightChars}
+						<Helper class="mt-1 flex items-center gap-1" color='gray'>
+							<svelte:component this={lessThanEightChars ? XCircle : CheckCircle2} class="w-3 h-3"/>
+							La password deve contenere almeno 8 caratteri
+						</Helper>
+					{/if}
+					{#if noUpperCase}
+						<Helper class="mt-1 flex items-center gap-1" color='gray'>
+							<svelte:component this={noUpperCase ? XCircle : CheckCircle2} class="w-3 h-3"/>
+							La password deve contenere almeno una lettera maiuscola
+						</Helper>
+					{/if}
+					{#if noNumber}
+						<Helper class="mt-1 flex items-center gap-1" color='gray'>
+							<svelte:component this={noNumber ? XCircle : CheckCircle2} class="w-3 h-3"/>
+							La password deve contenere almeno un numero
+						</Helper>
+					{/if}
+					{#if noSpecialChar}
+						<Helper class="mt-1 flex items-center gap-1" color='gray'>
+							<svelte:component this={noSpecialChar ? XCircle : CheckCircle2} class="w-3 h-3"/>
+							La password deve contenere almeno un carattere speciale
+						</Helper>
+					{/if}
+				{/if}
 			</Label>
 
 			{#if option === 'register'}
 				<Label>
 					Conferma password
 					<Input
-						id="repeat-pw"
 						name="password"
 						type={rpPwVisible ? 'text' : 'password'}
 						color={!validatorError ? 'base' : 'red'}
@@ -192,23 +278,26 @@
 						</button>
 					</Input>
 					{#if validatorError}
-						<Helper class="mt-2" color="red">Le password non coincidono</Helper>
+					<Helper class="mt-1 flex items-center gap-1" color='gray'>
+						<svelte:component this={noSpecialChar ? XCircle : CheckCircle2} class="w-3 h-3"/>
+						Le password non corrispondono
+					</Helper>
 					{/if}
 				</Label>
 			{/if}
 
-			<Button class="mt-5 w-full" on:click={handleSubmission} bind:disabled={validatorError}
+			<Button class="mt-5 w-full" on:click={handleSubmission} bind:disabled={disableButton}
 				>{option === 'login' ? 'Accedi' : 'Registrati'}</Button
 			>
 		</div>
 	</Card>
-{:else if currentUser.emailVerified === false}
+{:else if !$user?.emailVerified}
 	<div>
-		<p>Ti è stata mandata una mail di verifica all'indirizzo {currentUser.email}</p>
+		<p>Ti è stata mandata una mail di verifica all'indirizzo {$user?.email}</p>
 	</div>
 {/if}
 
-<Toast bind:open color={color} class="w-max mt-10 mb-5 mx-auto right-0 left-0" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
+<Toast on:close={() => open = false} bind:open color={color} class="w-max mt-10 mb-5 mx-auto right-0 left-0 fixed bottom-5" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
 	<svelte:component this={toastMessage !== ToastMessages.EMAIL_VERIFICATION_SENT ? XCircle : CheckCircle2} class="w-6 h-6  text-{color}-400" slot="icon"/>
 	<span class={`text-${color}-400 font-semibold`}>{toastMessage}</span>
 </Toast>

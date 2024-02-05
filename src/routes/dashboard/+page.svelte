@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Card } from 'flowbite-svelte';
-	import { onAuthStateChanged, getAuth } from 'firebase/auth';
+	import { Card, Spinner, Toast } from 'flowbite-svelte';
+	import { getAuth, signInWithCustomToken } from 'firebase/auth';
 
-	import { goto } from '$app/navigation';
 	import { getClientApp } from '$lib/firebase/client';
 
 	import { user } from '../../store/store';
@@ -11,10 +10,14 @@
 	import Tickets from '../../components/graphs/Tickets.svelte';
 	import CheckInPerTime from '../../components/graphs/CheckInPerTime.svelte';
 	import TicketsPerPerson from '../../components/graphs/TicketsPerPerson.svelte';
+	import { XCircle } from 'lucide-svelte';
 	import ExportToCsv from '../../components/ExportToCSV.svelte';
 	import SalesPerTime from '../../components/graphs/SalesPerTime.svelte';
 
-	export let data: { strTicketData: string };
+	export let data: { token:string, strTicketData: string };
+	
+	let toastOpen: boolean = false;
+	let toastMessage: string = '';
 
 	let tickets: Ticket[] = JSON.parse(data.strTicketData) as Ticket[];
 
@@ -148,28 +151,34 @@
 		);
 	}
 
-	$: {
-		ticketsSolds = computeDataSales(tickets, timeWindowCheckinPerTime, numberOfBarCheckinPerTime);
-	}
-
-	onMount(async () => {
-		onAuthStateChanged(getAuth(getClientApp()), (newUser) => {
-			$user = newUser;
-			if ($user === null) {
-				goto('/');
-				return;
-			}
-		});
+	onMount(async() => {
+		if(getAuth(getClientApp()).currentUser === null && data.token){
+			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
+				$user = userCredential.user;
+			}).catch((error) => {
+				if(error.code === 'auth/invalid-custom-token'){
+					toastMessage = 'Token non valido';
+				}
+				else if(error.code === 'auth/network-request-failed'){
+					toastMessage = 'Errore di rete';
+				}
+				else{
+					toastMessage = 'Errore sconosciuto';
+				}
+				toastOpen = true;
+			});
+		}
 	});
 </script>
 
-{#if $user}
-	<section class="flex h-full w-full flex-col items-center gap-4">
-		<div class="m-auto flex w-full flex-col items-start gap-4 px-5 pb-12 pt-5">
+<section class="w-full h-full flex flex-col items-center gap-4 flex-grow">
+	<div class="w-full px-5 pt-5 flex flex-col gap-4 pb-12 flex-grow">
+		{#if $user}
 			<div class="m-auto w-full max-w-sm md:max-w-3xl xl:max-w-6xl 2xl:max-w-[1584px]">
 				<h1 class="text-4xl font-bold text-primary-600">Dashboard</h1>
 				<p class="text-justify dark:text-white">Informazioni relative ai biglietti</p>
 			</div>
+			
 			<div class="m-auto grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
 				<div class="grid h-full w-full max-w-sm grid-flow-row-dense grid-cols-2 gap-2">
 					<Card
@@ -215,7 +224,18 @@
 					bind:numberOfBar={numberOfBarSalesPerTime}
 				/>
 			</div>
-			<ExportToCsv bind:tickets />
-		</div>
-	</section>
-{/if}
+				<ExportToCsv bind:tickets />
+		{:else}
+			<div class="w-full flex flex-col flex-grow gap-5 items-center justify-center mt-10">
+				<Spinner size="sm" class="max-w-12 self-center"/>
+				<span class="text-primary-600 font-semibold text-2xl">Attendere...</span>
+			</div>
+		{/if}
+	</div>
+</section>
+
+<Toast on:close={() => toastOpen = false} bind:open={toastOpen} color="red" class="w-max mt-10 mb-5 mx-auto right-0 left-0 fixed bottom-5" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
+	<XCircle class="w-6 h-6  text-red-400" slot="icon"/>
+	<span class='text-red-400 font-semibold'>{toastMessage}</span>
+</Toast>
+

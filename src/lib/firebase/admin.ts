@@ -1,8 +1,8 @@
-/* import { FIREBASE_ADMIN_CLIENT_EMAIL, FIREBASE_ADMIN_PRIVATE_KEY } from '$env/static/private'; */
 import { initializeApp, getApps, getApp, cert, type App } from 'firebase-admin/app';
 
 import { getAuth, type DecodedIdToken } from 'firebase-admin/auth';
 import { getServerOnlyEnvVar } from '$lib/getServerOnlyEnvVar';
+import type { Cookies } from '@sveltejs/kit';
 
 const projectId = import.meta.env.VITE_PROJECT_ID;
 const clientEmail = getServerOnlyEnvVar('FIREBASE_ADMIN_CLIENT_EMAIL');
@@ -35,7 +35,6 @@ export const createSessionCookie = async (token: string, maxAge: number) => {
 
 	return `session=${session}; SameSite=Strict; Path=/; HttpOnly; Max-Age=${maxAge};`;
 };
-// TODO: gestire l'aggiornamento dei cookie
 
 export const createSessionCookieForUserId = async (userId: string, maxAge: number) => {
 	const auth = getAuth(getAdminApp());
@@ -67,4 +66,11 @@ export const getIdTokenFromSessionCookie = async (
 	const auth = getAuth(getAdminApp());
 
 	return auth.verifySessionCookie(sessionCookie, true).catch(() => null);
+};
+
+export const getClaimsFromIdToken = async (cookies: Cookies): Promise<DecodedIdToken | null> => {
+	const cookie = cookies.get('session');
+	const user = await getIdTokenFromSessionCookie(cookie || null);
+
+	return user;
 };
