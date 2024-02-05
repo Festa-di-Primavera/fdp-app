@@ -34,7 +34,7 @@
 </script>
 
 <div
-	class="m-auto flex w-full max-w-sm flex-row items-center justify-end md:max-w-3xl xl:max-w-6xl"
+	class="m-auto flex w-full max-w-sm flex-row items-center justify-end md:max-w-3xl xl:max-w-6xl 2xl:max-w-[1584px]"
 >
 	<Button on:click={downloadCSV}>Export to CSV</Button>
 </div>
