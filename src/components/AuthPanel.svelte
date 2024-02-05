@@ -95,6 +95,12 @@
 					toastMessage = ToastMessages.UNKNOWN_ERROR;
 				}
 				open = true;
+
+				const timeOut = setTimeout(() => {
+					open = false;
+					clearTimeout(timeOut);
+				}, 3500);
+
 				color = 'red';
 			}
 		} else {
@@ -121,6 +127,12 @@
 
 				toastMessage = ToastMessages.EMAIL_VERIFICATION_SENT;
 				open = true;
+
+				const timeOut = setTimeout(() => {
+					open = false;
+					clearTimeout(timeOut);
+				}, 3500);
+
 				color = 'green';
 			} catch (error) {
 				if((error as FirebaseError).code === 'auth/invalid-email'){
@@ -139,6 +151,12 @@
 					toastMessage = ToastMessages.UNKNOWN_ERROR;
 				}
 				open = true;
+
+				const timeOut = setTimeout(() => {
+					open = false;
+					clearTimeout(timeOut);
+				}, 3500);
+
 				color = 'red';
 			}
 		}

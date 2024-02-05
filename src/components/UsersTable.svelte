@@ -63,11 +63,22 @@
 				
 				message = (await response.json()).message;
 				toastOpen = true;
+
+				const timeOut = setTimeout(() => {
+					toastOpen = false;
+					clearTimeout(timeOut);
+				}, 3500);
 			}
 			catch(e) {
 				error = true;
 				color = 'red';
 				toastOpen = true;
+
+				const timeOut = setTimeout(() => {
+					toastOpen = false;
+					clearTimeout(timeOut);
+				}, 3500);
+
 				message = 'Errore di rete';
 			}
 		}

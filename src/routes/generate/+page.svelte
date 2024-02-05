@@ -101,32 +101,28 @@
 		})
 			.then((res) => {
 				color = 'green';
-				trigger();
+				open = true;
+				const timeOut = setTimeout(() => {
+					open = false;
+					clearTimeout(timeOut);
+				}, 3500);
 			})
 			.catch((err) => {
 				color = 'red';
-				trigger();
+				open = true;
+				const timeOut = setTimeout(() => {
+					open = false;
+					clearTimeout(timeOut);
+				}, 3500);
 				console.log(err);
 			});
 	};
 
 	let open = false;
-	let counter = 4;
 	let color: 'green' | 'red' | 'yellow' = 'red';
 
 	let toastOpen: boolean = false;
 	let toastMessage: string = '';
-
-	const trigger = () => {
-		open = true;
-		counter = 6;
-		timeout();
-	};
-
-	const timeout = (): any => {
-		if (--counter > 0) return setTimeout(timeout, 1000);
-		open = false;
-	};
 
 	let tickets: Ticket[];
 
@@ -149,6 +145,10 @@
 					toastMessage = 'Errore sconosciuto';
 				}
 				toastOpen = true;
+				const timeOut = setTimeout(() => {
+					toastOpen = false;
+					clearTimeout(timeOut);
+				}, 3500);
 			});
 		}
 	});

@@ -166,6 +166,10 @@
 					toastMessage = 'Errore sconosciuto';
 				}
 				toastOpen = true;
+				const timeOut = setTimeout(() => {
+					toastOpen = false;
+					clearTimeout(timeOut);
+				}, 3500);
 			});
 		}
 	});

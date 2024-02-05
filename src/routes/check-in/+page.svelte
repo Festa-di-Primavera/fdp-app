@@ -33,6 +33,12 @@
             notFound = true;
             color = 'red';
             open = true;
+
+            const timeOut = setTimeout(() => {
+                open = false;
+                clearTimeout(timeOut);
+            }, 3500);
+
             ticket = {
                 ticketID: code,
                 name: '',
@@ -51,6 +57,11 @@
             color = 'red';
             open = true;
 
+            const timeOut = setTimeout(() => {
+                open = false;
+                clearTimeout(timeOut);
+            }, 3500);
+
             ticket = {
                 ticketID: code,
                 name: tick.name,
@@ -67,6 +78,11 @@
             alreadyChecked = true;
             color = 'yellow';
             open = true;
+
+            const timeOut = setTimeout(() => {
+                open = false;
+                clearTimeout(timeOut);
+            }, 3500);
 
             ticket = {
                 ticketID: code,
@@ -99,6 +115,11 @@
             seller: res.status !== 206 ? tick.seller : 'Non Trovato'
         } as Ticket;
         open = true;
+
+        const timeOut = setTimeout(() => {
+            open = false;
+            clearTimeout(timeOut);
+        }, 3500);
     }
 
     const reset = () => {
@@ -135,6 +156,10 @@
 					toastMessage = 'Errore sconosciuto';
 				}
 				toastOpen = true;
+                const timeOut = setTimeout(() => {
+                    toastOpen = false;
+                    clearTimeout(timeOut);
+                }, 3500);
 			});
 		}
 	});

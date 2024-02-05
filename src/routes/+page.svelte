@@ -27,6 +27,10 @@
 					toastMessage = 'Errore sconosciuto';
 				}
 				open = true;
+				const timeOut = setTimeout(() => {
+					open = false;
+					clearTimeout(timeOut);
+				}, 3500);
 			});
 		}
 	});

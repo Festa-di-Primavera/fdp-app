@@ -45,13 +45,25 @@
 				error = true;
 				color = 'red';
 			}
+			
 			changeToastOpen = true;
+			const timeOut = setTimeout(() => {
+				changeToastOpen = false;
+				clearTimeout(timeOut);
+			}, 3500);
+
 			message = (await res.json()).message;
 		}
 		catch(e) {
+			console.log(e);
+
 			error = true;
 			color = 'red';
 			changeToastOpen = true;
+			const timeOut = setTimeout(() => {
+				changeToastOpen = false;
+				clearTimeout(timeOut);
+			}, 3500);
 			message = 'Errore di rete';
 		}
 	};
@@ -93,6 +105,10 @@
 			}
 
 			changeToastOpen = true;
+			const timeOut = setTimeout(() => {
+				changeToastOpen = false;
+				clearTimeout(timeOut);
+			}, 3500);
 			message = (await res.json()).message;
 		}
 
@@ -115,6 +131,10 @@
 					toastMessage = 'Errore sconosciuto';
 				}
 				toastOpen = true;
+				const timeOut = setTimeout(() => {
+					toastOpen = false;
+					clearTimeout(timeOut);
+				}, 3500);
 			});
 		}
 	});

@@ -41,6 +41,10 @@
 					toastMessage = 'Errore sconosciuto';
 				}
 				toastOpen = true;
+				const timeOut = setTimeout(() => {
+					toastOpen = false;
+					clearTimeout(timeOut);
+				}, 3500);
 			});
 		}
 	});
@@ -74,17 +78,29 @@
 				
 				message = (await response.json()).message;
 				feedbackToastOpen = true;
+				const timeOut = setTimeout(() => {
+					feedbackToastOpen = false;
+					clearTimeout(timeOut);
+				}, 3500);
 			}
 			catch(e){
 				color = 'red';
 				message = 'Errore di rete';
 				feedbackToastOpen = true;
+				const timeOut = setTimeout(() => {
+					feedbackToastOpen = false;
+					clearTimeout(timeOut);
+				}, 3500);
 			}
 		}
 		else{
 			message = 'Compilare tutti i campi';
 			color = 'red';
 			feedbackToastOpen = true;
+			const timeOut = setTimeout(() => {
+				feedbackToastOpen = false;
+				clearTimeout(timeOut);
+			}, 3500);
 		}
 
 		name = '';
