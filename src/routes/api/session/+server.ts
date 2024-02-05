@@ -65,7 +65,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	  
 		return response;
 	} catch {
-		const response = new Response('Invalid Token', {
+		const response = new Response(JSON.stringify({message: 'Invalid Token'}), {
 			status: 401,
 			headers: {
 				'Content-Type': 'text/plain'

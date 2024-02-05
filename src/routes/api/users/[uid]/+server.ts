@@ -8,7 +8,7 @@ export async function DELETE({ params }){
 	try{
 		await app.deleteUser(params.uid);
 
-		const response = new Response('Utente eliminato', {
+		const response = new Response(JSON.stringify({message: 'Utente eliminato'}), {
 			status: 200,
 			headers: {
 				'Content-Type': 'text/plain'

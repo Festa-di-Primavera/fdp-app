@@ -13,7 +13,7 @@ export async function PUT({ params }) {
 	});
 
 	if(aliasAlreadyExists){
-		const response = new Response('L\'alias inserito è già in uso', {
+		const response = new Response(JSON.stringify({message: 'L\'alias inserito è già in uso'}), {
 			status: 409,
 			headers: {
 				'Content-Type': 'text/plain'
