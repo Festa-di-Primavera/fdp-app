@@ -1,14 +1,59 @@
 <script lang="ts">
-	import { Chart, Card, A, Button, Dropdown, DropdownItem } from 'flowbite-svelte';
+	import { Chart, Card, A, Select, Label } from 'flowbite-svelte';
 	import { ChevronDown } from 'lucide-svelte';
 
 	export let ticketsCheckIn: { x: string; y: number }[];
 	export let numberOfCheckIns: number;
+	export let timeWindow: number;
+	export let numberOfBar: number;
+
+	let selected: number = (12 * 60 * 60 * 1000) / numberOfBar;
+	let timeOptions = [
+		{ value: (15 * 60 * 1000) / numberOfBar, name: '15 min' },
+		{ value: (30 * 60 * 1000) / numberOfBar, name: '30 min' },
+		{ value: (60 * 60 * 1000) / numberOfBar, name: '1h' },
+		{ value: (2 * 60 * 60 * 1000) / numberOfBar, name: '2h' },
+		{ value: (4 * 60 * 60 * 1000) / numberOfBar, name: '4h' },
+		{ value: (6 * 60 * 60 * 1000) / numberOfBar, name: '6h' },
+		{ value: (12 * 60 * 60 * 1000) / numberOfBar, name: '12h' }
+	];
+
+	$: {
+		timeWindow = selected;
+	}
 
 	let options: ApexCharts.ApexOptions;
 
 	options = {
+		chart: {
+			id: 'chart-1',
+			type: 'bar',
+			height: '250px',
+			fontFamily: 'Inter, sans-serif',
+			toolbar: {
+				autoSelected: 'pan',
+				show: false
+			},
+		},
 		colors: ['#1A56DB', '#FDBA8C'],
+		dataLabels: {
+			enabled: false
+		},
+		fill: {
+			opacity: 1
+		},
+		grid: {
+			show: false,
+			strokeDashArray: 4,
+			padding: {
+				left: 2,
+				right: 2,
+				top: -30
+			}
+		},
+		legend: {
+			show: false
+		},
 		series: [
 			{
 				name: 'CheckIn',
@@ -16,30 +61,12 @@
 				data: ticketsCheckIn
 			}
 		],
-		chart: {
-			type: 'bar',
-			height: '320px',
-			fontFamily: 'Inter, sans-serif',
-			toolbar: {
-				show: false
-			}
-		},
 		plotOptions: {
 			bar: {
 				horizontal: false,
 				columnWidth: '70%',
 				borderRadiusApplication: 'end',
 				borderRadius: 8
-			}
-		},
-		tooltip: {
-			shared: true,
-			intersect: false,
-			style: {
-				fontFamily: 'Inter, sans-serif'
-			},
-			x: {
-				show: false
 			}
 		},
 		states: {
@@ -55,28 +82,29 @@
 			width: 0,
 			colors: ['transparent']
 		},
-		grid: {
-			show: false,
-			strokeDashArray: 4,
-			padding: {
-				left: 2,
-				right: 2,
-				top: -14
+		tooltip: {
+			shared: true,
+			intersect: false,
+			style: {
+				fontFamily: 'Inter, sans-serif'
+			},
+			x: {
+				show: false
 			}
 		},
-		dataLabels: {
-			enabled: false
-		},
-		legend: {
-			show: false
-		},
 		xaxis: {
-			floating: false,
+			type: 'datetime',
 			labels: {
 				show: true,
 				style: {
 					fontFamily: 'Inter, sans-serif',
 					cssClass: 'text-xs font-normal fill-gray-500 dark:fill-gray-400'
+				},
+				datetimeFormatter: {
+					year: 'yyyy',
+					month: "MMM 'yy",
+					day: 'dd MMM',
+					hour: 'HH:mm'
 				}
 			},
 			axisBorder: {
@@ -84,15 +112,43 @@
 			},
 			axisTicks: {
 				show: false
-			}
+			},
+			floating: false
 		},
 		yaxis: {
 			show: false
-		},
-		fill: {
-			opacity: 1
 		}
 	};
+
+	$: {
+		if (options && options.series && options.series[0]) {
+			(
+				options.series[0] as {
+					name?: string;
+					type?: string;
+					color?: string;
+					group?: string;
+					zIndex?: number;
+					data:
+						| (number | null)[]
+						| {
+								x: any;
+								y: any;
+								fill?: ApexFill;
+								fillColor?: string;
+								strokeColor?: string;
+								meta?: any;
+								goals?: any;
+								barHeightOffset?: number;
+								columnWidthOffset?: number;
+						  }[]
+						| [number, number | null][]
+						| [number, (number | null)[]][]
+						| number[][];
+				}
+			).data = ticketsCheckIn;
+		}
+	}
 </script>
 
 <Card>
@@ -110,16 +166,12 @@
 			</div>
 		</div>
 		<div>
-			<Button color="light" class="px-3 py-2"
-				>Last week<ChevronDown class="ms-1.5 h-2.5 w-2.5" /></Button
-			>
-			<Dropdown class="w-40">
-				<DropdownItem>Yesterday</DropdownItem>
-				<DropdownItem>Today</DropdownItem>
-				<DropdownItem>Last 7 days</DropdownItem>
-				<DropdownItem>Last 30 days</DropdownItem>
-				<DropdownItem>Last 90 days</DropdownItem>
-			</Dropdown>
+			<Select
+				class="mt-2"
+				items={timeOptions}
+				bind:value={selected}
+				placeholder="Scegli un'opzione"
+			/>
 		</div>
 	</div>
 	<Chart {options} />

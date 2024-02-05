@@ -39,7 +39,6 @@
 				const timestamp = new Date(ticket.checkIn).getTime();
 				const slotIndex = Math.floor(timestamp / slotTime);
 				timeSlotsMap.set(slotIndex, (timeSlotsMap.get(slotIndex) || 0) + 1);
-				numberOfCheckIns++; // TODO: qui conto il numero totale di checkin, mentre dovrei considerare solo quelli all'interno dello slot
 			}
 
 			if (ticket.seller !== null) {
@@ -52,36 +51,38 @@
 		const timeSlotData: TimeSlotData[] = [];
 		let currentSlotIndex = sortedTimeSlots[0][0];
 		let currentIndex = 0;
+		numberOfCheckIns = 0;
 
-		while (currentIndex < sortedTimeSlots.length && timeSlotData.length < maxSlots) {
+		while (currentIndex < sortedTimeSlots.length) {
 			if (sortedTimeSlots[currentIndex][0] === currentSlotIndex) {
 				const timestamp = currentSlotIndex * slotTime;
 				const date = new Date(timestamp);
+				numberOfCheckIns += sortedTimeSlots[currentIndex][1];
 
-				const hours = date.getHours().toString().padStart(2, '0');
-				const minutes = date.getMinutes().toString().padStart(2, '0');
-
-				const label = `${hours}:${minutes}`; // Formatta l'ora come "hh:mm"
+				const label = date.toString();
 				timeSlotData.push({ x: label, y: sortedTimeSlots[currentIndex][1] });
 				currentIndex++;
 			} else {
 				const timestamp = currentSlotIndex * slotTime;
 				const date = new Date(timestamp);
 
-				const hours = date.getHours().toString().padStart(2, '0');
-				const minutes = date.getMinutes().toString().padStart(2, '0');
-
-				const label = `${hours}:${minutes}`;
+				const label = date.toString();
 				timeSlotData.push({ x: label, y: 0 });
 			}
 			currentSlotIndex++;
 		}
 
-		return timeSlotData; //.reverse();
+		return timeSlotData;
 	}
 
-	ticketsCheckIn = computeData(tickets, 1000 * 60 * 60, 100);
-	console.log(ticketsCheckIn);
+	let timeWindowCheckinPerTime = 1000 * 60 * 60 * 24; // 1 day
+	let numberOfBarCheckinPerTime = 7;
+
+	ticketsCheckIn = computeData(tickets, timeWindowCheckinPerTime, numberOfBarCheckinPerTime);
+
+	$: {
+		ticketsCheckIn = computeData(tickets, timeWindowCheckinPerTime, numberOfBarCheckinPerTime);
+	}
 
 	onMount(async () => {
 		onAuthStateChanged(getAuth(getClientApp()), (newUser) => {
@@ -125,7 +126,12 @@
 
 			<Tickets bind:checkedTicketsCount bind:notSoldTicketsCount bind:notCheckedTicketsCount />
 			<TicketsPerPerson bind:mappings />
-			<CheckInPerTime bind:ticketsCheckIn bind:numberOfCheckIns />
+			<CheckInPerTime
+				bind:ticketsCheckIn
+				bind:numberOfCheckIns
+				bind:timeWindow={timeWindowCheckinPerTime}
+				bind:numberOfBar={numberOfBarCheckinPerTime}
+			/>
 		</div>
 	</section>
 {/if}
