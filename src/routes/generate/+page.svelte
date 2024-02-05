@@ -135,7 +135,7 @@
 		tickets = (await res.json()).body.tickets;
 		codesInDB = new Set<string>(tickets.map((ticket) => ticket.ticketID));
 
-		if(getAuth(getClientApp()).currentUser === null){
+		if(getAuth(getClientApp()).currentUser === null && data.token){
 			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
 				$user = userCredential.user;
 			}).catch((error) => {
