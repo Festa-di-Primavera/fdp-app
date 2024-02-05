@@ -166,7 +166,7 @@
 {#if $user}
 	<section class="flex h-full w-full flex-col items-center gap-4">
 		<div class="m-auto flex w-full flex-col items-start gap-4 px-5 pb-12 pt-5">
-			<div class="m-auto w-full max-w-sm md:max-w-3xl xl:max-w-6xl">
+			<div class="m-auto w-full max-w-sm md:max-w-3xl xl:max-w-6xl 2xl:max-w-[1584px]">
 				<h1 class="text-4xl font-bold text-primary-600">Dashboard</h1>
 				<p class="text-justify dark:text-white">Informazioni relative ai biglietti</p>
 			</div>
