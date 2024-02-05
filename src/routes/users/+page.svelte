@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { Input, Button, Modal, Spinner, Toast } from 'flowbite-svelte';
 	import { getAuth, signInWithCustomToken } from 'firebase/auth';
-	import { XCircle } from 'lucide-svelte'
+	import { CheckCircle2, XCircle } from 'lucide-svelte'
 	
 	import { getClientApp } from '$lib/firebase/client.js';
 
@@ -15,34 +15,64 @@
 
 	// modal state variable
 	let deleteModalOpen: boolean = false;
+	
+	// login error toast variables
 	let toastOpen: boolean = false;
 	let toastMessage: string = '';
 
+	// changes toast variables
+	let changeToastOpen: boolean = false;
+	let color: 'green' | 'red' = 'green';
+	let message: string = '';
+	let error: boolean = false;
+
 	// function to handle user delete
-	// TODO: toast con errori/successo
 	const handleUserDelete = async (user: any) => {
-		let res = await (await fetch(`/api/users/${user.uid}`, {method: 'DELETE', headers: {'Content-Type': 'application/json'}})).json();
-		
-		if(res.status === 200){
-			users = users.filter((item: any) => item.uid !== user.uid);
+		try{
+			let res = await fetch(`/api/users/${user.uid}`, {method: 'DELETE', headers: {'Content-Type': 'application/json'}});
+
+			if(res.ok){
+				error = false;
+				color = 'green';
+				users = users.filter((item: any) => item.uid !== user.uid);
+			}
+			else if(res.status === 404){
+				error = true;
+				color = 'red';
+				users = users.filter((item: any) => item.uid !== user.uid);
+			}
+			else{
+				error = true;
+				color = 'red';
+			}
+			changeToastOpen = true;
+			message = (await res.json()).message;
+		}
+		catch(e) {
+			error = true;
+			color = 'red';
+			changeToastOpen = true;
+			message = 'Errore di rete';
 		}
 	};
 	
+	// alias modal state variables
 	let aliasModalOpen: boolean = false;
 	let alias: string = '';
 	
 	// current selected user state variable
 	let currSelectedUser: any | undefined = undefined;
 
-	// TODO: toast con errori/successo
 	const handleAliasChange = async (user: any) => {
 		if(alias !== null && alias != '' && alias != user.customClaims?.alias){
-			const res = await (await fetch(`/api/alias/${user.uid}/${alias}`, {
+			const res = await fetch(`/api/alias/${user.uid}/${alias}`, {
 				method: 'PUT',
 				headers: {'Content-Type': 'application/json'}
-			})).json();
+			});
 
-			if(res.status === 200){
+			if(res.ok){
+				color = 'green';
+				error = false;
 				users = users.map((item: any) => {
 					if (item.uid === user.uid) {
 						if(item.customClaims?.alias)
@@ -53,12 +83,17 @@
 					return item;
 				});
 			}
-			else if(res.status === 400){
-				console.log(res.body);
+			else {
+				color = 'red';
+				error = true;
 			}
-			else{
-				console.log(res.body);
+			
+			if(res.status === 404){
+				users = users.filter((item: any) => item.uid !== user.uid);
 			}
+
+			changeToastOpen = true;
+			message = (await res.json()).message;
 		}
 
 		aliasModalOpen = false;
@@ -136,4 +171,9 @@
 <Toast on:close={() => toastOpen = false} bind:open={toastOpen} color="red" class="w-max mt-10 mb-5 mx-auto right-0 left-0 fixed bottom-5" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
 	<XCircle class="w-6 h-6  text-red-400" slot="icon"/>
 	<span class='text-red-400 font-semibold'>{toastMessage}</span>
+</Toast>
+
+<Toast on:close={() => changeToastOpen = false} bind:open={changeToastOpen} color={color} class="w-max mt-5 mx-auto right-0 left-0 fixed bottom-5" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
+	<svelte:component this={error ? XCircle : CheckCircle2} class="w-6 h-6  text-{color}-400" slot="icon"/>
+	<span class={`text-${color}-400 font-semibold`}>{message}</span>
 </Toast>

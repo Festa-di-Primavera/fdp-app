@@ -34,7 +34,7 @@ export async function PUT({params}) {
 			  message = 'Permesso negato';
 			  break;
 			case 'app/network-error':
-			  message = 'Errore di rete!!!';
+			  message = 'Errore di rete';
 			  break;
 			default:
 			  message = 'Errore sconosciuto';
