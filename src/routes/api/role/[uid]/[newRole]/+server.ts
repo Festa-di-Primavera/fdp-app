@@ -22,7 +22,6 @@ export async function PUT({params}) {
 			{status: 200, headers: {'Content-Type': 'application/json'}}
 		);
 		
-		console.log(`Ruolo modificato con successo: ${params.uid} -> ${params.newRole}`);
 		return resp;
 	}
 	catch(e){
