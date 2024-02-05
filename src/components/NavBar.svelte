@@ -1,6 +1,6 @@
 <script lang="ts">
     import { DarkMode, Drawer, CloseButton } from "flowbite-svelte";
-	import { AlignJustify, DollarSign, Home, LogOut, ScanLine, User, Ticket, Users } from 'lucide-svelte';
+	import { AlignJustify, DollarSign, LayoutDashboard, LogOut, ScanLine, User, Ticket, Users, Home } from 'lucide-svelte';
 	import Logo from "./Logo.svelte";
   	import { sineIn } from 'svelte/easing';
 
@@ -24,10 +24,16 @@
 
 	const routes = [
 		{
+			label: 'Home',
+			slug: "/",
+			role: roles.NORMAL,
+			icon: Home
+		},
+		{
 			label: 'Dashboard',
 			slug: "/dashboard",
 			role: roles.ADMIN,
-			icon: Home
+			icon: LayoutDashboard
 		},
 		{
 			label: 'Utenti',

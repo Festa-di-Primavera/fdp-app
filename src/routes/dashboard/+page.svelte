@@ -11,6 +11,8 @@
 	import CheckInPerTime from '../../components/graphs/CheckInPerTime.svelte';
 	import TicketsPerPerson from '../../components/graphs/TicketsPerPerson.svelte';
 	import { XCircle } from 'lucide-svelte';
+	import ExportToCsv from '../../components/ExportToCSV.svelte';
+	import SalesPerTime from '../../components/graphs/SalesPerTime.svelte';
 
 	export let data: { token:string, strTicketData: string };
 	
@@ -18,40 +20,136 @@
 	let toastMessage: string = '';
 
 	let tickets: Ticket[] = JSON.parse(data.strTicketData) as Ticket[];
-	
-	let numberOfCheckIns: number = 0;
-	let ticketsCheckIn: { x: string, y: number }[] = [];
 
-	let checkedTicketsCount: number = tickets.filter(ticket => ticket.checkIn !== null).length;
-	let notCheckedTicketsCount: number = tickets.filter(ticket => ticket.soldAt !== null).length - checkedTicketsCount;
-	let notSoldTicketsCount: number = tickets.filter(ticket => ticket.soldAt === null).length;
+	let numberOfCheckIns: number = 0;
+	let numberOfSales: number = 0;
+	let ticketsCheckIn: { x: string; y: number }[] = [];
+	let ticketsSolds: { x: string; y: number }[] = [];
+
+	let checkedTicketsCount: number = tickets.filter((ticket) => ticket.checkIn !== null).length;
+	let notCheckedTicketsCount: number =
+		tickets.filter((ticket) => ticket.soldAt !== null).length - checkedTicketsCount;
+	let notSoldTicketsCount: number = tickets.filter((ticket) => ticket.soldAt === null).length;
+
+	interface TimeSlotData {
+		x: string;
+		y: number;
+	}
 
 	let mappings: Map<string, number> = new Map();
-	function computeData(tickets: Ticket[]): void {
-		const mapHourToCount: Map<string, number> = new Map();
-		
-		for(let ticket of tickets){
-			if(ticket.checkIn !== null){
-				const date = new Date(ticket.checkIn);
-				const hour = date.getHours();
-				const count = mapHourToCount.get(hour.toString()) || 0;
-				mapHourToCount.set(hour.toString(), count + 1);
-				numberOfCheckIns++;
+
+	function computeDataCheckIn(
+		tickets: Ticket[],
+		slotTime: number,
+		maxSlots: number
+	): TimeSlotData[] {
+		const timeSlotsMap: Map<number, number> = new Map();
+
+		for (let ticket of tickets) {
+			if (ticket.checkIn !== null) {
+				const timestamp = new Date(ticket.checkIn).getTime();
+				const slotIndex = Math.floor(timestamp / slotTime);
+				timeSlotsMap.set(slotIndex, (timeSlotsMap.get(slotIndex) || 0) + 1);
+			}
+		}
+
+		const sortedTimeSlots = Array.from(timeSlotsMap.entries()).sort((a, b) => a[0] - b[0]);
+
+		if (sortedTimeSlots.length === 0) {
+			return [];
+		}
+
+		const timeSlotData: TimeSlotData[] = [];
+		let currentSlotIndex = sortedTimeSlots[0][0];
+		let currentIndex = 0;
+		numberOfCheckIns = 0;
+
+		while (currentIndex < sortedTimeSlots.length) {
+			if (sortedTimeSlots[currentIndex][0] === currentSlotIndex) {
+				const timestamp = currentSlotIndex * slotTime;
+				const date = new Date(timestamp);
+				numberOfCheckIns += sortedTimeSlots[currentIndex][1];
+
+				const label = date.toString();
+				timeSlotData.push({ x: label, y: sortedTimeSlots[currentIndex][1] });
+				currentIndex++;
+			} else {
+				const timestamp = currentSlotIndex * slotTime;
+				const date = new Date(timestamp);
+
+				const label = date.toString();
+				timeSlotData.push({ x: label, y: 0 });
+			}
+			currentSlotIndex++;
+		}
+
+		return timeSlotData;
+	}
+
+	function computeDataSales(tickets: Ticket[], slotTime: number, maxSlots: number): TimeSlotData[] {
+		const timeSlotsMap: Map<number, number> = new Map();
+		mappings.clear();
+
+		for (let ticket of tickets) {
+			if (ticket.soldAt !== null) {
+				const timestamp = new Date(ticket.soldAt).getTime();
+				const slotIndex = Math.floor(timestamp / slotTime);
+				timeSlotsMap.set(slotIndex, (timeSlotsMap.get(slotIndex) || 0) + 1);
 			}
 
-			if(ticket.seller !== null){
+			if (ticket.seller !== null) {
 				mappings.set(ticket.seller, (mappings.get(ticket.seller) || 0) + 1);
 			}
 		}
-		
-		mapHourToCount.forEach((value, key) => {
-			ticketsCheckIn.push({ x: key, y: value });
-		});
-		ticketsCheckIn.sort((a, b) => parseInt(a.x) - parseInt(b.x));
-		ticketsCheckIn = ticketsCheckIn;
+
+		const sortedTimeSlots = Array.from(timeSlotsMap.entries()).sort((a, b) => a[0] - b[0]);
+
+		if (sortedTimeSlots.length === 0) {
+			return [];
+		}
+
+		const timeSlotData: TimeSlotData[] = [];
+		let currentSlotIndex = sortedTimeSlots[0][0];
+		let currentIndex = 0;
+		numberOfSales = 0;
+
+		while (currentIndex < sortedTimeSlots.length) {
+			if (sortedTimeSlots[currentIndex][0] === currentSlotIndex) {
+				const timestamp = currentSlotIndex * slotTime;
+				const date = new Date(timestamp);
+				numberOfSales += sortedTimeSlots[currentIndex][1];
+
+				const label = date.toString();
+				timeSlotData.push({ x: label, y: sortedTimeSlots[currentIndex][1] });
+				currentIndex++;
+			} else {
+				const timestamp = currentSlotIndex * slotTime;
+				const date = new Date(timestamp);
+
+				const label = date.toString();
+				timeSlotData.push({ x: label, y: 0 });
+			}
+			currentSlotIndex++;
+		}
+
+		return timeSlotData;
 	}
-	
-	computeData(tickets);
+
+	let timeWindowCheckinPerTime = 1000 * 60 * 60 * 24; // 1 day
+	let numberOfBarCheckinPerTime = 7;
+	let timeWindowSalesPerTime = 1000 * 60 * 60 * 24; // 1 day
+	let numberOfBarSalesPerTime = 7;
+
+	ticketsCheckIn = computeDataCheckIn(tickets, timeWindowCheckinPerTime, numberOfBarCheckinPerTime);
+	ticketsSolds = computeDataSales(tickets, timeWindowCheckinPerTime, numberOfBarCheckinPerTime);
+
+	$: {
+		ticketsCheckIn = computeDataCheckIn(
+			tickets,
+			timeWindowCheckinPerTime,
+			numberOfBarCheckinPerTime
+		);
+	}
 
 	onMount(async() => {
 		if(getAuth(getClientApp()).currentUser === null && data.token){
@@ -74,31 +172,59 @@
 </script>
 
 <section class="w-full h-full flex flex-col items-center gap-4 flex-grow">
-	<div class="w-full px-5 pt-5 flex flex-col gap-4 max-w-96 pb-12 flex-grow">
+	<div class="w-full px-5 pt-5 flex flex-col gap-4 pb-12 flex-grow">
 		{#if $user}
-			<h1 class="text-primary-600 font-bold text-4xl">Dashboard</h1>
-			<p class="dark:text-white text-justify">Informazioni relative ai biglietti</p>
-			
-			<div class="w-full grid grid-cols-2 gap-2 grid-flow-row-dense">
-				<Card class="col-span-2 w-full flex flex-col gap-5 items-center pt-6">
-					<h1 class="text-primary-600 font-bold text-5xl text-center">{checkedTicketsCount !== undefined ? checkedTicketsCount : '--'}</h1>
-					<p class="dark:text-white text-center">Biglietti validati</p>
-				</Card>
-
-				<Card class="w-full aspect-square flex flex-col gap-5 items-center pt-6">
-					<h1 class="text-primary-600 font-bold text-5xl text-center">{notCheckedTicketsCount !== undefined ? notCheckedTicketsCount : '--'}</h1>
-					<p class="dark:text-white text-center">Biglietti venduti non validati</p>
-				</Card>
-
-				<Card class="w-full aspect-square flex flex-col gap-5 items-center pt-6">
-					<h1 class="text-primary-600 font-bold text-5xl text-center">{notSoldTicketsCount !== undefined ? notSoldTicketsCount : '--'}</h1>
-					<p class="dark:text-white text-center">Biglietti non venduti</p>
-				</Card>
+			<div class="m-auto w-full max-w-sm md:max-w-3xl xl:max-w-6xl 2xl:max-w-[1584px]">
+				<h1 class="text-4xl font-bold text-primary-600">Dashboard</h1>
+				<p class="text-justify dark:text-white">Informazioni relative ai biglietti</p>
 			</div>
+			
+			<div class="m-auto grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+				<div class="grid h-full w-full max-w-sm grid-flow-row-dense grid-cols-2 gap-2">
+					<Card
+						class="col-span-2 flex h-full w-full max-w-md flex-col items-center justify-center gap-5 pt-6"
+					>
+						<h1 class="text-center text-5xl font-bold text-primary-600">
+							{checkedTicketsCount !== undefined ? checkedTicketsCount : '--'}
+						</h1>
+						<p class="text-center dark:text-white">Biglietti validati</p>
+					</Card>
 
-			<Tickets bind:checkedTicketsCount bind:notSoldTicketsCount bind:notCheckedTicketsCount/>
-			<TicketsPerPerson bind:mappings/>
-			<CheckInPerTime bind:ticketsCheckIn bind:numberOfCheckIns/>
+					<Card
+						class="flex aspect-square h-full w-full flex-col items-center justify-center gap-5 pt-6"
+					>
+						<h1 class="text-center text-5xl font-bold text-primary-600">
+							{notCheckedTicketsCount !== undefined ? notCheckedTicketsCount : '--'}
+						</h1>
+						<p class="text-center dark:text-white">Biglietti venduti non validati</p>
+					</Card>
+
+					<Card
+						class="flex aspect-square h-full w-full flex-col items-center justify-center gap-5 pt-6"
+					>
+						<h1 class="text-center text-5xl font-bold text-primary-600">
+							{notSoldTicketsCount !== undefined ? notSoldTicketsCount : '--'}
+						</h1>
+						<p class="text-center dark:text-white">Biglietti non venduti</p>
+					</Card>
+				</div>
+
+				<Tickets bind:checkedTicketsCount bind:notSoldTicketsCount bind:notCheckedTicketsCount />
+				<TicketsPerPerson bind:mappings />
+				<CheckInPerTime
+					bind:ticketsCheckIn
+					bind:numberOfCheckIns
+					bind:timeWindow={timeWindowCheckinPerTime}
+					bind:numberOfBar={numberOfBarCheckinPerTime}
+				/>
+				<SalesPerTime
+					bind:ticketsSolds
+					bind:numberOfSales
+					bind:timeWindow={timeWindowSalesPerTime}
+					bind:numberOfBar={numberOfBarSalesPerTime}
+				/>
+			</div>
+				<ExportToCsv bind:tickets />
 		{:else}
 			<div class="w-full flex flex-col flex-grow gap-5 items-center justify-center mt-10">
 				<Spinner size="sm" class="max-w-12 self-center"/>
@@ -112,3 +238,4 @@
 	<XCircle class="w-6 h-6  text-red-400" slot="icon"/>
 	<span class='text-red-400 font-semibold'>{toastMessage}</span>
 </Toast>
+

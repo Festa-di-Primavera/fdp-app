@@ -10,6 +10,7 @@ import { redirect } from '@sveltejs/kit';
 
 export async function load({cookies}) {
 	const app = getAuth(getAdminApp());
+	
 	const user = await getClaimsFromIdToken(cookies);
 
 	if (user?.accessLevel >= roles.ADMIN) {
@@ -30,7 +31,7 @@ export async function load({cookies}) {
 					surname: ticketDoc.data().surname,
 					checkIn: ticketDoc.data().checkIn?.toDate() || null,
 					soldAt: ticketDoc.data().soldAt?.toDate() || null,
-					seller: ticketDoc.data().seller ? sellers.find((seller) => seller.uid === ticketDoc.data().seller)?.customClaims?.alias : null
+					seller: ticketDoc.data().seller ? sellers.find((seller) => seller.uid === ticketDoc.data().seller)?.customClaims?.alias : "AnOnImO"
 				} as Ticket
 			);
 		});

@@ -2,20 +2,22 @@
 	import { Chart, Card, A, Select, Label } from 'flowbite-svelte';
 	import { ChevronDown } from 'lucide-svelte';
 
-	export let ticketsCheckIn: { x: string; y: number }[];
-	export let numberOfCheckIns: number;
+	export let ticketsSolds: { x: string; y: number }[];
+	export let numberOfSales: number;
 	export let timeWindow: number;
 	export let numberOfBar: number;
 
-	let selected: number = (12 * 60 * 60 * 1000) / numberOfBar;
+	let selected: number = (24 * 60 * 60 * 1000) / numberOfBar;
 	let timeOptions = [
-		{ value: (15 * 60 * 1000) / numberOfBar, name: '15 min' },
-		{ value: (30 * 60 * 1000) / numberOfBar, name: '30 min' },
 		{ value: (60 * 60 * 1000) / numberOfBar, name: '1h' },
 		{ value: (2 * 60 * 60 * 1000) / numberOfBar, name: '2h' },
 		{ value: (4 * 60 * 60 * 1000) / numberOfBar, name: '4h' },
 		{ value: (6 * 60 * 60 * 1000) / numberOfBar, name: '6h' },
-		{ value: (12 * 60 * 60 * 1000) / numberOfBar, name: '12h' }
+		{ value: (12 * 60 * 60 * 1000) / numberOfBar, name: '12h' },
+		{ value: (24 * 60 * 60 * 1000) / numberOfBar, name: '1 day' },
+		{ value: (2 * 24 * 60 * 60 * 1000) / numberOfBar, name: '2 day' },
+		{ value: (7 * 24 * 60 * 60 * 1000) / numberOfBar, name: '7 day' },
+		{ value: (2 * 7 * 24 * 60 * 60 * 1000) / numberOfBar, name: '2 weeks' }
 	];
 
 	$: {
@@ -33,7 +35,7 @@
 			toolbar: {
 				autoSelected: 'pan',
 				show: false
-			},
+			}
 		},
 		colors: ['#1A56DB', '#FDBA8C'],
 		dataLabels: {
@@ -58,7 +60,7 @@
 			{
 				name: 'CheckIn',
 				color: '#1A56DB',
-				data: ticketsCheckIn
+				data: ticketsSolds
 			}
 		],
 		plotOptions: {
@@ -146,7 +148,7 @@
 						| [number, (number | null)[]][]
 						| number[][];
 				}
-			).data = ticketsCheckIn;
+			).data = ticketsSolds;
 		}
 	}
 </script>
@@ -158,10 +160,10 @@
 				<h5
 					class="mb-2 inline-flex items-center font-normal leading-none text-gray-500 dark:text-gray-400"
 				>
-					CheckIn
+					Sales
 				</h5>
 				<p class="text-2xl font-bold leading-none text-gray-900 dark:text-white">
-					{numberOfCheckIns}
+					{numberOfSales}
 				</p>
 			</div>
 		</div>
