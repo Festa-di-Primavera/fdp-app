@@ -4,6 +4,19 @@ import { ONE_WEEK_IN_SECONDS } from '$lib/constants';
 import { createSessionCookie, getAdminApp, verifyIdToken /* , getAdminApp */ } from '$lib/firebase/admin';
 import { getAuth } from 'firebase-admin/auth';
 
+function isTooLight(color: string) {
+	const red = parseInt(color.slice(1, 3), 16);
+    const green = parseInt(color.slice(3, 5), 16);
+    const blue = parseInt(color.slice(5, 7), 16);
+
+	const rNorm = 0.2126 * red
+	const gNorm = 0.7152 * green
+	const bNorm = 0.0722 * blue
+
+	const lum = rNorm + gNorm + bNorm;
+
+	return (lum/255) > 0.35;
+  }
 
 // POST /auth/session
 export const POST: RequestHandler = async ({ request }) => {
@@ -18,7 +31,12 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		adminApp.updateUser(userId, {displayName: name});
 
-		const randomColor = `#${Math.floor(Math.random()*16777215).toString(16)}`;
+		let randomColor: string;
+		do{
+			randomColor = `#${Math.floor(Math.random()*16777215).toString(16)}`;
+			console.log('color: ', randomColor);
+		} while(isTooLight(randomColor));
+
 		adminApp.setCustomUserClaims(userId, {role: 'normal', accessLevel: 0, alias: name, color: randomColor});
 	}
 
