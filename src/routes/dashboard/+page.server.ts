@@ -24,7 +24,7 @@ export async function load() {
 				surname: ticketDoc.data().surname,
 				checkIn: ticketDoc.data().checkIn?.toDate() || null,
 				soldAt: ticketDoc.data().soldAt?.toDate() || null,
-				seller: ticketDoc.data().seller ? sellers.find((seller) => seller.uid === ticketDoc.data().seller)?.customClaims?.alias : null
+				seller: ticketDoc.data().seller ? sellers.find((seller) => seller.uid === ticketDoc.data().seller)?.customClaims?.alias : "AnOnImO"
 			} as Ticket
 		);
 	});
