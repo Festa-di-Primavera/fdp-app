@@ -81,7 +81,6 @@
 				);
 
 				$user = credential.user;
-				console.log($user);
 			} catch (error) {
 				if((error as FirebaseError).code === 'auth/invalid-email'){
 					toastMessage = ToastMessages.INVALID_EMAIL_ERROR;
