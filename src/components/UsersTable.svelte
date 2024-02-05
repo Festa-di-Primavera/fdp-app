@@ -1,14 +1,18 @@
 <script lang="ts">
-	import { Button, Dropdown, DropdownItem, Input, Popover, Radio, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from "flowbite-svelte";
-	import { ChevronsUpDown, Filter, PenBox, Search, Trash2 } from "lucide-svelte";
+	import { Button, Dropdown, DropdownItem, Input, Popover, Radio, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Toast } from "flowbite-svelte";
+	import { CheckCircle2, ChevronsUpDown, Filter, PenBox, Search, Trash2, XCircle } from "lucide-svelte";
 	import { roles } from "../models/role";
 	import { user } from "../store/store";
-	import { createProfileImage } from "$lib/profileImage";
 	
 	export let users: any;
 	export let currSelectedUser: any | undefined;
 	export let aliasModalOpen: boolean;
 	export let deleteModalOpen: boolean;
+
+	let color: 'green' | 'red' = 'green';
+	let message: string = '';
+	let error: boolean = false;
+	let toastOpen: boolean = false;
 	
 	// dropdown state variables
 	let dropdownOpenMap: { [key: string]: boolean } = {};
@@ -24,16 +28,18 @@
 		'superadmin': roles.SUPERADMIN
 	};
 
-	// function to handle role change
-	// TODO: toast con errori/successo
 	const handleRoleChange = async (user: any, role: string) => {
 		let roleEnum = enumBindings[role];
 		dropdownOpenMap = { ...dropdownOpenMap, [user.uid]: false };
 
 		if (user.customClaims?.role !== role){
-			await fetch(`/api/role/${user.uid}/${role}`, {method: 'PUT', headers: {'Content-Type': 'application/json'}})
-			.then(async (response) => {
-				if(response.status === 200){
+			try{
+				const response = await fetch(`/api/role/${user.uid}/${role}`, {method: 'PUT', headers: {'Content-Type': 'application/json'}})
+				
+				if(response.ok){
+					error = false;
+					color = 'green';
+
 					users = users.map((item: any) => {
 						if (item.uid === user.uid) {
 							if(item.customClaims){
@@ -51,12 +57,19 @@
 					}
 				}
 				else{
-					console.log(response.body);
+					error = true;
+					color = 'red';
 				}
-			})
-			.catch((error) => {
-				console.log(error);
-			});
+				
+				message = (await response.json()).message;
+				toastOpen = true;
+			}
+			catch(e) {
+				error = true;
+				color = 'red';
+				toastOpen = true;
+				message = 'Errore di rete';
+			}
 		}
 	};
 
@@ -123,7 +136,9 @@
 				{#each filteredItems as item}
 					<TableBodyRow>
 						<TableBodyCell tdClass="px-6 py-4 whitespace-nowrap font-medium flex items-center gap-4">
-							<img referrerpolicy="no-referrer" src={createProfileImage(item.displayName || 'U', item.customClaims?.color)} alt="Profile" class="h-7 w-7 rounded-full" />
+							<div style="background: {item.customClaims?.color || '#000'};" class="h-7 w-7 rounded-full flex items-center justify-center" >
+								{item.displayName?.charAt(0).toUpperCase() || 'U'}
+							</div>
 							<span class="mr-4">{item.displayName}</span>
 						</TableBodyCell>
 						<TableBodyCell>{item.email}</TableBodyCell>
@@ -177,3 +192,8 @@
 		</Table>
 	</div>
 {/if}
+
+<Toast on:close={() => toastOpen = false} bind:open={toastOpen} color={color} class="w-max mt-5 mx-auto right-0 left-0 fixed bottom-5" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
+	<svelte:component this={error ? XCircle : CheckCircle2} class="w-6 h-6  text-{color}-400" slot="icon"/>
+	<span class={`text-${color}-400 font-semibold`}>{message}</span>
+</Toast>
