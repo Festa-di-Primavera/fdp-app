@@ -34,7 +34,6 @@ export const POST: RequestHandler = async ({ request }) => {
 		let randomColor: string;
 		do{
 			randomColor = `#${Math.floor(Math.random()*16777215).toString(16)}`;
-			console.log('color: ', randomColor);
 		} while(isTooLight(randomColor));
 
 		adminApp.setCustomUserClaims(userId, {role: 'normal', accessLevel: 0, alias: name, color: randomColor});
