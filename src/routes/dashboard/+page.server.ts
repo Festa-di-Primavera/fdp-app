@@ -25,10 +25,10 @@ export async function load({cookies}) {
 
 		const ticketData: Ticket[] = querySnapshot.docs.map((ticketDoc) => {
 
-			let currSeller: string = "";
+			let currSeller: string | null;
 
 			if(!ticketDoc.data().seller) {
-				currSeller = "";
+				currSeller = null;
 			} else {
 				if(sellers.find((seller) => seller.uid === ticketDoc.data().seller)) {
 					currSeller = sellers.find((seller) => seller.uid === ticketDoc.data().seller)?.customClaims?.alias;
