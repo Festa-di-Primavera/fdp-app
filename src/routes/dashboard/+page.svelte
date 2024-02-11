@@ -4,15 +4,18 @@
 	import { getAuth, signInWithCustomToken } from 'firebase/auth';
 
 	import { getClientApp } from '$lib/firebase/client';
+	
+	import { XCircle } from 'lucide-svelte';
 
 	import { user } from '../../store/store';
 	import type { Ticket } from '../../models/ticket';
-	import Tickets from '../../components/graphs/Tickets.svelte';
-	import CheckInPerTime from '../../components/graphs/CheckInPerTime.svelte';
-	import TicketsPerPerson from '../../components/graphs/TicketsPerPerson.svelte';
-	import { XCircle } from 'lucide-svelte';
+	import { computeSellersStats, computeSalesPerTime, computeCheckInPerTime, SalesTimeSlot, CheckInTimeSlot } from '$lib/graphs/utils';
+
+	import TicketsECharts from '../../components/graphs/TicketsECharts.svelte';
 	import ExportToCsv from '../../components/ExportToCSV.svelte';
-	import SalesPerTime from '../../components/graphs/SalesPerTime.svelte';
+	import SalesPerTimeECharts from '../../components/graphs/SalesPerTimeECharts.svelte';
+	import TicketsPerPersonECharts from '../../components/graphs/TicketsPerPersonECharts.svelte';
+	import CheckInPerTimeECharts from '../../components/graphs/CheckInPerTimeECharts.svelte';
 
 	export let data: { token:string, strTicketData: string };
 	
@@ -21,136 +24,19 @@
 
 	let tickets: Ticket[] = JSON.parse(data.strTicketData) as Ticket[];
 
-	let numberOfCheckIns: number = 0;
-	let numberOfSales: number = 0;
-	let ticketsCheckIn: { x: string; y: number }[] = [];
-	let ticketsSolds: { x: string; y: number }[] = [];
-
+	// cards and pie chart data
 	let checkedTicketsCount: number = tickets.filter((ticket) => ticket.checkIn !== null).length;
-	let notCheckedTicketsCount: number =
-		tickets.filter((ticket) => ticket.soldAt !== null).length - checkedTicketsCount;
+	let notCheckedTicketsCount: number = tickets.filter((ticket) => ticket.soldAt !== null).length - checkedTicketsCount;
 	let notSoldTicketsCount: number = tickets.filter((ticket) => ticket.soldAt === null).length;
 
-	interface TimeSlotData {
-		x: string;
-		y: number;
-	}
-
-	let mappings: Map<string, number> = new Map();
-
-	function computeDataCheckIn(
-		tickets: Ticket[],
-		slotTime: number,
-		maxSlots: number
-	): TimeSlotData[] {
-		const timeSlotsMap: Map<number, number> = new Map();
-
-		for (let ticket of tickets) {
-			if (ticket.checkIn !== null) {
-				const timestamp = new Date(ticket.checkIn).getTime();
-				const slotIndex = Math.floor(timestamp / slotTime);
-				timeSlotsMap.set(slotIndex, (timeSlotsMap.get(slotIndex) || 0) + 1);
-			}
-		}
-
-		const sortedTimeSlots = Array.from(timeSlotsMap.entries()).sort((a, b) => a[0] - b[0]);
-
-		if (sortedTimeSlots.length === 0) {
-			return [];
-		}
-
-		const timeSlotData: TimeSlotData[] = [];
-		let currentSlotIndex = sortedTimeSlots[0][0];
-		let currentIndex = 0;
-		numberOfCheckIns = 0;
-
-		while (currentIndex < sortedTimeSlots.length) {
-			if (sortedTimeSlots[currentIndex][0] === currentSlotIndex) {
-				const timestamp = currentSlotIndex * slotTime;
-				const date = new Date(timestamp);
-				numberOfCheckIns += sortedTimeSlots[currentIndex][1];
-
-				const label = date.toString();
-				timeSlotData.push({ x: label, y: sortedTimeSlots[currentIndex][1] });
-				currentIndex++;
-			} else {
-				const timestamp = currentSlotIndex * slotTime;
-				const date = new Date(timestamp);
-
-				const label = date.toString();
-				timeSlotData.push({ x: label, y: 0 });
-			}
-			currentSlotIndex++;
-		}
-
-		return timeSlotData;
-	}
-
-	function computeDataSales(tickets: Ticket[], slotTime: number, maxSlots: number): TimeSlotData[] {
-		const timeSlotsMap: Map<number, number> = new Map();
-		mappings.clear();
-
-		for (let ticket of tickets) {
-			if (ticket.soldAt !== null) {
-				const timestamp = new Date(ticket.soldAt).getTime();
-				const slotIndex = Math.floor(timestamp / slotTime);
-				timeSlotsMap.set(slotIndex, (timeSlotsMap.get(slotIndex) || 0) + 1);
-			}
-
-			if (ticket.seller !== null) {
-				mappings.set(ticket.seller, (mappings.get(ticket.seller) || 0) + 1);
-			}
-		}
-
-		const sortedTimeSlots = Array.from(timeSlotsMap.entries()).sort((a, b) => a[0] - b[0]);
-
-		if (sortedTimeSlots.length === 0) {
-			return [];
-		}
-
-		const timeSlotData: TimeSlotData[] = [];
-		let currentSlotIndex = sortedTimeSlots[0][0];
-		let currentIndex = 0;
-		numberOfSales = 0;
-
-		while (currentIndex < sortedTimeSlots.length) {
-			if (sortedTimeSlots[currentIndex][0] === currentSlotIndex) {
-				const timestamp = currentSlotIndex * slotTime;
-				const date = new Date(timestamp);
-				numberOfSales += sortedTimeSlots[currentIndex][1];
-
-				const label = date.toString();
-				timeSlotData.push({ x: label, y: sortedTimeSlots[currentIndex][1] });
-				currentIndex++;
-			} else {
-				const timestamp = currentSlotIndex * slotTime;
-				const date = new Date(timestamp);
-
-				const label = date.toString();
-				timeSlotData.push({ x: label, y: 0 });
-			}
-			currentSlotIndex++;
-		}
-
-		return timeSlotData;
-	}
-
-	let timeWindowCheckinPerTime = 1000 * 60 * 60 * 24; // 1 day
-	let numberOfBarCheckinPerTime = 7;
-	let timeWindowSalesPerTime = 1000 * 60 * 60 * 24; // 1 day
-	let numberOfBarSalesPerTime = 7;
-
-	ticketsCheckIn = computeDataCheckIn(tickets, timeWindowCheckinPerTime, numberOfBarCheckinPerTime);
-	ticketsSolds = computeDataSales(tickets, timeWindowCheckinPerTime, numberOfBarCheckinPerTime);
-
-	$: {
-		ticketsCheckIn = computeDataCheckIn(
-			tickets,
-			timeWindowCheckinPerTime,
-			numberOfBarCheckinPerTime
-		);
-	}
-
+	
+	let timeWindowSalesPerTime: SalesTimeSlot = SalesTimeSlot.DAY;
+	let timeWindowCheckInPerTime: CheckInTimeSlot = CheckInTimeSlot.HOUR;
+	
+	$: sellersStats = computeSellersStats(tickets);
+	$: salesPerTime = computeSalesPerTime(tickets, timeWindowSalesPerTime);
+	$: checkInPerTime = computeCheckInPerTime(tickets, timeWindowCheckInPerTime);
+	
 	onMount(async() => {
 		if(getAuth(getClientApp()).currentUser === null && data.token){
 			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
@@ -213,19 +99,17 @@
 					</Card>
 				</div>
 
-				<Tickets bind:checkedTicketsCount bind:notSoldTicketsCount bind:notCheckedTicketsCount />
-				<TicketsPerPerson bind:mappings />
-				<CheckInPerTime
-					bind:ticketsCheckIn
-					bind:numberOfCheckIns
-					bind:timeWindow={timeWindowCheckinPerTime}
-					bind:numberOfBar={numberOfBarCheckinPerTime}
-				/>
-				<SalesPerTime
-					bind:ticketsSolds
-					bind:numberOfSales
+				<TicketsECharts bind:checkedTicketsCount bind:notCheckedTicketsCount bind:notSoldTicketsCount />
+				<TicketsPerPersonECharts bind:sellersStats />
+
+				<SalesPerTimeECharts
+					bind:ticketsData={salesPerTime}
 					bind:timeWindow={timeWindowSalesPerTime}
-					bind:numberOfBar={numberOfBarSalesPerTime}
+				/>
+
+				<CheckInPerTimeECharts
+					bind:ticketsData={checkInPerTime}
+					bind:timeWindow={timeWindowCheckInPerTime}
 				/>
 			</div>
 				<ExportToCsv bind:tickets />
