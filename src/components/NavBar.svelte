@@ -106,11 +106,11 @@
 			{/if}
 			{#if $user !== null}
 				<div class="dark:text-white flex text-md items-center self-baseline w-full justify-between p-3 rounded-lg bg-gray-100 dark:bg-gray-600">
-					<div class="flex gap-4 text-md items-center truncate overflow-ellipsis">
-						<div style="background: {color || '#000'};" class="h-7 w-7 rounded-full flex items-center justify-center" >
-							{$user.displayName?.charAt(0).toUpperCase() || 'U'}
+					<div class="flex gap-4 text-md items-center truncate overflow-ellipsis pr-5">
+						<div style="background: {color || '#000'};" class="h-7 min-w-7 rounded-full flex items-center justify-center" >
+							{$user.displayName?.charAt(0).toUpperCase() || 'NO'}
 						</div>
-						<span>{$user.displayName}</span>
+						<span class="overflow-x-hidden overflow-ellipsis">{$user.displayName || 'Non registrato'}</span>
 					</div>
 					
 					<button on:click={() => {handleSignOut(); hidden=true}}>
