@@ -108,25 +108,44 @@ export async function PUT( { params } ) {
 		});
 	}
 
-	const sellerID = ticketDoc.data().seller;
-	const sellerUser = await adminApp.getUser(sellerID);
-	const sellerName = sellerUser.customClaims?.alias;
+	try{
+		const sellerID = ticketDoc.data().seller;
+		const sellerUser = await adminApp.getUser(sellerID);
+		const sellerName = sellerUser.customClaims?.alias;
 
-	const ticket: Ticket = {
-		ticketID: ticketDoc.id,
-		name: ticketDoc.data().name,
-		surname: ticketDoc.data().surname,
-		checkIn: ticketDoc.data().checkIn?.toDate(),
-		soldAt: ticketDoc.data().soldAt?.toDate(),
-		seller: sellerName
-	} as Ticket;
+		const ticket: Ticket = {
+			ticketID: ticketDoc.id,
+			name: ticketDoc.data().name,
+			surname: ticketDoc.data().surname,
+			checkIn: ticketDoc.data().checkIn?.toDate(),
+			soldAt: ticketDoc.data().soldAt?.toDate(),
+			seller: sellerName
+		} as Ticket;
 
-	return json({
-		status: 200,
-		body: {
-			ticket
-		}
-	});
+		return json({
+			status: 200,
+			body: {
+				ticket
+			}
+		});
+	}
+	catch(e) {
+		const ticket: Ticket = {
+			ticketID: ticketDoc.id,
+			name: ticketDoc.data().name,
+			surname: ticketDoc.data().surname,
+			checkIn: ticketDoc.data().checkIn?.toDate(),
+			soldAt: ticketDoc.data().soldAt?.toDate(),
+			seller: null
+		} as Ticket;
+
+		return json({
+			status: 206,
+			body: {
+				ticket
+			}
+		});
+	}
 }
 
 export async function POST( { params, request } ) {
