@@ -19,3 +19,5 @@ export const handleSignOut = async () => {
 		console.error(error);
 	}
 };
+
+export const theme: Writable<'light' | 'dark'> = writable();

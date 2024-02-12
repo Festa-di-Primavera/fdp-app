@@ -1,11 +1,11 @@
 <script lang="ts">
     import { DarkMode, Drawer, CloseButton } from "flowbite-svelte";
-	import { AlignJustify, DollarSign, LayoutDashboard, LogOut, ScanLine, User, Ticket, Users, Home } from 'lucide-svelte';
+	import { AlignJustify, DollarSign, LayoutDashboard, LogOut, ScanLine, User, Ticket, Users, Home, LucideThermometer } from 'lucide-svelte';
 	import Logo from "./Logo.svelte";
   	import { sineIn } from 'svelte/easing';
 
 	import { page } from '$app/stores';  
-	import { handleSignOut, user } from "../store/store";
+	import { handleSignOut, user, theme } from "../store/store";
 	import { onIdTokenChanged, getAuth } from "firebase/auth";
 	import { getClientApp } from "$lib/firebase/client";
 	import { roles } from "../models/role";
@@ -67,6 +67,15 @@
 		duration: 200,
 		easing: sineIn
 	};
+
+	function changeTheme() {
+		if($theme == 'dark'){
+			$theme = 'light'
+		}
+		else{
+			$theme = 'dark'
+		}
+	}
 </script>
 	
 <navbar class="z-[99] sticky top-0 flex items-center justify-between w-full bg-gray-100 dark:bg-gray-900">
@@ -74,7 +83,10 @@
 		<Logo/>
 	</a>
 	<div class="flex items-center justify-end">
-		<DarkMode btnClass='text-gray-500 mr-5 dark:text-gray-400 rounded-lg text-sm p-1.5'/>
+		<button on:click={changeTheme}>
+			<DarkMode btnClass='text-gray-500 mr-5 dark:text-gray-400 rounded-lg text-sm p-1.5'/>
+		</button>
+		
 		{#if $user !== null}
 			<button on:click={()=> {hidden = false}} class="p-1 mr-5 rounded-md border-2 border-black dark:border-white dark:border-opacity-20 border-opacity-10"><AlignJustify class="text-gray-500 dark:text-gray-400"/></button>
 		{/if}
@@ -107,7 +119,7 @@
 			{#if $user !== null}
 				<div class="dark:text-white flex text-md items-center self-baseline w-full justify-between p-3 rounded-lg bg-gray-100 dark:bg-gray-600">
 					<div class="flex gap-4 text-md items-center truncate overflow-ellipsis pr-5">
-						<div style="background: {color || '#000'};" class="h-7 min-w-7 rounded-full flex items-center justify-center" >
+						<div style="background: {color || '#000'};" class="h-7 min-w-7 rounded-full flex items-center justify-center text-white" >
 							{$user.displayName?.charAt(0).toUpperCase() || 'NO'}
 						</div>
 						<span class="overflow-x-hidden overflow-ellipsis">{$user.displayName || 'Non registrato'}</span>

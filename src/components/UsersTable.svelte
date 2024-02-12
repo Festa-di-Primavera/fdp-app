@@ -150,7 +150,7 @@
 				{#each filteredItems as item}
 					<TableBodyRow>
 						<TableBodyCell tdClass="px-6 py-4 whitespace-nowrap font-medium flex items-center gap-4">
-							<div style="background: {item.customClaims?.color || '#000'};" class="h-7 w-7 rounded-full flex items-center justify-center" >
+							<div style="background: {item.customClaims?.color || '#000'};" class="h-7 w-7 rounded-full flex items-center justify-center text-white" >
 								{item.displayName?.charAt(0).toUpperCase() || 'U'}
 							</div>
 							<span class="mr-4">{item.displayName}</span>

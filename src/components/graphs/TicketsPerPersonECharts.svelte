@@ -2,6 +2,13 @@
 	import type { ChartData } from '$lib/graphs/utils';
 	import { Card } from 'flowbite-svelte';
 	import { Chart, type EChartsOptions } from 'svelte-echarts';
+	import { theme } from '../../store/store';
+
+	let currentTheme = $theme;
+
+	theme.subscribe((value) => {
+		currentTheme = value;
+	});
 
 	export let sellersStats: ChartData;
 	const MAX_VISIBLE_BARS = 4;
@@ -19,6 +26,14 @@
 			axisLabel: {
 				interval: 0,
 				overflow: 'truncate',
+				textStyle:{
+					color: currentTheme == 'dark' ? 'white' : 'rgb(55 65 81)'
+				}
+			},
+			axisLine: {
+				lineStyle: {
+					color: currentTheme == 'dark' ? 'white' : 'rgb(55 65 81)'
+				}
 			}
         },
         yAxis: {
@@ -29,6 +44,14 @@
 				symbol: ['none', 'arrow'],
 				symbolSize: [8, 8],
 				symbolOffset: [0, 8],
+				lineStyle: {
+					color: currentTheme == 'dark' ? 'white' : 'rgb(55 65 81)'
+				}
+			},
+			axisLabel: {
+				textStyle:{
+					color: currentTheme == 'dark' ? 'white' : 'rgb(55 65 81)'
+				}
 			},
 			minInterval: 5,
 			min: 0,
@@ -39,6 +62,7 @@
 			axisPointer: {
 				type: 'shadow',
 			},
+			
 			/*
 				formatter: (item: any) => {
 					return (`<div class="text-center bg-white dark:bg-gray-800">
