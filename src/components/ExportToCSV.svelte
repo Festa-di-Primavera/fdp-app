@@ -1,4 +1,5 @@
 <script lang="ts">
+	import moment from 'moment-timezone';
 	import { Button } from 'flowbite-svelte';
 	import type { Ticket } from '../models/ticket';
 
@@ -11,8 +12,8 @@
 				ticket.ticketID,
 				ticket.name,
 				ticket.surname,
-				ticket.checkIn,
-				ticket.soldAt,
+				ticket.checkIn ? moment.tz(ticket.checkIn, moment.tz.guess()) : null,
+				ticket.soldAt ? moment.tz(ticket.soldAt, moment.tz.guess()) : null,
 				ticket.seller
 			])
 		];
