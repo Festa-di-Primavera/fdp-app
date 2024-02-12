@@ -4,7 +4,7 @@
 	import { Chart, type EChartsOptions } from "svelte-echarts";
 	import { theme } from "../../store/store";
 
-	let currentTheme = $theme;
+	let currentTheme = localStorage.getItem('color-theme') || 'dark';
 
 	theme.subscribe((value) => {
 		currentTheme = value;
@@ -15,7 +15,6 @@
 	export let ticketsData: ChartData;
 	export let timeWindow: number;
 
-	
 	let selected: CheckInTimeSlot = CheckInTimeSlot.HOUR;
 	const timeOptions = [
 		{ value: CheckInTimeSlot.FIFTEEN_MINUTES, name: '15 min ' },
@@ -40,9 +39,7 @@
 					// replace , with \n
 					return value.replace(/,/g, '\n');
 				},
-				textStyle:{
-					color: currentTheme == 'dark' ? 'white' : 'rgb(55 65 81)'
-				}
+				color: currentTheme == 'dark' ? 'white' : 'rgb(55 65 81)'
 			},
 			axisLine: {
 				lineStyle: {
@@ -63,16 +60,14 @@
 				}
 			},
 			axisLabel: {
-				textStyle:{
-					color: currentTheme == 'dark' ? 'white' : 'rgb(55 65 81)'
-				}
+				color: currentTheme == 'dark' ? 'white' : 'rgb(55 65 81)'
 			},
 			minInterval: 5,
 			min: 0,
 			max: Math.ceil(Math.max(...ticketsData.datasets) / 5) * 5,
 		},
 		tooltip: {
-			trigger: 'axis',
+			trigger: 'item',
 			axisPointer: {
 				type: 'shadow',
 			},
@@ -94,15 +89,41 @@
 			xAxisIndex: 0,
 			start: 0,
 			end: numberOfBars > MAX_VISIBLE_BARS ? 100 / (numberOfBars / MAX_VISIBLE_BARS) : 100,
-			zoomOnMouseWheel: false,
+			zoomOnMouseWheel: true,
 			moveOnMouseMove: true,
-			moveOnMouseWheel: true,
-
-		}]
+			moveOnMouseWheel: false
+		}],
+		toolbox: {
+			show : true,
+			bottom: 0,
+			showTitle: false,
+			itemSize: 20,
+			feature : {
+				saveAsImage: {
+					show: true, 
+					type: 'png', 
+					
+					name: 'graph',
+					iconStyle: {
+						borderColor: currentTheme == 'dark' ? 'white' : 'rgb(55 65 81)',
+						borderWidth: 1.5,
+						
+					},
+					icon: `path://M 7 10 L 12 15 L 17 10 M 21 15 v 4 a 2 2 0 0 1 -2 2 H 5 a 2 2 0 0 1 -2 -2 v -4 M 12 4 L 12 15`,
+					emphasis:{
+						iconStyle:{
+							borderColor: '#EF562F'
+						}
+					}
+				},
+			}
+		},
     } as EChartsOptions;
+
+	
 </script>
 
-<Card class="w-full h-96">
+<Card class=" w-full h-96">
 	<div class="mb-3 flex justify-between">
 		<div class="grid grid-cols-2 gap-4">
 			<div>
@@ -123,5 +144,5 @@
 			/>
 		</div>
 	</div>
-	<Chart {options} />
+	<Chart renderer="svg" {options}/>
 </Card>

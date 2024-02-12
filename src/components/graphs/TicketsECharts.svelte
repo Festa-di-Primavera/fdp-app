@@ -7,7 +7,7 @@
 	export let notCheckedTicketsCount: number;
 	export let notSoldTicketsCount: number;
 
-	let currentTheme = $theme;
+	let currentTheme = localStorage.getItem('color-theme') || 'dark';
 
 	theme.subscribe((value) => {
 		currentTheme = value;
@@ -75,15 +75,36 @@
 						}
 					}
 				],
-				tooltip:{
-					extraCssText: `background-color: ${currentTheme == 'dark' ? 'rgb(55 65 81)' : 'white'}; border-width: 2px; color: ${currentTheme == 'light' ? 'rgb(55 65 81)' : 'white'};`
-				}
 			}
-		]
+		],
+		toolbox: {
+			show : true,
+			bottom: 0,
+			showTitle: false,
+			itemSize: 20,
+			feature : {
+				saveAsImage: {
+					show: true, 
+					type: 'png', 
+					name: 'graph',
+					iconStyle: {
+						borderColor: currentTheme == 'dark' ? 'white' : 'rgb(55 65 81)',
+						borderWidth: 1.5,
+						
+					},
+					icon: `path://M 7 10 L 12 15 L 17 10 M 21 15 v 4 a 2 2 0 0 1 -2 2 H 5 a 2 2 0 0 1 -2 -2 v -4 M 12 4 L 12 15`,
+					emphasis:{
+						iconStyle:{
+							borderColor: '#EF562F'
+						}
+					}
+				},
+			}
+		},
 	} as EChartsOptions;
 </script>
 
-<Card class="w-full h-96" padding="md">
+<Card class=" w-full h-96" padding="md">
 	<div class="flex w-full items-start justify-between">
 		<div class="flex-col items-center">
 			<div class="mb-1 flex items-center">
