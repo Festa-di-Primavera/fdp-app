@@ -3,6 +3,7 @@
 	import { CheckCircle2, ChevronsUpDown, Filter, PenBox, Search, Trash2, XCircle } from "lucide-svelte";
 	import { roles } from "../models/role";
 	import { user } from "../store/store";
+	import { writable } from 'svelte/store';
 	
 	export let users: any;
 	export let currSelectedUser: any | undefined;
@@ -94,6 +95,19 @@
 	let filter = 'nome';
 	let filteredItems: any[] = [];
 
+	const sortKey = writable('displayName'); // displayName, email, role, alias
+	const sortDirection = writable(1);
+	const sortItems = writable(filteredItems.slice()); 
+
+	const sortTable = (key: string) => {
+		if ($sortKey === key) {
+			sortDirection.update((val) => -val);
+		} else {
+			sortKey.set(key);
+			sortDirection.set(1);
+		}
+  	};
+
 	$: {
 		filteredItems = (users?.filter((item: any) => {
 			if (filter === 'nome')
@@ -106,17 +120,34 @@
 				return item.customClaims?.alias.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
 			else return true;
 		}));
+		
+		const key = $sortKey;
+		const direction = $sortDirection;
+		sortItems.set(filteredItems);
+		
+		const sorted = [...$sortItems].sort((a, b) => {
 
-		filteredItems.sort((a, b) => {
-			if (a.displayName < b.displayName) {
-				return -1;
+			let aVal;
+			let bVal;
+
+			if(key == "role" || key == "alias"){
+				aVal = a.customClaims[key];
+				bVal = b.customClaims[key];
+			} else {
+				aVal = a[key];
+				bVal = b[key];
 			}
-			if (a.displayName > b.displayName) {
-				return 1;
+
+			if (aVal < bVal) {
+				return -direction;
+			} else if (aVal > bVal) {
+				return direction;
 			}
-			return a.email < b.email ? -1 : 1;
+			return 0;
 		});
+		sortItems.set(sorted);
 	}
+
 </script>
 
 {#if $user}
@@ -140,14 +171,14 @@
 	<div class="mx-5 mt-5">
 		<Table hoverable={true} class="relative overflow-x-auto rounded-md shadow-md sm:rounded-lg mb-48">
 			<TableHead>
-				<TableHeadCell>Nome</TableHeadCell>
-				<TableHeadCell>Email</TableHeadCell>
-				<TableHeadCell>Ruolo</TableHeadCell>
-				<TableHeadCell>Alias</TableHeadCell>
+				<TableHeadCell on:click={() => sortTable('displayName')} class="cursor-pointer select-none">Nome</TableHeadCell>
+				<TableHeadCell on:click={() => sortTable('email')} class="cursor-pointer select-none">Email</TableHeadCell>
+				<TableHeadCell on:click={() => sortTable('role')} class="cursor-pointer select-none">Ruolo</TableHeadCell>
+				<TableHeadCell on:click={() => sortTable('alias')} class="cursor-pointer select-none">Alias</TableHeadCell>
 				<TableHeadCell class="text-center">Elimina</TableHeadCell>
 			</TableHead>
 			<TableBody tableBodyClass="divide-y">
-				{#each filteredItems as item}
+				{#each $sortItems as item}
 					<TableBodyRow>
 						<TableBodyCell tdClass="px-6 py-4 whitespace-nowrap font-medium flex items-center gap-4">
 							<div style="background: {item.customClaims?.color || '#000'};" class="h-7 w-7 rounded-full flex items-center justify-center text-white" >

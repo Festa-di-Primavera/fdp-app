@@ -11,7 +11,7 @@ export async function load({cookies}) {
 
 	/* if (user?.accessLevel >= roles.SUPERADMIN) { */
 	if(user?.email === import.meta.env.VITE_ADMIN_EMAIL1 || user?.email === import.meta.env.VITE_ADMIN_EMAIL2) {
-		const tok = await app.createCustomToken(user?.uid || '');
+		const tok = await app.createCustomToken(user?.uid ?? '');
 
 		return {
 			token: tok
