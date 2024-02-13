@@ -123,7 +123,7 @@
 				);
 				$user = userCredential.user;
 
-				await sendEmailVerification($user);
+				await sendEmailVerification($user, {url: 'https://fdp-app-git-dev-customemailhandle-isax03.vercel.app/'});
 
 				toastMessage = ToastMessages.EMAIL_VERIFICATION_SENT;
 				open = true;

@@ -20,24 +20,20 @@ async function handleVerifyEmail(auth: Auth, actionCode: string, continueUrl: st
 
 		console.log(resp);
 
-		const response = new Response(JSON.stringify({redirect: continueUrl}), {
+		const response = {
 			status: 200,
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
+			url: continueUrl || '/',
+		}
 
 		return response;
 	}
 	catch(error) {
 		console.error(error);
 
-		const response = new Response(JSON.stringify({error: error.message}), {
+		const response = {
 			status: 500,
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
+			error: error.message,
+		}
 
 		return response;
 	}
