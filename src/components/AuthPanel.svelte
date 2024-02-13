@@ -1,6 +1,5 @@
 <script lang="ts">
 	import {
-		type User,
 		type ActionCodeSettings,
 		onAuthStateChanged,
 		createUserWithEmailAndPassword,
@@ -22,7 +21,6 @@
 	let password: string = '';
 	let repeatPassword: string = '';
 	let pwVisible: boolean = false;
-	let rpPwVisible: boolean = false;
 	let validatorError: boolean = true;
 
 	let open: boolean = false;
@@ -283,7 +281,7 @@
 					Conferma password
 					<Input
 						name="password"
-						type={rpPwVisible ? 'text' : 'password'}
+						type={pwVisible ? 'text' : 'password'}
 						color={!validatorError ? 'base' : 'red'}
 						bind:value={repeatPassword}
 						on:blur={() => (validatorError = !(password === repeatPassword))}
@@ -294,9 +292,9 @@
 							slot="right"
 							class="flex items-center justify-center"
 							tabindex="-1"
-							on:click={() => (rpPwVisible = !rpPwVisible)}
+							on:click={() => (pwVisible = !pwVisible)}
 						>
-							{#if rpPwVisible}
+							{#if pwVisible}
 								<EyeOff />
 							{:else}
 								<Eye />
