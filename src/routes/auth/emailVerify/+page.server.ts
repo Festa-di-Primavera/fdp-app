@@ -1,6 +1,7 @@
 import { applyActionCode, type Auth } from 'firebase/auth';
 import { getAuth } from 'firebase/auth';
 import { getClientApp } from '$lib/firebase/client.js';
+import type { FirebaseError } from 'firebase/app';
 
 export async function load({ url }) {
 	const auth = getAuth(getClientApp());
@@ -12,13 +13,17 @@ export async function load({ url }) {
 	if (mode === 'verifyEmail' && actionCode) {
 		return handleVerifyEmail(auth, actionCode, continueUrl);
 	}
+
+	return {
+		status: 400,
+		error: 'Invalid mode or action code',
+		url: '/',
+	};
 }
 
 async function handleVerifyEmail(auth: Auth, actionCode: string, continueUrl: string | null) {
 	try{
-		const resp = await applyActionCode(auth, actionCode);
-
-		console.log(resp);
+		await applyActionCode(auth, actionCode);
 
 		const response = {
 			status: 200,
@@ -28,11 +33,18 @@ async function handleVerifyEmail(auth: Auth, actionCode: string, continueUrl: st
 		return response;
 	}
 	catch(error) {
-		console.error(error);
-
-		const response = {
-			status: 500,
-			error: error.message,
+		let response;
+		if ((error as FirebaseError).code === 'auth/invalid-action-code') {
+			response = {
+				status: 401,
+				url: '/',
+			}
+		}
+		else {
+			response = {
+				status: 500,
+				url: '/',
+			}
 		}
 
 		return response;
