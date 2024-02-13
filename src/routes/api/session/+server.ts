@@ -24,12 +24,39 @@ export const POST: RequestHandler = async ({ request }) => {
 	const [scheme, token] = authHeader.split(' ');
 
 	if (request.body) {
-		const name = (await request.json()).name;
+		let name = (await request.json()).name;
 		
 		const adminApp = getAuth(getAdminApp());
 		const userId = (await verifyIdToken(token)).uid;
 
 		adminApp.updateUser(userId, {displayName: name});
+
+		const allUsers = await getAuth(getAdminApp()).listUsers();
+
+		const existingsAliases = new Set<string>();
+
+		allUsers.users.forEach((userRecord) => {
+			existingsAliases.add(userRecord.customClaims?.alias);
+		});
+
+		let validAlias = false;
+
+		while(!validAlias){
+			if(existingsAliases.has(name)){
+				const regex = /\d+$/;
+				const matches = name.match(regex);
+
+				if (matches) {
+					const ultimoNumero = parseInt(matches[0]);
+					const nuovoNumero = ultimoNumero + 1;
+					name = name.replace(regex, '') + nuovoNumero;
+				} else {
+					name += '1';
+				}
+			} else {
+				validAlias = true;
+			}
+		}
 
 		let randomColor: string;
 		do{
