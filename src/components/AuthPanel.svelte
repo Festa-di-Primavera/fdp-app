@@ -1,11 +1,12 @@
 <script lang="ts">
 	import {
 		type User,
+		type ActionCodeSettings,
 		onAuthStateChanged,
 		createUserWithEmailAndPassword,
 		signInWithEmailAndPassword,
 		getAuth,
-		sendEmailVerification
+		sendEmailVerification,
 	} from 'firebase/auth';
 	import { FirebaseError } from 'firebase/app';
 	import { CheckCircle2, Eye, EyeOff, XCircle } from 'lucide-svelte';
@@ -64,6 +65,23 @@
 		
 	}
 
+	const sendEmail = async () => {
+		const actionSettings: ActionCodeSettings = {
+			// ! ATTENZIONE: Cambiare l'url in produzione e aggiungere il dominio a firebase "Autenticazione"
+			url: 'https://fdp-app-git-dev-customemailhandle-isax03.vercel.app/',
+		};
+		await sendEmailVerification($user!, actionSettings);
+
+		toastMessage = ToastMessages.EMAIL_VERIFICATION_SENT;
+		open = true;
+
+		const timeOut = setTimeout(() => {
+			open = false;
+			clearTimeout(timeOut);
+		}, 3500);
+
+		color = 'green';
+	}
 
 	const handleSubmission = async () => {
 		if (option === 'login') {
@@ -123,17 +141,7 @@
 				);
 				$user = userCredential.user;
 
-				await sendEmailVerification($user);
-
-				toastMessage = ToastMessages.EMAIL_VERIFICATION_SENT;
-				open = true;
-
-				const timeOut = setTimeout(() => {
-					open = false;
-					clearTimeout(timeOut);
-				}, 3500);
-
-				color = 'green';
+				await sendEmail();
 			} catch (error) {
 				if((error as FirebaseError).code === 'auth/invalid-email'){
 					toastMessage = ToastMessages.INVALID_EMAIL_ERROR;
@@ -312,6 +320,8 @@
 {:else if !$user?.emailVerified}
 	<div>
 		<p>Ti è stata mandata una mail di verifica all'indirizzo {$user?.email}</p>
+		<p>Controlla la tua casella di posta elettronica e clicca sul link per confermare la tua email.</p>
+		<p>Se non hai ricevuto la mail di verifica, clicca <button on:click={sendEmail} class="text-primary-500">qui</button> per richiederne un'altra.</p>
 	</div>
 {/if}
 

@@ -55,8 +55,6 @@
 			message = (await res.json()).message;
 		}
 		catch(e) {
-			console.log(e);
-
 			error = true;
 			color = 'red';
 			changeToastOpen = true;
