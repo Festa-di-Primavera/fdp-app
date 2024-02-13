@@ -10,7 +10,7 @@ export async function load({ url }) {
 	const continueUrl: string | null = url.searchParams.get('continueUrl');
 
 	if (mode === 'verifyEmail' && actionCode) {
-		handleVerifyEmail(auth, actionCode, continueUrl);
+		return handleVerifyEmail(auth, actionCode, continueUrl);
 	}
 }
 
