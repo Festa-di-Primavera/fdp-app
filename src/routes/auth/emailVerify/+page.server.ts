@@ -16,7 +16,6 @@ export async function load({ url }) {
 
 	return {
 		status: 400,
-		error: 'Invalid mode or action code',
 		url: '/',
 	};
 }

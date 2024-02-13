@@ -18,7 +18,7 @@
 </script>
 
 <section class="flex h-full w-full flex-grow flex-col items-center gap-4">
-	<div class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5">
+	<div class="flex w-full flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5">
 		{#if data.status === 200}
 			<h1 class="text-3xl font-bold text-primary-600">Email Verificata</h1>
 			<p class="text-left dark:text-white">
