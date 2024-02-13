@@ -1,6 +1,6 @@
 <script lang="ts">
 	export let data: { status: number, url?: string, error?: string};
 
-	console.log(data.url);
+	console.log(data);
 </script>
 
