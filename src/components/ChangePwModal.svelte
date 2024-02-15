@@ -49,6 +49,7 @@
 			color = 'red';
 			toastMessage = 'Le password sono uguali';
 			open = true;
+			error = true;
 			const timeOut = setTimeout(() => {
 				open = false;
 				clearTimeout(timeOut);
@@ -80,6 +81,7 @@
 			color = 'red';
 			toastMessage = (e as FirebaseError).message;
 			open = true;
+			error = true;
 			const timeOut = setTimeout(() => {
 				open = false;
 				clearTimeout(timeOut);
