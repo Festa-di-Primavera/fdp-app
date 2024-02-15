@@ -1,4 +1,4 @@
-import { verifyPasswordResetCode, type Auth, applyActionCode } from 'firebase/auth';
+import { verifyPasswordResetCode, type Auth, applyActionCode, checkActionCode } from 'firebase/auth';
 import { getAuth } from 'firebase/auth';
 import { getClientApp } from '$lib/firebase/client.js';
 import type { FirebaseError } from 'firebase/app';
@@ -11,12 +11,19 @@ export async function load({ url }) {
 	const actionCode: string | null = url.searchParams.get('oobCode');
 	const continueUrl: string | null = url.searchParams.get('continueUrl');
 
-	if (mode === 'resetPassword' && actionCode) {
-		return handlePasswordReset(auth, actionCode, continueUrl);
-	}
-	else if(mode === 'verifyEmail' && actionCode) {
-		return handleVerifyEmail(mode, auth, actionCode, continueUrl);
-	}
+	if(actionCode && mode)
+		if (mode === 'resetPassword') {
+			return handlePasswordReset(auth, actionCode, continueUrl);
+		}
+		else if(mode === 'verifyEmail') {
+			return handleVerifyEmail(auth, actionCode, continueUrl);
+		}
+		else if (mode === 'recoverEmail') {
+			return handleRecoverEmail(auth, actionCode, continueUrl);
+		}
+		else if (mode === 'verifyAndChangeEmail') {
+			return handleVerifyAndChangeEmail(auth, actionCode, continueUrl);
+		}
 
 	const response: ActionData = {
 		mode: null,
@@ -56,7 +63,7 @@ async function handlePasswordReset(auth: Auth, actionCode: string, continueUrl: 
 	}
 }
 
-async function handleVerifyEmail(mode: string, auth: Auth, actionCode: string, continueUrl: string | null): Promise<ActionData> {
+async function handleVerifyEmail( auth: Auth, actionCode: string, continueUrl: string | null): Promise<ActionData> {
 	const response: ActionData = {
 		mode: 'verifyEmail',
 		status: 200
@@ -66,6 +73,62 @@ async function handleVerifyEmail(mode: string, auth: Auth, actionCode: string, c
 
 		response.url = continueUrl || '/';
 
+		return response;
+	}
+	catch(error) {
+		if ((error as FirebaseError).code === 'auth/invalid-action-code') {
+			response.status = 401;
+			response.url = '/';
+		}
+		else {
+			response.status = 500;
+			response.url = '/';
+		}
+
+		return response;
+	}
+}
+
+async function handleRecoverEmail(auth: Auth, actionCode: string, continueUrl: string | null): Promise<ActionData> {
+	const response: ActionData = {
+		mode: 'recoverEmail',
+		status: 200
+	};
+	
+	try{
+		const infos = await checkActionCode(auth, actionCode);
+		await applyActionCode(auth, actionCode);
+
+		response.email = infos.data.email ? infos.data.email : undefined;
+		response.url = continueUrl || '/';
+		return response;
+	}
+	catch(error) {
+		if ((error as FirebaseError).code === 'auth/invalid-action-code') {
+			response.status = 401;
+			response.url = '/';
+		}
+		else {
+			response.status = 500;
+			response.url = '/';
+		}
+
+		return response;
+	}
+}
+
+async function handleVerifyAndChangeEmail(auth: Auth, actionCode: string, continueUrl: string | null): Promise<ActionData> {
+	const response: ActionData = {
+		mode: 'verifyAndChangeEmail',
+		status: 200
+	};
+	
+	try{
+		const infos = await checkActionCode(auth, actionCode);
+		await applyActionCode(auth, actionCode);
+
+		response.email = infos.data.email ? infos.data.email : undefined;
+		response.url = continueUrl || '/';
 		return response;
 	}
 	catch(error) {

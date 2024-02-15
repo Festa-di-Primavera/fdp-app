@@ -1,5 +1,7 @@
 <script lang="ts">
 	import EmailVerify from '../../../components/emailActions/EmailVerify.svelte';
+	import EmailChange from '../../../components/emailActions/EmailChange.svelte';
+	import EmailRecover from '../../../components/emailActions/EmailRecover.svelte';
 	import PasswordReset from '../../../components/emailActions/PasswordReset.svelte';
 	import type { ActionData } from '../../../models/email_action_data';
 
@@ -12,6 +14,10 @@
 			<EmailVerify {data} />
 		{:else if data.mode === 'resetPassword'}
 			<PasswordReset {data} />
+		{:else if data.mode === 'recoverEmail'}
+			<EmailRecover {data} />
+		{:else if data.mode === 'verifyAndChangeEmail'}
+			<EmailChange {data} />
 		{/if}
 	</div>
 </section>

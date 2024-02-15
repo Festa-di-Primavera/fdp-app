@@ -1,5 +1,5 @@
 export type ActionData = {
-	mode: 'resetPassword' | 'verifyEmail' | 'recoverEmail' | null;
+	mode: 'resetPassword' | 'verifyEmail' | 'recoverEmail' | 'verifyAndChangeEmail' | null;
 	status: number;
 	email?: string;
 	url?: string;
