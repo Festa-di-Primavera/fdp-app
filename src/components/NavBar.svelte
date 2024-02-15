@@ -17,9 +17,14 @@
 	onIdTokenChanged(getAuth(getClientApp()), async (user) => {
 		if(user !== null){
 			$user = user;
-			const claims = (await user.getIdTokenResult(true))?.claims;
-			currAccessLevel = (claims?.accessLevel as number);
-			color = claims?.color as string;
+			try{
+				const claims = (await user.getIdTokenResult(true))?.claims;
+				currAccessLevel = (claims?.accessLevel as number);
+				color = claims?.color as string;
+			}
+			catch(e){
+				console.error(e);
+			}
 		}
 	});
 
