@@ -207,7 +207,7 @@
 	</div>
 {/if}
 
-<Toast on:close={() => toastOpen = false} bind:open={toastOpen} color={color} class="w-max mt-5 mx-auto right-0 left-0 fixed bottom-5" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
+<Toast on:close={() => toastOpen = false} bind:open={toastOpen} color={color} class="w-max mt-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
 	<svelte:component this={error ? XCircle : CheckCircle2} class="w-6 h-6  text-{color}-400" slot="icon"/>
 	<span class={`text-${color}-400 font-semibold`}>{message}</span>
 </Toast>
