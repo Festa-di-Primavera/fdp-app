@@ -49,12 +49,6 @@
 			icon: Users
 		},
 		{
-			label: 'Generate',
-			slug: "/generate",
-			role: roles.SUPERADMIN,
-			icon: Ticket
-		},
-		{
 			label: 'Check-in',
 			slug: "/check-in",
 			role: roles.CHECKIN,
@@ -65,6 +59,12 @@
 			slug: "/sell",
 			role: roles.SELLER,
 			icon: DollarSign
+		},
+		{
+			label: 'Info biglietti',
+			slug: "/ticket-info",
+			role: roles.SELLER,
+			icon: Ticket
 		},
 	]
 
