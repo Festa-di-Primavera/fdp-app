@@ -26,6 +26,8 @@
 	let name: string = '';
 	let surname: string = '';
 
+	$: disableButton = name === '' || surname === '' || ticketCode === '';
+
 	onMount(async() => {
 		if(getAuth(getClientApp()).currentUser === null && data.token){
 			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
@@ -50,6 +52,7 @@
 	});
 
 	async function handleSell() {
+		disableButton = true;
 		if(name !== '' && surname !== '' && ticketCode !== ''){
 			name = name.trim();
 			surname = surname.trim();
@@ -70,9 +73,11 @@
 				});
 
 				if(response.ok){
+					error = false;
 					color = 'green';
 				}
 				else{
+					error = true;
 					color = 'red';
 				}
 				
@@ -87,6 +92,7 @@
 				color = 'red';
 				message = 'Errore di rete';
 				feedbackToastOpen = true;
+				error = true;
 				const timeOut = setTimeout(() => {
 					feedbackToastOpen = false;
 					clearTimeout(timeOut);
@@ -116,11 +122,11 @@
 			<p class="dark:text-white text-justify">Inserire nome, cognome e, scansionando il QR, il codice del biglietto.</p>
 			
 			<Label class="text-black dark:text-white font-medium text-md w-full">
-				Nome <span class="text-primary-700">*</span>
+				Nome Ospite <span class="text-primary-700">*</span>
 				<Input class="mt-1" bind:value={name} autocomplete="off"/>
 			</Label>
 			<Label class="text-black dark:text-white font-medium text-md w-full">
-				Cognome <span class="text-primary-700">*</span>
+				Cognome Ospite <span class="text-primary-700">*</span>
 				<Input class="mt-1" bind:value={surname} autocomplete="off"/>
 			</Label>
 			<Label class="text-black dark:text-white font-medium text-md w-full">
@@ -133,7 +139,7 @@
 			<div class="w-full mt-6 flex items-center justify-center">
 				<QrReader bind:codeResult={ticketCode}/>
 			</div>
-			<Button class="w-full mt-6" on:click={handleSell}>Vendi</Button>
+			<Button class="w-full mt-6" on:click={handleSell} bind:disabled={disableButton}>Vendi</Button>
 		{:else}
             <div class="w-full flex flex-col flex-grow gap-5 items-center justify-center mt-10">
                 <Spinner size="sm" class="max-w-12 self-center"/>

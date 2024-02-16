@@ -157,40 +157,51 @@ export async function POST( { params, request } ) {
 	const seller = formData.seller;
 	const soldAt = Timestamp.fromDate(new Date());
 
-	if((await getDoc(doc(getClientDB(), "tickets", code))).exists()) {
+	const ticket = await getDoc(doc(getClientDB(), "tickets", code));
 
-		try{
-			await setDoc(doc(getClientDB(), "tickets", `${code}`), {
-				name: name,
-				surname: surname,
-				checkIn: null,
-				soldAt: soldAt,
-				seller: seller
-			});
-
-			const response = new Response(JSON.stringify({ message: 'Biglietto venduto' }), {
-				status: 200,
-				headers: {
-					'content-type': 'application/json'
-				}
-			});
-
-			return response;
-		}
-		catch(e) {
-			const response = new Response(JSON.stringify({ message: 'Errore nella vendita' }), {
-				status: 500,
-				headers: {
-					'content-type': 'application/json'
-				}
-			});
-
-			return response;
-		}
-	}
-	else{
+	if(!ticket.exists()){
 		const response = new Response(JSON.stringify({ message: 'Biglietto non esistente' }), {
 			status: 404,
+			headers: {
+				'content-type': 'application/json'
+			}
+		});
+
+		return response;
+	}
+	
+	if(ticket.data().soldAt){
+		const response = new Response(JSON.stringify({ message: 'Biglietto già venduto' }), {
+			status: 403,
+			headers: {
+				'content-type': 'application/json'
+			}
+		});
+
+		return response;
+	}
+
+	try{
+		await setDoc(doc(getClientDB(), "tickets", `${code}`), {
+			name: name,
+			surname: surname,
+			checkIn: null,
+			soldAt: soldAt,
+			seller: seller
+		});
+
+		const response = new Response(JSON.stringify({ message: 'Biglietto venduto' }), {
+			status: 200,
+			headers: {
+				'content-type': 'application/json'
+			}
+		});
+
+		return response;
+	}
+	catch(e) {
+		const response = new Response(JSON.stringify({ message: 'Errore nella vendita' }), {
+			status: 500,
 			headers: {
 				'content-type': 'application/json'
 			}
