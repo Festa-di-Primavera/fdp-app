@@ -40,6 +40,28 @@ export function computeSellersStats(tickets: Ticket[]): ChartData {
 	return { labels, datasets };
 }
 
+export function computeSalesPerHour(tickets: Ticket[]): ChartData {
+	const sellHoursStats: Map<number, number> = new Map();
+
+	for (const ticket of tickets) {
+		if (ticket.soldAt !== null) {
+			sellHoursStats.set((new Date(ticket.soldAt)).getHours(), (sellHoursStats.get((new Date(ticket.soldAt)).getHours()) || 0) + 1);
+		}
+	}
+
+	const labels: string[] = [];
+	const datasets: number[] = [];
+
+	// iterate over hours
+	for (let hour = 0; hour < 24; hour++) {
+		const label = hour < 10 ? `0${hour}:00` : `${hour}:00`;
+		labels.push(label);
+		datasets.push(sellHoursStats.get(hour) || 0);
+	}
+
+	return { labels, datasets };
+}
+
 export function computeSalesPerTime(tickets: Ticket[], timeSlot: SalesTimeSlot = SalesTimeSlot.DAY): ChartData {
 	// map associa una label univoca ad un id numerico sortabile e un numero di vendite
 	const timeSlotsMap: Map<number, number> = new Map();

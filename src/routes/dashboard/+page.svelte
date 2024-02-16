@@ -9,13 +9,14 @@
 
 	import { user } from '../../store/store';
 	import type { Ticket } from '../../models/ticket';
-	import { computeSellersStats, computeSalesPerTime, computeCheckInPerTime, SalesTimeSlot, CheckInTimeSlot } from '$lib/graphs/utils';
+	import { computeSellersStats, computeSalesPerHour, computeSalesPerTime, computeCheckInPerTime, SalesTimeSlot, CheckInTimeSlot } from '$lib/graphs/utils';
 
 	import TicketsECharts from '../../components/graphs/TicketsECharts.svelte';
 	import ExportToCsv from '../../components/ExportToCSV.svelte';
 	import SalesPerTimeECharts from '../../components/graphs/SalesPerTimeECharts.svelte';
 	import TicketsPerPersonECharts from '../../components/graphs/TicketsPerPersonECharts.svelte';
 	import CheckInPerTimeECharts from '../../components/graphs/CheckInPerTimeECharts.svelte';
+	import TicketsPerHourECharts from '../../components/graphs/TicketsPerHourECharts.svelte';
 
 	export let data: { token:string, strTicketData: string };
 	
@@ -34,6 +35,7 @@
 	let timeWindowCheckInPerTime: CheckInTimeSlot = CheckInTimeSlot.HOUR;
 	
 	$: sellersStats = computeSellersStats(tickets);
+	$: sellHoursStats = computeSalesPerHour(tickets);
 	$: salesPerTime = computeSalesPerTime(tickets, timeWindowSalesPerTime);
 	$: checkInPerTime = computeCheckInPerTime(tickets, timeWindowCheckInPerTime);
 	
@@ -101,6 +103,7 @@
 
 				<TicketsECharts bind:checkedTicketsCount bind:notCheckedTicketsCount bind:notSoldTicketsCount />
 				<TicketsPerPersonECharts bind:sellersStats />
+				<TicketsPerHourECharts bind:sellHoursStats />
 
 				<SalesPerTimeECharts
 					bind:ticketsData={salesPerTime}
