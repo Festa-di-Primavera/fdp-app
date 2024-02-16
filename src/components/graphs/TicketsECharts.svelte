@@ -2,12 +2,17 @@
 	import { Card } from 'flowbite-svelte';
 	import { Chart, type EChartsOptions } from 'svelte-echarts';
 	import { theme } from '../../store/store';
+	import { onMount } from 'svelte';
 
 	export let checkedTicketsCount: number;
 	export let notCheckedTicketsCount: number;
 	export let notSoldTicketsCount: number;
 
-	let currentTheme = localStorage.getItem('color-theme') || 'dark';
+	let currentTheme: 'dark' | 'light';
+
+	onMount(() => {
+		$theme = localStorage.getItem('color-theme') as 'light' | 'dark';
+	});
 
 	theme.subscribe((value) => {
 		currentTheme = value;

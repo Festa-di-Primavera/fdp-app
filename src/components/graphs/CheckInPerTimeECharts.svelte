@@ -3,8 +3,13 @@
 	import { Card, Select } from "flowbite-svelte";
 	import { Chart, type EChartsOptions } from "svelte-echarts";
 	import { theme } from "../../store/store";
+	import { onMount } from "svelte";
 
-	let currentTheme = localStorage.getItem('color-theme') || 'dark';
+	let currentTheme: 'dark' | 'light';
+
+	onMount(() => {
+		$theme = localStorage.getItem('color-theme') as 'light' | 'dark';
+	});
 
 	theme.subscribe((value) => {
 		currentTheme = value;
@@ -119,8 +124,6 @@
 			}
 		},
     } as EChartsOptions;
-
-	
 </script>
 
 <Card class=" w-full h-96">
