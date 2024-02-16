@@ -37,6 +37,7 @@
 			left: 10,
 			right: 25,
 		},
+		backgroundColor: currentTheme == 'dark' ? 'rgb(31 41 55)' : 'white',
         xAxis: {
             data: ticketsData.labels,
 			axisLabel: {
@@ -84,7 +85,7 @@
 				labelLine: {
 					show: true,
 				},
-				name: 'Biglietti Venduti',
+				name: 'Biglietti Validati',
 				color: '#EF562F',
             }
 		],

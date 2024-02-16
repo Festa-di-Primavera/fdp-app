@@ -30,6 +30,7 @@
 				color: currentTheme == 'dark' ? 'white' : 'rgb(55 65 81)'
 			}
 		},
+		backgroundColor: currentTheme == 'dark' ? 'rgb(31 41 55)' : 'white',
 		tooltip: {
 			trigger: 'item',
 			formatter: '{b}: {c}'
@@ -120,7 +121,7 @@
 
 	{#if options !== null}
 		<div class="pt-4 w-full h-full">
-			<Chart bind:options />
+			<Chart renderer="svg" bind:options />
 		</div>
 	{/if}
 </Card>

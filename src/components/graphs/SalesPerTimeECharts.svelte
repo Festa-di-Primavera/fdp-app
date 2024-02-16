@@ -42,6 +42,7 @@
 			left: 10,
 			right: 25,
 		},
+		backgroundColor: currentTheme == 'dark' ? 'rgb(31 41 55)' : 'white',
         xAxis: {
             data: ticketsData.labels,
 			axisLabel: {
@@ -160,5 +161,5 @@
 			/>
 		</div>
 	</div>
-	<Chart {options} />
+	<Chart renderer="svg" {options} />
 </Card>
