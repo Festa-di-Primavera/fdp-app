@@ -36,6 +36,7 @@
 
             const timeOut = setTimeout(() => {
                 open = false;
+                notFound = false;
                 clearTimeout(timeOut);
             }, 3500);
 
@@ -47,6 +48,8 @@
                 soldAt: null,
                 seller: ''
             } as Ticket;
+
+            ticketCodeInput = '';
             return
         }
         
@@ -59,6 +62,7 @@
 
             const timeOut = setTimeout(() => {
                 open = false;
+                notSold = false;
                 clearTimeout(timeOut);
             }, 3500);
 
@@ -70,7 +74,7 @@
                 soldAt: tick.soldAt,
                 seller: tick.seller
             } as Ticket;
-
+            ticketCodeInput = '';
             return
         }
 
@@ -78,9 +82,11 @@
             alreadyChecked = true;
             color = 'yellow';
             open = true;
+            toastMessage = 'Biglietto già validato';
 
             const timeOut = setTimeout(() => {
                 open = false;
+                alreadyChecked = false;
                 clearTimeout(timeOut);
             }, 3500);
 
@@ -92,6 +98,7 @@
                 soldAt: tick.soldAt,
                 seller: res.status !== 206 ? tick.seller : 'Non Trovato'
             } as Ticket;
+            ticketCodeInput = '';
             return
         }
 
@@ -114,6 +121,7 @@
             soldAt: tick.soldAt,
             seller: res.status !== 206 ? tick.seller : 'Non Trovato'
         } as Ticket;
+        ticketCodeInput = '';
         open = true;
 
         const timeOut = setTimeout(() => {
