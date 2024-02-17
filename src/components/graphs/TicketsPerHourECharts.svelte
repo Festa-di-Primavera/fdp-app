@@ -118,7 +118,7 @@
 		<div class="flex-col items-center">
 			<div class="mb-1 flex items-center">
 				<h5 class="me-1 text-xl font-bold leading-none text-gray-900 dark:text-white">
-					Distribuzione Vendite per Fascia Oraria
+					Vendite per Fascia Oraria
 				</h5>
 			</div>
 		</div>
