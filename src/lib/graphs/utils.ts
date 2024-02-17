@@ -70,8 +70,14 @@ export function computeSalesPerTime(tickets: Ticket[], timeSlot: SalesTimeSlot =
 		if (ticket.soldAt !== null) {
 			const dateTime = new Date(ticket.soldAt);
 
+			let slotIndex: number;
 			// calcolo l'id numerico del timeslot
-			const slotIndex = Math.floor(dateTime.getTime() / timeSlot);
+			if (dateTime.getHours() < 12) {
+				slotIndex = Math.floor(dateTime.getTime() / timeSlot)+1;
+			} else {
+				slotIndex = Math.floor(dateTime.getTime() / timeSlot);
+			}
+
 			const periodStart = slotIndex * timeSlot;
 			// incremento il numero di vendite per il timeslot
 			timeSlotsMap.set(periodStart, (timeSlotsMap.get(periodStart) || 0) + 1);
@@ -84,6 +90,10 @@ export function computeSalesPerTime(tickets: Ticket[], timeSlot: SalesTimeSlot =
 	// creo un array di label e un array di vendite
 	const labels: string[] = [];
 	const datasets: number[] = [];
+
+	if (sortedTimeSlots.length === 0) {
+		return { labels, datasets };
+	}
 
 	// per ogni timeslot
 	for (let indTimeSlot = sortedTimeSlots[0][0]; indTimeSlot <= sortedTimeSlots[sortedTimeSlots.length - 1][0]; indTimeSlot += timeSlot) {
@@ -151,6 +161,10 @@ export function computeCheckInPerTime(tickets: Ticket[], timeSlot: CheckInTimeSl
 
 	const labels: string[] = [];
 	const datasets: number[] = [];
+
+	if (sortedCheckIns.length === 0) {
+		return { labels, datasets };
+	}
 
 	for (let indTimeSlot = sortedCheckIns[0][0]; indTimeSlot <= sortedCheckIns[sortedCheckIns.length - 1][0]; indTimeSlot += timeSlot) {
 		const date = new Date(indTimeSlot);
