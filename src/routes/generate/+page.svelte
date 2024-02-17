@@ -53,12 +53,10 @@
 	};
 
 	const generateProgressiveCodes = (uniqueCodes: Set<string>) => {
-		let prefix = 'FDP_';
 		let counter = 1;
 
 		while (uniqueCodes.size < numberOfCodes) {
-			const paddedCounter = counter.toString().padStart(4, '0');
-			const code = prefix + paddedCounter;
+			const code = counter.toString().padStart(codeLength, '0');
 
 			if (!codesInDB.has(code)) {
 				uniqueCodes.add(code);
