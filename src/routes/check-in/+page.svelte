@@ -113,6 +113,7 @@
         
         tick = (await response.json()).body.ticket
 
+        color = 'green';
         ticket = {
             ticketID: code,
             name: tick.name,
