@@ -28,7 +28,6 @@
 
 	const q = query(collection(getClientDB(), "tickets"));
 	const unsubscribe = onSnapshot(q, (querySnapshot) => {
-		console.log('tickets updated');
 		tickets = querySnapshot.docs.map((ticketDoc) => {
 			let currSeller: string | null;
 

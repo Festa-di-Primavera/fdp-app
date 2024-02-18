@@ -70,13 +70,9 @@ export function computeSalesPerTime(tickets: Ticket[], timeSlot: SalesTimeSlot =
 		if (ticket.soldAt !== null) {
 			const dateTime = new Date(ticket.soldAt);
 
-			let slotIndex: number;
-			// calcolo l'id numerico del timeslot
-			if (dateTime.getHours() < 12) {
-				slotIndex = Math.floor(dateTime.getTime() / timeSlot)+1;
-			} else {
-				slotIndex = Math.floor(dateTime.getTime() / timeSlot);
-			}
+			const slotIndex = Math.floor(dateTime.getTime() / timeSlot);
+			// console log slotIndex and dateTime as string
+			console.log(slotIndex, dateTime.toString());
 
 			const periodStart = slotIndex * timeSlot;
 			// incremento il numero di vendite per il timeslot
@@ -141,6 +137,7 @@ export function computeSalesPerTime(tickets: Ticket[], timeSlot: SalesTimeSlot =
 	}
 
 	return { labels, datasets };
+
 }
 
 export function computeCheckInPerTime(tickets: Ticket[], timeSlot: CheckInTimeSlot = CheckInTimeSlot.HOUR){
