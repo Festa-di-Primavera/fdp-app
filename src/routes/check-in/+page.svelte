@@ -17,29 +17,29 @@
 
     let ticket: Ticket;
     let open: boolean = false;
+    let feedbackToastMessage: string = '';
 
-    let notFound: boolean = false;
-    let alreadyChecked: boolean = false;
-    let notSold: boolean = false;
+    let ticketStatus: 'notFound' | 'alreadyChecked' | 'notSold' | null = null;
+
     let color: 'green' | 'red' | 'yellow' = 'green';
     
 	let toastOpen: boolean = false;
 	let toastMessage: string = '';
 
-    async function checkTicket(code: string){
-        const res = await (await fetch(`/api/tickets/${code}`)).json()
+    async function checkTicket(code: string){        
+        const response = await fetch(`/api/tickets/${code}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        const body = (await response.json());
+        let message = body.message
         
-        if(res.status == 404){
-            notFound = true;
-            color = 'red';
-            open = true;
-
-            const timeOut = setTimeout(() => {
-                open = false;
-                notFound = false;
-                clearTimeout(timeOut);
-            }, 3500);
-
+        if(response.status == 404){
             ticket = {
                 ticketID: code,
                 name: '',
@@ -49,23 +49,14 @@
                 seller: ''
             } as Ticket;
 
+            triggerToast(message, 'red', 'notFound');
             ticketCodeInput = '';
             return
         }
         
-        let tick = res.body.ticket
+        let tick = body.ticket
 
-        if(res.status == 402){
-            notSold = true;
-            color = 'red';
-            open = true;
-
-            const timeOut = setTimeout(() => {
-                open = false;
-                notSold = false;
-                clearTimeout(timeOut);
-            }, 3500);
-
+        if(response.status == 402){
             ticket = {
                 ticketID: code,
                 name: tick.name,
@@ -74,62 +65,54 @@
                 soldAt: tick.soldAt,
                 seller: tick.seller
             } as Ticket;
+
+            triggerToast(message, 'red', 'notSold');
             ticketCodeInput = '';
             return
         }
 
-        if(tick.checkIn !== null && tick.checkIn !== undefined && tick.checkIn !== ''){
-            alreadyChecked = true;
-            color = 'yellow';
-            open = true;
-            toastMessage = 'Biglietto già validato';
-
-            const timeOut = setTimeout(() => {
-                open = false;
-                alreadyChecked = false;
-                clearTimeout(timeOut);
-            }, 3500);
-
+        if(response.status === 409){
             ticket = {
                 ticketID: code,
                 name: tick.name,
                 surname: tick.surname,
                 checkIn: tick.checkIn,
                 soldAt: tick.soldAt,
-                seller: res.status !== 206 ? tick.seller : 'Non Trovato'
+                seller: tick.seller
             } as Ticket;
+
+            triggerToast(message, 'yellow', 'alreadyChecked');
             ticketCodeInput = '';
             return
         }
 
-        const response = await fetch(`/api/tickets/${code}`,
-            {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
-        
-        tick = (await response.json()).body.ticket
-
-        color = 'green';
         ticket = {
             ticketID: code,
             name: tick.name,
             surname: tick.surname,
             checkIn: tick.checkIn,
             soldAt: tick.soldAt,
-            seller: res.status !== 206 ? tick.seller : 'Non Trovato'
+            seller: response.status !== 206 ? tick.seller : 'Non Trovato'
         } as Ticket;
+
+        triggerToast(message, 'green', null);
         ticketCodeInput = '';
+        return;
+    }
+
+    function triggerToast(message: string, col: 'red' | 'green' | 'yellow', status: 'notFound' | 'alreadyChecked' | 'notSold' | null){
+        feedbackToastMessage = message;
         open = true;
+        color = col;
+        ticketStatus = status;
 
         const timeOut = setTimeout(() => {
             open = false;
+            ticketStatus = null;
             clearTimeout(timeOut);
         }, 3500);
     }
+        
 
     const reset = () => {
         ticket = {
@@ -144,9 +127,7 @@
         ticketCodeInput = '';
         ticketCode = '';
         open = false;
-        notFound = false;
-        alreadyChecked = false;
-        notSold = false;
+        ticketStatus = null;
         color = 'green';
     }
 
@@ -233,16 +214,8 @@
                     </span>
                 </Card>
                 <Toast on:close={() => open = false} bind:open color={color} class="w-max mt-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
-                    <svelte:component this={notFound ? XCircle : (alreadyChecked ? AlertCircle : CheckCircle2)} class="w-6 h-6  text-{color}-400" slot="icon"/>
-                    {#if notFound}
-                        <span class={`text-${color}-400 font-semibold`}>Codice biglietto errato</span>
-                    {:else if notSold}
-                        <span class={`text-${color}-400 font-semibold`}>Biglietto NON venduto!</span>
-                    {:else if alreadyChecked}
-                        <span class={`text-${color}-400 font-semibold`}>Biglietto già validato</span>
-                    {:else}
-                        <span class={`text-${color}-400 font-semibold`}>Biglietto validato</span>
-                    {/if}
+                    <svelte:component this={ticketStatus === 'notFound' || ticketStatus === 'notSold' ? XCircle : (ticketStatus === 'alreadyChecked' ? AlertCircle : CheckCircle2)} class="w-6 h-6  text-{color}-400" slot="icon"/>
+                    <span class={`text-${color}-400 font-semibold`}>{feedbackToastMessage}</span>
                 </Toast>
             </div>
         {:else}
