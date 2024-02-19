@@ -181,11 +181,11 @@ export function computeCheckInPerTime(tickets: Ticket[], timeSlot: CheckInTimeSl
 				label = `${day < 10 ? '0'+day : day} ${month},${hour}:${minutes < 30 ? '00' : '30'}-${hour+1}:${minutes < 30 ? '30' : '00'}`;
 				break;
 			case CheckInTimeSlot.HOUR:
-				label = `${day < 10 ? '0'+day : day} ${month}, ${hour}:00-${hour+1}:00`;
+				label = `${day < 10 ? '0'+day : day} ${month}, ${hour}:00-${(hour+1)%24}:00`;
 				break;
 			case CheckInTimeSlot.TWO_HOURS:
 				// label 'gg mmm hh:00-hh+1:00'
-				label = `${day < 10 ? '0'+day : day} ${month},${hour}:00-${hour+2}:00`;
+				label = `${day < 10 ? '0'+day : day} ${month},${hour}:00-${(hour+2)%24}:00`;
 				break;
 			default:
 				throw new Error("Invalid timeSlot");
