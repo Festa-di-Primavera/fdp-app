@@ -103,13 +103,13 @@
 	<a class="ml-[1%] my-2" href="/">
 		<Logo/>
 	</a>
-	<div class="flex items-center justify-end">
-		<button on:click={changeTheme} class="p-0 mr-5">
+	<div class="flex items-center justify-end mr-5 gap-5">
+		<button on:click={changeTheme} class="p-0">
 			<DarkMode btnClass='text-gray-500 dark:text-gray-400 rounded-lg text-sm p-1.5'/>
 		</button>
 		
 		{#if $user !== null}
-			<button on:click={()=> {hidden = false}} class="p-1 mr-5 rounded-md border-2 border-black dark:border-white dark:border-opacity-20 border-opacity-10"><AlignJustify class="text-gray-500 dark:text-gray-400"/></button>
+			<button on:click={()=> {hidden = false}} class="p-1 rounded-md border-2 border-black dark:border-white dark:border-opacity-20 border-opacity-10"><AlignJustify class="text-gray-500 dark:text-gray-400"/></button>
 		{/if}
 	</div>
 </navbar>
