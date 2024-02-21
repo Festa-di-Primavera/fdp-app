@@ -67,7 +67,7 @@
 	const sendEmail = async () => {
 		const actionSettings: ActionCodeSettings = {
 			// ! ATTENZIONE: Cambiare l'url in produzione e aggiungere il dominio a firebase "Autenticazione"
-			url: 'https://fdp-app-git-dev-customemailhandle-isax03.vercel.app/',
+			url: 'https://fdp-app-git-dev-customemailhandle-festa-di-primaveras-projects.vercel.app/',
 		};
 		
 		if(option === 'register')
