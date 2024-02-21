@@ -144,7 +144,9 @@
 				<TableHeadCell>Email</TableHeadCell>
 				<TableHeadCell>Ruolo</TableHeadCell>
 				<TableHeadCell>Alias</TableHeadCell>
-				<TableHeadCell class="text-center">Elimina</TableHeadCell>
+				{#if $user.email === import.meta.env.VITE_ADMIN_EMAIL1 || $user.email === import.meta.env.VITE_ADMIN_EMAIL2}
+					<TableHeadCell class="text-center">Elimina</TableHeadCell>
+				{/if}
 			</TableHead>
 			<TableBody tableBodyClass="divide-y">
 				{#each filteredItems as item}
@@ -195,11 +197,13 @@
 									</button>
 								</div>
 						</TableBodyCell>
-						<TableBodyCell class="flex items-center justify-center">
-							<Button disabled={item.email === import.meta.env.VITE_ADMIN_EMAIL1 || item.email === import.meta.env.VITE_ADMIN_EMAIL2} class="px-2 py-1 dark:bg-red-500 bg-red-500" on:click={()=> {currSelectedUser=item; deleteModalOpen = true; }}>
-								<Trash2 class="aspect-square w-4 dark:text-white text-gray-900" />
-							</Button>
-						</TableBodyCell>
+						{#if $user.email === import.meta.env.VITE_ADMIN_EMAIL1 || $user.email === import.meta.env.VITE_ADMIN_EMAIL2}
+							<TableBodyCell class="flex items-center justify-center">
+								<Button disabled={item.email === import.meta.env.VITE_ADMIN_EMAIL1 || item.email === import.meta.env.VITE_ADMIN_EMAIL2} class="px-2 py-1 dark:bg-red-500 bg-red-500" on:click={()=> {currSelectedUser=item; deleteModalOpen = true; }}>
+									<Trash2 class="aspect-square w-4 dark:text-white text-gray-900" />
+								</Button>
+							</TableBodyCell>
+						{/if}
 					</TableBodyRow>
 				{/each}
 			</TableBody>
