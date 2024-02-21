@@ -4,10 +4,11 @@ import { getAuth } from 'firebase-admin/auth';
 import { collection, getDocs, query, setDoc, doc } from 'firebase/firestore';
 
 import { getAdminApp } from '$lib/firebase/admin';
-import { getClientDB } from '$lib/firebase/client.js';
+import { getClientApp, getClientDB } from '$lib/firebase/client.js';
 
 import { roles } from '../../../models/role';
 import type { Ticket } from '../../../models/ticket';
+import { signInWithCustomToken, getAuth as getClientAuth } from 'firebase/auth';
 
 export async function GET() {
 	const q = query(collection(getClientDB(), "tickets"));
@@ -42,7 +43,11 @@ export async function GET() {
 export async function POST(request) {
 	const body = await request.request.json();
 
-	for (const code of body) {
+	const auth = getClientAuth(getClientApp());
+
+	await signInWithCustomToken(auth, body.token);
+
+	for (const code of body.codes) {
 		const ticketRef = doc(getClientDB(), "tickets", code);
 		await setDoc(ticketRef, {
 			checkIn: null,

@@ -95,7 +95,7 @@
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify(codes)
+			body: JSON.stringify({codes, token: data.token})
 		})
 			.then((res) => {
 				color = 'green';
