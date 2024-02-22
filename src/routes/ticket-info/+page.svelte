@@ -10,6 +10,16 @@
 	import type { Ticket } from "../../models/ticket";
 	import QrReader from "../../components/QrReader.svelte";
 
+    let myDiv: Element | null = null;
+    
+    onMount(() => myDiv = document.querySelector('#myDiv'))
+
+    function scrollToDiv() {
+        myDiv?.scrollIntoView({
+            behavior: 'smooth',
+        });
+    }
+
     export let data: { token: string };
 
 	let ticketCode: string = '';
@@ -22,10 +32,12 @@
 	let toastMessage: string = '';
 
     async function getTicket(code: string){
-        const res = await (await fetch(`/api/tickets/${code}`)).json()
+        const res = await fetch(`/api/tickets/${code}`);
+        scrollToDiv();
         
         if(res.status == 404){
             open = true;
+            console.log('404')
 
             const timeOut = setTimeout(() => {
                 open = false;
@@ -42,8 +54,8 @@
             } as Ticket;
             return
         }
-        
-        let tick = res.body.ticket
+
+        let tick = (await res.json()).ticket
 
         ticket = {
             ticketID: code,
@@ -130,7 +142,7 @@
                     <QrReader bind:codeResult={ticketCode}/>
                 </div>
 
-                <Card class="w-full flex flex-col text-lg p-3">
+                <Card class="w-full flex flex-col text-lg p-3" id="myDiv">
                     <span class="text-black dark:text-white w-full flex justify-between">
                         <span>N° biglietto:</span>
                         <span class="font-bold">{ticket.ticketID || ticketCode || ticketCodeInput}</span>
