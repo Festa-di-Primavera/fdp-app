@@ -3,8 +3,13 @@
 	import { Card } from 'flowbite-svelte';
 	import { Chart, type EChartsOptions } from 'svelte-echarts';
 	import { theme } from '../../store/store';
+	import { onMount } from 'svelte';
 
-	let currentTheme = localStorage.getItem('color-theme') || 'dark';
+	let currentTheme: 'dark' | 'light';
+
+	onMount(() => {
+		$theme = localStorage.getItem('color-theme') as 'light' | 'dark';
+	});
 
 	theme.subscribe((value) => {
 		currentTheme = value;
@@ -20,6 +25,7 @@
 			left: 10,
 			right: 25,
 		},
+		backgroundColor: currentTheme == 'dark' ? 'rgb(31 41 55)' : 'white',
         xAxis: {
             data: sellersStats.labels,
 			axisLabel: {
@@ -65,7 +71,7 @@
         series: [
             {
                 type: "bar",
-				barWidth	: 60,
+				barWidth: '60%',
 				data: sellersStats.datasets,
 				labelLine: {
 					show: true,
@@ -83,7 +89,6 @@
 			zoomOnMouseWheel: true,
 			moveOnMouseMove: true,
 			moveOnMouseWheel: false,
-
 		}],
 		toolbox: {
 			show : true,
@@ -124,7 +129,7 @@
 
 	{#if options !== null}
 		<div class="mt-5 h-full w-full">
-			<Chart bind:options />
+			<Chart renderer="svg" bind:options />
 		</div>
 	{/if}
 </Card>

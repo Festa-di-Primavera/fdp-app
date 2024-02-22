@@ -1,39 +1,65 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { Card, Spinner, Toast } from 'flowbite-svelte';
 	import { getAuth, signInWithCustomToken } from 'firebase/auth';
 
-	import { getClientApp } from '$lib/firebase/client';
+	import { getClientApp, getClientDB } from '$lib/firebase/client';
 	
 	import { XCircle } from 'lucide-svelte';
 
 	import { user } from '../../store/store';
 	import type { Ticket } from '../../models/ticket';
-	import { computeSellersStats, computeSalesPerTime, computeCheckInPerTime, SalesTimeSlot, CheckInTimeSlot } from '$lib/graphs/utils';
+	import { computeSellersStats, computeSalesPerHour, computeSalesPerTime, computeCheckInPerTime, SalesTimeSlot, CheckInTimeSlot } from '$lib/graphs/utils';
 
 	import TicketsECharts from '../../components/graphs/TicketsECharts.svelte';
 	import ExportToCsv from '../../components/ExportToCSV.svelte';
 	import SalesPerTimeECharts from '../../components/graphs/SalesPerTimeECharts.svelte';
 	import TicketsPerPersonECharts from '../../components/graphs/TicketsPerPersonECharts.svelte';
 	import CheckInPerTimeECharts from '../../components/graphs/CheckInPerTimeECharts.svelte';
+	import TicketsPerHourECharts from '../../components/graphs/TicketsPerHourECharts.svelte';
+	import { collection, onSnapshot, query } from 'firebase/firestore';
 
-	export let data: { token:string, strTicketData: string };
+	export let data: { token:string, sellers: {uid: string; alias: string}[] };
 	
 	let toastOpen: boolean = false;
 	let toastMessage: string = '';
 
-	let tickets: Ticket[] = JSON.parse(data.strTicketData) as Ticket[];
+	let tickets: Ticket[] = [];
+
+	const q = query(collection(getClientDB(), "tickets"));
+	const unsubscribe = onSnapshot(q, (querySnapshot) => {
+		tickets = querySnapshot.docs.map((ticketDoc) => {
+			let currSeller: string | null;
+
+			if(!ticketDoc.data().seller) {
+				currSeller = null;
+			} else {
+				currSeller = data.sellers.find((seller) => seller.uid === ticketDoc.data().seller)?.alias || "AnOnImO";
+			}
+
+			return (
+				{
+					ticketID: ticketDoc.id,
+					name: ticketDoc.data().name,
+					surname: ticketDoc.data().surname,
+					checkIn: ticketDoc.data().checkIn?.toDate() || null,
+					soldAt: ticketDoc.data().soldAt?.toDate() || null,
+					seller: currSeller,
+				} as Ticket
+			);
+		});
+	});
 
 	// cards and pie chart data
-	let checkedTicketsCount: number = tickets.filter((ticket) => ticket.checkIn !== null).length;
-	let notCheckedTicketsCount: number = tickets.filter((ticket) => ticket.soldAt !== null).length - checkedTicketsCount;
-	let notSoldTicketsCount: number = tickets.filter((ticket) => ticket.soldAt === null).length;
+	$: checkedTicketsCount = tickets.filter((ticket) => ticket.checkIn !== null).length;
+	$: notCheckedTicketsCount = tickets.filter((ticket) => ticket.soldAt !== null).length - checkedTicketsCount;
+	$: notSoldTicketsCount = tickets.filter((ticket) => ticket.soldAt === null).length;
 
-	
 	let timeWindowSalesPerTime: SalesTimeSlot = SalesTimeSlot.DAY;
 	let timeWindowCheckInPerTime: CheckInTimeSlot = CheckInTimeSlot.HOUR;
 	
 	$: sellersStats = computeSellersStats(tickets);
+	$: sellHoursStats = computeSalesPerHour(tickets);
 	$: salesPerTime = computeSalesPerTime(tickets, timeWindowSalesPerTime);
 	$: checkInPerTime = computeCheckInPerTime(tickets, timeWindowCheckInPerTime);
 	
@@ -58,6 +84,10 @@
 				}, 3500);
 			});
 		}
+	});
+
+	onDestroy(() => {
+		unsubscribe();
 	});
 </script>
 
@@ -101,6 +131,7 @@
 
 				<TicketsECharts bind:checkedTicketsCount bind:notCheckedTicketsCount bind:notSoldTicketsCount />
 				<TicketsPerPersonECharts bind:sellersStats />
+				<TicketsPerHourECharts bind:sellHoursStats />
 
 				<SalesPerTimeECharts
 					bind:ticketsData={salesPerTime}
@@ -122,7 +153,7 @@
 	</div>
 </section>
 
-<Toast on:close={() => toastOpen = false} bind:open={toastOpen} color="red" class="w-max mt-10 mb-5 mx-auto right-0 left-0 fixed bottom-5" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
+<Toast on:close={() => toastOpen = false} bind:open={toastOpen} color="red" class="w-max mt-10 mb-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
 	<XCircle class="w-6 h-6  text-red-400" slot="icon"/>
 	<span class='text-red-400 font-semibold'>{toastMessage}</span>
 </Toast>

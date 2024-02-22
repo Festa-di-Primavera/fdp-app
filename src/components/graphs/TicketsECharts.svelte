@@ -2,12 +2,17 @@
 	import { Card } from 'flowbite-svelte';
 	import { Chart, type EChartsOptions } from 'svelte-echarts';
 	import { theme } from '../../store/store';
+	import { onMount } from 'svelte';
 
 	export let checkedTicketsCount: number;
 	export let notCheckedTicketsCount: number;
 	export let notSoldTicketsCount: number;
 
-	let currentTheme = localStorage.getItem('color-theme') || 'dark';
+	let currentTheme: 'dark' | 'light';
+
+	onMount(() => {
+		$theme = localStorage.getItem('color-theme') as 'light' | 'dark';
+	});
 
 	theme.subscribe((value) => {
 		currentTheme = value;
@@ -25,6 +30,7 @@
 				color: currentTheme == 'dark' ? 'white' : 'rgb(55 65 81)'
 			}
 		},
+		backgroundColor: currentTheme == 'dark' ? 'rgb(31 41 55)' : 'white',
 		tooltip: {
 			trigger: 'item',
 			formatter: '{b}: {c}'
@@ -115,7 +121,7 @@
 
 	{#if options !== null}
 		<div class="pt-4 w-full h-full">
-			<Chart bind:options />
+			<Chart renderer="svg" bind:options />
 		</div>
 	{/if}
 </Card>

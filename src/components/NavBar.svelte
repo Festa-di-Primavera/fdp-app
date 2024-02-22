@@ -1,14 +1,16 @@
 <script lang="ts">
     import { DarkMode, Drawer, CloseButton, Dropdown, DropdownItem, Modal, Button } from "flowbite-svelte";
-	import { AlignJustify, DollarSign, LayoutDashboard, LogOut, ScanLine, User, Ticket, Users, Home, LucideThermometer } from 'lucide-svelte';
+	import { AlignJustify, DollarSign, LayoutDashboard, LogOut, ScanLine, Ticket, Users, Home} from 'lucide-svelte';
 	import Logo from "./Logo.svelte";
   	import { sineIn } from 'svelte/easing';
 
 	import { page } from '$app/stores';  
 	import { handleSignOut, user, theme } from "../store/store";
-	import { onIdTokenChanged, getAuth, deleteUser, sendPasswordResetEmail } from "firebase/auth";
+	import { onIdTokenChanged, getAuth, deleteUser, } from "firebase/auth";
 	import { getClientApp } from "$lib/firebase/client";
 	import { roles } from "../models/role";
+	import ChangePwModal from "./ChangePwModal.svelte";
+	import ChangeEmailModal from "./ChangeEmailModal.svelte";
 	
 	let currAccessLevel: number | null = null;
 	let color: string = '#000';
@@ -16,9 +18,14 @@
 	onIdTokenChanged(getAuth(getClientApp()), async (user) => {
 		if(user !== null){
 			$user = user;
-			const claims = (await user.getIdTokenResult(true))?.claims;
-			currAccessLevel = (claims?.accessLevel as number);
-			color = claims?.color as string;
+			try{
+				const claims = (await user.getIdTokenResult(true))?.claims;
+				currAccessLevel = (claims?.accessLevel as number);
+				color = claims?.color as string;
+			}
+			catch(e){
+				console.error(e);
+			}
 		}
 	});
 
@@ -42,12 +49,6 @@
 			icon: Users
 		},
 		{
-			label: 'Generate',
-			slug: "/generate",
-			role: roles.SUPERADMIN,
-			icon: Ticket
-		},
-		{
 			label: 'Check-in',
 			slug: "/check-in",
 			role: roles.CHECKIN,
@@ -58,6 +59,12 @@
 			slug: "/sell",
 			role: roles.SELLER,
 			icon: DollarSign
+		},
+		{
+			label: 'Info biglietti',
+			slug: "/ticket-info",
+			role: roles.SELLER,
+			icon: Ticket
 		},
 	]
 
@@ -88,28 +95,21 @@
 		}
 	}
 
-	function sendPasswordReset(){
-		if($user !== null && $user.email !== null){
-			sendPasswordResetEmail(getAuth(getClientApp()), $user.email).then(() => {
-				console.log('Email sent');
-			}).catch((error) => {
-				console.error(error);
-			});
-		}
-	}
+	let changePwModalOpen: boolean = false;
+	let changeEmailModalOpen: boolean = false;
 </script>
 	
 <navbar class="z-[99] sticky top-0 flex items-center justify-between w-full bg-gray-100 dark:bg-gray-900">
 	<a class="ml-[1%] my-2" href="/">
 		<Logo/>
 	</a>
-	<div class="flex items-center justify-end">
-		<button on:click={changeTheme} class="p-0 mr-5">
+	<div class="flex items-center justify-end mr-5 gap-5">
+		<button on:click={changeTheme} class="p-0">
 			<DarkMode btnClass='text-gray-500 dark:text-gray-400 rounded-lg text-sm p-1.5'/>
 		</button>
 		
 		{#if $user !== null}
-			<button on:click={()=> {hidden = false}} class="p-1 mr-5 rounded-md border-2 border-black dark:border-white dark:border-opacity-20 border-opacity-10"><AlignJustify class="text-gray-500 dark:text-gray-400"/></button>
+			<button on:click={()=> {hidden = false}} class="p-1 rounded-md border-2 border-black dark:border-white dark:border-opacity-20 border-opacity-10"><AlignJustify class="text-gray-500 dark:text-gray-400"/></button>
 		{/if}
 	</div>
 </navbar>
@@ -139,21 +139,24 @@
 			{/if}
 			{#if $user !== null}
 				<div class="dark:text-white flex text-md items-center self-baseline w-full justify-between p-3 rounded-lg bg-gray-100 dark:bg-gray-600">
-					<div class="flex gap-4 text-md items-center truncate overflow-ellipsis pr-5">
-						<button id="account" style="background: {color || '#000'};" class="h-7 min-w-7 rounded-full flex items-center justify-center text-white" >
+					<button id="account" class="flex gap-4 text-md items-center truncate overflow-ellipsis pr-5">
+						<div style="background: {color || '#000'};" class="h-7 min-w-7 rounded-full flex items-center justify-center text-white" >
 							{$user.displayName?.charAt(0).toUpperCase() || 'NO'}
-						</button>
-						<Dropdown placement="top" triggeredBy="#account">
-							<DropdownItem>
-								<button on:click={sendPasswordReset}>Cambia Password</button>
-							</DropdownItem>
-							<DropdownItem slot="footer">
-								<button class="text-red-400" on:click={() =>{ deleteModalOpen = true; hidden=true}}>Elimina Account</button>
-							</DropdownItem>
-						</Dropdown>
-						  
+						</div>
+						
 						<span class="overflow-x-hidden overflow-ellipsis">{$user.displayName || 'Non registrato'}</span>
-					</div>
+					</button>
+					<Dropdown placement="top" triggeredBy="#account">
+						<DropdownItem>
+							<button on:click={() =>{ changePwModalOpen = true; hidden=true}}>Cambia Password</button>
+						</DropdownItem>
+						<DropdownItem>
+							<button on:click={() =>{ changeEmailModalOpen = true; hidden=true}}>Cambia Email</button>
+						</DropdownItem>
+						<DropdownItem slot="footer">
+							<button class="text-red-400" on:click={() =>{ deleteModalOpen = true; hidden=true}}>Elimina Account</button>
+						</DropdownItem>
+					</Dropdown>
 					
 					<button on:click={() => {handleSignOut(); hidden=true}}>
 						<LogOut class="text-gray-500 dark:text-white"/>
@@ -163,12 +166,18 @@
 		</div>
 	</div>
 </Drawer>
-<Modal bind:open={deleteModalOpen} on:close={() => deleteModalOpen = false} class="w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3">
+<Modal title="Elimina account" outsideclose autoclose bind:open={deleteModalOpen} on:close={() => deleteModalOpen = false} size="sm" class="z-50">
 	<div class="flex flex-col gap-5 items-center justify-center">
-		<span class="text-red-400 font-semibold text-2xl">Sei sicuro di voler eliminare il tuo account?</span>
-		<div class="flex gap-5">
-			<Button on:click={deleteCurrentUser} color="red">Si</Button>
-			<Button on:click={() => deleteModalOpen = false} color="alternative">No</Button>
+		<span class="text-xl">Vuoi eliminare questo account?</span>
+		<div class="flex flex-col gap-2">
+			<span class="text-md">Nome: {$user?.displayName}</span>
+			<span class="text-md">E-mail: {$user?.email}</span>
 		</div>
 	</div>
+	<svelte:fragment slot="footer">
+		<Button on:click={deleteCurrentUser} color="red">Si</Button>
+		<Button on:click={() => deleteModalOpen = false} color="alternative">No</Button>
+	</svelte:fragment>
 </Modal>
+<ChangePwModal bind:changePwModalOpen/>
+<ChangeEmailModal bind:changeEmailModalOpen/>

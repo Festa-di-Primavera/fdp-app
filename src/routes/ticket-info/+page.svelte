@@ -10,6 +10,16 @@
 	import type { Ticket } from "../../models/ticket";
 	import QrReader from "../../components/QrReader.svelte";
 
+    let myDiv: Element | null = null;
+    
+    onMount(() => myDiv = document.querySelector('#myDiv'))
+
+    function scrollToDiv() {
+        myDiv?.scrollIntoView({
+            behavior: 'smooth',
+        });
+    }
+
     export let data: { token: string };
 
 	let ticketCode: string = '';
@@ -17,29 +27,23 @@
 
     let ticket: Ticket;
     let open: boolean = false;
-    let feedbackToastMessage: string = '';
-
-    let ticketStatus: 'notFound' | 'alreadyChecked' | 'notSold' | null = null;
-
-    let color: 'green' | 'red' | 'yellow' = 'green';
     
 	let toastOpen: boolean = false;
 	let toastMessage: string = '';
 
-    async function checkTicket(code: string){        
-        const response = await fetch(`/api/tickets/${code}`,
-            {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
-
-        const body = (await response.json());
-        let message = body.message
+    async function getTicket(code: string){
+        const res = await fetch(`/api/tickets/${code}`);
+        scrollToDiv();
         
-        if(response.status == 404){
+        if(res.status == 404){
+            open = true;
+            console.log('404')
+
+            const timeOut = setTimeout(() => {
+                open = false;
+                clearTimeout(timeOut);
+            }, 3500);
+
             ticket = {
                 ticketID: code,
                 name: '',
@@ -48,43 +52,10 @@
                 soldAt: null,
                 seller: ''
             } as Ticket;
-
-            triggerToast(message, 'red', 'notFound');
-            ticketCodeInput = '';
-            return
-        }
-        
-        let tick = body.ticket
-
-        if(response.status == 402){
-            ticket = {
-                ticketID: code,
-                name: tick.name,
-                surname: tick.surname,
-                checkIn: tick.checkIn,
-                soldAt: tick.soldAt,
-                seller: tick.seller
-            } as Ticket;
-
-            triggerToast(message, 'red', 'notSold');
-            ticketCodeInput = '';
             return
         }
 
-        if(response.status === 409){
-            ticket = {
-                ticketID: code,
-                name: tick.name,
-                surname: tick.surname,
-                checkIn: tick.checkIn,
-                soldAt: tick.soldAt,
-                seller: tick.seller
-            } as Ticket;
-
-            triggerToast(message, 'yellow', 'alreadyChecked');
-            ticketCodeInput = '';
-            return
-        }
+        let tick = (await res.json()).ticket
 
         ticket = {
             ticketID: code,
@@ -92,27 +63,9 @@
             surname: tick.surname,
             checkIn: tick.checkIn,
             soldAt: tick.soldAt,
-            seller: response.status !== 206 ? tick.seller : 'Non Trovato'
+            seller: res.status !== 206 ? tick.seller : 'Non Trovato'
         } as Ticket;
-
-        triggerToast(message, 'green', null);
-        ticketCodeInput = '';
-        return;
     }
-
-    function triggerToast(message: string, col: 'red' | 'green' | 'yellow', status: 'notFound' | 'alreadyChecked' | 'notSold' | null){
-        feedbackToastMessage = message;
-        open = true;
-        color = col;
-        ticketStatus = status;
-
-        const timeOut = setTimeout(() => {
-            open = false;
-            ticketStatus = null;
-            clearTimeout(timeOut);
-        }, 3500);
-    }
-        
 
     const reset = () => {
         ticket = {
@@ -127,8 +80,6 @@
         ticketCodeInput = '';
         ticketCode = '';
         open = false;
-        ticketStatus = null;
-        color = 'green';
     }
 
     onMount(async() => {
@@ -156,7 +107,7 @@
 
     $:{
         if(ticketCode !== ''){
-            checkTicket(ticketCode)
+            getTicket(ticketCode)
         }
         else{
             reset();
@@ -167,8 +118,8 @@
 <section class="w-full h-full flex flex-col items-center gap-4 flex-grow">
     <div class="w-full px-5 pt-5 flex flex-col gap-4 items-start max-w-96 pb-12 flex-grow">
         {#if $user}
-            <h1 class="text-primary-600 font-bold text-4xl">Check-in</h1>
-            <p class="dark:text-white text-justify">Scansionare il QR e verificare la validità del biglietto</p>
+            <h1 class="text-primary-600 font-bold text-4xl">Info biglietto</h1>
+            <p class="dark:text-white text-justify">Scansionare il QR per ottenere informazioni sul biglietto senza influenzare i check-in e le vendite</p>
             <div>
                 <Label class="text-black dark:text-white font-medium text-md">
 					Codice Biglietto <span class="text-primary-700">*</span>
@@ -177,7 +128,7 @@
 
                         <div slot="right" class="h-full flex items-center gap-2">
                             {#if ticketCodeInput !== ''}
-                                <button on:click={() => checkTicket(ticketCodeInput)}>
+                                <button on:click={() => getTicket(ticketCodeInput)}>
                                     <Check color="green"/>
                                 </button>
                                 <button on:click={reset}>
@@ -191,31 +142,31 @@
                     <QrReader bind:codeResult={ticketCode}/>
                 </div>
 
-                <Card class="w-full flex flex-col text-lg p-3">
+                <Card class="w-full flex flex-col text-lg p-3" id="myDiv">
                     <span class="text-black dark:text-white w-full flex justify-between">
                         <span>N° biglietto:</span>
-                        <span>{ticket.ticketID || ticketCode || ticketCodeInput}</span>
+                        <span class="font-bold">{ticket.ticketID || ticketCode || ticketCodeInput}</span>
                     </span>
                     <span class="text-black dark:text-white w-full flex justify-between">
                         <span>Nominativo:</span>
-                        <span>{(ticket.name || '') + ' ' + (ticket.surname || '')}</span>
+                        <span class="font-bold">{(ticket.name || '') + ' ' + (ticket.surname || '')}</span>
                     </span>
                     <span class="text-black dark:text-white w-full flex justify-between">
                         <span>Ingresso:</span>
-                        <span class="text-{color}-400 font-bold">{ticket.checkIn ? (new Date(ticket.checkIn)).toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : ''}</span>
+                        <span class="font-bold">{ticket.checkIn ? (new Date(ticket.checkIn)).toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : ''}</span>
                     </span>
                     <span class="text-black dark:text-white w-full flex justify-between">
                         <span>Venditore:</span>
-                        <span>{ticket.seller || ''}</span>
+                        <span class="font-bold">{ticket.seller || ''}</span>
                     </span>
                     <span class="text-black dark:text-white w-full flex justify-between">
                         <span>Venduto:</span>
-                        <span>{ticket.soldAt ? (new Date(ticket.soldAt)).toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : ''}</span>
+                        <span class="font-bold">{ticket.soldAt ? (new Date(ticket.soldAt)).toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : ''}</span>
                     </span>
                 </Card>
-                <Toast on:close={() => open = false} bind:open color={color} class="w-max mt-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
-                    <svelte:component this={ticketStatus === 'notFound' || ticketStatus === 'notSold' ? XCircle : (ticketStatus === 'alreadyChecked' ? AlertCircle : CheckCircle2)} class="w-6 h-6  text-{color}-400" slot="icon"/>
-                    <span class={`text-${color}-400 font-semibold`}>{feedbackToastMessage}</span>
+                <Toast on:close={() => open = false} bind:open color='red' class="w-max mt-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
+                    <XCircle class="w-6 h-6  text-red-400" slot="icon"/>
+                    <span class='text-red-400 font-semibold'>Codice biglietto errato</span>
                 </Toast>
             </div>
         {:else}

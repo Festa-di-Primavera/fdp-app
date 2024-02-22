@@ -1,11 +1,12 @@
 <script lang="ts">
 	import {
-		type User,
+		type ActionCodeSettings,
 		onAuthStateChanged,
 		createUserWithEmailAndPassword,
 		signInWithEmailAndPassword,
 		getAuth,
-		sendEmailVerification
+		sendEmailVerification,
+		sendPasswordResetEmail,
 	} from 'firebase/auth';
 	import { FirebaseError } from 'firebase/app';
 	import { CheckCircle2, Eye, EyeOff, XCircle } from 'lucide-svelte';
@@ -14,14 +15,13 @@
 	import { getClientApp } from '$lib/firebase/client';
 	import { user } from '../store/store';
 
-	let option: 'login' | 'register' = 'login';
+	let option: 'login' | 'register' | 'recover' = 'login';
 
 	let username: string = '';
 	let email: string = '';
 	let password: string = '';
 	let repeatPassword: string = '';
 	let pwVisible: boolean = false;
-	let rpPwVisible: boolean = false;
 	let validatorError: boolean = true;
 
 	let open: boolean = false;
@@ -34,7 +34,7 @@
 		INVALID_CREDENTIAL_ERROR = 'Credenziali non valide',
 		NETWORK_REQUEST_FAILED_ERROR = 'Errore di rete',
 		UNKNOWN_ERROR = 'Errore sconosciuto',
-		EMAIL_VERIFICATION_SENT = 'Email di verifica inviata',
+		EMAIL_VERIFICATION_SENT = 'Email inviata',
 	}
 	
 	let toastMessage: ToastMessages = ToastMessages.UNKNOWN_ERROR;
@@ -64,6 +64,27 @@
 		
 	}
 
+	const sendEmail = async () => {
+		const actionSettings: ActionCodeSettings = {
+			// ! ATTENZIONE: Cambiare l'url in produzione e aggiungere il dominio a firebase "Autenticazione"
+			url: 'https://fdp-app-git-dev-customemailhandle-festa-di-primaveras-projects.vercel.app/',
+		};
+		
+		if(option === 'register')
+			await sendEmailVerification($user!, actionSettings);
+		else if(option === 'recover')
+			await sendPasswordResetEmail(getAuth(getClientApp()), email, actionSettings);
+
+		toastMessage = ToastMessages.EMAIL_VERIFICATION_SENT;
+		open = true;
+
+		const timeOut = setTimeout(() => {
+			open = false;
+			clearTimeout(timeOut);
+		}, 3500);
+
+		color = 'green';
+	}
 
 	const handleSubmission = async () => {
 		if (option === 'login') {
@@ -103,7 +124,7 @@
 
 				color = 'red';
 			}
-		} else {
+		} else if(option === 'register') {
 			try {
 				const userCredential = await createUserWithEmailAndPassword(
 					getAuth(getClientApp()),
@@ -123,17 +144,7 @@
 				);
 				$user = userCredential.user;
 
-				await sendEmailVerification($user);
-
-				toastMessage = ToastMessages.EMAIL_VERIFICATION_SENT;
-				open = true;
-
-				const timeOut = setTimeout(() => {
-					open = false;
-					clearTimeout(timeOut);
-				}, 3500);
-
-				color = 'green';
+				await sendEmail();
 			} catch (error) {
 				if((error as FirebaseError).code === 'auth/invalid-email'){
 					toastMessage = ToastMessages.INVALID_EMAIL_ERROR;
@@ -160,13 +171,37 @@
 				color = 'red';
 			}
 		}
+		else if(option === 'recover'){
+			try{
+				await sendEmail();
+			}
+			catch(error){
+				if((error as FirebaseError).code === 'auth/invalid-email'){
+					toastMessage = ToastMessages.INVALID_EMAIL_ERROR;
+				}
+				else if((error as FirebaseError).code === 'auth/network-request-failed'){
+					toastMessage = ToastMessages.NETWORK_REQUEST_FAILED_ERROR;
+				}
+				else{
+					toastMessage = ToastMessages.UNKNOWN_ERROR;
+				}
+				open = true;
+
+				const timeOut = setTimeout(() => {
+					open = false;
+					clearTimeout(timeOut);
+				}, 3500);
+
+				color = 'red';
+			}
+		}
 	};
 
 	onAuthStateChanged(getAuth(getClientApp()), (user) => {
 		$user = user;
 	});
 
-	$: disableButton = validatorError || (option === 'register' && (lessThanEightChars || noUpperCase || noNumber || noSpecialChar));
+	$: disableButton = validatorError || (option === 'register' && (lessThanEightChars || noUpperCase || noNumber || noSpecialChar)) || (option === 'recover' && email === '');
 </script>
 
 {#if $user === null}
@@ -174,21 +209,21 @@
 		<div class="mb-5 flex w-full justify-around">
 			<button
 				on:click={() => (option = 'login')}
-				class="w-[40%] border-b-2 {option == 'register'
-					? 'border-transparent'
-					: 'border-primary-500 text-black dark:text-white'} pb-3">Login</button
+				class="w-[40%] border-b-2 {option == 'login'
+					? 'border-primary-500 text-black dark:text-white'
+					: 'border-transparent'} pb-3">Login</button
 			>
 			<button
 				on:click={() => (option = 'register')}
-				class="w-[40%] border-b-2 {option == 'login'
-					? 'border-transparent'
-					: 'border-primary-500 text-black dark:text-white'} pb-3">Registrati</button
+				class="w-[40%] border-b-2 {option == 'register'
+					? 'border-primary-500 text-black dark:text-white'
+					: 'border-transparent'} pb-3">Registrati</button
 			>
 		</div>
 
 		<div class="flex w-full flex-col gap-3">
 			<h1 class="w-max text-3xl font-semibold text-primary-600">
-				{option === 'login' ? 'Accedi' : 'Registrati'}
+				{option === 'login' ? 'Accedi' : (option === 'register' ? 'Registrati' : 'Recupera password')}
 			</h1>
 
 			{#if option === 'register'}
@@ -213,69 +248,71 @@
 				/>
 			</Label>
 
-			<Label>
-				Password
-				<Input
-					id="password"
-					name="password"
-					type={pwVisible ? 'text' : 'password'}
-					bind:value={password}
-					on:blur={() => {
-						lessThanEightChars = password.length < 8;
-						noUpperCase = !/[A-Z]/.test(password);
-						noNumber = !/[0-9]/.test(password);
-						noSpecialChar = !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password)
-					}}
-					class="mt-2"
-				>
-					<button
-						type="button"
-						slot="right"
-						class="flex items-center justify-center"
-						tabindex="-1"
-						on:click={() => (pwVisible = !pwVisible)}
+			{#if option !== 'recover'}
+				<Label>
+					Password
+					<Input
+						id="password"
+						name="password"
+						type={pwVisible ? 'text' : 'password'}
+						bind:value={password}
+						on:blur={() => {
+							lessThanEightChars = password.length < 8;
+							noUpperCase = !/[A-Z]/.test(password);
+							noNumber = !/[0-9]/.test(password);
+							noSpecialChar = !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password)
+						}}
+						class="mt-2"
 					>
-						{#if pwVisible}
-							<EyeOff />
-						{:else}
-							<Eye />
+						<button
+							type="button"
+							slot="right"
+							class="flex items-center justify-center"
+							tabindex="-1"
+							on:click={() => (pwVisible = !pwVisible)}
+						>
+							{#if pwVisible}
+								<EyeOff />
+							{:else}
+								<Eye />
+							{/if}
+						</button>
+					</Input>
+					{#if option === 'register'}
+						{#if lessThanEightChars}
+							<Helper class="mt-1 flex items-center gap-1" color='gray'>
+								<svelte:component this={lessThanEightChars ? XCircle : CheckCircle2} class="w-3 h-3"/>
+								La password deve contenere almeno 8 caratteri
+							</Helper>
 						{/if}
-					</button>
-				</Input>
-				{#if option === 'register'}
-					{#if lessThanEightChars}
-						<Helper class="mt-1 flex items-center gap-1" color='gray'>
-							<svelte:component this={lessThanEightChars ? XCircle : CheckCircle2} class="w-3 h-3"/>
-							La password deve contenere almeno 8 caratteri
-						</Helper>
+						{#if noUpperCase}
+							<Helper class="mt-1 flex items-center gap-1" color='gray'>
+								<svelte:component this={noUpperCase ? XCircle : CheckCircle2} class="w-3 h-3"/>
+								La password deve contenere almeno una lettera maiuscola
+							</Helper>
+						{/if}
+						{#if noNumber}
+							<Helper class="mt-1 flex items-center gap-1" color='gray'>
+								<svelte:component this={noNumber ? XCircle : CheckCircle2} class="w-3 h-3"/>
+								La password deve contenere almeno un numero
+							</Helper>
+						{/if}
+						{#if noSpecialChar}
+							<Helper class="mt-1 flex items-center gap-1" color='gray'>
+								<svelte:component this={noSpecialChar ? XCircle : CheckCircle2} class="w-3 h-3"/>
+								La password deve contenere almeno un carattere speciale
+							</Helper>
+						{/if}
 					{/if}
-					{#if noUpperCase}
-						<Helper class="mt-1 flex items-center gap-1" color='gray'>
-							<svelte:component this={noUpperCase ? XCircle : CheckCircle2} class="w-3 h-3"/>
-							La password deve contenere almeno una lettera maiuscola
-						</Helper>
-					{/if}
-					{#if noNumber}
-						<Helper class="mt-1 flex items-center gap-1" color='gray'>
-							<svelte:component this={noNumber ? XCircle : CheckCircle2} class="w-3 h-3"/>
-							La password deve contenere almeno un numero
-						</Helper>
-					{/if}
-					{#if noSpecialChar}
-						<Helper class="mt-1 flex items-center gap-1" color='gray'>
-							<svelte:component this={noSpecialChar ? XCircle : CheckCircle2} class="w-3 h-3"/>
-							La password deve contenere almeno un carattere speciale
-						</Helper>
-					{/if}
-				{/if}
-			</Label>
+				</Label>
+			{/if}
 
 			{#if option === 'register'}
 				<Label>
 					Conferma password
 					<Input
 						name="password"
-						type={rpPwVisible ? 'text' : 'password'}
+						type={pwVisible ? 'text' : 'password'}
 						color={!validatorError ? 'base' : 'red'}
 						bind:value={repeatPassword}
 						on:blur={() => (validatorError = !(password === repeatPassword))}
@@ -286,9 +323,9 @@
 							slot="right"
 							class="flex items-center justify-center"
 							tabindex="-1"
-							on:click={() => (rpPwVisible = !rpPwVisible)}
+							on:click={() => (pwVisible = !pwVisible)}
 						>
-							{#if rpPwVisible}
+							{#if pwVisible}
 								<EyeOff />
 							{:else}
 								<Eye />
@@ -304,18 +341,23 @@
 				</Label>
 			{/if}
 
-			<Button class="mt-5 w-full" on:click={handleSubmission} bind:disabled={disableButton}
-				>{option === 'login' ? 'Accedi' : 'Registrati'}</Button
+			{#if option !== 'recover'}
+				<button class="text-sm hover:text-primary-500 p-0 w-max self-end mt-1" on:click={() => option = 'recover'}>Password dimenticata?</button>
+			{/if}
+			<Button class="mt-3 w-full" on:click={handleSubmission} bind:disabled={disableButton}
+				>{option === 'login' ? 'Accedi' : (option === 'register' ? 'Registrati' : 'Invia Email di recupero')}</Button
 			>
 		</div>
 	</Card>
 {:else if !$user?.emailVerified}
 	<div>
 		<p>Ti è stata mandata una mail di verifica all'indirizzo {$user?.email}</p>
+		<p>Controlla la tua casella di posta elettronica e clicca sul link per confermare la tua email.</p>
+		<p>Se non hai ricevuto la mail di verifica, clicca <button on:click={sendEmail} class="text-primary-500">qui</button> per richiederne un'altra.</p>
 	</div>
 {/if}
 
-<Toast on:close={() => open = false} bind:open color={color} class="w-max mt-10 mb-5 mx-auto right-0 left-0 fixed bottom-5" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
+<Toast on:close={() => open = false} bind:open color={color} class="w-max mt-10 mb-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
 	<svelte:component this={toastMessage !== ToastMessages.EMAIL_VERIFICATION_SENT ? XCircle : CheckCircle2} class="w-6 h-6  text-{color}-400" slot="icon"/>
 	<span class={`text-${color}-400 font-semibold`}>{toastMessage}</span>
 </Toast>

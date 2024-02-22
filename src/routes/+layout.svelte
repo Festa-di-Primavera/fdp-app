@@ -5,6 +5,9 @@
 	import { theme } from '../store/store';
 
 	onMount(() => {
+		if(!localStorage.getItem('color-theme'))
+			localStorage.setItem('color-theme', 'dark');
+
 		$theme = localStorage.getItem('color-theme') as 'light' | 'dark';
 	});
 </script>
