@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button, Dropdown, DropdownItem, Input, Popover, Radio, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Toast } from "flowbite-svelte";
-	import { CheckCircle2, ChevronsUpDown, Filter, PenBox, Search, Trash2, XCircle } from "lucide-svelte";
+	import { CheckCircle2, ChevronsUpDown, Filter, PenBox, Search, Trash2, XCircle, ArrowDownAZ, ArrowUpAZ } from "lucide-svelte";
 	import { roles } from "../models/role";
 	import { user } from "../store/store";
 	import { writable } from 'svelte/store';
@@ -171,10 +171,38 @@
 	<div class="mx-5 mt-5">
 		<Table hoverable={true} class="relative overflow-x-auto rounded-md shadow-md sm:rounded-lg mb-48">
 			<TableHead>
-				<TableHeadCell on:click={() => sortTable('displayName')} class="cursor-pointer select-none">Nome</TableHeadCell>
-				<TableHeadCell on:click={() => sortTable('email')} class="cursor-pointer select-none">Email</TableHeadCell>
-				<TableHeadCell on:click={() => sortTable('role')} class="cursor-pointer select-none">Ruolo</TableHeadCell>
-				<TableHeadCell on:click={() => sortTable('alias')} class="cursor-pointer select-none">Alias</TableHeadCell>
+				<TableHeadCell on:click={() => sortTable('displayName')} class="cursor-pointer select-none">
+					<div class="flex gap-1">
+						Nome
+						{#if $sortKey === 'displayName'}
+							<svelte:component this={$sortDirection > 0 ? ArrowDownAZ : ArrowUpAZ} class="w-4 h-4 ml-1" />
+						{/if}
+					</div>
+				</TableHeadCell>
+				<TableHeadCell on:click={() => sortTable('email')} class="cursor-pointer select-none">
+					<div class="flex gap-1">
+						Email
+						{#if $sortKey === 'email'}
+							<svelte:component this={$sortDirection > 0 ? ArrowDownAZ : ArrowUpAZ} class="w-4 h-4 ml-1" />
+						{/if}
+					</div>
+				</TableHeadCell>
+				<TableHeadCell on:click={() => sortTable('role')} class="cursor-pointer select-none">
+					<div class="flex gap-1">
+						Ruolo
+						{#if $sortKey === 'role'}
+							<svelte:component this={$sortDirection > 0 ? ArrowDownAZ : ArrowUpAZ} class="w-4 h-4 ml-1" />
+						{/if}
+					</div>
+				</TableHeadCell>
+				<TableHeadCell on:click={() => sortTable('alias')} class="cursor-pointer select-none flex gap-1">
+					<div class="flex gap-1">
+						Alias
+						{#if $sortKey === 'alias'}
+							<svelte:component this={$sortDirection > 0 ? ArrowDownAZ : ArrowUpAZ} class="w-4 h-4 ml-1" />
+						{/if}
+					</div>
+				</TableHeadCell>
 				{#if $user.email === import.meta.env.VITE_ADMIN_EMAIL1 || $user.email === import.meta.env.VITE_ADMIN_EMAIL2}
 					<TableHeadCell class="text-center">Elimina</TableHeadCell>
 				{/if}
