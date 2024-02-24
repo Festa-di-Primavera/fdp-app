@@ -26,6 +26,14 @@
     
 	let toastOpen: boolean = false;
 	let toastMessage: string = '';
+    
+    let ticketInfos: Element | null = null;
+
+    function scrollToDiv() {
+        ticketInfos?.scrollIntoView({
+            behavior: 'smooth',
+        });
+    }
 
     async function checkTicket(code: string){        
         const response = await fetch(`/api/tickets/${code}`,
@@ -36,6 +44,8 @@
                 }
             }
         );
+
+        scrollToDiv();
 
         const body = (await response.json());
         let message = body.message
@@ -134,6 +144,7 @@
     }
 
     onMount(async() => {
+        ticketInfos = document.querySelector('#ticketInfos')
 		if(getAuth(getClientApp()).currentUser === null && data.token){
 			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
 				$user = userCredential.user;
@@ -194,7 +205,7 @@
                     <QrReader bind:codeResult={ticketCode}/>
                 </div>
 
-                <Card class="w-full flex flex-col text-lg p-3">
+                <Card class="w-full flex flex-col text-lg p-3" id="ticketInfos">
                     <span class="text-black dark:text-white w-full flex justify-between">
                         <span>N° biglietto:</span>
                         <span>{ticket.ticketID || ticketCode || ticketCodeInput}</span>
