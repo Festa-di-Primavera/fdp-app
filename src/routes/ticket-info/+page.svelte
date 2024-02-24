@@ -37,7 +37,6 @@
         
         if(res.status == 404){
             open = true;
-            console.log('404')
 
             clearTimeout(timeOut);
             timeOut = setTimeout(() => {
