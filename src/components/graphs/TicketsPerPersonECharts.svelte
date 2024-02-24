@@ -60,7 +60,7 @@
 			},
 			minInterval: 5,
 			min: 0,
-			max: Math.ceil(Math.max(...sellersStats.datasets) / 5) * 5,
+			max: Math.ceil((Math.max(...sellersStats.datasets)+1) / 5) * 5,
 		},
 		tooltip: {
 			trigger: 'item',
