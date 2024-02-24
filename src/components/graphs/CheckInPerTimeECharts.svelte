@@ -86,7 +86,7 @@
 					show: true,
 				},
 				name: 'Biglietti Validati',
-				color: '#EF562F',
+				color: '#C114C8',
             }
 		],
 		// scorri il grafico con il mouse
@@ -118,7 +118,7 @@
 					icon: `path://M 7 10 L 12 15 L 17 10 M 21 15 v 4 a 2 2 0 0 1 -2 2 H 5 a 2 2 0 0 1 -2 -2 v -4 M 12 4 L 12 15`,
 					emphasis:{
 						iconStyle:{
-							borderColor: '#EF562F'
+							borderColor: '#C114C8'
 						}
 					}
 				},
