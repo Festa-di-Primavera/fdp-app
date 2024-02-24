@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, Label, Input, Spinner, Toast } from "flowbite-svelte"
+	import { Button, Label, Input, Spinner, Toast, Modal } from "flowbite-svelte"
 	import { getAuth, signInWithCustomToken } from "firebase/auth";
 	import { CheckCircle2, Ticket, XCircle } from 'lucide-svelte';
 	import { onMount } from "svelte";
@@ -18,8 +18,8 @@
 	let toastOpen: boolean = false;
 	let toastMessage: string = '';
 
-	let feedbackToastOpen: boolean = false;
-	let message: string = '';
+	let modalOpen: boolean = false;
+	let modalMessage: string = '';
 	let color: 'green' | 'red' = 'green';
 	let error: boolean = false;
 
@@ -81,34 +81,25 @@
 					color = 'red';
 				}
 				
-				message = (await response.json()).message;
-				feedbackToastOpen = true;
-				const timeOut = setTimeout(() => {
-					feedbackToastOpen = false;
-					clearTimeout(timeOut);
-				}, 3500);
+				modalMessage = (await response.json()).message;
+				modalOpen = true;
 			}
 			catch(e){
 				color = 'red';
-				message = 'Errore di rete';
-				feedbackToastOpen = true;
+				modalMessage = 'Errore di rete';
+				modalOpen = true;
 				error = true;
-				const timeOut = setTimeout(() => {
-					feedbackToastOpen = false;
-					clearTimeout(timeOut);
-				}, 3500);
 			}
 		}
 		else{
-			message = 'Compilare tutti i campi';
+			modalMessage = 'Compilare tutti i campi';
 			color = 'red';
-			feedbackToastOpen = true;
-			const timeOut = setTimeout(() => {
-				feedbackToastOpen = false;
-				clearTimeout(timeOut);
-			}, 3500);
+			modalOpen = true;
 		}
+	}
 
+	const closeModal = () => {
+		modalOpen = false;
 		name = '';
 		surname = '';
 		ticketCode = '';
@@ -154,7 +145,20 @@
 	<span class='text-red-400 font-semibold'>{toastMessage}</span>
 </Toast>
 
-<Toast on:close={() => feedbackToastOpen = false} bind:open={feedbackToastOpen} color={color} class="w-max mt-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
-	<svelte:component this={error ? XCircle : CheckCircle2} class="w-6 h-6  text-{color}-400" slot="icon"/>
-	<span class={`text-${color}-400 font-semibold`}>{message}</span>
-</Toast>
+<Modal bind:open={modalOpen} on:close={closeModal} size="xs" outsideclose autoclose>
+	<span slot="header" class="text-2xl font-semibold text-{color}-500 flex items-center gap-2">
+		<svelte:component this={error ? XCircle : CheckCircle2} class="w-6 h-6  text-{color}-500"/>
+		{error ? 'Errore' : 'Successo'}
+	</span>
+	<div class="flex flex-col gap-5">
+		<span class="text-xl font-medium text-gray-500">{modalMessage}</span>
+		{#if !error}
+			<div class="flex flex-col">
+				<span class="mb-3">Codice: {ticketCode || ''}</span>
+				<span>Nome: {name}</span>
+				<span>Cognome: {surname}</span>
+			</div>
+		{/if}
+	</div>
+	<Button class="w-full" on:click={closeModal} slot="footer">Chiudi</Button>
+</Modal>
