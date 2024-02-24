@@ -70,7 +70,7 @@ export function computeSalesPerTime(tickets: Ticket[], timeSlot: SalesTimeSlot =
 		if (ticket.soldAt !== null) {
 			const dateTime = new Date(ticket.soldAt);
 
-			const slotIndex = Math.floor(dateTime.getTime() / timeSlot);
+			const slotIndex = Math.floor((dateTime.getTime()+1000*60*60) / timeSlot);
 			// console log slotIndex and dateTime as string
 			console.log(slotIndex, dateTime.toString());
 
@@ -99,6 +99,7 @@ export function computeSalesPerTime(tickets: Ticket[], timeSlot: SalesTimeSlot =
 		const month = date.toLocaleString('default', { month: 'short' });
 		const hour = date.getHours();
 
+		console.log('slotDate',date.toLocaleString(), "number: ", timeSlotsMap.get(indTimeSlot) || 0);
 		let label: string;
 
 		switch (timeSlot) {
@@ -147,7 +148,7 @@ export function computeCheckInPerTime(tickets: Ticket[], timeSlot: CheckInTimeSl
 		if (ticket.checkIn !== null) {
 			const dateTime = new Date(ticket.checkIn);
 
-			const slotIndex = Math.floor(dateTime.getTime() / timeSlot);
+			const slotIndex = Math.floor((dateTime.getTime()) / timeSlot);
 			const periodStart = slotIndex * timeSlot;
 
 			checkInsMap.set(periodStart, (checkInsMap.get(periodStart) || 0) + 1);
@@ -178,7 +179,8 @@ export function computeCheckInPerTime(tickets: Ticket[], timeSlot: CheckInTimeSl
 				label = `${day < 10 ? '0'+day : day} ${month},${hour}:${minutes < 10 ? '0'+minutes : minutes}`;
 				break;
 			case CheckInTimeSlot.HALF_HOUR:
-				label = `${day < 10 ? '0'+day : day} ${month},${hour}:${minutes < 30 ? '00' : '30'}-${hour+1}:${minutes < 30 ? '30' : '00'}`;
+				/* label = `${day < 10 ? '0'+day : day} ${month},${hour}:${minutes < 30 ? '00' : '30'}-${(hour+1)%24}:${minutes < 30 ? '30' : '00'}`; */
+				label = `${day < 10 ? '0'+day : day} ${month}, ${hour}:${minutes < 30 ? '00' : '30'}`
 				break;
 			case CheckInTimeSlot.HOUR:
 				label = `${day < 10 ? '0'+day : day} ${month}, ${hour}:00-${(hour+1)%24}:00`;
