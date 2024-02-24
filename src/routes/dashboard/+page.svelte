@@ -81,7 +81,7 @@
 				const timeOut = setTimeout(() => {
 					toastOpen = false;
 					clearTimeout(timeOut);
-				}, 3500);
+				}, 8000);
 			});
 		}
 	});

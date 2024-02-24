@@ -14,6 +14,7 @@
 	let message: string = '';
 	let error: boolean = false;
 	let toastOpen: boolean = false;
+	let timeOut: NodeJS.Timeout;
 	
 	// dropdown state variables
 	let dropdownOpenMap: { [key: string]: boolean } = {};
@@ -65,7 +66,8 @@
 				message = (await response.json()).message;
 				toastOpen = true;
 
-				const timeOut = setTimeout(() => {
+				clearTimeout(timeOut);
+				timeOut = setTimeout(() => {
 					toastOpen = false;
 					clearTimeout(timeOut);
 				}, 3500);
@@ -75,7 +77,8 @@
 				color = 'red';
 				toastOpen = true;
 
-				const timeOut = setTimeout(() => {
+				clearTimeout(timeOut);
+				timeOut = setTimeout(() => {
 					toastOpen = false;
 					clearTimeout(timeOut);
 				}, 3500);

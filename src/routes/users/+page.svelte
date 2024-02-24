@@ -25,6 +25,7 @@
 	let color: 'green' | 'red' = 'green';
 	let message: string = '';
 	let error: boolean = false;
+	let timeOut: NodeJS.Timeout;
 
 	// function to handle user delete
 	const handleUserDelete = async (user: any) => {
@@ -47,7 +48,8 @@
 			}
 			
 			changeToastOpen = true;
-			const timeOut = setTimeout(() => {
+			clearTimeout(timeOut);
+			timeOut = setTimeout(() => {
 				changeToastOpen = false;
 				clearTimeout(timeOut);
 			}, 3500);
@@ -58,7 +60,8 @@
 			error = true;
 			color = 'red';
 			changeToastOpen = true;
-			const timeOut = setTimeout(() => {
+			clearTimeout(timeOut);
+			timeOut = setTimeout(() => {
 				changeToastOpen = false;
 				clearTimeout(timeOut);
 			}, 3500);
@@ -103,7 +106,8 @@
 			}
 
 			changeToastOpen = true;
-			const timeOut = setTimeout(() => {
+			clearTimeout(timeOut);
+			timeOut = setTimeout(() => {
 				changeToastOpen = false;
 				clearTimeout(timeOut);
 			}, 3500);
@@ -129,7 +133,8 @@
 					toastMessage = 'Errore sconosciuto';
 				}
 				toastOpen = true;
-				const timeOut = setTimeout(() => {
+				clearTimeout(timeOut);
+				timeOut = setTimeout(() => {
 					toastOpen = false;
 					clearTimeout(timeOut);
 				}, 3500);

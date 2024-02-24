@@ -4,6 +4,7 @@
 	import { user } from "../store/store";
 	import { verifyBeforeUpdateEmail } from "firebase/auth";
 	import type { FirebaseError } from "firebase/app";
+	import type { N } from "vitest/dist/reporters-1evA5lom.js";
 
 	export let changeEmailModalOpen: boolean = false;
 
@@ -11,6 +12,7 @@
 	let toastMessage: string = '';
 	let error: boolean = false;
 	let open: boolean = false;
+	let timeOut: NodeJS.Timeout;
 
 	let value: string = '';
 	$: disableButton = value === '';
@@ -21,7 +23,8 @@
 			error = true;
 			toastMessage = 'Nessuna modifica effettuata';
 			open = true;
-			const timeOut = setTimeout(() => {
+			clearTimeout(timeOut);
+			timeOut = setTimeout(() => {
 				open = false;
 				clearTimeout(timeOut);
 			}, 3500);
@@ -34,7 +37,8 @@
 			color = 'green';
 			toastMessage = 'Email di verifica inviata al nuovo indirizzo';
 			open = true;
-			const timeOut = setTimeout(() => {
+			clearTimeout(timeOut);
+			timeOut = setTimeout(() => {
 				open = false;
 				clearTimeout(timeOut);
 			}, 3500);
@@ -56,7 +60,8 @@
 
 			color = 'red';
 			open = true;
-			const timeOut = setTimeout(() => {
+			clearTimeout(timeOut);
+			timeOut = setTimeout(() => {
 				open = false;
 				clearTimeout(timeOut);
 			}, 3500);

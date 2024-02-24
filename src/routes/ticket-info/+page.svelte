@@ -30,6 +30,7 @@
     
 	let toastOpen: boolean = false;
 	let toastMessage: string = '';
+    let timeOut: NodeJS.Timeout;
 
     async function getTicket(code: string){
         const res = await fetch(`/api/tickets/${code}`);
@@ -39,7 +40,8 @@
             open = true;
             console.log('404')
 
-            const timeOut = setTimeout(() => {
+            clearTimeout(timeOut);
+            timeOut = setTimeout(() => {
                 open = false;
                 clearTimeout(timeOut);
             }, 3500);
@@ -97,7 +99,8 @@
 					toastMessage = 'Errore sconosciuto';
 				}
 				toastOpen = true;
-                const timeOut = setTimeout(() => {
+                clearTimeout(timeOut);
+                timeOut = setTimeout(() => {
                     toastOpen = false;
                     clearTimeout(timeOut);
                 }, 3500);

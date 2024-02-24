@@ -26,6 +26,7 @@
 
 	let open: boolean = false;
 	let color: 'green' | 'red' | 'yellow' = 'green';
+	let timeOut: NodeJS.Timeout;
 	
 	enum ToastMessages {
 		INVALID_EMAIL_ERROR = 'Email non valida',
@@ -77,7 +78,8 @@
 		toastMessage = ToastMessages.EMAIL_VERIFICATION_SENT;
 		open = true;
 
-		const timeOut = setTimeout(() => {
+		clearTimeout(timeOut);
+		timeOut = setTimeout(() => {
 			open = false;
 			clearTimeout(timeOut);
 		}, 3500);
@@ -116,7 +118,8 @@
 				}
 				open = true;
 
-				const timeOut = setTimeout(() => {
+				clearTimeout(timeOut);
+				timeOut = setTimeout(() => {
 					open = false;
 					clearTimeout(timeOut);
 				}, 3500);
@@ -162,7 +165,8 @@
 				}
 				open = true;
 
-				const timeOut = setTimeout(() => {
+				clearTimeout(timeOut);
+				timeOut = setTimeout(() => {
 					open = false;
 					clearTimeout(timeOut);
 				}, 3500);
@@ -186,7 +190,8 @@
 				}
 				open = true;
 
-				const timeOut = setTimeout(() => {
+				clearTimeout(timeOut);
+				timeOut = setTimeout(() => {
 					open = false;
 					clearTimeout(timeOut);
 				}, 3500);

@@ -18,6 +18,7 @@
     let ticket: Ticket;
     let open: boolean = false;
     let feedbackToastMessage: string = '';
+    let timeOut: NodeJS.Timeout;
 
     let ticketStatus: 'notFound' | 'alreadyChecked' | 'notSold' | null = null;
 
@@ -106,7 +107,8 @@
         color = col;
         ticketStatus = status;
 
-        const timeOut = setTimeout(() => {
+        clearTimeout(timeOut);
+        timeOut = setTimeout(() => {
             open = false;
             ticketStatus = null;
             clearTimeout(timeOut);
@@ -146,7 +148,8 @@
 					toastMessage = 'Errore sconosciuto';
 				}
 				toastOpen = true;
-                const timeOut = setTimeout(() => {
+                clearTimeout(timeOut);
+                timeOut = setTimeout(() => {
                     toastOpen = false;
                     clearTimeout(timeOut);
                 }, 3500);

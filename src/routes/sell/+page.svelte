@@ -22,6 +22,7 @@
 	let modalMessage: string = '';
 	let color: 'green' | 'red' = 'green';
 	let error: boolean = false;
+	let timeOut: NodeJS.Timeout;
 
 	let name: string = '';
 	let surname: string = '';
@@ -43,7 +44,8 @@
 					toastMessage = 'Errore sconosciuto';
 				}
 				toastOpen = true;
-				const timeOut = setTimeout(() => {
+				clearTimeout(timeOut);
+				timeOut = setTimeout(() => {
 					toastOpen = false;
 					clearTimeout(timeOut);
 				}, 3500);

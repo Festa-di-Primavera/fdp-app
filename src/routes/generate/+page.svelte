@@ -100,7 +100,8 @@
 			.then((res) => {
 				color = 'green';
 				open = true;
-				const timeOut = setTimeout(() => {
+				clearTimeout(timeOut);
+				timeOut = setTimeout(() => {
 					open = false;
 					clearTimeout(timeOut);
 				}, 3500);
@@ -108,7 +109,8 @@
 			.catch((err) => {
 				color = 'red';
 				open = true;
-				const timeOut = setTimeout(() => {
+				clearTimeout(timeOut);
+				timeOut = setTimeout(() => {
 					open = false;
 					clearTimeout(timeOut);
 				}, 3500);
@@ -118,6 +120,7 @@
 
 	let open = false;
 	let color: 'green' | 'red' | 'yellow' = 'red';
+	let timeOut: NodeJS.Timeout;
 
 	let toastOpen: boolean = false;
 	let toastMessage: string = '';
@@ -143,7 +146,8 @@
 					toastMessage = 'Errore sconosciuto';
 				}
 				toastOpen = true;
-				const timeOut = setTimeout(() => {
+				clearTimeout(timeOut);
+				timeOut = setTimeout(() => {
 					toastOpen = false;
 					clearTimeout(timeOut);
 				}, 3500);

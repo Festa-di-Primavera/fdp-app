@@ -11,6 +11,7 @@
 	let toastMessage: string = '';
 	let error: boolean = false;
 	let open: boolean = false;
+	let timeOut: NodeJS.Timeout;
 
 	let oldPassword: string = '';
 	let newPassword: string = '';
@@ -50,7 +51,8 @@
 			toastMessage = 'Le password sono uguali';
 			open = true;
 			error = true;
-			const timeOut = setTimeout(() => {
+			clearTimeout(timeOut);
+			timeOut = setTimeout(() => {
 				open = false;
 				clearTimeout(timeOut);
 			}, 3500);
@@ -72,7 +74,8 @@
 			color = 'green';
 			toastMessage = 'Password cambiata con successo';
 			open = true;
-			const timeOut = setTimeout(() => {
+			clearTimeout(timeOut);
+			timeOut = setTimeout(() => {
 				open = false;
 				clearTimeout(timeOut);
 			}, 3500);
@@ -82,7 +85,8 @@
 			toastMessage = (e as FirebaseError).message;
 			open = true;
 			error = true;
-			const timeOut = setTimeout(() => {
+			clearTimeout(timeOut);
+			timeOut = setTimeout(() => {
 				open = false;
 				clearTimeout(timeOut);
 			}, 3500);
