@@ -13,8 +13,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const cookie = event.request.headers.get('cookie');
 	const token = await getIdTokenFromSessionCookie(getCookieValue(cookie, 'session'));
 
-	if(event.route.id?.startsWith('/api') && !token) {
-		return new Response('Unauthorized', { status: 401 });
+	if(event.route.id !== '/api/session' && event.route.id?.startsWith('/api')) {
+		if (!token)
+			return new Response('Unauthorized', { status: 401 });
 	}
 
 	event.locals.idToken = token;
