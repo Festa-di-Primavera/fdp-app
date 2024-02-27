@@ -77,6 +77,7 @@
 			axisPointer: {
 				type: 'shadow',
 			},
+			triggerOn: 'click',
 		},
         series: [
             {

@@ -83,13 +83,7 @@
 			axisPointer: {
 				type: 'shadow',
 			},
-			/* formatter: (item: any) => {
-				return (`<div class="text-center bg-white dark:bg-gray-800">
-							<div class="text-xs text-gray-500 dark:text-gray-400">${item.name}</div>
-							<div class="text-lg font-semibold text-primary-700">${item.value}</div>
-						</div>`);
-			}, 
-			extraCssText: 'padding: 10px; background: rgb(31 41 55);',*/
+			triggerOn: 'click',
 		},
         series: [
             {
