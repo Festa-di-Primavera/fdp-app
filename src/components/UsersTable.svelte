@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button, Dropdown, DropdownItem, Input, Popover, Radio, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Toast } from "flowbite-svelte";
-	import { CheckCircle2, ChevronsUpDown, Filter, PenBox, Search, Trash2, XCircle, ArrowDownAZ, ArrowUpAZ } from "lucide-svelte";
+	import { CheckCircle2, ChevronsUpDown, Filter, PenBox, Search, Trash2, XCircle, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowDown10, ArrowUp01, ArrowUp10, Euro } from "lucide-svelte";
 	import { roles } from "../models/role";
 	import { user } from "../store/store";
 	import { writable } from 'svelte/store';
@@ -88,6 +88,38 @@
 		}
 	};
 
+	const claimMoney = async (uid: string, amount: number) => {
+		const resp = await fetch(`/api/money/${uid}`, {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({money: amount})
+		});
+
+		if(resp.ok){
+			users = users.map((item: any) => {
+				if (item.uid === uid) {
+					item.customClaims.money = 0;
+				}
+				return item;
+			});
+			error = false;
+			color = 'green';
+		}
+		else{
+			error = true;
+			color = 'red';
+		}
+
+		message = (await resp.json()).message;
+		toastOpen = true;
+
+		clearTimeout(timeOut);
+		timeOut = setTimeout(() => {
+			toastOpen = false;
+			clearTimeout(timeOut);
+		}, 3500);
+	}
+
 	const triggerAliasModal = async (user: any) => {
 		currSelectedUser = user;
 		aliasModalOpen = true;
@@ -133,9 +165,9 @@
 			let aVal;
 			let bVal;
 
-			if(key == "role" || key == "alias"){
-				aVal = a.customClaims[key];
-				bVal = b.customClaims[key];
+			if(key == "role" || key == "alias" || key == "money" || key == "totMoney"){
+				aVal = a.customClaims[key] || 0;
+				bVal = b.customClaims[key] || 0;
 			} else {
 				aVal = a[key];
 				bVal = b[key];
@@ -172,7 +204,7 @@
 		</Input>
 	</div>
 	<div class="mx-5 mt-5">
-		<Table hoverable={true} class="relative overflow-x-auto rounded-md shadow-md sm:rounded-lg mb-48">
+		<Table hoverable={true} divClass="tableDiv relative overflow-x-auto overflow-y-visible pb-40" class="relative overflow-x-auto rounded-md shadow-md sm:rounded-lg overflow-visible ">
 			<TableHead>
 				<TableHeadCell on:click={() => sortTable('displayName')} class="cursor-pointer select-none">
 					<div class="flex gap-1">
@@ -198,11 +230,27 @@
 						{/if}
 					</div>
 				</TableHeadCell>
-				<TableHeadCell on:click={() => sortTable('alias')} class="cursor-pointer select-none flex gap-1">
-					<div class="flex gap-1">
+				<TableHeadCell on:click={() => sortTable('alias')} class="cursor-pointer select-none">
+					<div class="flex gap-1 justify-center">
 						Alias
 						{#if $sortKey === 'alias'}
 							<svelte:component this={$sortDirection > 0 ? ArrowDownAZ : ArrowUpAZ} class="w-4 h-4 ml-1" />
+						{/if}
+					</div>
+				</TableHeadCell>
+				<TableHeadCell on:click={() => sortTable('money')} class="cursor-pointer select-none">
+					<div class="flex gap-1 justify-center">
+						Debito (€)
+						{#if $sortKey === 'money'}
+							<svelte:component this={$sortDirection > 0 ? ArrowDown01 : ArrowUp01} class="w-4 h-4 ml-1" />
+						{/if}
+					</div>
+				</TableHeadCell>
+				<TableHeadCell on:click={() => sortTable('totMoney')} class="cursor-pointer select-none max-w-[8.5rem]">
+					<div class="flex gap-1 justify-left">
+						Tot. Vendite (€)
+						{#if $sortKey === 'totMoney'}
+							<svelte:component this={$sortDirection > 0 ? ArrowDown01 : ArrowUp01} class="w-4 h-4 ml-1" />
 						{/if}
 					</div>
 				</TableHeadCell>
@@ -228,40 +276,37 @@
 									{item.customClaims?.role ? item.customClaims?.role.toUpperCase() : 'NORMAL'}
 									<ChevronsUpDown class="aspect-square w-4" />
 								</button>
-								<Dropdown placement="bottom" class="z-50" bind:open={dropdownOpenMap[item.uid]}>
-									<DropdownItem class={(item.customClaims?.role === undefined || item.customClaims?.role === 'normal') ? `text-primary-600` : ''}>
-										<button on:click={() => handleRoleChange(item, 'normal')}> NORMAL </button>
-									</DropdownItem>
-									<DropdownItem class={item.customClaims?.role === 'seller' ? `text-primary-600` : ''}>
-										<button on:click={() => handleRoleChange(item, 'seller')}> SELLER </button>
-									</DropdownItem>
-									<DropdownItem
-									class={item.customClaims?.role === 'check-in' ? `text-primary-600` : ''}
-									>
-									<button on:click={() => handleRoleChange(item, 'check-in')}> CHECK-IN </button>
-									</DropdownItem>
-									<DropdownItem class={item.customClaims?.role === 'admin' ? `text-primary-600` : ''}>
-										<button on:click={() => handleRoleChange(item, 'admin')}> ADMIN </button>
-									</DropdownItem>
-									<DropdownItem
-									class={item.customClaims?.role === 'superadmin' ? `text-primary-600` : ''}
-									>
-										<button on:click={() => handleRoleChange(item, 'superadmin')}> SUPERADMIN </button>
-									</DropdownItem>
+								<Dropdown placement="bottom" class="z-[100] dark:bg-gray-700 rounded-lg" bind:open={dropdownOpenMap[item.uid]}>
+									{#each Object.keys(roles).filter((v) => isNaN(Number(v))) as role}
+										<DropdownItem class={item.customClaims?.role === role.toLowerCase() ? `text-primary-500` : ''}>
+											<button class="drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]" on:click={() => handleRoleChange(item, role.toLowerCase())}> {role.toUpperCase()} </button>
+										</DropdownItem>
+									{/each}
 								</Dropdown>
 							{/if}
 						</TableBodyCell>
 						<TableBodyCell>
-								<div class="flex gap-3 w-full justify-between">
-									{item.customClaims?.alias}
-									<button on:click={() => triggerAliasModal(item)}>
-										<PenBox />
-									</button>
-								</div>
+							<div class="flex gap-3 w-full justify-between items-center">
+								{item.customClaims?.alias}
+								<button on:click={() => triggerAliasModal(item)}>
+									<PenBox class="w-5 h-5" />
+								</button>
+							</div>
+						</TableBodyCell>
+						<TableBodyCell class="min-w-52 max-w-64">
+							<div class="flex w-full justify-around items-center">
+								<span class="text-right w-12">{item.customClaims?.money || 0},00</span>
+								<Button disabled={!item.customClaims?.money} size="xs" class="flex items-center gap-1" on:click={() => claimMoney(item.uid, item.customClaims?.money)}>
+									<Euro class="w-4 h-4" /> Salda
+								</Button>
+							</div>
+						</TableBodyCell>
+						<TableBodyCell class="max-w-40">
+							<span class="w-max">{item.customClaims?.totMoney || 0},00</span>
 						</TableBodyCell>
 						{#if $user.email === import.meta.env.VITE_ADMIN_EMAIL1 || $user.email === import.meta.env.VITE_ADMIN_EMAIL2}
 							<TableBodyCell class="flex items-center justify-center">
-								<Button disabled={item.email === import.meta.env.VITE_ADMIN_EMAIL1 || item.email === import.meta.env.VITE_ADMIN_EMAIL2} class="px-2 py-1 dark:bg-red-500 bg-red-500" on:click={()=> {currSelectedUser=item; deleteModalOpen = true; }}>
+								<Button disabled={item.email === import.meta.env.VITE_ADMIN_EMAIL1 || item.email === import.meta.env.VITE_ADMIN_EMAIL2} class="px-2 py-1 dark:bg-red-500 bg-red-500 hover:bg-red-600 dark:hover:bg-red-600" on:click={()=> {currSelectedUser=item; deleteModalOpen = true; }}>
 									<Trash2 class="aspect-square w-4 dark:text-white text-gray-900" />
 								</Button>
 							</TableBodyCell>

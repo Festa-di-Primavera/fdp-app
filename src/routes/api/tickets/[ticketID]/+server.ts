@@ -158,6 +158,8 @@ export async function PUT( { params } ) {
 }
 
 export async function POST( { params, request } ) {
+	const adminApp = getAuth(getAdminApp());
+
 	const formData = await request.json();
 
 	const name = formData.name;
@@ -198,6 +200,9 @@ export async function POST( { params, request } ) {
 			soldAt: soldAt,
 			seller: seller
 		});
+
+		const sellerUser = await adminApp.getUser(seller);
+		await adminApp.setCustomUserClaims(seller, {...sellerUser.customClaims, money: (sellerUser.customClaims?.money ?? 0) + 10, totMoney: (sellerUser.customClaims?.totMoney ?? 0) + 10});
 
 		const response = new Response(JSON.stringify({ message: 'Biglietto venduto' }), {
 			status: 200,
