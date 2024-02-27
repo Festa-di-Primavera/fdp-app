@@ -5,8 +5,6 @@
 	import { onMount } from "svelte";
 
 	import { getClientApp } from "$lib/firebase/client";
-
-	import { enhance } from "$app/forms";
 	
 	import { user } from "../../store/store";
 	import QrReader from "../../components/QrReader.svelte";
@@ -69,8 +67,7 @@
 					body: JSON.stringify({
 						name,
 						surname,
-						seller: $user?.uid,
-						user: $user?.uid
+						seller: $user?.uid
 					})
 				});
 
