@@ -63,7 +63,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			randomColor = `#${Math.floor(Math.random()*16777215).toString(16)}`;
 		} while(isTooLight(randomColor));
 
-		adminApp.setCustomUserClaims(userId, {role: 'normal', accessLevel: 0, alias: name, color: randomColor});
+		adminApp.setCustomUserClaims(userId, {role: 'normal', accessLevel: 0, alias: name, color: randomColor, money: 0, totMoney: 0});
 	}
 
 	if (scheme !== 'Bearer' || !token) {
