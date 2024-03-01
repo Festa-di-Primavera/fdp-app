@@ -9,7 +9,7 @@ export async function PUT({params}) {
 	const enumBindings: {[key: string]: roles} = {
 		'normal': roles.NORMAL,
 		'seller': roles.SELLER,
-		'check-in': roles.CHECKIN,
+		'checkin': roles.CHECKIN,
 		'admin': roles.ADMIN,
 		'superadmin': roles.SUPERADMIN
 	};
