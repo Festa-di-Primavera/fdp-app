@@ -3,8 +3,11 @@ import { getFirestore } from 'firebase/firestore';
 import {
 	getAuth,
 	inMemoryPersistence,
-	setPersistence
+	setPersistence,
+	signOut
 } from 'firebase/auth';
+import { user } from '../../store/store';
+import { goto } from '$app/navigation';
 
 const clientConfig = {
 	apiKey: import.meta.env.VITE_API_KEY,
@@ -31,3 +34,18 @@ export const getClientApp = () => {
 export const clientAuth = getAuth(firebaseApp); */
 
 export const getClientDB = () => getFirestore(getClientApp());
+
+export const handleSignOut = async (roleUpdate: boolean = false) => {
+	try {
+		await signOut(getAuth());
+		await fetch('/api/session', {
+			method: 'DELETE'
+		});
+
+		user.set(null);
+
+		goto(`/${roleUpdate ? '?roleUpdate' : ''}`, { invalidateAll: true, state: { messaggio: 'Ciao dal componente precedente!' } });
+	} catch (error) {
+		console.error(error);
+	}
+};
