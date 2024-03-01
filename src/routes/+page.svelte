@@ -1,18 +1,37 @@
 <script lang="ts">
 	import AuthPanel from '../components/AuthPanel.svelte';
 	import { getAuth, signInWithCustomToken } from 'firebase/auth';
-	import { handleSignOut, user } from '../store/store';
+	import { user } from '../store/store';
 	import { Button, Toast } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
-	import { getClientApp } from '$lib/firebase/client';
-	import { XCircle } from 'lucide-svelte';
+	import { getClientApp, handleSignOut } from '$lib/firebase/client';
+	import { XCircle, CheckCircle2 } from 'lucide-svelte';
+	import { goto } from '$app/navigation';
 
-	export let data: { token: string };
+	export let data: {logout?: boolean, token?: string };
 
 	let toastMessage: string = '';
 	let open: boolean = false;
+	let error: boolean = false;
 
 	onMount(async() => {
+		if(data.logout){
+			handleSignOut(true);
+			return;
+		}
+
+		if(window.location.search.split('?')[1] == 'roleUpdate'){
+			toastMessage = 'Ruolo aggiornato! Rifai il login';
+			open = true;
+			error=false;
+			goto(window.location.pathname);
+			const timeOut = setTimeout(() => {
+				open = false;
+
+				clearTimeout(timeOut);
+			}, 4000);
+		}
+
 		if(getAuth(getClientApp()).currentUser === null && data.token){
 			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
 				$user = userCredential.user;
@@ -27,6 +46,7 @@
 					toastMessage = 'Errore sconosciuto';
 				}
 				open = true;
+				error=true;
 				const timeOut = setTimeout(() => {
 					open = false;
 					clearTimeout(timeOut);
@@ -50,14 +70,14 @@
 				</p>
 				<div class="mt-5 flex flex-col items-center gap-4 text-center">
 					Se invece vuoi uscire dall'applicazione, clicca qui sotto
-					<Button on:click={handleSignOut}>Esci dall'app</Button>
+					<Button on:click={() => handleSignOut()}>Esci dall'app</Button>
 				</div>
 			</div>
 		</div>
 	{/if}
 </section>
 
-<Toast on:close={() => open = false} bind:open color="red" class="w-max mt-10 mb-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
-	<XCircle class="w-6 h-6  text-red-400" slot="icon"/>
-	<span class='text-red-400 font-semibold'>{toastMessage}</span>
+<Toast on:close={() => open = false} bind:open color={error ? 'red' : 'green'} class="w-max mt-10 mb-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
+	<svelte:component this={error ? XCircle : CheckCircle2} class="w-6 h-6  text-{error ? 'red' : 'green'}-400" slot="icon"/>
+	<span class='text-{error ? 'red' : 'green'}-400 font-semibold'>{toastMessage}</span>
 </Toast>

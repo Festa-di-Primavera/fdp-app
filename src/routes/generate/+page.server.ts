@@ -7,11 +7,21 @@ import { redirect } from '@sveltejs/kit';
 
 export async function load({cookies}) {
 	const app = getAuth(getAdminApp());
-	const user = await getClaimsFromIdToken(cookies);
 
-	/* if (user?.accessLevel >= roles.SUPERADMIN) { */
-	if(user?.email === import.meta.env.VITE_ADMIN_EMAIL1 || user?.email === import.meta.env.VITE_ADMIN_EMAIL2) {
-		const tok = await app.createCustomToken(user?.uid ?? '');
+	const userClaims = await getClaimsFromIdToken(cookies);
+
+	if(userClaims){
+		const user = await app.getUser(userClaims.uid);
+		if(user?.customClaims?.accessLevel !== userClaims?.accessLevel) {
+			return {
+				logout: true
+			}
+		}
+	}
+
+	/* if (userClaims?.accessLevel >= roles.SUPERADMIN) { */
+	if(userClaims?.email === import.meta.env.VITE_ADMIN_EMAIL1 || userClaims?.email === import.meta.env.VITE_ADMIN_EMAIL2) {
+		const tok = await app.createCustomToken(userClaims?.uid ?? '');
 
 		return {
 			token: tok

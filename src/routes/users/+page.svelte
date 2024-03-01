@@ -4,14 +4,44 @@
 	import { getAuth, signInWithCustomToken } from 'firebase/auth';
 	import { CheckCircle2, XCircle } from 'lucide-svelte'
 	
-	import { getClientApp } from '$lib/firebase/client.js';
+	import { getClientApp, handleSignOut } from '$lib/firebase/client.js';
 
 	import { user } from '../../store/store.js';
 	import UsersTable from '../../components/UsersTable.svelte';
 	
-	export let data;
+	export let data: { logout?: boolean, token?: string, usersList?: string};
+
+	onMount(async() => {
+		if(data.logout){
+			handleSignOut(true);
+			return;
+		}
+
+		if(getAuth(getClientApp()).currentUser === null && data.token){
+			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
+				$user = userCredential.user;
+			}).catch((error) => {
+				if(error.code === 'auth/invalid-custom-token'){
+					toastMessage = 'Token non valido';
+				}
+				else if(error.code === 'auth/network-request-failed'){
+					toastMessage = 'Errore di rete';
+				}
+				else{
+					toastMessage = 'Errore sconosciuto';
+				}
+				toastOpen = true;
+				clearTimeout(timeOut);
+				timeOut = setTimeout(() => {
+					toastOpen = false;
+					clearTimeout(timeOut);
+				}, 3500);
+			});
+		}
+	});
+
 	// fetch all users
-	let users = JSON.parse(data.usersList || '')?.users;
+	let users = JSON.parse(data.usersList || 'null')?.users;
 
 	// modal state variable
 	let deleteModalOpen: boolean = false;
@@ -117,30 +147,6 @@
 		aliasModalOpen = false;
 		alias = '';
 	};
-
-	onMount(async() => {
-		if(getAuth(getClientApp()).currentUser === null && data.token){
-			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
-				$user = userCredential.user;
-			}).catch((error) => {
-				if(error.code === 'auth/invalid-custom-token'){
-					toastMessage = 'Token non valido';
-				}
-				else if(error.code === 'auth/network-request-failed'){
-					toastMessage = 'Errore di rete';
-				}
-				else{
-					toastMessage = 'Errore sconosciuto';
-				}
-				toastOpen = true;
-				clearTimeout(timeOut);
-				timeOut = setTimeout(() => {
-					toastOpen = false;
-					clearTimeout(timeOut);
-				}, 3500);
-			});
-		}
-	});
 </script>
 
 {#if $user}

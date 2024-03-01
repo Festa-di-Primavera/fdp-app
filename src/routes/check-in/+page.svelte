@@ -4,13 +4,13 @@
     import { CheckCircle2, XCircle, AlertCircle, Ticket as TicketIcon, Check, X } from 'lucide-svelte';
 	import { getAuth, signInWithCustomToken } from "firebase/auth";
     
-	import { getClientApp } from "$lib/firebase/client";
+	import { getClientApp, handleSignOut } from "$lib/firebase/client";
     
     import { user } from "../../store/store";
 	import type { Ticket } from "../../models/ticket";
 	import QrReader from "../../components/QrReader.svelte";
 
-    export let data: { token: string };
+	export let data: {logout?: boolean, token?: string };
 
 	let ticketCode: string = '';
 	let ticketCodeInput: string = '';
@@ -144,6 +144,11 @@
     }
 
     onMount(async() => {
+		if(data.logout){
+			handleSignOut(true);
+			return;
+		}
+        
         ticketInfos = document.querySelector('#ticketInfos')
 		if(getAuth(getClientApp()).currentUser === null && data.token){
 			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {

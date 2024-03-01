@@ -7,10 +7,19 @@ import { roles } from '../../models/role.js';
 export async function load({cookies}) {
 	const app = getAuth(getAdminApp());
 
-	const user = await getClaimsFromIdToken(cookies);
+	const userClaims = await getClaimsFromIdToken(cookies);
 
-	if (user?.accessLevel >= roles.SUPERADMIN) {
-		const tok = await app.createCustomToken(user?.uid || '');
+	if(userClaims){
+		const user = await app.getUser(userClaims.uid);
+		if(user?.customClaims?.accessLevel !== userClaims?.accessLevel) {
+			return {
+				logout: true
+			}
+		}
+	}
+
+	if (userClaims?.accessLevel >= roles.SUPERADMIN) {
+		const tok = await app.createCustomToken(userClaims?.uid || '');
 
 		return {
 			token: tok,

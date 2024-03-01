@@ -4,12 +4,12 @@
 	import { CheckCircle2, Ticket, XCircle } from 'lucide-svelte';
 	import { onMount } from "svelte";
 
-	import { getClientApp } from "$lib/firebase/client";
+	import { getClientApp, handleSignOut } from "$lib/firebase/client";
 	
 	import { user } from "../../store/store";
 	import QrReader from "../../components/QrReader.svelte";
 
-	export let data: {token: string};
+	export let data: {logout?: boolean, token?: string };
 
 	let ticketCode: string;
 
@@ -28,6 +28,11 @@
 	$: disableButton = name === '' || surname === '' || ticketCode === '';
 
 	onMount(async() => {
+		if(data.logout){
+			handleSignOut(true);
+			return;
+		}
+
 		if(getAuth(getClientApp()).currentUser === null && data.token){
 			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
 				$user = userCredential.user;

@@ -4,12 +4,12 @@
 	import { XCircle, CheckCircle2 } from 'lucide-svelte';
 	import { Select, Label, Checkbox, Button, Toast, NumberInput, Spinner } from 'flowbite-svelte';
 	
-	import { getClientApp } from '$lib/firebase/client';
+	import { getClientApp, handleSignOut } from '$lib/firebase/client';
 	
 	import { user } from '../../store/store';
 	import type { Ticket } from '../../models/ticket';
 
-	export let data: { token: string };
+	export let data: {logout?: boolean, token?: string };
 
 	const codeTypesList = [
 		{ value: 'numeric', name: 'Numerico' },
@@ -128,6 +128,10 @@
 	let tickets: Ticket[];
 
 	onMount(async() => {
+		if(data.logout){
+			handleSignOut(true);
+			return;
+		}
 		const res = await fetch('/api/tickets');
 		tickets = (await res.json()).body.tickets;
 		codesInDB = new Set<string>(tickets.map((ticket) => ticket.ticketID));

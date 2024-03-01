@@ -3,7 +3,7 @@
 	import { Card, Spinner, Toast } from 'flowbite-svelte';
 	import { getAuth, signInWithCustomToken } from 'firebase/auth';
 
-	import { getClientApp, getClientDB } from '$lib/firebase/client';
+	import { getClientApp, getClientDB, handleSignOut } from '$lib/firebase/client';
 	
 	import { XCircle } from 'lucide-svelte';
 
@@ -19,7 +19,7 @@
 	import TicketsPerHourECharts from '../../components/graphs/TicketsPerHourECharts.svelte';
 	import { collection, onSnapshot, query } from 'firebase/firestore';
 
-	export let data: { token:string, sellers: {uid: string; alias: string}[] };
+	export let data: {logout?: boolean, token?: string, sellers?: {uid: string; alias: string}[] };
 	
 	let toastOpen: boolean = false;
 	let toastMessage: string = '';
@@ -34,7 +34,7 @@
 			if(!ticketDoc.data().seller) {
 				currSeller = null;
 			} else {
-				currSeller = data.sellers.find((seller) => seller.uid === ticketDoc.data().seller)?.alias || "AnOnImO";
+				currSeller = data.sellers?.find((seller) => seller.uid === ticketDoc.data().seller)?.alias || "AnOnImO";
 			}
 
 			return (
@@ -64,6 +64,11 @@
 	$: checkInPerTime = computeCheckInPerTime(tickets, timeWindowCheckInPerTime);
 	
 	onMount(async() => {
+		if(data.logout){
+			handleSignOut(true);
+			return;
+		}
+
 		if(getAuth(getClientApp()).currentUser === null && data.token){
 			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
 				$user = userCredential.user;
