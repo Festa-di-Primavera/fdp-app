@@ -18,7 +18,7 @@
 	
 	// dropdown state variables
 	let dropdownOpenMap: { [key: string]: boolean } = {};
-	users.forEach((user: any) => {
+	users?.forEach((user: any) => {
 		dropdownOpenMap = {...dropdownOpenMap, [user.uid]: false}
 	});
 
@@ -125,6 +125,25 @@
 		aliasModalOpen = true;
 	};
 
+	const newShade = (hexColor: string, magnitude: number) => {
+		hexColor = hexColor.replace(`#`, ``);
+		if (hexColor.length === 6) {
+			const decimalColor = parseInt(hexColor, 16);
+			let r = (decimalColor >> 16) + magnitude;
+			r > 255 && (r = 255);
+			r < 0 && (r = 0);
+			let g = (decimalColor & 0x0000ff) + magnitude;
+			g > 255 && (g = 255);
+			g < 0 && (g = 0);
+			let b = ((decimalColor >> 8) & 0x00ff) + magnitude;
+			b > 255 && (b = 255);
+			b < 0 && (b = 0);
+			return `#${(g | (b << 8) | (r << 16)).toString(16)}`;
+		} else {
+			return hexColor;
+		}
+	};
+
 	// search and filter variables
 	let searchTerm = '';
 	let filter = 'nome';
@@ -160,27 +179,29 @@
 		const direction = $sortDirection;
 		sortItems.set(filteredItems);
 		
-		const sorted = [...$sortItems].sort((a, b) => {
+		if($sortItems?.length > 0) {
+			const sorted = [...$sortItems].sort((a, b) => {
 
-			let aVal;
-			let bVal;
+				let aVal;
+				let bVal;
 
-			if(key == "role" || key == "alias" || key == "money" || key == "totMoney"){
-				aVal = a.customClaims[key] || 0;
-				bVal = b.customClaims[key] || 0;
-			} else {
-				aVal = a[key];
-				bVal = b[key];
-			}
+				if(key == "role" || key == "alias" || key == "money" || key == "totMoney"){
+					aVal = a.customClaims[key] || 0;
+					bVal = b.customClaims[key] || 0;
+				} else {
+					aVal = a[key];
+					bVal = b[key];
+				}
 
-			if (aVal < bVal) {
-				return -direction;
-			} else if (aVal > bVal) {
-				return direction;
-			}
-			return 0;
-		});
-		sortItems.set(sorted);
+				if (aVal < bVal) {
+					return -direction;
+				} else if (aVal > bVal) {
+					return direction;
+				}
+				return 0;
+			});
+			sortItems.set(sorted);
+		}
 	}
 
 </script>
@@ -259,10 +280,10 @@
 				{/if}
 			</TableHead>
 			<TableBody tableBodyClass="divide-y">
-				{#each $sortItems as item}
+				{#each $sortItems || [] as item}
 					<TableBodyRow>
 						<TableBodyCell tdClass="px-6 py-4 whitespace-nowrap font-medium flex items-center gap-4">
-							<div style="background: {item.customClaims?.color || '#000'};" class="h-7 w-7 rounded-full flex items-center justify-center text-white" >
+							<div style="background: linear-gradient(335deg, {newShade(item.customClaims?.color || '#000', 50)}, {newShade(item.customClaims?.color || '#000', -10)});" class="h-7 w-7 rounded-full flex items-center justify-center text-white" >
 								{item.displayName?.charAt(0).toUpperCase() || 'U'}
 							</div>
 							<span class="mr-4">{item.displayName}</span>

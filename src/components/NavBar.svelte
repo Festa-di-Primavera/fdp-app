@@ -5,9 +5,9 @@
   	import { sineIn } from 'svelte/easing';
 
 	import { page } from '$app/stores';  
-	import { handleSignOut, user, theme } from "../store/store";
+	import { user, theme } from "../store/store";
 	import { onIdTokenChanged, getAuth, deleteUser, } from "firebase/auth";
-	import { getClientApp } from "$lib/firebase/client";
+	import { getClientApp, handleSignOut } from "$lib/firebase/client";
 	import { roles } from "../models/role";
 	import ChangePwModal from "./ChangePwModal.svelte";
 	import ChangeEmailModal from "./ChangeEmailModal.svelte";
@@ -84,6 +84,25 @@
 		}
 	}
 
+	const newShade = (hexColor: string, magnitude: number) => {
+		hexColor = hexColor.replace(`#`, ``);
+		if (hexColor.length === 6) {
+			const decimalColor = parseInt(hexColor, 16);
+			let r = (decimalColor >> 16) + magnitude;
+			r > 255 && (r = 255);
+			r < 0 && (r = 0);
+			let g = (decimalColor & 0x0000ff) + magnitude;
+			g > 255 && (g = 255);
+			g < 0 && (g = 0);
+			let b = ((decimalColor >> 8) & 0x00ff) + magnitude;
+			b > 255 && (b = 255);
+			b < 0 && (b = 0);
+			return `#${(g | (b << 8) | (r << 16)).toString(16)}`;
+		} else {
+			return hexColor;
+		}
+	};
+
 	let deleteModalOpen: boolean = false;
 	function deleteCurrentUser(){
 		if($user !== null){
@@ -140,7 +159,7 @@
 			{#if $user !== null}
 				<div class="dark:text-white flex text-md items-center self-baseline w-full justify-between p-3 rounded-lg bg-gray-100 dark:bg-gray-600">
 					<button id="account" class="flex gap-4 text-md items-center truncate overflow-ellipsis pr-5">
-						<div style="background: {color || '#000'};" class="h-7 min-w-7 rounded-full flex items-center justify-center text-white" >
+						<div style="background: linear-gradient(335deg, {newShade(color || '#000', 50)}, {newShade(color || '#000', -10)});" class="h-7 min-w-7 rounded-full flex items-center justify-center text-white" >
 							{$user.displayName?.charAt(0).toUpperCase() || 'NO'}
 						</div>
 						
