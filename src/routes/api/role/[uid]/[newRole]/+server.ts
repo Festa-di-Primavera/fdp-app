@@ -1,17 +1,17 @@
 import { getAdminApp } from '$lib/firebase/admin';
 import { getAuth } from 'firebase-admin/auth';
-import { roles } from '../../../../../models/role';
+import { Role } from '../../../../../models/role';
 import type { FirebaseError } from 'firebase-admin/app';
 
 export async function PUT({params}) {
 	const app = getAuth(getAdminApp());
 	
-	const enumBindings: {[key: string]: roles} = {
-		'normal': roles.NORMAL,
-		'seller': roles.SELLER,
-		'checkin': roles.CHECKIN,
-		'admin': roles.ADMIN,
-		'superadmin': roles.SUPERADMIN
+	const enumBindings: {[key: string]: Role} = {
+		'normal': Role.NORMAL,
+		'seller': Role.SELLER,
+		'checkin': Role.CHECKIN,
+		'admin': Role.ADMIN,
+		'superadmin': Role.SUPERADMIN
 	};
 
 	try{

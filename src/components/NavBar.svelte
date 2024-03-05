@@ -8,7 +8,7 @@
 	import { user, theme } from "../store/store";
 	import { onIdTokenChanged, getAuth, deleteUser, } from "firebase/auth";
 	import { getClientApp, handleSignOut } from "$lib/firebase/client";
-	import { roles } from "../models/role";
+	import { Role } from "../models/role";
 	import ChangePwModal from "./ChangePwModal.svelte";
 	import ChangeEmailModal from "./ChangeEmailModal.svelte";
 	
@@ -33,37 +33,37 @@
 		{
 			label: 'Home',
 			slug: "/",
-			role: roles.NORMAL,
+			role: Role.NORMAL,
 			icon: Home
 		},
 		{
 			label: 'Dashboard',
 			slug: "/dashboard",
-			role: roles.ADMIN,
+			role: Role.ADMIN,
 			icon: LayoutDashboard
 		},
 		{
 			label: 'Utenti',
 			slug: "/users",
-			role: roles.SUPERADMIN,
+			role: Role.SUPERADMIN,
 			icon: Users
 		},
 		{
 			label: 'Check-in',
 			slug: "/check-in",
-			role: roles.CHECKIN,
+			role: Role.CHECKIN,
 			icon: ScanLine
 		},
 		{
 			label: 'Vendi',
 			slug: "/sell",
-			role: roles.SELLER,
+			role: Role.SELLER,
 			icon: DollarSign
 		},
 		{
 			label: 'Info biglietti',
 			slug: "/ticket-info",
-			role: roles.SELLER,
+			role: Role.SELLER,
 			icon: Ticket
 		},
 	]

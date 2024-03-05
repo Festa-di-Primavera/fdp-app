@@ -2,7 +2,7 @@ import { getAuth } from 'firebase-admin/auth';
 
 import { getAdminApp, getClaimsFromIdToken } from '$lib/firebase/admin';
 import { redirect } from '@sveltejs/kit';
-import { roles } from '../../models/role.js';
+import { Role } from '../../models/role.js';
 
 export async function load({cookies}) {
 	const app = getAuth(getAdminApp());
@@ -18,7 +18,7 @@ export async function load({cookies}) {
 		}
 	}
 
-	if (userClaims?.accessLevel >= roles.SUPERADMIN) {
+	if (userClaims?.accessLevel >= Role.SUPERADMIN) {
 		const tok = await app.createCustomToken(userClaims?.uid || '');
 
 		return {

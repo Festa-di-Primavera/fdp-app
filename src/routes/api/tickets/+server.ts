@@ -6,7 +6,7 @@ import { collection, getDocs, query, setDoc, doc } from 'firebase/firestore';
 import { getAdminApp } from '$lib/firebase/admin';
 import { getClientApp, getClientDB } from '$lib/firebase/client.js';
 
-import { roles } from '../../../models/role';
+import { Role } from '../../../models/role';
 import type { Ticket } from '../../../models/ticket';
 import { signInWithCustomToken, getAuth as getClientAuth } from 'firebase/auth';
 
@@ -15,7 +15,7 @@ export async function GET() {
 
 	const app = getAuth(getAdminApp());
 	const users = await app.listUsers();
-	const sellers = users.users.filter((user) => user.customClaims?.accessLevel >= roles.SELLER);
+	const sellers = users.users.filter((user) => user.customClaims?.accessLevel >= Role.SELLER);
 
 	const querySnapshot = await getDocs(q);
 

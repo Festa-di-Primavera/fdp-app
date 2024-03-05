@@ -1,6 +1,6 @@
 import { getAuth } from "firebase-admin/auth";
 import { getAdminApp, getClaimsFromIdToken } from "$lib/firebase/admin";
-import { roles } from "../../models/role";
+import { Role } from "../../models/role";
 import { redirect } from "@sveltejs/kit";
 
 export async function load({cookies}) {
@@ -17,7 +17,7 @@ export async function load({cookies}) {
 		}
 	}
 
-	if (userClaims?.accessLevel >= roles.SELLER) {
+	if (userClaims?.accessLevel >= Role.SELLER) {
 		const tok = await app.createCustomToken(userClaims?.uid || '');
 
 		return {

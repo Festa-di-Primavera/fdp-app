@@ -2,7 +2,7 @@ import { getAuth } from 'firebase-admin/auth';
 
 import { getAdminApp, getClaimsFromIdToken } from '$lib/firebase/admin';
 
-import { roles } from '../../models/role';
+import { Role } from '../../models/role';
 import { redirect } from '@sveltejs/kit';
 
 export async function load({cookies}) {
@@ -19,12 +19,12 @@ export async function load({cookies}) {
 		}
 	}
 
-	if (userClaims?.accessLevel >= roles.ADMIN) {
+	if (userClaims?.accessLevel >= Role.ADMIN) {
 		const tok = await app.createCustomToken(userClaims?.uid || '');
 
 		const users = await app.listUsers();
 		
-		const sellers = users.users.filter((user) => user.customClaims?.accessLevel >= roles.SELLER);
+		const sellers = users.users.filter((user) => user.customClaims?.accessLevel >= Role.SELLER);
 
 		return {
 			sellers:	sellers.map((seller) => {

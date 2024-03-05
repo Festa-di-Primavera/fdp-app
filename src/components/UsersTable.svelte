@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Button, Dropdown, DropdownItem, Input, Popover, Radio, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Toast } from "flowbite-svelte";
 	import { CheckCircle2, ChevronsUpDown, Filter, PenBox, Search, Trash2, XCircle, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowDown10, ArrowUp01, ArrowUp10, Euro } from "lucide-svelte";
-	import { roles } from "../models/role";
+	import { Role } from "../models/role";
 	import { user } from "../store/store";
 	import { writable } from 'svelte/store';
 	
@@ -22,12 +22,12 @@
 		dropdownOpenMap = {...dropdownOpenMap, [user.uid]: false}
 	});
 
-	let enumBindings: {[key: string]: roles} = {
-		'normal': roles.NORMAL,
-		'seller': roles.SELLER,
-		'check-in': roles.CHECKIN,
-		'admin': roles.ADMIN,
-		'superadmin': roles.SUPERADMIN
+	let enumBindings: {[key: string]: Role} = {
+		'normal': Role.NORMAL,
+		'seller': Role.SELLER,
+		'check-in': Role.CHECKIN,
+		'admin': Role.ADMIN,
+		'superadmin': Role.SUPERADMIN
 	};
 
 	const handleRoleChange = async (user: any, role: string) => {
@@ -298,7 +298,7 @@
 									<ChevronsUpDown class="aspect-square w-4" />
 								</button>
 								<Dropdown placement="bottom" class="z-[100] dark:bg-gray-700 rounded-lg" bind:open={dropdownOpenMap[item.uid]}>
-									{#each Object.keys(roles).filter((v) => isNaN(Number(v))) as role}
+									{#each Object.keys(Role).filter((v) => isNaN(Number(v))) as role}
 										<DropdownItem class={item.customClaims?.role === role.toLowerCase() ? `text-primary-500` : ''}>
 											<button class="drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]" on:click={() => handleRoleChange(item, role.toLowerCase())}> {role.toUpperCase()} </button>
 										</DropdownItem>
