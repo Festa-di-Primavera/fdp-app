@@ -17,7 +17,7 @@
 	import TicketsPerPersonECharts from '../../components/graphs/TicketsPerPersonECharts.svelte';
 	import CheckInPerTimeECharts from '../../components/graphs/CheckInPerTimeECharts.svelte';
 	import TicketsPerHourECharts from '../../components/graphs/TicketsPerHourECharts.svelte';
-	import { collection, onSnapshot, query } from 'firebase/firestore';
+	import { collection, onSnapshot, query, type Unsubscribe } from 'firebase/firestore';
 
 	export let data: {logout?: boolean, token?: string, sellers?: {uid: string; alias: string}[] };
 	
@@ -25,30 +25,7 @@
 	let toastMessage: string = '';
 
 	let tickets: Ticket[] = [];
-
-	const q = query(collection(getClientDB(), "tickets"));
-	const unsubscribe = onSnapshot(q, (querySnapshot) => {
-		tickets = querySnapshot.docs.map((ticketDoc) => {
-			let currSeller: string | null;
-
-			if(!ticketDoc.data().seller) {
-				currSeller = null;
-			} else {
-				currSeller = data.sellers?.find((seller) => seller.uid === ticketDoc.data().seller)?.alias || "AnOnImO";
-			}
-
-			return (
-				{
-					ticketID: ticketDoc.id,
-					name: ticketDoc.data().name,
-					surname: ticketDoc.data().surname,
-					checkIn: ticketDoc.data().checkIn?.toDate() || null,
-					soldAt: ticketDoc.data().soldAt?.toDate() || null,
-					seller: currSeller,
-				} as Ticket
-			);
-		});
-	});
+	let unsubscribe: Unsubscribe;
 
 	// cards and pie chart data
 	$: checkedTicketsCount = tickets.filter((ticket) => ticket.checkIn !== null).length;
@@ -70,7 +47,7 @@
 		}
 
 		if(getAuth(getClientApp()).currentUser === null && data.token){
-			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
+			await signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
 				$user = userCredential.user;
 			}).catch((error) => {
 				if(error.code === 'auth/invalid-custom-token'){
@@ -87,6 +64,34 @@
 					toastOpen = false;
 					clearTimeout(timeOut);
 				}, 8000);
+			});
+		}
+
+		if(getAuth(getClientApp()).currentUser){
+			const q = query(collection(getClientDB(), "tickets"));
+			unsubscribe = onSnapshot(q, (querySnapshot) => {
+				tickets = querySnapshot.docs.map((ticketDoc) => {
+					let currSeller: string | null;
+
+					if(!ticketDoc.data().seller) {
+						currSeller = null;
+					} else {
+						currSeller = data.sellers?.find((seller) => seller.uid === ticketDoc.data().seller)?.alias || "AnOnImO";
+					}
+
+					return (
+						{
+							ticketID: ticketDoc.id,
+							name: ticketDoc.data().name,
+							surname: ticketDoc.data().surname,
+							seller: currSeller,
+							soldAt: ticketDoc.data().soldAt?.toDate() || null,
+							checkIn: ticketDoc.data().checkIn?.toDate() || null,
+							checkOut: ticketDoc.data().checkOut?.toDate() || null,
+							newCheckIn: ticketDoc.data().newCheckIn?.toDate() || null
+						}
+					);
+				});
 			});
 		}
 	});
