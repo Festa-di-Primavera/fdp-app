@@ -1,6 +1,6 @@
 <script lang="ts">
     import { DarkMode, Drawer, CloseButton, Dropdown, DropdownItem, Modal, Button } from "flowbite-svelte";
-	import { AlignJustify, DollarSign, LayoutDashboard, LogOut, ScanLine, Ticket, Users, Home} from 'lucide-svelte';
+	import { AlignJustify, DollarSign, LayoutDashboard, LogOut, ScanLine, Ticket, Users, Home, DoorOpen } from 'lucide-svelte';
 	import Logo from "./Logo.svelte";
   	import { sineIn } from 'svelte/easing';
 
@@ -61,9 +61,15 @@
 			icon: DollarSign
 		},
 		{
+			label: 'Check-out',
+			slug: "/check-out",
+			role: Role.CHECKOUT,
+			icon: DoorOpen
+		},
+		{
 			label: 'Info biglietti',
 			slug: "/ticket-info",
-			role: Role.SELLER,
+			role: Role.CHECKOUT,
 			icon: Ticket
 		},
 	]
@@ -145,13 +151,24 @@
 			{#if currAccessLevel !== null}
 				<div class="flex flex-col gap-4 mt-5">
 					{#each routes as route}
-						{#if route.role <= currAccessLevel}
-							<a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>
-								<span class="flex gap-4 w-full text-xl items-center">
-									<svelte:component this={route.icon}/>
-									{route.label}
-								</span>
-							</a>
+						{#if route.slug != '/check-out'}
+							{#if route.role <= currAccessLevel}
+								<a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>
+									<span class="flex gap-4 w-full text-xl items-center">
+										<svelte:component this={route.icon}/>
+										{route.label}
+									</span>
+								</a>
+							{/if}
+						{:else}
+							{#if currAccessLevel == Role.CHECKOUT || currAccessLevel >= Role.ADMIN}
+								<a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>
+									<span class="flex gap-4 w-full text-xl items-center">
+										<svelte:component this={route.icon}/>
+										{route.label}
+									</span>
+								</a>
+							{/if}
 						{/if}
 					{/each}
 				</div>
