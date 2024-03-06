@@ -26,10 +26,12 @@ export async function GET( { params } ) {
 			ticketID: ticketDoc.id,
 			name: ticketDoc.data().name,
 			surname: ticketDoc.data().surname,
-			checkIn: ticketDoc.data().checkIn?.toDate() || null,
+			seller: null,
 			soldAt: ticketDoc.data().soldAt?.toDate() || null,
-			seller: null
-		} as Ticket;
+			checkIn: ticketDoc.data().checkIn?.toDate() || null,
+			checkOut: ticketDoc.data().checkOut?.toDate() || null,
+			newCheckIn: ticketDoc.data().newCheckIn?.toDate() || null
+		};
 
 		return new Response(JSON.stringify({ ticket }), {
 			status: 402,
@@ -54,10 +56,12 @@ export async function GET( { params } ) {
 		ticketID: ticketDoc.id,
 		name: ticketDoc.data().name,
 		surname: ticketDoc.data().surname,
-		checkIn: ticketDoc.data().checkIn?.toDate() || null,
+		seller: sellerName,
 		soldAt: ticketDoc.data().soldAt?.toDate() || null,
-		seller: sellerName
-	} as Ticket;
+		checkIn: ticketDoc.data().checkIn?.toDate() || null,
+		checkOut: ticketDoc.data().checkOut?.toDate() || null,
+		newCheckIn: ticketDoc.data().newCheckIn?.toDate() || null
+	};
 
 	return new Response(JSON.stringify({ ticket, message: 'Biglietto validato' }), {
 		// 206 Partial Content || 200 OK
@@ -76,6 +80,7 @@ export async function PUT( { params } ) {
 
 	const ticketDoc = (await getDoc(ticketDocRef));
 
+	//* BIGLIETTO NON ESISTENTE
 	if(!ticketDoc.exists()) {
 		return new Response(JSON.stringify({ message: 'Biglietto non valido' }), {
 			// 404 Not Found
@@ -86,15 +91,18 @@ export async function PUT( { params } ) {
 		});
 	}
 
+	//* BIGLIETTO NON VENDUTO
 	if(!ticketDoc.data().soldAt) {
 		const ticket: Ticket = {
 			ticketID: ticketDoc.id,
 			name: ticketDoc.data().name,
 			surname: ticketDoc.data().surname,
-			checkIn: ticketDoc.data().checkIn?.toDate() || null,
+			seller: ticketDoc.data().seller,
 			soldAt: ticketDoc.data().soldAt?.toDate() || null,
-			seller: ticketDoc.data().seller
-		} as Ticket;			
+			checkIn: ticketDoc.data().checkIn?.toDate() || null,
+			checkOut: ticketDoc.data().checkOut?.toDate() || null,
+			newCheckIn: ticketDoc.data().newCheckIn?.toDate() || null,
+		};			
 
 		return new Response(JSON.stringify({ ticket, message: 'Biglietto non venduto' }), {
 			// 402 Payment Required
@@ -105,6 +113,7 @@ export async function PUT( { params } ) {
 		});
 	}
 
+	//* GET DEL NOME DEL VENDITORE
 	let sellerName;
 	try{
 		const sellerID = ticketDoc.data().seller;
@@ -115,25 +124,78 @@ export async function PUT( { params } ) {
 		sellerName = null;
 	}
 
+	//* BIGLIETTO GIA' VALIDATO
 	if(ticketDoc.data().checkIn) {
-		const ticket: Ticket = {
-			ticketID: ticketDoc.id,
-			name: ticketDoc.data().name,
-			surname: ticketDoc.data().surname,
-			checkIn: ticketDoc.data().checkIn?.toDate() || null,
-			soldAt: ticketDoc.data().soldAt?.toDate() || null,
-			seller: sellerName
-		} as Ticket;
+		//* E NON USCITO
+		if(!ticketDoc.data().checkOut) {
+			const ticket: Ticket = {
+				ticketID: ticketDoc.id,
+				name: ticketDoc.data().name,
+				surname: ticketDoc.data().surname,
+				checkIn: ticketDoc.data().checkIn?.toDate() || null,
+				soldAt: ticketDoc.data().soldAt?.toDate() || null,
+				checkOut: ticketDoc.data().checkOut?.toDate() || null,
+				newCheckIn: ticketDoc.data().newCheckIn?.toDate() || null,
+				seller: sellerName
+			};
 
-		return new Response(JSON.stringify({ ticket, message: 'Biglietto già validato' }), {
-			// 409 Conflict
-			status: 409,
-			headers: {
-				'content-type': 'application/json'
+			return new Response(JSON.stringify({ ticket, message: 'Biglietto già validato' }), {
+				// 409 Conflict
+				status: 409,
+				headers: {
+					'content-type': 'application/json'
+				}
+			});
+		}
+		//* E USCITO UNA VOLTA
+		else {
+			if(ticketDoc.data().newCheckIn) {
+				const ticket: Ticket = {
+					ticketID: ticketDoc.id,
+					name: ticketDoc.data().name,
+					surname: ticketDoc.data().surname,
+					checkIn: ticketDoc.data().checkIn?.toDate() || null,
+					soldAt: ticketDoc.data().soldAt?.toDate() || null,
+					checkOut: ticketDoc.data().checkOut?.toDate() || null,
+					newCheckIn: ticketDoc.data().newCheckIn?.toDate() || null,
+					seller: sellerName
+				};
+	
+				return new Response(JSON.stringify({ ticket, message: 'Biglietto già validato (2 volte)', second: true }), {
+					// 409 Conflict
+					status: 409,
+					headers: {
+						'content-type': 'application/json'
+					}
+				});
 			}
-		});
+			const currentTimestamp = Timestamp.fromDate(new Date());
+			await updateDoc(doc(getClientDB(), "tickets", ticketID), {
+				newCheckIn: currentTimestamp
+			});
+
+			const ticket: Ticket = {
+				ticketID: ticketDoc.id,
+				name: ticketDoc.data().name,
+				surname: ticketDoc.data().surname,
+				seller: sellerName,
+				soldAt: ticketDoc.data().soldAt?.toDate() || null,
+				checkIn: ticketDoc.data().checkIn?.toDate() || null,
+				checkOut: ticketDoc.data().checkOut?.toDate() || null,
+				newCheckIn: currentTimestamp?.toDate()
+			};
+
+			return new Response(JSON.stringify({ ticket, message: 'Biglietto validato (2^ entrata)', second: true }), {
+				// 206 Partial Content || 200 OK
+				status: sellerName === null ? 206 : 200,
+				headers: {
+					'content-type': 'application/json'
+				}
+			});
+		}
 	}
 
+	//* BIGLIETTO NON ANCORA VALIDATO
 	const currentTimestamp = Timestamp.fromDate(new Date());
 	await updateDoc(doc(getClientDB(), "tickets", ticketID), {
 		checkIn: currentTimestamp
@@ -143,12 +205,14 @@ export async function PUT( { params } ) {
 		ticketID: ticketDoc.id,
 		name: ticketDoc.data().name,
 		surname: ticketDoc.data().surname,
-		checkIn: currentTimestamp.toDate(),
+		seller: sellerName,
 		soldAt: ticketDoc.data().soldAt?.toDate() || null,
-		seller: sellerName
-	} as Ticket;
+		checkIn: currentTimestamp?.toDate(),
+		checkOut: null,
+		newCheckIn: null
+	};
 
-	return new Response(JSON.stringify({ ticket, message: 'Biglietto validato' }), {
+	return new Response(JSON.stringify({ ticket, message: 'Biglietto validato', second: false }), {
 		// 206 Partial Content || 200 OK
 		status: sellerName === null ? 206 : 200,
 		headers: {
