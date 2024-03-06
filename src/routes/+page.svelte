@@ -5,7 +5,7 @@
 	import { Button, Toast } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 	import { getClientApp, handleSignOut } from '$lib/firebase/client';
-	import { XCircle, CheckCircle2 } from 'lucide-svelte';
+	import { XCircle, AlertCircle } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
 
 	export let data: {logout?: boolean, token?: string };
@@ -31,6 +31,16 @@
 				clearTimeout(timeOut);
 			}, 4000);
 		}
+		else if(window.location.search.split('?')[1] == 'checkOutExpired'){
+			toastMessage = 'Non è più possibile fare check-out';
+			open = true;
+			error=false;
+			goto(window.location.pathname);
+			const timeOut = setTimeout(() => {
+				open = false;
+				clearTimeout(timeOut);
+			}, 4000);
+		} 
 
 		if(getAuth(getClientApp()).currentUser === null && data.token){
 			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
@@ -77,7 +87,7 @@
 	{/if}
 </section>
 
-<Toast on:close={() => open = false} bind:open color={error ? 'red' : 'green'} class="w-max mt-10 mb-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
-	<svelte:component this={error ? XCircle : CheckCircle2} class="w-6 h-6  text-{error ? 'red' : 'green'}-400" slot="icon"/>
-	<span class='text-{error ? 'red' : 'green'}-400 font-semibold'>{toastMessage}</span>
+<Toast on:close={() => open = false} bind:open color={error ? 'red' : 'yellow'} class="w-max mt-10 mb-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
+	<svelte:component this={error ? XCircle : AlertCircle} class="w-6 h-6 text-{error ? 'red' : 'yellow'}-400" slot="icon"/>
+	<span class='text-{error ? 'red' : 'yellow'}-400 font-semibold'>{toastMessage}</span>
 </Toast>
