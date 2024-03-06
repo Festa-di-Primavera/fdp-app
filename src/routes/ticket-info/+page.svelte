@@ -9,6 +9,7 @@
     import { user } from "../../store/store";
 	import type { Ticket } from "../../models/ticket";
 	import QrReader from "../../components/QrReader.svelte";
+	import InfoCard from "../../components/InfoCard.svelte";
 
     let ticketInfos: Element | null = null;
 
@@ -48,10 +49,12 @@
                 ticketID: code,
                 name: '',
                 surname: '',
-                checkIn: null,
+                seller: '',
                 soldAt: null,
-                seller: ''
-            } as Ticket;
+                checkIn: null,
+                checkOut: null,
+                newCheckIn: null,
+            };
             return
         }
 
@@ -61,10 +64,12 @@
             ticketID: code,
             name: tick.name,
             surname: tick.surname,
-            checkIn: tick.checkIn,
+            seller: res.status !== 206 ? tick.seller : 'Non Trovato',
             soldAt: tick.soldAt,
-            seller: res.status !== 206 ? tick.seller : 'Non Trovato'
-        } as Ticket;
+            checkIn: tick.checkIn,
+            checkOut: tick.checkOut,
+            newCheckIn: tick.newCheckIn,
+        };
     }
 
     const reset = () => {
@@ -72,10 +77,12 @@
             ticketID: '',
             name: '',
             surname: '',
-            checkIn: null,
+            seller: '',
             soldAt: null,
-            seller: ''
-        } as Ticket;
+            checkIn: null,
+            checkOut: null,
+            newCheckIn: null,
+        };
 
         ticketCodeInput = '';
         ticketCode = '';
@@ -148,28 +155,12 @@
                     <QrReader bind:codeResult={ticketCode}/>
                 </div>
 
-                <Card class="w-full flex flex-col text-lg p-3" id="ticketInfos">
-                    <span class="text-black dark:text-white w-full flex justify-between">
-                        <span>N° biglietto:</span>
-                        <span class="font-bold">{ticket.ticketID || ticketCode || ticketCodeInput}</span>
-                    </span>
-                    <span class="text-black dark:text-white w-full flex justify-between">
-                        <span>Nominativo:</span>
-                        <span class="font-bold">{(ticket.name || '') + ' ' + (ticket.surname || '')}</span>
-                    </span>
-                    <span class="text-black dark:text-white w-full flex justify-between">
-                        <span>Ingresso:</span>
-                        <span class="font-bold">{ticket.checkIn ? (new Date(ticket.checkIn)).toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : ''}</span>
-                    </span>
-                    <span class="text-black dark:text-white w-full flex justify-between">
-                        <span>Venditore:</span>
-                        <span class="font-bold">{ticket.seller || ''}</span>
-                    </span>
-                    <span class="text-black dark:text-white w-full flex justify-between">
-                        <span>Venduto:</span>
-                        <span class="font-bold">{ticket.soldAt ? (new Date(ticket.soldAt)).toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : ''}</span>
-                    </span>
-                </Card>
+                <InfoCard
+                    bind:ticketCode
+                    bind:ticketCodeInput
+                    bind:ticket
+                />
+                
                 <Toast on:close={() => open = false} bind:open color='red' class="w-max mt-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
                     <XCircle class="w-6 h-6  text-red-400" slot="icon"/>
                     <span class='text-red-400 font-semibold'>Codice biglietto errato</span>

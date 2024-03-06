@@ -9,6 +9,7 @@
     import { user } from "../../store/store";
 	import type { Ticket } from "../../models/ticket";
 	import QrReader from "../../components/QrReader.svelte";
+	import InfoCard from "../../components/InfoCard.svelte";
 
 	export let data: {logout?: boolean, token?: string };
 
@@ -23,6 +24,7 @@
     let ticketStatus: 'notFound' | 'alreadyChecked' | 'notSold' | null = null;
 
     let color: 'green' | 'red' | 'yellow' = 'green';
+    let focus: 'checkIn' | 'newCheckIn' | null = null;
     
 	let toastOpen: boolean = false;
 	let toastMessage: string = '';
@@ -48,17 +50,20 @@
         scrollToDiv();
 
         const body = (await response.json());
-        let message = body.message
+        let message = body.message;
+        focus = (body.second) ? 'newCheckIn' : 'checkIn';
         
         if(response.status == 404){
             ticket = {
                 ticketID: code,
                 name: '',
                 surname: '',
-                checkIn: null,
+                seller: '',
                 soldAt: null,
-                seller: ''
-            } as Ticket;
+                checkIn: null,
+                checkOut: null,
+                newCheckIn: null,
+            };
 
             triggerToast(message, 'red', 'notFound');
             ticketCodeInput = '';
@@ -72,10 +77,12 @@
                 ticketID: code,
                 name: tick.name,
                 surname: tick.surname,
-                checkIn: tick.checkIn,
+                seller: tick.seller,
                 soldAt: tick.soldAt,
-                seller: tick.seller
-            } as Ticket;
+                checkIn: tick.checkIn,
+                checkOut: tick.checkOut,
+                newCheckIn: tick.newCheckIn,
+            };
 
             triggerToast(message, 'red', 'notSold');
             ticketCodeInput = '';
@@ -87,10 +94,12 @@
                 ticketID: code,
                 name: tick.name,
                 surname: tick.surname,
-                checkIn: tick.checkIn,
+                seller: tick.seller,
                 soldAt: tick.soldAt,
-                seller: tick.seller
-            } as Ticket;
+                checkIn: tick.checkIn,
+                checkOut: tick.checkOut,
+                newCheckIn: tick.newCheckIn,
+            };
 
             triggerToast(message, 'yellow', 'alreadyChecked');
             ticketCodeInput = '';
@@ -101,10 +110,12 @@
             ticketID: code,
             name: tick.name,
             surname: tick.surname,
-            checkIn: tick.checkIn,
+            seller: response.status !== 206 ? tick.seller : 'Non Trovato',
             soldAt: tick.soldAt,
-            seller: response.status !== 206 ? tick.seller : 'Non Trovato'
-        } as Ticket;
+            checkIn: tick.checkIn,
+            checkOut: tick.checkOut,
+            newCheckIn: tick.newCheckIn
+        };
 
         triggerToast(message, 'green', null);
         ticketCodeInput = '';
@@ -131,16 +142,19 @@
             ticketID: '',
             name: '',
             surname: '',
-            checkIn: null,
+            seller: '',
             soldAt: null,
-            seller: ''
-        } as Ticket;
+            checkIn: null,
+            checkOut: null,
+            newCheckIn: null
+        };
 
         ticketCodeInput = '';
         ticketCode = '';
         open = false;
         ticketStatus = null;
         color = 'green';
+        focus = null;
     }
 
     onMount(async() => {
@@ -210,28 +224,14 @@
                     <QrReader bind:codeResult={ticketCode}/>
                 </div>
 
-                <Card class="w-full flex flex-col text-lg p-3" id="ticketInfos">
-                    <span class="text-black dark:text-white w-full flex justify-between">
-                        <span>N° biglietto:</span>
-                        <span>{ticket.ticketID || ticketCode || ticketCodeInput}</span>
-                    </span>
-                    <span class="text-black dark:text-white w-full flex justify-between">
-                        <span>Nominativo:</span>
-                        <span>{(ticket.name || '') + ' ' + (ticket.surname || '')}</span>
-                    </span>
-                    <span class="text-black dark:text-white w-full flex justify-between">
-                        <span>Ingresso:</span>
-                        <span class="text-{color}-400 font-bold">{ticket.checkIn ? (new Date(ticket.checkIn)).toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : ''}</span>
-                    </span>
-                    <span class="text-black dark:text-white w-full flex justify-between">
-                        <span>Venditore:</span>
-                        <span>{ticket.seller || ''}</span>
-                    </span>
-                    <span class="text-black dark:text-white w-full flex justify-between">
-                        <span>Venduto:</span>
-                        <span>{ticket.soldAt ? (new Date(ticket.soldAt)).toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : ''}</span>
-                    </span>
-                </Card>
+                <InfoCard
+                    bind:ticketCode
+                    bind:ticketCodeInput
+                    bind:ticket
+                    bind:color
+                    bind:focus
+                />
+                
                 <Toast on:close={() => open = false} bind:open color={color} class="w-max mt-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
                     <svelte:component this={ticketStatus === 'notFound' || ticketStatus === 'notSold' ? XCircle : (ticketStatus === 'alreadyChecked' ? AlertCircle : CheckCircle2)} class="w-6 h-6  text-{color}-400" slot="icon"/>
                     <span class={`text-${color}-400 font-semibold`}>{feedbackToastMessage}</span>
