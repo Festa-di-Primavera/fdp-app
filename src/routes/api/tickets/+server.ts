@@ -25,10 +25,12 @@ export async function GET() {
 				ticketID: ticketDoc.id,
 				name: ticketDoc.data().name,
 				surname: ticketDoc.data().surname,
-				checkIn: ticketDoc.data().checkIn?.toDate(),
+				seller: ticketDoc.data().seller ? sellers.find((seller) => seller.uid === ticketDoc.data().seller)?.customClaims?.alias : null,
 				soldAt: ticketDoc.data().soldAt?.toDate(),
-				seller: ticketDoc.data().seller ? sellers.find((seller) => seller.uid === ticketDoc.data().seller)?.customClaims?.alias : null
-			} as Ticket
+				checkIn: ticketDoc.data().checkIn?.toDate(),
+				checkOut: ticketDoc.data().checkOut?.toDate(),
+				newCheckIn: ticketDoc.data().newCheckIn?.toDate()
+			}
 		);
 	});
 
@@ -50,12 +52,14 @@ export async function POST(request) {
 	for (const code of body.codes) {
 		const ticketRef = doc(getClientDB(), "tickets", code);
 		await setDoc(ticketRef, {
-			checkIn: null,
 			name: null,
+			surname: null,
 			seller: null,
 			soldAt: null,
-			surname: null
-		} as Ticket);
+			checkIn: null,
+			newCheckIn: null,
+			checkOut: null
+		});
 	}
 
 	return json({
