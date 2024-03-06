@@ -20,6 +20,12 @@ export enum CheckInTimeSlot {
 	TWO_HOURS = 1000*60*60*2,
 }
 
+export enum CheckOutTimeSlot {
+	FIFTEEN_MINUTES = 1000*60*15,
+	HALF_HOUR = 1000*60*30,
+	HOUR = 1000*60*60
+}
+
 export function computeSellersStats(tickets: Ticket[]): ChartData {
 	const sellersStats: Map<string, number> = new Map();
 
@@ -194,6 +200,66 @@ export function computeCheckInPerTime(tickets: Ticket[], timeSlot: CheckInTimeSl
 
 		if (checkInsMap.has(indTimeSlot)) {
 			datasets.push(checkInsMap.get(indTimeSlot) as number);
+		} else {
+			datasets.push(0);
+		}
+	}
+
+	return { labels, datasets };
+}
+
+export function computeCheckOutPerTime(tickets: Ticket[], timeSlot: CheckOutTimeSlot = CheckOutTimeSlot.HALF_HOUR){
+	const checkOutsMap: Map<number, number> = new Map();
+
+	for (const ticket of tickets) {
+		if (ticket.checkOut !== null) {
+			const dateTime = new Date(ticket.checkOut);
+
+			const slotIndex = Math.floor((dateTime.getTime()) / timeSlot);
+			const periodStart = slotIndex * timeSlot;
+
+			checkOutsMap.set(periodStart, (checkOutsMap.get(periodStart) || 0) + 1);
+		}
+	}
+
+	const sortedCheckOuts = Array.from(checkOutsMap.entries()).sort((a, b) => a[0] - b[0]);
+
+	const labels: string[] = [];
+	const datasets: number[] = [];
+
+	if (sortedCheckOuts.length === 0) {
+		return { labels, datasets };
+	}
+
+	for (let indTimeSlot = sortedCheckOuts[0][0]; indTimeSlot <= sortedCheckOuts[sortedCheckOuts.length - 1][0]; indTimeSlot += timeSlot) {
+		const date = new Date(indTimeSlot);
+
+		const day = date.getDate();
+		const month = date.toLocaleString('default', { month: 'short' });
+		const hour = date.getHours();
+		const minutes = date.getMinutes();
+
+		let label: string;
+
+		switch (timeSlot) {
+			case CheckOutTimeSlot.FIFTEEN_MINUTES:
+				label = `${day < 10 ? '0'+day : day} ${month},${hour}:${minutes < 10 ? '0'+minutes : minutes}`;
+				break;
+			case CheckOutTimeSlot.HALF_HOUR:
+				/* label = `${day < 10 ? '0'+day : day} ${month},${hour}:${minutes < 30 ? '00' : '30'}-${(hour+1)%24}:${minutes < 30 ? '30' : '00'}`; */
+				label = `${day < 10 ? '0'+day : day} ${month}, ${hour}:${minutes < 30 ? '00' : '30'}`
+				break;
+			case CheckOutTimeSlot.HOUR:
+				label = `${day < 10 ? '0'+day : day} ${month}, ${hour}:00-${(hour+1)%24}:00`;
+				break;
+			default:
+				throw new Error("Invalid timeSlot");
+		}
+
+		labels.push(label);
+
+		if (checkOutsMap.has(indTimeSlot)) {
+			datasets.push(checkOutsMap.get(indTimeSlot) as number);
 		} else {
 			datasets.push(0);
 		}

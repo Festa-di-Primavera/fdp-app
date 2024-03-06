@@ -9,7 +9,7 @@
 
 	import { user } from '../../store/store';
 	import type { Ticket } from '../../models/ticket';
-	import { computeSellersStats, computeSalesPerHour, computeSalesPerTime, computeCheckInPerTime, SalesTimeSlot, CheckInTimeSlot } from '$lib/graphs/utils';
+	import { computeSellersStats, computeSalesPerHour, computeSalesPerTime, computeCheckInPerTime, SalesTimeSlot, CheckInTimeSlot, computeCheckOutPerTime, CheckOutTimeSlot } from '$lib/graphs/utils';
 
 	import TicketsECharts from '../../components/graphs/TicketsECharts.svelte';
 	import ExportToCsv from '../../components/ExportToCSV.svelte';
@@ -18,6 +18,7 @@
 	import CheckInPerTimeECharts from '../../components/graphs/CheckInPerTimeECharts.svelte';
 	import TicketsPerHourECharts from '../../components/graphs/TicketsPerHourECharts.svelte';
 	import { collection, onSnapshot, query, type Unsubscribe } from 'firebase/firestore';
+	import CheckOutPerTimeECharts from '../../components/graphs/CheckOutPerTimeECharts.svelte';
 
 	export let data: {logout?: boolean, token?: string, sellers?: {uid: string; alias: string}[] };
 	
@@ -25,7 +26,7 @@
 	let toastMessage: string = '';
 
 	let tickets: Ticket[] = [];
-	let unsubscribe: Unsubscribe;
+	let unsubscribe: Unsubscribe = () => {};
 
 	// cards and pie chart data
 	$: checkedTicketsCount = tickets.filter((ticket) => ticket.checkIn !== null).length;
@@ -34,11 +35,13 @@
 
 	let timeWindowSalesPerTime: SalesTimeSlot = SalesTimeSlot.DAY;
 	let timeWindowCheckInPerTime: CheckInTimeSlot = CheckInTimeSlot.HOUR;
+	let timeWindowCheckOutPerTime: CheckOutTimeSlot = CheckOutTimeSlot.HALF_HOUR;
 	
 	$: sellersStats = computeSellersStats(tickets);
 	$: sellHoursStats = computeSalesPerHour(tickets);
 	$: salesPerTime = computeSalesPerTime(tickets, timeWindowSalesPerTime);
 	$: checkInPerTime = computeCheckInPerTime(tickets, timeWindowCheckInPerTime);
+	$: checkOutPerTime = computeCheckOutPerTime(tickets, timeWindowCheckOutPerTime);
 	
 	onMount(async() => {
 		if(data.logout){
@@ -151,6 +154,11 @@
 				<CheckInPerTimeECharts
 					bind:ticketsData={checkInPerTime}
 					bind:timeWindow={timeWindowCheckInPerTime}
+				/>
+
+				<CheckOutPerTimeECharts
+					bind:ticketsData={checkOutPerTime}
+					bind:timeWindow={timeWindowCheckOutPerTime}
 				/>
 			</div>
 				<ExportToCsv bind:tickets />
