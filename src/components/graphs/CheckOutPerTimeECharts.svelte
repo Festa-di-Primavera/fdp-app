@@ -85,7 +85,7 @@
 				labelLine: {
 					show: true,
 				},
-				name: 'Biglietti Validati',
+				name: 'Biglietti Usciti',
 				color: '#C114C8',
             }
 		],
