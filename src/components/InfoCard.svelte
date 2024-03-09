@@ -30,12 +30,16 @@
 		<span>Entrata:</span>
 		<span class="{focus == 'checkIn' && color ? `text-${color}-400` : ""} font-bold">{ticket.checkIn ? (new Date(ticket.checkIn)).toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : ''}</span>
 	</span>
-	<span class="text-black dark:text-white w-full flex justify-between">
-		<span>Uscita:</span>
-		<span class="{focus == 'checkOut' && color ? `text-${color}-400` : ""} font-bold">{ticket.checkOut ? (new Date(ticket.checkOut)).toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : ''}</span>
-	</span>
-	<span class="text-black dark:text-white w-full flex justify-between">
-		<span>Rientro:</span>
-		<span class="{focus == 'newCheckIn' && color ? `text-${color}-400` : ""} font-bold">{ticket.newCheckIn ? (new Date(ticket.newCheckIn)).toLocaleString('it-IT', { timeZone: 'Europe/Rome' }) : ''}</span>
-	</span>
+	{#if ticket.checkOut}
+		<span class="text-black dark:text-white w-full flex justify-between">
+			<span>Uscita:</span>
+			<span class="{focus == 'checkOut' && color ? `text-${color}-400` : ""} font-bold">{(new Date(ticket.checkOut)).toLocaleString('it-IT', { timeZone: 'Europe/Rome' })}</span>
+		</span>
+	{/if}
+	{#if ticket.newCheckIn}
+		<span class="text-black dark:text-white w-full flex justify-between">
+			<span>Rientro:</span>
+			<span class="{focus == 'newCheckIn' && color ? `text-${color}-400` : ""} font-bold">{(new Date(ticket.newCheckIn)).toLocaleString('it-IT', { timeZone: 'Europe/Rome' })}</span>
+		</span>
+	{/if}
 </Card>
