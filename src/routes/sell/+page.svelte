@@ -27,6 +27,12 @@
 
 	$: disableButton = name === '' || surname === '' || ticketCode === '';
 
+	const onKeyDown = (e: KeyboardEvent) => {
+		if(e.key === 'Enter' && name !== '' && surname !== '' && ticketCode !== ''){
+			handleSell();
+		}
+	}
+
 	onMount(async() => {
 		if(data.logout){
 			handleSignOut(true);
@@ -118,15 +124,15 @@
 			
 			<Label class="text-black dark:text-white font-medium text-md w-full">
 				Nome Ospite <span class="text-primary-700">*</span>
-				<Input class="mt-1" bind:value={name} autocomplete="off"/>
+				<Input class="mt-1" bind:value={name} autocomplete="off" on:keypress={onKeyDown}/>
 			</Label>
 			<Label class="text-black dark:text-white font-medium text-md w-full">
 				Cognome Ospite <span class="text-primary-700">*</span>
-				<Input class="mt-1" bind:value={surname} autocomplete="off"/>
+				<Input class="mt-1" bind:value={surname} autocomplete="off" on:keypress={onKeyDown}/>
 			</Label>
 			<Label class="text-black dark:text-white font-medium text-md w-full">
 				Codice Biglietto <span class="text-primary-700">*</span>
-				<Input class="mt-1" bind:value={ticketCode} autocomplete="off">
+				<Input class="mt-1" bind:value={ticketCode} autocomplete="off" on:keypress={onKeyDown}>
 					<Ticket slot="left" class="w-6 h-6 text-primary-600 dark:text-white"/>
 				</Input>
 			</Label>

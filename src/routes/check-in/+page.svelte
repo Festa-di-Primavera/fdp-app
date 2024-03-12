@@ -122,6 +122,12 @@
         return;
     }
 
+    const onKeyDown = (e: KeyboardEvent) => {
+        if(e.key === 'Enter' && ticketCodeInput !== ''){
+            checkTicket(ticketCodeInput);
+        }
+    }
+
     function triggerToast(message: string, col: 'red' | 'green' | 'yellow', status: 'notFound' | 'alreadyChecked' | 'notSold' | null){
         feedbackToastMessage = message;
         open = true;
@@ -205,7 +211,7 @@
             <div>
                 <Label class="text-black dark:text-white font-medium text-md">
 					Codice Biglietto <span class="text-primary-700">*</span>
-					<Input required class="mt-1" bind:value={ticketCodeInput} name="code" autocomplete="off">
+					<Input required class="mt-1" bind:value={ticketCodeInput} name="code" autocomplete="off" on:keypress={onKeyDown}>
 						<TicketIcon slot="left" class="w-6 h-6 text-primary-600 dark:text-white"/>
 
                         <div slot="right" class="h-full flex items-center gap-2">
