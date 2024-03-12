@@ -172,10 +172,10 @@
         
         ticketInfos = document.querySelector('#ticketInfos')
 
-        redirectTimeOut = setTimeout(() => {
+        /* redirectTimeOut = setTimeout(() => {
             clearTimeout(redirectTimeOut);
             goto('/?checkOutExpired')
-        }, getRemainingTime());
+        }, getRemainingTime()); */
 
 		if(getAuth(getClientApp()).currentUser === null && data.token){
 			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
