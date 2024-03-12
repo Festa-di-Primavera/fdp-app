@@ -12,8 +12,6 @@ export async function PUT( { params } ) {
 
 	const ticketDoc = (await getDoc(ticketDocRef));
 
-	console.log(ticketDoc.data());
-
 	//* BIGLIETTO NON ESISTENTE
 	if(!ticketDoc.exists()) {
 		return new Response(JSON.stringify({ message: 'Biglietto non valido' }), {
