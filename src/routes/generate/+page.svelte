@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { enhance } from '$app/forms';
+
 	import { getAuth, signInWithCustomToken } from 'firebase/auth';
 	import { XCircle, CheckCircle2 } from 'lucide-svelte';
-	import { Select, Label, Checkbox, Button, Toast, NumberInput, Spinner } from 'flowbite-svelte';
+	import { Select, Label, Checkbox, Button, Toast, NumberInput, Spinner, Input, Fileupload } from 'flowbite-svelte';
 	
 	import { getClientApp, handleSignOut } from '$lib/firebase/client';
 	
@@ -209,6 +211,11 @@
 						<li class="rounded border p-2 dark:text-white">{code}</li>
 					{/each}
 				</ul>
+
+				<form method="post" use:enhance enctype="multipart/form-data" class="flex flex-col gap-4">
+					<Fileupload name="fileToUpload" class="mt-4" accept=".csv"/>
+					<Button type="submit">Inserisci Codici da file</Button>
+				</form>
 			</main>
 		{:else}
 			<div class="w-full flex flex-col flex-grow gap-5 items-center justify-center mt-10">
