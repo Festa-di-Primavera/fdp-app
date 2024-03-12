@@ -4,7 +4,6 @@
 	import { user } from "../store/store";
 	import { verifyBeforeUpdateEmail } from "firebase/auth";
 	import type { FirebaseError } from "firebase/app";
-	import type { N } from "vitest/dist/reporters-1evA5lom.js";
 
 	export let changeEmailModalOpen: boolean = false;
 
