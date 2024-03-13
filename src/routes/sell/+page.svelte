@@ -110,8 +110,10 @@
 
 	const closeModal = () => {
 		modalOpen = false;
-		name = '';
-		surname = '';
+		if(!error){
+			name = '';
+			surname = '';
+		}
 		ticketCode = '';
 	}
 </script>
