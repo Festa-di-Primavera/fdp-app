@@ -5,7 +5,7 @@
 	import { Button, Toast } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 	import { getClientApp, handleSignOut } from '$lib/firebase/client';
-	import { XCircle, AlertCircle } from 'lucide-svelte';
+	import { XCircle, AlertCircle, LogOut } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
 
 	export let data: {logout?: boolean, token?: string };
@@ -78,9 +78,12 @@
 				<p class="flex items-end">
 					Per iniziare ad usare l'applicazione usa il menu in alto a destra
 				</p>
-				<div class="mt-5 flex flex-col items-center gap-4 text-center">
+				<div class="mt-5 flex flex-col items-center gap-8 text-center">
 					Se invece vuoi uscire dall'applicazione, clicca qui sotto
-					<Button on:click={() => handleSignOut()}>Esci dall'app</Button>
+					<Button on:click={() => handleSignOut()} color="red" class="flex gap-2 items-center justify-center">
+						Esci dall'app
+						<LogOut class="w-4 h-4"/>
+					</Button>
 				</div>
 			</div>
 		</div>
