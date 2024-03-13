@@ -4,45 +4,34 @@ import { ONE_WEEK_IN_SECONDS } from '$lib/constants';
 import { createSessionCookie, getAdminApp, verifyIdToken /* , getAdminApp */ } from '$lib/firebase/admin';
 import { getAuth } from 'firebase-admin/auth';
 
-function isTooLight(color: string) {
-	const red = parseInt(color.slice(1, 3), 16);
-    const green = parseInt(color.slice(3, 5), 16);
-    const blue = parseInt(color.slice(5, 7), 16);
-
-	const rNorm = 0.2126 * red
-	const gNorm = 0.7152 * green
-	const bNorm = 0.0722 * blue
-
-	const lum = rNorm + gNorm + bNorm;
-
-	return (lum/255) > 0.35;
-  }
-
 // POST /auth/session
 export const POST: RequestHandler = async ({ request }) => {
 	const authHeader = request.headers.get('Authorization') ?? '';
 	const [scheme, token] = authHeader.split(' ');
 
 	if (request.body) {
-		let name = (await request.json()).name;
-		
+		const reqResolved = (await request.json());
+
+		let name = reqResolved.name;
+		const color = reqResolved.color;
+
 		const adminApp = getAuth(getAdminApp());
 		const userId = (await verifyIdToken(token)).uid;
 
-		adminApp.updateUser(userId, {displayName: name});
+		adminApp.updateUser(userId, { displayName: name });
 
 		const allUsers = await getAuth(getAdminApp()).listUsers();
 
-		const existingsAliases = new Set<string>();
+		const existingAliases = new Set<string>();
 
 		allUsers.users.forEach((userRecord) => {
-			existingsAliases.add(userRecord.customClaims?.alias);
+			existingAliases.add(userRecord.customClaims?.alias);
 		});
 
 		let validAlias = false;
 
 		while(!validAlias){
-			if(existingsAliases.has(name)){
+			if(existingAliases.has(name)){
 				const regex = /\d+$/;
 				const matches = name.match(regex);
 
@@ -58,12 +47,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			}
 		}
 
-		let randomColor: string;
-		do{
-			randomColor = `#${Math.floor(Math.random()*16777215).toString(16)}`;
-		} while(isTooLight(randomColor));
-
-		adminApp.setCustomUserClaims(userId, {role: 'normal', accessLevel: 0, alias: name, color: randomColor, money: 0, totMoney: 0});
+		adminApp.setCustomUserClaims(userId, {role: 'normal', accessLevel: 0, alias: name, color, money: 0, totMoney: 0});
 	}
 
 	if (scheme !== 'Bearer' || !token) {

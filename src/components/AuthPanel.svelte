@@ -134,6 +134,11 @@
 					password
 				);
 
+				const colorPool: string[] =['#f40086', '#7562fd', '#0e7e30', '#195072', '#4e5d07', '#00b03b', '#8839bd', '#636abc',
+											'#ec8121', '#ad4299', '#2b70eb', '#c7964a', '#cb93bf', '#3abc93', '#02155b', '#0d4241',
+											'#784a97', '#a37f26', '#a25a4c', '#841907', '#e24b58', '#10c4f5', '#fa6d56', '#874c25'];
+				let randomColor = colorPool[Math.floor(Math.random() * colorPool.length)];
+
 				const token = await userCredential.user.getIdToken();
 				await fetch('/api/session',
 					{
@@ -141,7 +146,7 @@
 						headers: {
 							authorization: `Bearer ${token}`,
 						},
-						body: JSON.stringify({ name: username })
+						body: JSON.stringify({ name: username, color: randomColor})
 					}
 				);
 				$user = userCredential.user;

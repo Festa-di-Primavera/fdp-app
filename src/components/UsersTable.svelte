@@ -125,25 +125,6 @@
 		aliasModalOpen = true;
 	};
 
-	const newShade = (hexColor: string, magnitude: number) => {
-		hexColor = hexColor.replace(`#`, ``);
-		if (hexColor.length === 6) {
-			const decimalColor = parseInt(hexColor, 16);
-			let r = (decimalColor >> 16) + magnitude;
-			r > 255 && (r = 255);
-			r < 0 && (r = 0);
-			let g = (decimalColor & 0x0000ff) + magnitude;
-			g > 255 && (g = 255);
-			g < 0 && (g = 0);
-			let b = ((decimalColor >> 8) & 0x00ff) + magnitude;
-			b > 255 && (b = 255);
-			b < 0 && (b = 0);
-			return `#${(g | (b << 8) | (r << 16)).toString(16)}`;
-		} else {
-			return hexColor;
-		}
-	};
-
 	// search and filter variables
 	let searchTerm = '';
 	let filter = 'nome';
@@ -283,7 +264,7 @@
 				{#each $sortItems || [] as item}
 					<TableBodyRow>
 						<TableBodyCell tdClass="px-6 py-4 whitespace-nowrap font-medium flex items-center gap-4">
-							<div style="background: linear-gradient(335deg, {newShade(item.customClaims?.color || '#000', 50)}, {newShade(item.customClaims?.color || '#000', -10)});" class="h-7 w-7 rounded-full flex items-center justify-center text-white" >
+							<div style="background: {item.customClaims?.color};" class="h-7 w-7 rounded-full flex items-center justify-center text-white" >
 								{item.displayName?.charAt(0).toUpperCase() || 'U'}
 							</div>
 							<span class="mr-4">{item.displayName}</span>
