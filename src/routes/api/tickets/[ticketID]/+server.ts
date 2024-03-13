@@ -161,7 +161,7 @@ export async function PUT( { params } ) {
 					seller: sellerName
 				};
 	
-				return new Response(JSON.stringify({ ticket, message: 'Biglietto già validato (2 volte)', second: true }), {
+				return new Response(JSON.stringify({ ticket, message: 'Biglietto già rientrato', second: true }), {
 					// 409 Conflict
 					status: 409,
 					headers: {
