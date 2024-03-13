@@ -1,8 +1,8 @@
 import { getAuth } from 'firebase-admin/auth';
+import { getAuth as getClientAuth, signInWithCustomToken } from 'firebase/auth';
 
 import { getAdminApp, getClaimsFromIdToken } from '$lib/firebase/admin';
 
-/* import { Role } from '../../models/role'; */
 import { fail, redirect } from '@sveltejs/kit';
 import { doc, setDoc } from 'firebase/firestore';
 import { getClientDB } from '$lib/firebase/client.js';
@@ -37,7 +37,7 @@ export async function load({ cookies }) {
 }
 
 export const actions = {
-	default: async ({ request }) => {
+	default: async ({ cookies, request }) => {
 		const formData = Object.fromEntries(await request.formData());
 
 		if (
@@ -49,6 +49,12 @@ export const actions = {
 				message: 'You must provide a file to upload'
 			});
 		}
+
+		const app = getAuth(getAdminApp());
+		const userClaims = await getClaimsFromIdToken(cookies);
+		const tok = await app.createCustomToken(userClaims?.uid ?? "");
+
+		await signInWithCustomToken(getClientAuth(), tok);
 
 		const { fileToUpload } = formData as { fileToUpload: File };
 
