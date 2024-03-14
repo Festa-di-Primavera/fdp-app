@@ -97,8 +97,8 @@
 			catch(e){
 				color = 'red';
 				modalMessage = 'Errore di rete';
-				modalOpen = true;
 				error = true;
+				modalOpen = true;
 			}
 		}
 		else{
@@ -109,12 +109,12 @@
 	}
 
 	const closeModal = () => {
-		modalOpen = false;
 		if(!error){
 			name = '';
 			surname = '';
 		}
 		ticketCode = '';
+		modalOpen = false;
 	}
 </script>
 

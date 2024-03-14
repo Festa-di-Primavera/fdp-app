@@ -33,8 +33,8 @@
 		}
 		else if(window.location.search.split('?')[1] == 'checkOutExpired'){
 			toastMessage = 'Non è più possibile fare check-out';
-			open = true;
 			error=false;
+			open = true;
 			goto(window.location.pathname);
 			const timeOut = setTimeout(() => {
 				open = false;
@@ -55,8 +55,8 @@
 				else{
 					toastMessage = 'Errore sconosciuto';
 				}
-				open = true;
 				error=true;
+				open = true;
 				const timeOut = setTimeout(() => {
 					open = false;
 					clearTimeout(timeOut);
