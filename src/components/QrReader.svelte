@@ -23,6 +23,8 @@
     let opened = false;
     let isPaused = true;
 
+    let camSelectOpen = false;
+
     let devices: MediaDeviceInfo[] = [];
     let selectedCam: string;
 
@@ -37,13 +39,11 @@
         });
     });
 
-
-    async function setStream(deviceId: string) {
-        console.log('setStream', deviceId);
+    async function updateVideoStream() {
         if (stream) {
             stream.getTracks().forEach(track => track.stop());
         }
-        stream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: deviceId } });
+        stream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: selectedCam } });
         video.srcObject = stream;
         video.play();
     }
@@ -59,7 +59,7 @@
             canvasElement = document.getElementById("canvas") as HTMLCanvasElement;
             canvas = canvasElement!.getContext("2d", { willReadFrequently: true });
 
-            await setStream(selectedCam);
+            updateVideoStream();
 
             requestAnimationFrame(tick);
         }
@@ -183,20 +183,18 @@
 
 <div class="flex flex-col gap-3 items-center">
     <div class="relative w-[80%] md:w-96 rounded-xl border-primary-600 border-4 dark:bg-gray-600 bg-gray-400">
-        <Button class="absolute top-2 left-2 aspect-square rounded-md bg-transparent dark:bg-transparent dark:hover:bg-opacity-30 hover:bg-opacity-30 focus-within:ring-0">
+        <Button class="absolute top-2 left-2 aspect-square rounded-md bg-transparent dark:bg-transparent dark:hover:bg-opacity-30 hover:bg-opacity-30 focus-within:ring-0" on:click={()=>{camSelectOpen = !camSelectOpen}}>
             <CameraIcon class="absolute w-6 h-6 dark:text-primary-300 text-primary-800 z-50" />
         </Button>
         {#if devices.length > 0}
-            <Dropdown placement="bottom-start" class="w-min">
+            <Dropdown bind:open={camSelectOpen} placement="bottom-start">
                 <DropdownHeader>
                     Fotocamere
                 </DropdownHeader>
                 {#each devices as device}
-                    <button on:click={()=>{selectedCam = device.deviceId; setStream(selectedCam);}} class="font-light p-0 text-sm w-full text-left text-nowrap">
-                        <DropdownItem>
-                            {device.label}
-                        </DropdownItem>
-                    </button>
+                    <DropdownItem on:click={()=>{selectedCam = device.deviceId; if(!isPaused){ updateVideoStream();} camSelectOpen = false}}>
+                        {device.label}
+                    </DropdownItem>
                 {/each}
             </Dropdown>
         {/if}
