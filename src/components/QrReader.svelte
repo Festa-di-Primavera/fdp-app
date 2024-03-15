@@ -1,6 +1,6 @@
 <script lang="ts">
     import jsQR, { type QRCode } from 'jsqr';
-    import { onMount } from 'svelte';
+    import { onDestroy, onMount } from 'svelte';
     import { CameraIcon, X } from 'lucide-svelte';
     import { Button, Dropdown, DropdownHeader, DropdownItem } from 'flowbite-svelte';
 
@@ -40,12 +40,15 @@
         document.addEventListener("visibilitychange", handleVisibilityChange);
     });
 
+    onDestroy(() => {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+        closeScanner();
+    });
+
     function handleVisibilityChange() {
         if (document.visibilityState === "hidden") {
             closeScanner();
-        } else if (document.visibilityState === "visible") {
-            console.log("visible");
-        }
+        }   
     }
 
     async function updateVideoStream() {
