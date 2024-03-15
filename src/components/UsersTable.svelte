@@ -9,6 +9,7 @@
 	export let currSelectedUser: any | undefined;
 	export let aliasModalOpen: boolean;
 	export let deleteModalOpen: boolean;
+	export let debtModalOpen: boolean;
 
 	let color: 'green' | 'red' = 'green';
 	let message: string = '';
@@ -88,41 +89,14 @@
 		}
 	};
 
-	const claimMoney = async (uid: string, amount: number) => {
-		const resp = await fetch(`/api/money/${uid}`, {
-			method: 'POST',
-			headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({money: amount})
-		});
-
-		if(resp.ok){
-			users = users.map((item: any) => {
-				if (item.uid === uid) {
-					item.customClaims.money = 0;
-				}
-				return item;
-			});
-			error = false;
-			color = 'green';
-		}
-		else{
-			error = true;
-			color = 'red';
-		}
-
-		message = (await resp.json()).message;
-		toastOpen = true;
-
-		clearTimeout(timeOut);
-		timeOut = setTimeout(() => {
-			toastOpen = false;
-			clearTimeout(timeOut);
-		}, 3500);
-	}
-
 	const triggerAliasModal = async (user: any) => {
 		currSelectedUser = user;
 		aliasModalOpen = true;
+	};
+
+	const triggerDebtModal = async (user: any) => {
+		currSelectedUser = user;
+		debtModalOpen = true;
 	};
 
 	// search and filter variables
@@ -298,7 +272,7 @@
 						<TableBodyCell class="min-w-52 max-w-64">
 							<div class="flex w-full justify-around items-center">
 								<span class="text-right w-12">{item.customClaims?.money || 0},00</span>
-								<Button disabled={!item.customClaims?.money} size="xs" class="flex items-center gap-1" on:click={() => claimMoney(item.uid, item.customClaims?.money)}>
+								<Button disabled={!item.customClaims?.money} size="xs" class="flex items-center gap-1" on:click={()=>triggerDebtModal(item)}>
 									<Euro class="w-4 h-4" /> Salda
 								</Button>
 							</div>
