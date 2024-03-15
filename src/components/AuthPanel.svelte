@@ -67,7 +67,7 @@
 
 	const sendEmail = async () => {
 		const actionSettings: ActionCodeSettings = {
-			url: 'https://fdp-app.vercel.app/',
+			url: 'https://www.festa-sdb.it/',
 		};
 		
 		if(option === 'register')
