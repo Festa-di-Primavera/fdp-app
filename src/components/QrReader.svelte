@@ -1,11 +1,12 @@
 <script lang="ts">
     import jsQR, { type QRCode } from 'jsqr';
     import { onMount } from 'svelte';
-    import { X } from 'lucide-svelte';
+    import { CameraIcon, X } from 'lucide-svelte';
+    import { Button, Dropdown, DropdownHeader, DropdownItem } from 'flowbite-svelte';
 
 	export let videoWidth: number = 900;
 	export let videoHeight: number = 900;
-	export let borderColor: string = "#68FF00";
+	export let borderColor: string = "#1ac814";
     export let codeResult: string = '';
 
 	let aspectClass = `aspect-${videoWidth}/${videoHeight}`;
@@ -20,13 +21,32 @@
 
     let alreadyFound = false;
     let opened = false;
+    let isPaused = true;
+
+    let camSelectOpen = false;
+
+    let devices: MediaDeviceInfo[] = [];
+    let selectedCam: string;
 
     onMount(() => {
         video = document.createElement("video");
         canvasElement = document.getElementById("canvas") as HTMLCanvasElement;
         canvas = canvasElement!.getContext("2d", { willReadFrequently: true });
         drawReaderIcon(canvasElement!, canvas!);
+        navigator.mediaDevices.enumerateDevices().then(devs => {
+            devices = devs.filter(device => device.kind === 'videoinput');
+            selectedCam = devices[0].deviceId;
+        });
     });
+
+    async function updateVideoStream() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+        stream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: selectedCam } });
+        video.srcObject = stream;
+        video.play();
+    }
 
     async function openScanner(){
         if(!opened || code){
@@ -39,14 +59,11 @@
             canvasElement = document.getElementById("canvas") as HTMLCanvasElement;
             canvas = canvasElement!.getContext("2d", { willReadFrequently: true });
 
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }});
-            
-            video!.srcObject = stream;
-            video!.setAttribute("playsinline", ""); // required to tell iOS safari we don't want fullscreen
-            video!.play();
+            updateVideoStream();
 
             requestAnimationFrame(tick);
         }
+        isPaused = false;
     }
 
     function pauseScannerOnCode() {
@@ -55,6 +72,7 @@
             video!.srcObject = null;
             video!.src = "";
             video!.remove();
+            isPaused = true;
         }
     }
 
@@ -78,7 +96,7 @@
         img.width = img.height = minSize/2;
         img.onload = function() {
             let textHeight = minSize/10;
-            let text = "Scan Now";
+            let text = "Scansiona";
 
             canvas!.drawImage(img, canvasElement!.width/2 - img.width/2, canvasElement!.height/2 - img.height/2 - textHeight/2, img.width, img.height);
             canvas!.font = textHeight + "px Arial";
@@ -99,6 +117,7 @@
             drawReaderIcon(canvasElement!, canvas!);
 
 			opened = false;
+            isPaused = true;
         }
     }
 
@@ -162,13 +181,31 @@
     }
 </script>
 
-<div class="relative w-[80%] md:w-96 rounded-xl border-primary-600 border-4 dark:bg-gray-600 bg-gray-400">
-	<canvas on:click={openScanner} id="canvas" class="w-full rounded-lg {aspectClass}" width={videoWidth} height={videoHeight}>
-    </canvas>
-    {#if opened}
+<div class="flex flex-col gap-3 items-center">
+    <div class="relative w-[80%] md:w-96 rounded-xl border-primary-600 border-4 dark:bg-gray-600 bg-gray-400">
+        <Button class="absolute top-2 left-2 aspect-square rounded-md bg-transparent dark:bg-transparent dark:hover:bg-opacity-30 hover:bg-opacity-30 focus-within:ring-0" on:click={()=>{camSelectOpen = !camSelectOpen}}>
+            <CameraIcon class="absolute w-6 h-6 dark:text-primary-300 text-primary-800 z-50" />
+        </Button>
+        {#if devices.length > 0}
+            <Dropdown bind:open={camSelectOpen} placement="bottom-start">
+                <DropdownHeader>
+                    Fotocamere
+                </DropdownHeader>
+                {#each devices as device}
+                    <DropdownItem on:click={()=>{selectedCam = device.deviceId; if(!isPaused){ updateVideoStream();} camSelectOpen = false}}>
+                        {device.label}
+                    </DropdownItem>
+                {/each}
+            </Dropdown>
+        {/if}
+        <canvas on:click={openScanner} id="canvas" class="w-full rounded-lg {aspectClass}" width={videoWidth} height={videoHeight}>
+        </canvas>
+        {#if opened}
         <button type="button" class="flex items-center gap-1 text-primary-400 absolute top-2 right-2 z-10 bg-slate-400 bg-opacity-40 p-1 rounded-md" on:click={closeScanner}>
             Chiudi
             <X class="w-5 h-5 text-primary-400" />
         </button>
-    {/if}
+        {/if}
+    </div>
+    <span class="text-primary-500 text-center font-semibold">{isPaused ? 'Clicca nel riquadro per scansionare' : 'Scansione in corso'}</span>
 </div>
