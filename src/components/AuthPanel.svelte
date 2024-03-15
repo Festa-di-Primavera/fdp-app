@@ -70,7 +70,7 @@
 			url: 'https://www.festa-sdb.it/',
 		};
 		
-		if(option === 'register')
+		if(option === 'register' || option === 'login')
 			await sendEmailVerification($user!, actionSettings);
 		else if(option === 'recover')
 			await sendPasswordResetEmail(getAuth(getClientApp()), email, actionSettings);
