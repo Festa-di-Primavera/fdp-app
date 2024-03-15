@@ -37,7 +37,16 @@
             devices = devs.filter(device => device.kind === 'videoinput');
             selectedCam = devices[0].deviceId;
         });
+        document.addEventListener("visibilitychange", handleVisibilityChange);
     });
+
+    function handleVisibilityChange() {
+        if (document.visibilityState === "hidden") {
+            closeScanner();
+        } else if (document.visibilityState === "visible") {
+            console.log("visible");
+        }
+    }
 
     async function updateVideoStream() {
         if (stream) {
