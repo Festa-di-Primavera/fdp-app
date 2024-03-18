@@ -10,6 +10,8 @@
 	import type { Ticket } from "../../models/ticket";
 	import QrReader from "../../components/QrReader.svelte";
 	import InfoCard from "../../components/InfoCard.svelte";
+	import FeedbackToast from "../../components/feedbacks/FeedbackToast.svelte";
+	import SignInToast from "../../components/feedbacks/SignInToast.svelte";
 
 	export let data: {logout?: boolean, token?: string };
 
@@ -17,7 +19,7 @@
 	let ticketCodeInput: string = '';
 
     let ticket: Ticket;
-    let open: boolean = false;
+    let feedbackToastOpen: boolean = false;
     let errorsModalOpen: boolean = false;
     let feedbackMessage: string = '';
     let timeOut: NodeJS.Timeout;
@@ -32,7 +34,7 @@
     let focus: 'checkIn' | 'newCheckIn' | null = null;
     
 	let signInToastOpen: boolean = false;
-	let toastMessage: string = '';
+	let signInToastMessage: string = '';
     
     let ticketInfos: Element | null = null;
 
@@ -138,7 +140,7 @@
         if(status != null)
             errorsModalOpen = true;
         else
-            open = true;
+            feedbackToastOpen = true;
         color = col;
         ticketStatus = status;
 
@@ -146,7 +148,7 @@
         if(ticketStatus === null){
             timeOut = setTimeout(() => {
                 ticketStatus = null;
-                open = false;
+                feedbackToastOpen = false;
                 clearTimeout(timeOut);
             }, 3500);
         }
@@ -167,7 +169,7 @@
 
         ticketCodeInput = '';
         ticketCode = '';
-        open = false;
+        feedbackToastOpen = false;
         ticketStatus = null;
         color = 'green';
         focus = null;
@@ -185,13 +187,13 @@
 				$user = userCredential.user;
 			}).catch((error) => {
 				if(error.code === 'auth/invalid-custom-token'){
-					toastMessage = 'Token non valido';
+					signInToastMessage = 'Token non valido';
 				}
 				else if(error.code === 'auth/network-request-failed'){
-					toastMessage = 'Errore di rete';
+					signInToastMessage = 'Errore di rete';
 				}
 				else{
-					toastMessage = 'Errore sconosciuto';
+					signInToastMessage = 'Errore sconosciuto';
 				}
 				signInToastOpen = true;
                 clearTimeout(timeOut);
@@ -211,6 +213,7 @@
             reset();
         }
     }
+    $: toastIcon = ticketStatus === 'notFound' || ticketStatus === 'notSold' ? XCircle : (ticketStatus === 'alreadyChecked' ? AlertCircle : CheckCircle2)
 </script>
 
 <section class="w-full h-full flex flex-col items-center gap-4 flex-grow">
@@ -248,10 +251,7 @@
                     bind:focus
                 />
                 
-                <Toast on:close={() => open = false} bind:open color={color} class="w-max mt-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
-                    <svelte:component this={ticketStatus === 'notFound' || ticketStatus === 'notSold' ? XCircle : (ticketStatus === 'alreadyChecked' ? AlertCircle : CheckCircle2)} class="w-6 h-6  text-{color}-400" slot="icon"/>
-                    <span class={`text-${color}-400 font-semibold`}>{feedbackMessage}</span>
-                </Toast>
+                <FeedbackToast bind:open={feedbackToastOpen} bind:color bind:message={feedbackMessage} bind:icon={toastIcon}/>
                 <Modal bind:open={errorsModalOpen} on:close={closeErrorsModal} size="xs" dismissable={false}>
                     <span class="text-3xl justify-center my-5 font-semibold text-{color}-500 flex items-center gap-2">
                         <svelte:component this={ticketStatus === 'notFound' || ticketStatus === 'notSold' ? XCircle : (ticketStatus === 'alreadyChecked' ? AlertCircle : CheckCircle2)} class="w-6 h-6  text-{color}-400"/>
@@ -269,7 +269,4 @@
     </div>
 </section>
 
-<Toast on:close={() => signInToastOpen = false} bind:open={signInToastOpen} color="red" class="w-max mt-10 mb-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
-	<XCircle class="w-6 h-6  text-red-400" slot="icon"/>
-	<span class='text-red-400 font-semibold'>{toastMessage}</span>
-</Toast>
+<SignInToast bind:open={signInToastOpen} bind:message={signInToastMessage} />

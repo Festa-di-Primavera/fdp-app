@@ -3,13 +3,15 @@
 	import { enhance } from '$app/forms';
 
 	import { getAuth, signInWithCustomToken } from 'firebase/auth';
-	import { XCircle, CheckCircle2 } from 'lucide-svelte';
+	import { XCircle, CheckCircle2, icons } from 'lucide-svelte';
 	import { Select, Label, Checkbox, Button, Toast, NumberInput, Spinner, Input, Fileupload } from 'flowbite-svelte';
 	
 	import { getClientApp, handleSignOut } from '$lib/firebase/client';
 	
 	import { user } from '../../store/store';
 	import type { Ticket } from '../../models/ticket';
+	import SignInToast from '../../components/feedbacks/SignInToast.svelte';
+	import FeedbackToast from '../../components/feedbacks/FeedbackToast.svelte';
 
 	export let data: {logout?: boolean, token?: string };
 
@@ -125,7 +127,7 @@
 	let timeOut: NodeJS.Timeout;
 
 	let signInToastOpen: boolean = false;
-	let toastMessage: string = '';
+	let signInToastMessage: string = '';
 
 	let tickets: Ticket[];
 
@@ -143,13 +145,13 @@
 				$user = userCredential.user;
 			}).catch((error) => {
 				if(error.code === 'auth/invalid-custom-token'){
-					toastMessage = 'Token non valido';
+					signInToastMessage = 'Token non valido';
 				}
 				else if(error.code === 'auth/network-request-failed'){
-					toastMessage = 'Errore di rete';
+					signInToastMessage = 'Errore di rete';
 				}
 				else{
-					toastMessage = 'Errore sconosciuto';
+					signInToastMessage = 'Errore sconosciuto';
 				}
 				signInToastOpen = true;
 				clearTimeout(timeOut);
@@ -160,6 +162,9 @@
 			});
 		}
 	});
+
+	$: message = color === 'green' ? 'Codici inseriti nel db con successo' : 'Errore nell\'inserimento dei codici';
+	$: icon = color === 'green' ? CheckCircle2 : XCircle;
 </script>
 
 <section class="flex h-full w-full flex-col items-center gap-4 flex-grow">
@@ -226,29 +231,5 @@
 	</div>
 </section>
 
-<Toast
-	{color}
-	bind:open
-	class="absolute bottom-5 left-0 right-0 mx-auto w-max"
-	divClass="w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3"
->
-	<svelte:fragment slot="icon">
-		{#if color == 'green'}
-			<CheckCircle2 class="h-5 w-5" />
-			<span class="sr-only">Check icon</span>
-		{:else}
-			<XCircle class="h-5 w-5" />
-			<span class="sr-only">Error icon</span>
-		{/if}
-	</svelte:fragment>
-	{#if color == 'green'}
-		Codici inseriti nel db con successo
-	{:else}
-		Errore nell'inserimento dei codici
-	{/if}
-</Toast>
-
-<Toast on:close={() => signInToastOpen = false} bind:open={signInToastOpen} color="red" class="w-max mt-10 mb-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
-	<XCircle class="w-6 h-6  text-red-400" slot="icon"/>
-	<span class='text-red-400 font-semibold'>{toastMessage}</span>
-</Toast>
+<FeedbackToast bind:open={open} bind:color bind:message bind:icon/>
+<SignInToast bind:open={signInToastOpen} bind:message={signInToastMessage}/>

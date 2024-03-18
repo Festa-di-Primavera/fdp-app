@@ -7,12 +7,17 @@
 	import { getClientApp, handleSignOut } from '$lib/firebase/client';
 	import { XCircle, AlertCircle, LogOut } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
+	import FeedbackToast from '../components/feedbacks/FeedbackToast.svelte';
 
 	export let data: {logout?: boolean, token?: string };
 
-	let toastMessage: string = '';
-	let open: boolean = false;
+	let feedbackToastMessage: string = '';
+	let feedbackToastOpen: boolean = false;
 	let error: boolean = false;
+	let color: 'red' | 'yellow';
+
+	$: color = error ? 'red' : 'yellow';
+	$: toastIcon = error ? AlertCircle : XCircle;
 
 	onMount(async() => {
 		if(data.logout){
@@ -21,23 +26,23 @@
 		}
 
 		if(window.location.search.split('?')[1] == 'roleUpdate'){
-			toastMessage = 'Ruolo aggiornato! Rifai il login';
-			open = true;
+			feedbackToastMessage = 'Ruolo aggiornato! Rifai il login';
+			feedbackToastOpen = true;
 			error=false;
 			goto(window.location.pathname);
 			const timeOut = setTimeout(() => {
-				open = false;
+				feedbackToastOpen = false;
 
 				clearTimeout(timeOut);
 			}, 4000);
 		}
 		else if(window.location.search.split('?')[1] == 'checkOutExpired'){
-			toastMessage = 'Non è più possibile fare check-out';
+			feedbackToastMessage = 'Non è più possibile fare check-out';
 			error=false;
-			open = true;
+			feedbackToastOpen = true;
 			goto(window.location.pathname);
 			const timeOut = setTimeout(() => {
-				open = false;
+				feedbackToastOpen = false;
 				clearTimeout(timeOut);
 			}, 4000);
 		} 
@@ -47,18 +52,18 @@
 				$user = userCredential.user;
 			}).catch((error) => {
 				if(error.code === 'auth/invalid-custom-token'){
-					toastMessage = 'Token non valido';
+					feedbackToastMessage = 'Token non valido';
 				}
 				else if(error.code === 'auth/network-request-failed'){
-					toastMessage = 'Errore di rete';
+					feedbackToastMessage = 'Errore di rete';
 				}
 				else{
-					toastMessage = 'Errore sconosciuto';
+					feedbackToastMessage = 'Errore sconosciuto';
 				}
 				error=true;
-				open = true;
+				feedbackToastOpen = true;
 				const timeOut = setTimeout(() => {
-					open = false;
+					feedbackToastOpen = false;
 					clearTimeout(timeOut);
 				}, 8000);
 			});
@@ -90,7 +95,9 @@
 	{/if}
 </section>
 
-<Toast on:close={() => open = false} bind:open color={error ? 'red' : 'yellow'} class="w-max mt-10 mb-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
-	<svelte:component this={error ? XCircle : AlertCircle} class="w-6 h-6 text-{error ? 'red' : 'yellow'}-400" slot="icon"/>
-	<span class='text-{error ? 'red' : 'yellow'}-400 font-semibold'>{toastMessage}</span>
-</Toast>
+<FeedbackToast
+	bind:open={feedbackToastOpen}
+	bind:color={color}
+	bind:message={feedbackToastMessage}
+	bind:icon={toastIcon}
+/>

@@ -4,6 +4,8 @@
 	import { Role } from "../models/role";
 	import { user } from "../store/store";
 	import { writable } from 'svelte/store';
+	import SignInToast from "./feedbacks/SignInToast.svelte";
+	import FeedbackToast from "./feedbacks/FeedbackToast.svelte";
 	
 	export let users: any;
 	export let currSelectedUser: any | undefined;
@@ -12,9 +14,9 @@
 	export let debtModalOpen: boolean;
 
 	let color: 'green' | 'red' = 'green';
-	let message: string = '';
+	let feedbackToastMessage: string = '';
 	let error: boolean = false;
-	let signInToastOpen: boolean = false;
+	let feedbackToastOpen: boolean = false;
 	let timeOut: NodeJS.Timeout;
 	
 	// dropdown state variables
@@ -64,27 +66,27 @@
 					color = 'red';
 				}
 				
-				message = (await response.json()).message;
-				signInToastOpen = true;
+				feedbackToastMessage = (await response.json()).message;
+				feedbackToastOpen = true;
 
 				clearTimeout(timeOut);
 				timeOut = setTimeout(() => {
-					signInToastOpen = false;
+					feedbackToastOpen = false;
 					clearTimeout(timeOut);
 				}, 3500);
 			}
 			catch(e) {
 				error = true;
 				color = 'red';
-				signInToastOpen = true;
+				feedbackToastOpen = true;
 
 				clearTimeout(timeOut);
 				timeOut = setTimeout(() => {
-					signInToastOpen = false;
+					feedbackToastOpen = false;
 					clearTimeout(timeOut);
 				}, 3500);
 
-				message = 'Errore di rete';
+				feedbackToastMessage = 'Errore di rete';
 			}
 		}
 	};
@@ -140,10 +142,13 @@
 				let aVal;
 				let bVal;
 
-				if(key == "role" || key == "alias" || key == "money" || key == "totMoney"){
+				if(key == "alias" || key == "money" || key == "totMoney"){
 					aVal = a.customClaims[key] || 0;
 					bVal = b.customClaims[key] || 0;
-				} else {
+				} else if(key == "role"){
+					aVal = a.customClaims?.accessLevel;
+					bVal = b.customClaims?.accessLevel;
+				}else {
 					aVal = a[key];
 					bVal = b[key];
 				}
@@ -158,7 +163,7 @@
 			sortItems.set(sorted);
 		}
 	}
-
+	$: toastIcon = error ? XCircle : CheckCircle2;
 </script>
 
 {#if $user}
@@ -294,7 +299,4 @@
 	</div>
 {/if}
 
-<Toast on:close={() => signInToastOpen = false} bind:open={signInToastOpen} color={color} class="w-max mt-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
-	<svelte:component this={error ? XCircle : CheckCircle2} class="w-6 h-6  text-{color}-400" slot="icon"/>
-	<span class={`text-${color}-400 font-semibold`}>{message}</span>
-</Toast>
+<FeedbackToast bind:open={feedbackToastOpen} bind:color bind:message={feedbackToastMessage} bind:icon={toastIcon} />

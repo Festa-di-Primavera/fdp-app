@@ -5,6 +5,7 @@
 	import { CheckCircle2, Eye, EyeOff, XCircle } from 'lucide-svelte';
 	import { EmailAuthProvider, confirmPasswordReset, getAuth, signInWithCredential } from 'firebase/auth';
 	import type { ActionData } from '../../models/email_action_data';
+	import FeedbackToast from '../feedbacks/FeedbackToast.svelte';
 
 	export let data: ActionData;
 
@@ -25,9 +26,9 @@
 	});
 
 	let color: 'green' | 'red' = 'green';
-	let toastMessage: string = '';
+	let feedbackToastMessage: string = '';
 	let error: boolean = false;
-	let open: boolean = false;
+	let feedbackToastOpen: boolean = false;
 
 	let newPassword: string = '';
 	let repeatPassword: string = '';
@@ -55,6 +56,7 @@
 	}
 
 	$: disableButton = validatorError || (lessThanEightChars || noUpperCase || noNumber || noSpecialChar);
+	$: toastIcon = error ? XCircle : CheckCircle2;
 
 	async function handlePasswordReset() {
 		try{
@@ -64,8 +66,8 @@
 			await signInWithCredential(getAuth(), credential);
 
 			color = 'green';
-			toastMessage = 'Password cambiata';
-			open = true;
+			feedbackToastMessage = 'Password cambiata';
+			feedbackToastOpen = true;
 			startRedirect = true;
 			const interval = setInterval(() => {
 				timer--;
@@ -77,9 +79,9 @@
 		}
 		catch (error) {
 			color = 'red';
-			toastMessage = 'Errore';
+			feedbackToastMessage = 'Errore';
 			error = true;
-			open = true;
+			feedbackToastOpen = true;
 		}
 	}
 </script>
@@ -201,17 +203,9 @@
 	</p>
 {/if}
 
-<Toast
-	on:close={() => (open = false)}
-	bind:open
-	{color}
-	class="fixed bottom-5 left-0 right-0 mx-auto mb-5 mt-10 w-max"
-	divClass="w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3"
->
-	<svelte:component
-		this={error ? XCircle : CheckCircle2}
-		class="h-6 w-6  text-{color}-400"
-		slot="icon"
-	/>
-	<span class={`text-${color}-400 font-semibold`}>{toastMessage}</span>
-</Toast>
+<FeedbackToast
+	bind:open={feedbackToastOpen}
+	bind:color
+	bind:message={feedbackToastMessage}
+	bind:icon={toastIcon}
+/>

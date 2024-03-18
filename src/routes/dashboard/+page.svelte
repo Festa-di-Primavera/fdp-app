@@ -20,11 +20,12 @@
 	import { collection, onSnapshot, query, type Unsubscribe } from 'firebase/firestore';
 	import CheckOutPerTimeECharts from '../../components/graphs/CheckOutPerTimeECharts.svelte';
 	import { goto } from '$app/navigation';
+	import SignInToast from '../../components/feedbacks/SignInToast.svelte';
 
 	export let data: {logout?: boolean, token?: string, sellers?: {uid: string; alias: string}[] };
 	
 	let signInToastOpen: boolean = false;
-	let toastMessage: string = '';
+	let signInToastMessage: string = '';
 
 	let tickets: Ticket[] = [];
 	let unsubscribe: Unsubscribe = () => {};
@@ -90,13 +91,13 @@
 				$user = userCredential.user;
 			}).catch((error) => {
 				if(error.code === 'auth/invalid-custom-token'){
-					toastMessage = 'Token non valido';
+					signInToastMessage = 'Token non valido';
 				}
 				else if(error.code === 'auth/network-request-failed'){
-					toastMessage = 'Errore di rete';
+					signInToastMessage = 'Errore di rete';
 				}
 				else{
-					toastMessage = 'Errore sconosciuto';
+					signInToastMessage = 'Errore sconosciuto';
 				}
 				signInToastOpen = true;
 				const timeOut = setTimeout(() => {
@@ -184,11 +185,7 @@
 	</div>
 </section>
 
-<Toast on:close={() => signInToastOpen = false} bind:open={signInToastOpen} color="red" class="w-max mt-10 mb-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
-	<XCircle class="w-6 h-6  text-red-400" slot="icon"/>
-	<span class='text-red-400 font-semibold'>{toastMessage}</span>
-</Toast>
-
+<SignInToast bind:open={signInToastOpen} bind:message={signInToastMessage} />
 <Modal bind:open dismissable={false}>
 	<div slot="header" class="flex justify-between items-center">
 		<h1 class="text-2xl text-primary-300">Conferma visita</h1>
