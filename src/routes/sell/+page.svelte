@@ -13,7 +13,7 @@
 
 	let ticketCode: string;
 
-	let toastOpen: boolean = false;
+	let signInToastOpen: boolean = false;
 	let toastMessage: string = '';
 
 	let modalOpen: boolean = false;
@@ -52,10 +52,10 @@
 				else{
 					toastMessage = 'Errore sconosciuto';
 				}
-				toastOpen = true;
+				signInToastOpen = true;
 				clearTimeout(timeOut);
 				timeOut = setTimeout(() => {
-					toastOpen = false;
+					signInToastOpen = false;
 					clearTimeout(timeOut);
 				}, 3500);
 			});
@@ -152,7 +152,7 @@
 	</div>
 </section>
 
-<Toast on:close={() => toastOpen = false} bind:open={toastOpen} color="red" class="w-max mt-10 mb-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
+<Toast on:close={() => signInToastOpen = false} bind:open={signInToastOpen} color="red" class="w-max mt-10 mb-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
 	<XCircle class="w-6 h-6  text-red-400" slot="icon"/>
 	<span class='text-red-400 font-semibold'>{toastMessage}</span>
 </Toast>
