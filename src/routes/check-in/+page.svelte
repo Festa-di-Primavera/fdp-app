@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-    import { Toast, Card, Spinner, Label, Input } from "flowbite-svelte";
+    import { Toast, Card, Spinner, Label, Input, Modal, Button } from "flowbite-svelte";
     import { CheckCircle2, XCircle, AlertCircle, Ticket as TicketIcon, Check, X } from 'lucide-svelte';
 	import { getAuth, signInWithCustomToken } from "firebase/auth";
     
@@ -18,15 +18,20 @@
 
     let ticket: Ticket;
     let open: boolean = false;
-    let feedbackToastMessage: string = '';
+    let errorsModalOpen: boolean = false;
+    let feedbackMessage: string = '';
     let timeOut: NodeJS.Timeout;
+
+    const closeErrorsModal = () => {
+		errorsModalOpen = false;
+	}
 
     let ticketStatus: 'notFound' | 'alreadyChecked' | 'notSold' | null = null;
 
     let color: 'green' | 'red' | 'yellow' = 'green';
     let focus: 'checkIn' | 'newCheckIn' | null = null;
     
-	let toastOpen: boolean = false;
+	let signInToastOpen: boolean = false;
 	let toastMessage: string = '';
     
     let ticketInfos: Element | null = null;
@@ -38,6 +43,7 @@
     }
 
     async function checkTicket(code: string){        
+        scrollToDiv();
         const response = await fetch(`/api/tickets/${code}`,
             {
                 method: 'PUT',
@@ -47,7 +53,6 @@
             }
         );
 
-        scrollToDiv();
 
         const body = (await response.json());
         let message = body.message;
@@ -65,7 +70,7 @@
                 newCheckIn: null,
             };
 
-            triggerToast(message, 'red', 'notFound');
+            triggerPopup(message, 'red', 'notFound');
             ticketCodeInput = '';
             return
         }
@@ -84,7 +89,7 @@
                 newCheckIn: tick.newCheckIn,
             };
 
-            triggerToast(message, 'red', 'notSold');
+            triggerPopup(message, 'red', 'notSold');
             ticketCodeInput = '';
             return
         }
@@ -101,7 +106,7 @@
                 newCheckIn: tick.newCheckIn,
             };
 
-            triggerToast(message, 'yellow', 'alreadyChecked');
+            triggerPopup(message, 'yellow', 'alreadyChecked');
             ticketCodeInput = '';
             return
         }
@@ -117,7 +122,7 @@
             newCheckIn: tick.newCheckIn
         };
 
-        triggerToast(message, 'green', null);
+        triggerPopup(message, 'green', null);
         ticketCodeInput = '';
         return;
     }
@@ -128,18 +133,23 @@
         }
     }
 
-    function triggerToast(message: string, col: 'red' | 'green' | 'yellow', status: 'notFound' | 'alreadyChecked' | 'notSold' | null){
-        feedbackToastMessage = message;
-        open = true;
+    function triggerPopup(message: string, col: 'red' | 'green' | 'yellow', status: 'notFound' | 'alreadyChecked' | 'notSold' | null){
+        feedbackMessage = message;
+        if(status != null)
+            errorsModalOpen = true;
+        else
+            open = true;
         color = col;
         ticketStatus = status;
 
         clearTimeout(timeOut);
-        timeOut = setTimeout(() => {
-            open = false;
-            ticketStatus = null;
-            clearTimeout(timeOut);
-        }, 3500);
+        if(ticketStatus === null){
+            timeOut = setTimeout(() => {
+                ticketStatus = null;
+                open = false;
+                clearTimeout(timeOut);
+            }, 3500);
+        }
     }
         
 
@@ -183,10 +193,10 @@
 				else{
 					toastMessage = 'Errore sconosciuto';
 				}
-				toastOpen = true;
+				signInToastOpen = true;
                 clearTimeout(timeOut);
                 timeOut = setTimeout(() => {
-                    toastOpen = false;
+                    signInToastOpen = false;
                     clearTimeout(timeOut);
                 }, 3500);
 			});
@@ -240,8 +250,15 @@
                 
                 <Toast on:close={() => open = false} bind:open color={color} class="w-max mt-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
                     <svelte:component this={ticketStatus === 'notFound' || ticketStatus === 'notSold' ? XCircle : (ticketStatus === 'alreadyChecked' ? AlertCircle : CheckCircle2)} class="w-6 h-6  text-{color}-400" slot="icon"/>
-                    <span class={`text-${color}-400 font-semibold`}>{feedbackToastMessage}</span>
+                    <span class={`text-${color}-400 font-semibold`}>{feedbackMessage}</span>
                 </Toast>
+                <Modal bind:open={errorsModalOpen} on:close={closeErrorsModal} size="xs" dismissable={false}>
+                    <span class="text-3xl justify-center my-5 font-semibold text-{color}-500 flex items-center gap-2">
+                        <svelte:component this={ticketStatus === 'notFound' || ticketStatus === 'notSold' ? XCircle : (ticketStatus === 'alreadyChecked' ? AlertCircle : CheckCircle2)} class="w-6 h-6  text-{color}-400"/>
+                        {feedbackMessage}
+                    </span>
+                    <Button class="w-full" on:click={closeErrorsModal} slot="footer">Chiudi</Button>
+                </Modal>
             </div>
         {:else}
             <div class="w-full flex flex-col flex-grow gap-5 items-center justify-center mt-10">
@@ -252,7 +269,7 @@
     </div>
 </section>
 
-<Toast on:close={() => toastOpen = false} bind:open={toastOpen} color="red" class="w-max mt-10 mb-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
+<Toast on:close={() => signInToastOpen = false} bind:open={signInToastOpen} color="red" class="w-max mt-10 mb-5 mx-auto right-0 left-0 fixed top-20" divClass= 'w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3'>
 	<XCircle class="w-6 h-6  text-red-400" slot="icon"/>
 	<span class='text-red-400 font-semibold'>{toastMessage}</span>
 </Toast>
