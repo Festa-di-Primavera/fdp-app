@@ -167,6 +167,10 @@
 	$: icon = color === 'green' ? CheckCircle2 : XCircle;
 </script>
 
+<svelte:head>
+    <title>Genera</title>
+</svelte:head>
+
 <section class="flex h-full w-full flex-col items-center gap-4 flex-grow">
 	<div class="flex w-full max-w-96 flex-col items-start gap-4 px-5 pb-12 pt-5 flex-grow">
 		{#if $user}

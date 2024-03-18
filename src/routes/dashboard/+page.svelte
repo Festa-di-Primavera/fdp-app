@@ -116,15 +116,19 @@
 	});
 </script>
 
+<svelte:head>
+    <title>Dashboard</title>
+</svelte:head>
+
 <section class="w-full h-full flex flex-col items-center gap-4 flex-grow">
 	<div class="w-full px-5 pt-5 flex flex-col gap-4 pb-12 flex-grow">
 		{#if $user}
-			<div class="m-auto w-full max-w-sm md:max-w-3xl xl:max-w-6xl 2xl:max-w-[1584px]">
-				<h1 class="text-4xl font-bold text-primary-600">Dashboard</h1>
-				<p class="text-justify dark:text-white">Informazioni relative ai biglietti</p>
-			</div>
-			
 			{#if tickets.length > 0}
+				<div class="m-auto w-full max-w-sm md:max-w-3xl xl:max-w-6xl 2xl:max-w-[1584px]">
+					<h1 class="text-4xl font-bold text-primary-600">Dashboard</h1>
+					<p class="text-justify dark:text-white">Informazioni relative ai biglietti</p>
+				</div>
+				
 				<div class="m-auto grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
 					<div class="grid h-full w-full max-w-sm grid-flow-row-dense grid-cols-2 gap-2">
 						<Card

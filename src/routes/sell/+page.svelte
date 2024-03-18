@@ -119,6 +119,10 @@
 	}
 </script>
 
+<svelte:head>
+    <title>Vendi</title>
+</svelte:head>
+
 <section class="w-full h-full flex flex-col items-center gap-4 flex-grow">
 	<div class="w-full px-5 pt-5 flex flex-col gap-4 items-start max-w-96 pb-12 flex-grow">
 		{#if $user}

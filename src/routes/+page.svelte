@@ -71,6 +71,10 @@
 	});
 </script>
 
+<svelte:head>
+    <title>Festa di Primavera</title>
+</svelte:head>
+
 <section class="flex flex-col w-full items-center justify-start px-5 py-10 text-xl text-black dark:text-white flex-grow">
 	{#if $user === null || $user.emailVerified === false}
 		<AuthPanel />

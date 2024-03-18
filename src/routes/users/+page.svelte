@@ -216,6 +216,10 @@
 	$: toastIcon = error ? XCircle : CheckCircle2;
 </script>
 
+<svelte:head>
+    <title>Utenti</title>
+</svelte:head>
+
 {#if $user}
 	<UsersTable bind:users bind:currSelectedUser bind:aliasModalOpen bind:deleteModalOpen bind:debtModalOpen />
 	{#if currSelectedUser !== undefined}
