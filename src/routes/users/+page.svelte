@@ -293,4 +293,4 @@
 {/if}
 
 <SignInToast bind:open={signInToastOpen} bind:message={signInToastMessage} />
-<FeedbackToast bind:open={changeToastOpen} bind:color bind:icon={toastIcon} />
+<FeedbackToast bind:open={changeToastOpen} bind:color bind:icon={toastIcon} bind:message/>
