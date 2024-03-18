@@ -44,8 +44,7 @@
         });
     }
 
-    async function checkTicket(code: string){        
-        scrollToDiv();
+    async function checkTicket(code: string) {
         const response = await fetch(`/api/tickets/${code}`,
             {
                 method: 'PUT',
@@ -207,6 +206,7 @@
 
     $:{
         if(ticketCode !== ''){
+            scrollToDiv();
             checkTicket(ticketCode)
         }
         else{
