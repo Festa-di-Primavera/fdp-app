@@ -70,8 +70,19 @@
 			await reauthenticateWithCredential($user!, credential);
 			await updatePassword($user!, newPassword);
 
-			await signInWithEmailAndPassword(getAuth(), $user!.email!, newPassword);
+			const userCred = await signInWithEmailAndPassword(getAuth(), $user!.email!, newPassword);
+			const token = await userCred.user.getIdToken();
 
+			await fetch('/api/session',
+				{
+					method: 'POST',
+					headers: {
+						authorization: `Bearer ${token}`,
+					}
+				}
+			);
+
+			$user = userCred.user;
 			oldPassword = '';
 			newPassword = '';
 			repeatPassword = '';
