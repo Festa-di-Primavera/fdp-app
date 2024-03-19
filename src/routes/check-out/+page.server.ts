@@ -6,7 +6,12 @@ import { Role } from '../../models/role';
 import { redirect } from '@sveltejs/kit';
 
 export async function load({cookies}) {
-	/* if(new Date().getHours() >= 18 && (new Date().getHours() <= 20 && new Date().getMinutes() <= 5)){ */
+	const currentDate = new Date();
+
+	const startDate = new Date('2024-04-17T17:59:00');
+	const endDate = new Date('2024-04-17T20:15:00');
+
+	if(currentDate >= startDate && currentDate <= endDate){
 		const app = getAuth(getAdminApp());
 
 		const userClaims = await getClaimsFromIdToken(cookies);
@@ -27,7 +32,10 @@ export async function load({cookies}) {
 				token: tok
 			};
 		}
-	/* } */
+	}
+	else{
+		throw redirect(302, '/?checkOutExpired');
+	}
 
 	throw redirect(302, '/');
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { onMount } from "svelte";
-    import { Toast, Card, Spinner, Label, Input, Modal, Button } from "flowbite-svelte";
+	import { onMount, onDestroy } from "svelte";
+    import { Spinner, Label, Input, Modal, Button } from "flowbite-svelte";
     import { CheckCircle2, XCircle, AlertCircle, Ticket as TicketIcon, Check, X } from 'lucide-svelte';
 	import { getAuth, signInWithCustomToken } from "firebase/auth";
     
@@ -12,6 +12,7 @@
 	import InfoCard from "../../components/InfoCard.svelte";
 	import FeedbackToast from "../../components/feedbacks/FeedbackToast.svelte";
 	import SignInToast from "../../components/feedbacks/SignInToast.svelte";
+	import { goto } from "$app/navigation";
 
 	export let data: {logout?: boolean, token?: string };
 
@@ -23,6 +24,7 @@
     let errorsModalOpen: boolean = false;
     let feedbackMessage: string = '';
     let timeOut: NodeJS.Timeout;
+    let redirectTimeOut: NodeJS.Timeout;
 
     const closeErrorsModal = () => {
 		errorsModalOpen = false;
@@ -174,6 +176,13 @@
         focus = null;
     }
 
+    const getRemainingTime = () => {
+        let now = new Date();
+        let checkInTime = new Date('2024-04-18T00:30:00');
+        
+        return checkInTime.getTime() - now.getTime();
+    }
+
     onMount(async() => {
 		if(data.logout){
 			handleSignOut(true);
@@ -181,6 +190,13 @@
 		}
         
         ticketInfos = document.querySelector('#ticketInfos')
+
+        redirectTimeOut = setTimeout(() => {
+            clearTimeout(redirectTimeOut);
+            goto('/?checkOutExpired')
+        }, getRemainingTime());
+
+
 		if(getAuth(getClientApp()).currentUser === null && data.token){
 			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
 				$user = userCredential.user;
@@ -203,6 +219,10 @@
 			});
 		}
 	});
+
+    onDestroy(() => {
+        clearTimeout(redirectTimeOut);
+    });
 
     $:{
         if(ticketCode !== ''){
