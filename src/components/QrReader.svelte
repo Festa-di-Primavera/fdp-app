@@ -45,7 +45,7 @@
             }
         );
 
-        let index = devices.findIndex(device => device.label.toLowerCase().includes('back'));
+        let index = devices.findIndex(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('posteriore'));
         index = index === -1 ? 0 : index;
 
         updateCamera(devices[index].deviceId);
