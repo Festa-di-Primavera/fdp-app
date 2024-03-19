@@ -47,7 +47,7 @@
 
         let defaultCam = localStorage.getItem('defaultCam');
 
-        if(defaultCam && ((defaultCam?.length || 0) > 64))
+        if(defaultCam && ((defaultCam?.length || 0) === 64))
             updateCamera(defaultCam);
         else{
             let index = devices.findIndex(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('posteriore'));
