@@ -45,10 +45,16 @@
             }
         );
 
-        let index = devices.findIndex(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('posteriore'));
-        index = index === -1 ? 0 : index;
+        let defaultCam = localStorage.getItem('defaultCam');
 
-        updateCamera(devices[index].deviceId);
+        if(defaultCam && ((defaultCam?.length || 0) > 64))
+            updateCamera(defaultCam);
+        else{
+            let index = devices.findIndex(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('posteriore'));
+            index = index === -1 ? 0 : index;
+
+            updateCamera(devices[index].deviceId);
+        }
 
         document.addEventListener("visibilitychange", handleVisibilityChange);
     });
@@ -65,7 +71,11 @@
     }
 
     async function updateCamera(cam: string) {
+        if(!devices.map(device => device.deviceId).includes(cam))
+            return;
+
         selectedCam = cam;
+        localStorage.setItem('defaultCam', cam);
         qrScanner.setCamera(cam);
         camSelectOpen = false;
     }
