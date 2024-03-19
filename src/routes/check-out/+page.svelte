@@ -242,7 +242,7 @@
         {#if $user}
             <h1 class="text-primary-600 font-bold text-4xl">Check-out</h1>
             <p class="dark:text-white text-justify">Scansionare il QR per effettuare il check-out entro le 20:00</p>
-            <div>
+            <div class="w-full">
                 <Label class="text-black dark:text-white font-medium text-md">
 					Codice Biglietto <span class="text-primary-700">*</span>
 					<Input required class="mt-1" bind:value={ticketCodeInput} name="code" autocomplete="off" on:keypress={onKeyDown}>
