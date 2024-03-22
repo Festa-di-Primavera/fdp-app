@@ -34,7 +34,7 @@
     let timeOut: NodeJS.Timeout;
 
     async function getTicket(code: string){
-        const res = await fetch(`/api/tickets/${code}`);
+        const res = await fetch(`/api/tickets/${encodeURIComponent(code)}`);
         scrollToDiv();
         ticketCodeInput = '';
         

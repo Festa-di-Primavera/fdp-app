@@ -72,19 +72,22 @@
 			ticketCode = convertCode(ticketCode.trim()) ?? '';
 
 			try{
-				const response = await fetch(`/api/tickets/${ticketCode}`, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						name,
-						surname,
-						seller: $user?.uid
-					})
-				});
+				let response;
+				if(ticketCode !== ''){
+					response = await fetch(`/api/tickets/${ticketCode}`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({
+							name,
+							surname,
+							seller: $user?.uid
+						})
+					});
+				}
 
-				if(response.ok){
+				if(response?.ok){
 					error = false;
 					color = 'green';
 				}
@@ -93,7 +96,7 @@
 					color = 'red';
 				}
 				
-				modalMessage = (await response.json()).message;
+				modalMessage = ticketCode !== '' ? (await response!.json()).message : 'Biglietto non vkjkalido';
 				modalOpen = true;
 			}
 			catch(e){
