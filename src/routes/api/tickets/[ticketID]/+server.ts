@@ -5,11 +5,22 @@ import { getAdminApp } from '$lib/firebase/admin';
 import { getClientDB } from '$lib/firebase/client.js';
 
 import type { Ticket } from '../../../../models/ticket';
+import { convertCode } from '$lib/codeConverter';
 
 export async function GET( { params } ) {
 	const adminApp = getAuth(getAdminApp());
 
-	const ticketDoc = (await getDoc(doc(getClientDB(), "tickets", params.ticketID)));
+	const code = convertCode(params.ticketID);
+	if(code === null){
+		return new Response(JSON.stringify({ message: 'Codice non valido' }), {
+			status: 404,
+			headers: {
+				'content-type': 'application/json'
+			}
+		});
+	}
+
+	const ticketDoc = (await getDoc(doc(getClientDB(), "tickets", code )));
 
 	if(!ticketDoc.exists()) {
 		return new Response(JSON.stringify({ message: 'Biglietto non esistente' }), {
@@ -74,9 +85,19 @@ export async function GET( { params } ) {
 
 export async function PUT( { params } ) {
 	const adminApp = getAuth(getAdminApp());
-	const ticketID = params.ticketID;
+	const code = convertCode(params.ticketID);
 
-	const ticketDocRef = doc(getClientDB(), "tickets", ticketID);
+	if(code === null){
+		return new Response(JSON.stringify({ message: 'Codice non valido' }), {
+			// 404 Not Found
+			status: 404,
+			headers: {
+				'content-type': 'application/json'
+			}
+		});
+	}
+
+	const ticketDocRef = doc(getClientDB(), "tickets", code);
 
 	const ticketDoc = (await getDoc(ticketDocRef));
 
@@ -170,7 +191,7 @@ export async function PUT( { params } ) {
 				});
 			}
 			const currentTimestamp = Timestamp.fromDate(new Date());
-			await updateDoc(doc(getClientDB(), "tickets", ticketID), {
+			await updateDoc(doc(getClientDB(), "tickets", code), {
 				newCheckIn: currentTimestamp
 			});
 
@@ -197,7 +218,7 @@ export async function PUT( { params } ) {
 
 	//* BIGLIETTO NON ANCORA VALIDATO
 	const currentTimestamp = Timestamp.fromDate(new Date());
-	await updateDoc(doc(getClientDB(), "tickets", ticketID), {
+	await updateDoc(doc(getClientDB(), "tickets", code), {
 		checkIn: currentTimestamp
 	});
 
@@ -225,10 +246,21 @@ export async function POST( { params, request } ) {
 	const adminApp = getAuth(getAdminApp());
 
 	const formData = await request.json();
+	const code = convertCode(params.ticketID);
+
+	if(code === null){
+		const response = new Response(JSON.stringify({ message: 'Codice non valido' }), {
+			status: 404,
+			headers: {
+				'content-type': 'application/json'
+			}
+		});
+
+		return response;
+	}
 
 	const name = formData.name;
 	const surname = formData.surname;
-	const code = params.ticketID;
 	const seller = formData.seller;
 	const soldAt = Timestamp.fromDate(new Date());
 

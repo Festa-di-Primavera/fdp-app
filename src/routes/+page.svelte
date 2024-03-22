@@ -37,7 +37,7 @@
 			}, 4000);
 		}
 		else if(window.location.search.split('?')[1] == 'checkOutExpired'){
-			feedbackToastMessage = 'Non è più possibile fare check-out';
+			feedbackToastMessage = 'Non è possibile fare check-out';
 			error=false;
 			feedbackToastOpen = true;
 			goto(window.location.pathname);
@@ -45,7 +45,17 @@
 				feedbackToastOpen = false;
 				clearTimeout(timeOut);
 			}, 4000);
-		} 
+		}
+		else if(window.location.search.split('?')[1] == 'checkInExpired'){
+			feedbackToastMessage = 'Non è possibile fare check-in';
+			error=false;
+			feedbackToastOpen = true;
+			goto(window.location.pathname);
+			const timeOut = setTimeout(() => {
+				feedbackToastOpen = false;
+				clearTimeout(timeOut);
+			}, 4000);
+		}
 
 		if(getAuth(getClientApp()).currentUser === null && data.token){
 			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {

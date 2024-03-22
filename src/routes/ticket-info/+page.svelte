@@ -169,7 +169,6 @@
 
                 <InfoCard
                     bind:ticketCode
-                    bind:ticketCodeInput
                     bind:ticket
                 />
                 

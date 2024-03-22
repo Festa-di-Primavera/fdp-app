@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Card } from "flowbite-svelte";
 	import type { Ticket } from "../models/ticket";
+	import { convertCode } from "$lib/codeConverter";
 
 	export let ticketCode: string;
-	export let ticketCodeInput: string;
 	export let ticket: Ticket;
 	export let color: string = '';
 	export let focus: 'checkIn' | 'checkOut' | 'newCheckIn' | null = null;
@@ -12,7 +12,7 @@
 <Card class="w-full flex flex-col text-lg p-3" id="ticketInfos">
 	<span class="text-black dark:text-white w-full flex justify-between">
 		<span>N° biglietto:</span>
-		<span>{ticket.ticketID || ticketCode || ticketCodeInput}</span>
+		<span>{convertCode(ticket.ticketID) || convertCode(ticketCode) || ''}</span>
 	</span>
 	<span class="text-black dark:text-white w-full flex justify-between">
 		<span>Nominativo:</span>

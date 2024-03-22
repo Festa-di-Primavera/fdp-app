@@ -3,12 +3,23 @@ import { getClientDB } from '$lib/firebase/client.js';
 import { getAuth } from 'firebase-admin/auth';
 import { Timestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
 import type { Ticket } from '../../../../../models/ticket.js';
+import { convertCode } from '$lib/codeConverter.js';
 
 export async function PUT( { params } ) {
 	const adminApp = getAuth(getAdminApp());
-	const ticketID = params.ticketID;
+	const code = convertCode(params.ticketID);
 
-	const ticketDocRef = doc(getClientDB(), "tickets", ticketID);
+	if(code === null){
+		return new Response(JSON.stringify({ message: 'Codice non valido' }), {
+			// 404 Not Found
+			status: 404,
+			headers: {
+				'content-type': 'application/json'
+			}
+		});
+	}
+
+	const ticketDocRef = doc(getClientDB(), "tickets", code);
 
 	const ticketDoc = (await getDoc(ticketDocRef));
 
@@ -100,7 +111,7 @@ export async function PUT( { params } ) {
 	}
 
 	const currentTimestamp = Timestamp.fromDate(new Date());
-	await updateDoc(doc(getClientDB(), "tickets", ticketID), {
+	await updateDoc(doc(getClientDB(), "tickets", code), {
 		checkOut: currentTimestamp
 	});
 

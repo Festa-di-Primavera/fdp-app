@@ -47,7 +47,8 @@
     }
 
     async function checkTicket(code: string) {
-        const response = await fetch(`/api/tickets/${code}`,
+        scrollToDiv();
+        const response = await fetch(`/api/tickets/${encodeURIComponent(code)}`,
             {
                 method: 'PUT',
                 headers: {
@@ -55,7 +56,6 @@
                 }
             }
         );
-
 
         const body = (await response.json());
         let message = body.message;
@@ -114,19 +114,27 @@
             return
         }
 
-        ticket = {
-            ticketID: code,
-            name: tick.name,
-            surname: tick.surname,
-            seller: response.status !== 206 ? tick.seller : 'Non Trovato',
-            soldAt: tick.soldAt,
-            checkIn: tick.checkIn,
-            checkOut: tick.checkOut,
-            newCheckIn: tick.newCheckIn
-        };
+        try{
+            ticket = {
+                ticketID: code,
+                name: tick.name,
+                surname: tick.surname,
+                seller: response.status !== 206 ? tick.seller : 'Non Trovato',
+                soldAt: tick.soldAt,
+                checkIn: tick.checkIn,
+                checkOut: tick.checkOut,
+                newCheckIn: tick.newCheckIn
+            };
 
-        triggerPopup(message, 'green', null);
-        ticketCodeInput = '';
+            triggerPopup(message, 'green', null);
+            ticketCodeInput = '';
+            
+        }
+        catch(e){
+            triggerPopup('Errore inaspettato', 'red', 'notFound');
+            ticketCodeInput = '';
+        }
+
         return;
     }
 
@@ -269,7 +277,6 @@
 
                 <InfoCard
                     bind:ticketCode
-                    bind:ticketCodeInput
                     bind:ticket
                     bind:color
                     bind:focus

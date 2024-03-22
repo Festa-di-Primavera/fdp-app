@@ -49,7 +49,7 @@
     async function checkOutTicket(code: string){        
         scrollToDiv();
 
-        const response = await fetch(`/api/tickets/checkout/${code}`,
+        const response = await fetch(`/api/tickets/checkout/${encodeURIComponent(code)}`,
             {
                 method: 'PUT',
                 headers: {
@@ -114,19 +114,25 @@
             return
         }
 
-        ticket = {
-            ticketID: code,
-            name: tick.name,
-            surname: tick.surname,
-            seller: response.status !== 206 ? tick.seller : 'Non Trovato',
-            soldAt: tick.soldAt,
-            checkIn: tick.checkIn,
-            checkOut: tick.checkOut,
-            newCheckIn: tick.newCheckIn,
-        };
+        try{
+            ticket = {
+                ticketID: code,
+                name: tick.name,
+                surname: tick.surname,
+                seller: response.status !== 206 ? tick.seller : 'Non Trovato',
+                soldAt: tick.soldAt,
+                checkIn: tick.checkIn,
+                checkOut: tick.checkOut,
+                newCheckIn: tick.newCheckIn,
+            };
 
-        triggerPopup(message, 'green', null);
-        ticketCodeInput = '';
+            triggerPopup(message, 'green', null);
+            ticketCodeInput = '';
+        }
+        catch(e){
+            triggerPopup('Errore inaspettato', 'red', 'error');
+            ticketCodeInput = '';
+        }
         return;
     }
 
@@ -266,7 +272,6 @@
 
                 <InfoCard
                     bind:ticketCode
-                    bind:ticketCodeInput
                     bind:ticket
                     bind:color
                     focus="checkOut"

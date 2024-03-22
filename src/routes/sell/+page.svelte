@@ -9,6 +9,7 @@
 	import { user } from "../../store/store";
 	import QrReader from "../../components/QrReader.svelte";
 	import SignInToast from "../../components/feedbacks/SignInToast.svelte";
+	import { convertCode } from "$lib/codeConverter";
 
 	export let data: {logout?: boolean, token?: string };
 
@@ -68,7 +69,7 @@
 		if(name !== '' && surname !== '' && ticketCode !== ''){
 			name = name.trim();
 			surname = surname.trim();
-			ticketCode = ticketCode.trim();
+			ticketCode = convertCode(ticketCode.trim()) ?? '';
 
 			try{
 				const response = await fetch(`/api/tickets/${ticketCode}`, {
