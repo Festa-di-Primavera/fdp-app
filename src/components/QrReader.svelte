@@ -1,21 +1,36 @@
 <script lang="ts">
     import QrScanner from 'qr-scanner';
     import { onDestroy, onMount } from 'svelte';
-    import { CameraIcon, X } from 'lucide-svelte';
+    import { CameraIcon, X, XCircle } from 'lucide-svelte';
     import { Button, Dropdown, DropdownHeader, DropdownItem } from 'flowbite-svelte';
+	import FeedbackToast from './feedbacks/FeedbackToast.svelte';
     export let codeResult: string = '';
 
     let videoFrame: HTMLVideoElement;
     let qrScanner: QrScanner;
 
-    let alreadyFound = false;
     let opened = false;
-    let isPaused = true;
+    let isPaused = false;
 
     let camSelectOpen = false;
 
     let devices: MediaDeviceInfo[] = [];
     let selectedCam: string;
+
+    let feedbackToastOpen = false;
+    let feedbackToastMessage = '';
+    let timeOut: NodeJS.Timeout;
+
+    function triggerToast(message: string, ){
+        feedbackToastMessage = message;
+
+        clearTimeout(timeOut);
+        timeOut = setTimeout(() => {
+            feedbackToastOpen = false;
+            feedbackToastMessage = '';
+            clearTimeout(timeOut);
+        }, 3500);
+    }
 
     onMount(async () => {
         try{
@@ -23,10 +38,9 @@
             stream.getTracks().forEach(track => track.stop());
         }
         catch (error) {
-            /* 
-                TODO: handle error 
-                message: Device in use
-            */
+            if((error as Error).message === 'Device in use'){
+                triggerToast('La fotocamera è già in uso');
+            }
         }
         
         const devicesList = await navigator.mediaDevices.enumerateDevices();
@@ -41,7 +55,6 @@
                 },
                 highlightCodeOutline: true,
                 highlightScanRegion: true,
-                //overlay: document.getElementById('overlay') as HTMLDivElement
             }
         );
 
@@ -85,13 +98,11 @@
             try{
                 await qrScanner.start();
                 opened = true;
-                alreadyFound = false;
                 codeResult = '';
             } catch (error) {
-                /* 
-                    TODO: handle error
-                    error === 'Camera not found.' <- it is a string
-                */
+               if(error === 'Camera not found.'){
+                   triggerToast('Fotocamera non trovata');
+               }
             }
 
             return
@@ -103,12 +114,10 @@
                 await qrScanner.$video.play();
                 isPaused = false;
                 codeResult = '';
-                alreadyFound = false;
             } catch (error) {
-                /* 
-                    TODO: handle error
-                    error === 'Camera not found.' <- it is a string
-                */
+                if(error === 'Camera not found.'){
+                    triggerToast('Fotocamera non trovata');
+                }
             }
 
             isPaused = false;
@@ -139,7 +148,6 @@
         </Button>
         <!-- svelte-ignore a11y-media-has-caption -->
         <video on:click={openScanner} class="w-full h-full aspect-square object-cover rounded-lg" bind:this={videoFrame}/>
-        <div id="overlay" class="border-2 rounded-xl border-primary-600" />
         {#if opened}
             <button type="button" class="flex items-center gap-1 text-primary-400 dark:text-primary-900 absolute top-2 right-2 z-10 bg-slate-400 bg-opacity-40 p-1 rounded-md" on:click={closeScanner}>
                 Chiudi
@@ -161,3 +169,5 @@
         {/each}
     </Dropdown>
 {/if}
+
+<FeedbackToast bind:open={feedbackToastOpen} bind:message={feedbackToastMessage} icon={XCircle} color="red"/>
