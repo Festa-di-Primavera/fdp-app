@@ -106,9 +106,6 @@
 				}, 8000);
 			});
 		}
-
-		console.log('getting tickets', salesPerTime);
-		//getTickets();
 	});
 
 	onDestroy(() => {
