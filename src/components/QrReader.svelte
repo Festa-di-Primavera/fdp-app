@@ -1,7 +1,7 @@
 <script lang="ts">
     import QrScanner from 'qr-scanner';
     import { onDestroy, onMount } from 'svelte';
-    import { CameraIcon, X, XCircle } from 'lucide-svelte';
+    import { AlertCircle, CameraIcon, X, XCircle } from 'lucide-svelte';
     import { Button, Dropdown, DropdownHeader, DropdownItem } from 'flowbite-svelte';
 	import FeedbackToast from './feedbacks/FeedbackToast.svelte';
     export let codeResult: string = '';
@@ -19,10 +19,13 @@
 
     let feedbackToastOpen = false;
     let feedbackToastMessage = '';
+    let feedbackToastColor: 'red' | 'yellow' = 'red';
     let timeOut: NodeJS.Timeout;
 
-    function triggerToast(message: string, ){
+    function triggerToast(message: string, color: 'red' | 'yellow' = 'red'){
         feedbackToastMessage = message;
+        feedbackToastOpen = true;
+        feedbackToastColor = color;
 
         clearTimeout(timeOut);
         timeOut = setTimeout(() => {
@@ -39,7 +42,7 @@
         }
         catch (error) {
             if((error as Error).message === 'Device in use'){
-                triggerToast('La fotocamera è già in uso');
+                triggerToast('Attento! Una fotocamera è in uso', 'yellow');
             }
         }
         
@@ -100,9 +103,9 @@
                 opened = true;
                 codeResult = '';
             } catch (error) {
-               if(error === 'Camera not found.'){
-                   triggerToast('Fotocamera non trovata');
-               }
+                if(error === 'Camera not found.'){
+                    triggerToast('Fotocamera non trovata');
+                }
             }
 
             return
@@ -170,4 +173,4 @@
     </Dropdown>
 {/if}
 
-<FeedbackToast bind:open={feedbackToastOpen} bind:message={feedbackToastMessage} icon={XCircle} color="red"/>
+<FeedbackToast bind:open={feedbackToastOpen} bind:message={feedbackToastMessage} icon={AlertCircle} bind:color={feedbackToastColor}/>
