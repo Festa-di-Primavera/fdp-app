@@ -1,17 +1,23 @@
 <script lang="ts">
 	import { Button, Dropdown, DropdownItem, Input, Popover, Radio, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Toast } from "flowbite-svelte";
-	import { CheckCircle2, ChevronsUpDown, Filter, PenBox, Search, Trash2, XCircle, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowDown10, ArrowUp01, ArrowUp10, Euro } from "lucide-svelte";
+	import { CheckCircle2, ChevronsUpDown, Filter, PenBox, Search, Trash2, XCircle, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowDown10, ArrowUp01, ArrowUp10, Euro, Ticket } from "lucide-svelte";
 	import { Role } from "../models/role";
 	import { user } from "../store/store";
 	import { writable } from 'svelte/store';
 	import SignInToast from "./feedbacks/SignInToast.svelte";
 	import FeedbackToast from "./feedbacks/FeedbackToast.svelte";
 	
+	export let loginToken: string | undefined;
+
 	export let users: any;
+	
 	export let currSelectedUser: any | undefined;
+	export let currentBlocks: string[];
+
 	export let aliasModalOpen: boolean;
 	export let deleteModalOpen: boolean;
 	export let debtModalOpen: boolean;
+	export let blocksModalOpen: boolean;
 
 	let color: 'green' | 'red' = 'green';
 	let feedbackToastMessage: string = '';
@@ -100,6 +106,37 @@
 		currSelectedUser = user;
 		debtModalOpen = true;
 	};
+	
+	const triggerBlocksModal = async (user: any) => {
+		currSelectedUser = user;
+		const response = await fetch(`/api/tickets/blocks/${user.uid}`,
+			{
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${loginToken}`
+				}
+			}
+		);
+		if(response.ok){
+			currentBlocks = (await response.json()).blocks;
+			blocksModalOpen = true;
+		}
+		else{
+			error = true;
+			color = 'red';
+			feedbackToastOpen = true;
+
+			clearTimeout(timeOut);
+			timeOut = setTimeout(() => {
+				feedbackToastOpen = false;
+				clearTimeout(timeOut);
+			}, 3500);
+
+			feedbackToastMessage = 'Errore nella lettura dei blocchetti';
+		}
+
+	};
 
 	// search and filter variables
 	let searchTerm = '';
@@ -185,7 +222,7 @@
 		</Input>
 	</div>
 	<div class="mx-5 mt-5">
-		<Table hoverable={true} divClass="tableDiv relative overflow-x-auto overflow-y-visible pb-40" class="relative overflow-x-auto rounded-md shadow-md sm:rounded-lg overflow-visible ">
+		<Table hoverable={true} divClass="tableDiv relative overflow-x-auto overflow-y-visible pb-40" class="relative overflow-x-auto rounded-md shadow-md sm:rounded-lg overflow-visible">
 			<TableHead>
 				<TableHeadCell on:click={() => sortTable('displayName')} class="cursor-pointer select-none">
 					<div class="flex gap-1">
@@ -235,13 +272,14 @@
 						{/if}
 					</div>
 				</TableHeadCell>
+				<TableHeadCell class="text-center max-w-20 px-0">Blocchetti</TableHeadCell>
 				{#if $user.email === import.meta.env.VITE_ADMIN_EMAIL1 || $user.email === import.meta.env.VITE_ADMIN_EMAIL2}
 					<TableHeadCell class="text-center">Elimina</TableHeadCell>
 				{/if}
 			</TableHead>
 			<TableBody tableBodyClass="divide-y">
 				{#each $sortItems || [] as item}
-					<TableBodyRow>
+					<TableBodyRow class="w-full">
 						<TableBodyCell tdClass="px-6 py-4 whitespace-nowrap font-medium flex items-center gap-4">
 							<div style="background: {item.customClaims?.color};" class="h-7 w-7 rounded-full flex items-center justify-center text-white" >
 								{item.displayName?.charAt(0).toUpperCase() || 'U'}
@@ -285,11 +323,20 @@
 						<TableBodyCell class="max-w-40">
 							<span class="w-max">{item.customClaims?.totMoney || 0},00</span>
 						</TableBodyCell>
-						{#if $user.email === import.meta.env.VITE_ADMIN_EMAIL1 || $user.email === import.meta.env.VITE_ADMIN_EMAIL2}
-							<TableBodyCell class="flex items-center justify-center">
-								<Button disabled={item.email === import.meta.env.VITE_ADMIN_EMAIL1 || item.email === import.meta.env.VITE_ADMIN_EMAIL2} class="px-2 py-1 dark:bg-red-500 bg-red-500 hover:bg-red-600 dark:hover:bg-red-600" on:click={()=> {currSelectedUser=item; deleteModalOpen = true; }}>
-									<Trash2 class="aspect-square w-4 dark:text-white text-gray-900" />
+						<TableBodyCell>
+							<div class="grid place-items-center w-full">
+								<Button disabled={item.customClaims?.accessLevel < Role.SELLER} class="mx-auto px-2 py-1 dark:bg-primary-500 bg-primary-500 hover:bg-primary-600 dark:hover:bg-primary-600" on:click={() => triggerBlocksModal(item)}>
+									<Ticket class="aspect-square w-4 dark:text-white text-gray-900" />
 								</Button>
+							</div>
+						</TableBodyCell>
+						{#if $user.email === import.meta.env.VITE_ADMIN_EMAIL1 || $user.email === import.meta.env.VITE_ADMIN_EMAIL2}
+							<TableBodyCell>
+								<div class="grid place-items-center w-full">
+									<Button disabled={item.email === import.meta.env.VITE_ADMIN_EMAIL1 || item.email === import.meta.env.VITE_ADMIN_EMAIL2} class="px-2 py-1 dark:bg-red-500 bg-red-500 hover:bg-red-600 dark:hover:bg-red-600" on:click={()=> {currSelectedUser=item; deleteModalOpen = true; }}>
+										<Trash2 class="aspect-square w-4 dark:text-white text-gray-900" />
+									</Button>
+								</div>
 							</TableBodyCell>
 						{/if}
 					</TableBodyRow>
