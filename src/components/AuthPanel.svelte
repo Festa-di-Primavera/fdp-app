@@ -252,7 +252,6 @@
 				Email
 				<Input
 					type="email"
-					placeholder="john.doe@company.com"
 					bind:value={email}
 					required
 					class="mt-2"
