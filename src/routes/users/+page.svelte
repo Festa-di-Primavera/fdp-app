@@ -218,6 +218,16 @@
 	let ticketCode: string = '';
 
 	function getFirstCodeOfBlock(inputCode: string): string {
+		// check if the format is XNRF 4xxxx
+		if(!/^XNRF\s\d{5}$/.test(inputCode)){
+			throw new Error('Invalid block code');
+		}
+
+		// check if the number is between 45151 and 46400
+		if(parseInt(inputCode.slice(5)) < 45151 || parseInt(inputCode.slice(5)) > 46400){
+			throw new Error('Invalid block number');
+		}
+
 		const blockNumber = Math.floor((parseInt(inputCode.slice(5)) - 1) / 50) * 50 + 1;
 
 		const firstCodeOfBlock = `XNRF ${blockNumber.toString().padStart(5, '0')}`;
@@ -240,7 +250,22 @@
 		
 		try {
 			ticketCode = getFirstCodeOfBlock(ticketCode);
+		}
+		catch(e) {
+			error = true;
+			color = 'red';
+			message = 'Codice blocco non valido';
+			changeToastOpen = true;
+			
+			clearTimeout(timeOut);
+			timeOut = setTimeout(() => {
+				changeToastOpen = false;
+				clearTimeout(timeOut);
+			}, 3500);
+			return;
+		}
 
+		try {
 			const resp = await fetch(`/api/tickets/blocks/${uid}/${encodeURIComponent(ticketCode)}`, {
 				method: 'POST',
 				headers: {
