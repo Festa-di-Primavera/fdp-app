@@ -201,6 +201,9 @@
 		}
 	}
 	$: toastIcon = error ? XCircle : CheckCircle2;
+
+	let totalToClaim = users?.reduce((acc: number, curr: any) => acc + (curr.customClaims?.money || 0), 0);
+	let totalProfit = users?.reduce((acc: number, curr: any) => acc + (curr.customClaims?.totMoney || 0), 0);
 </script>
 
 {#if $user}
@@ -341,6 +344,25 @@
 						{/if}
 					</TableBodyRow>
 				{/each}
+				<TableBodyRow>
+					<!-- 4 empty table body cells -->
+					<TableBodyCell></TableBodyCell>
+					<TableBodyCell></TableBodyCell>
+					<TableBodyCell></TableBodyCell>
+					<TableBodyCell></TableBodyCell>
+					<TableBodyCell>
+						<div class="flex w-full justify-center items-center">
+							<span class="text-left">{totalToClaim},00 €</span>
+						</div>
+					</TableBodyCell>
+					<TableBodyCell>
+						<div class="flex w-full justify-left items-center">
+							<span class="text-left">{totalProfit},00 €</span>
+						</div>
+					</TableBodyCell>
+					<TableBodyCell></TableBodyCell>
+					<TableBodyCell></TableBodyCell>
+				</TableBodyRow>
 			</TableBody>
 		</Table>
 	</div>
