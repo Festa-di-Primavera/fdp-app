@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Input, Button, Modal, Spinner, Toast, NumberInput, Toggle } from 'flowbite-svelte';
+	import { Input, Button, Modal, Spinner, Toast, NumberInput, Toggle, Label } from 'flowbite-svelte';
 	import { getAuth, signInWithCustomToken } from 'firebase/auth';
-	import { CheckCircle2, XCircle } from 'lucide-svelte'
+	import { CheckCircle2, Ticket, XCircle } from 'lucide-svelte'
 	
 	import { getClientApp, handleSignOut } from '$lib/firebase/client.js';
 
@@ -215,6 +215,98 @@
 		alias = '';
 	};
 
+	let blocksModalOpen: boolean = false;
+	let currentBlocks: string[] = [];
+	let ticketCode: string = '';
+
+	function getFirstCodeOfBlock(inputCode: string): string {
+		// check if the format is XNRF 4xxxx
+		if(!/^XNRF\s\d{5}$/.test(inputCode)){
+			throw new Error('Invalid block code');
+		}
+
+		// check if the number is between 45151 and 46400
+		if(parseInt(inputCode.slice(5)) < 45151 || parseInt(inputCode.slice(5)) > 46400){
+			throw new Error('Invalid block number');
+		}
+
+		const blockNumber = Math.floor((parseInt(inputCode.slice(5)) - 1) / 50) * 50 + 1;
+
+		const firstCodeOfBlock = `XNRF ${blockNumber.toString().padStart(5, '0')}`;
+		return firstCodeOfBlock;
+	}
+
+	const addBlock = async (ticketCode: string, uid: string) => {
+		if(ticketCode === ''){
+			error = true;
+			color = 'red';
+			message = 'Codice blocco non valido';
+			changeToastOpen = true;
+			clearTimeout(timeOut);
+			timeOut = setTimeout(() => {
+				changeToastOpen = false;
+				clearTimeout(timeOut);
+			}, 3500);
+			return;
+		}
+		
+		try {
+			ticketCode = getFirstCodeOfBlock(ticketCode);
+		}
+		catch(e) {
+			error = true;
+			color = 'red';
+			message = 'Codice blocco non valido';
+			changeToastOpen = true;
+			
+			clearTimeout(timeOut);
+			timeOut = setTimeout(() => {
+				changeToastOpen = false;
+				clearTimeout(timeOut);
+			}, 3500);
+			return;
+		}
+
+		try {
+			const resp = await fetch(`/api/tickets/blocks/${uid}/${encodeURIComponent(ticketCode)}`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': 'Bearer ' + data.token
+				}
+			});
+
+			if(resp.ok){
+				error = false;
+				color = 'green';
+			}
+			else{
+				error = true;
+				color = 'red';
+			}
+
+			message = (await resp.json()).message;
+			changeToastOpen = true;
+
+			clearTimeout(timeOut);
+			timeOut = setTimeout(() => {
+				changeToastOpen = false;
+				clearTimeout(timeOut);
+			}, 3500);
+		}
+		catch(e) {
+			error = true;
+			color = 'red';
+			changeToastOpen = true;
+			clearTimeout(timeOut);
+			timeOut = setTimeout(() => {
+				changeToastOpen = false;
+				clearTimeout(timeOut);
+			}, 3500);
+			message = 'Errore di rete';
+		}
+	}
+
 	$: toastIcon = error ? XCircle : CheckCircle2;
 </script>
 
@@ -223,7 +315,7 @@
 </svelte:head>
 
 {#if $user}
-	<UsersTable bind:users bind:currSelectedUser bind:aliasModalOpen bind:deleteModalOpen bind:debtModalOpen />
+	<UsersTable bind:users bind:currSelectedUser bind:aliasModalOpen bind:deleteModalOpen bind:debtModalOpen bind:blocksModalOpen bind:currentBlocks bind:loginToken={data.token}/>
 	{#if currSelectedUser !== undefined}
 		<Modal title={`Elimina ${currSelectedUser?.displayName}`} bind:open={deleteModalOpen} class="z-50">
 			<span class="text-md">Vuoi eliminare l'utente <b>{currSelectedUser?.displayName}</b>?</span>
@@ -285,6 +377,42 @@
 					Annulla
 				</Button>
 			</svelte:fragment>
+		</Modal>
+		<Modal bind:open={blocksModalOpen} title={`Blocchetti assegnati a ${currSelectedUser?.displayName}`} class="z-50" outsideclose autoclose on:close={()=> ticketCode=''}>
+			<span class="text-md">
+				{#if currentBlocks.length > 0}
+					Blocchetti di
+				{/if}
+				<b>{currSelectedUser?.displayName}</b>
+				{#if currentBlocks.length == 0}
+					non ha blocchetti assegnati
+				{/if}
+			</span>
+			{#if currentBlocks.length > 0}
+				<div class="flex flex-col gap-2">
+					{#each currentBlocks as block}
+						<span class="text-sm"> - {block}</span>
+					{/each}
+				</div>
+			{/if}
+			<div>
+				<Label class="text-black dark:text-white font-medium text-md w-full">
+					<div class="flex flex-col mb-2">
+						Codice Blocco
+						<span class="font-normal text-gray-500 text-xs">(biglietto qualsiasi del blocchetto)</span>
+					</div>
+					<div class="w-full flex gap-6 items-center justify-center">
+						<Input bind:value={ticketCode} autocomplete="off" placeholder="XNRF 45151">
+							<Ticket slot="left" class="w-6 h-6 text-primary-600 dark:text-white"/>
+						</Input>
+						<Button on:click={() => {
+							addBlock(ticketCode, currSelectedUser.uid);
+						}}>
+							Aggiungi
+						</Button>
+					</div>
+				</Label>
+			</div>
 		</Modal>
 	{/if}
 {:else}
