@@ -162,6 +162,8 @@
 			message = 'Errore di rete';
 		}
 		debtModalOpen = false;
+		debtPay = 0;
+		payMax = false;
 	}
 	
 	// alias modal state variables
