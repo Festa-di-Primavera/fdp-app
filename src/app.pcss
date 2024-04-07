@@ -25,3 +25,21 @@ textarea {
   /* 2px */
   stroke-width: 8px !important;
 }
+
+/* scrollbar webkit */
+.modal div::-webkit-scrollbar {
+  width: 5px;
+}
+
+.modal div::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+.modal div::-webkit-scrollbar-thumb {
+  @apply bg-primary-500;
+  border-radius: 10px;
+}
+
+.modal div::-webkit-scrollbar-thumb:hover {
+  @apply bg-primary-400;
+}
