@@ -96,7 +96,7 @@
 					color = 'red';
 				}
 				
-				modalMessage = ticketCode !== '' ? (await response!.json()).message : 'Biglietto non vkjkalido';
+				modalMessage = ticketCode !== '' ? (await response!.json()).message : 'Biglietto non valido';
 				modalOpen = true;
 			}
 			catch(e){
