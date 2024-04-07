@@ -147,7 +147,7 @@
 <div class="w-full flex flex-col gap-3 items-center">
     <div class="relative w-[80%] md:max-w-96 aspect-square rounded-xl border-primary-600 border-4 dark:bg-gray-600 bg-gray-400" id="videocontainer">
         <Button class="absolute top-2 left-2 aspect-square rounded-md bg-transparent dark:bg-transparent dark:hover:bg-opacity-30 hover:bg-opacity-30 focus-within:ring-0" id="camSelector">
-            <CameraIcon class="absolute w-6 h-6 dark:text-primary-800 text-primary-800 z-[25]" />
+            <CameraIcon class="absolute w-6 h-6 dark:text-primary-300 text-primary-800 z-[25]" />
         </Button>
         <!-- svelte-ignore a11y-media-has-caption -->
         <video on:click={openScanner} class="w-full h-full aspect-square object-cover rounded-lg" bind:this={videoFrame}/>
