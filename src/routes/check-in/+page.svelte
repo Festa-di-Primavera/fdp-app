@@ -201,7 +201,7 @@
 
         redirectTimeOut = setTimeout(() => {
             clearTimeout(redirectTimeOut);
-            goto('/?checkOutExpired')
+            goto('/?checkInExpired')
         }, getRemainingTime());
 
 
