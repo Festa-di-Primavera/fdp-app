@@ -1,6 +1,6 @@
 <script lang="ts">
     import { DarkMode, Drawer, CloseButton, Dropdown, DropdownItem, Modal, Button } from "flowbite-svelte";
-	import { AlignJustify, DollarSign, LayoutDashboard, LogOut, ScanLine, Ticket, Users, Home, DoorOpen } from 'lucide-svelte';
+	import { AlignJustify, DollarSign, LayoutDashboard, LogOut, ScanLine, Ticket, Users, Home, DoorOpen, Siren } from 'lucide-svelte';
 	import Logo from "./Logo.svelte";
   	import { sineIn } from 'svelte/easing';
 
@@ -72,6 +72,12 @@
 			role: Role.CHECKOUT,
 			icon: Ticket
 		},
+		{
+			label: 'Recovery',
+			slug: "/recovery",
+			role: Role.NORMAL,
+			icon: Siren
+		},
 	]
 
 	let hidden: boolean = true;
@@ -129,31 +135,39 @@
 		</div>
 		<hr class="dark:border-gray-600"/>
 		<div class="flex flex-col justify-between h-full">
-			{#if currAccessLevel !== null}
-				<div class="flex flex-col gap-4 mt-5">
+			<div class="flex flex-col gap-4 mt-5">
+				{#if currAccessLevel !== null}
 					{#each routes as route}
-						{#if route.slug != '/check-out'}
-							{#if route.role <= currAccessLevel}
-								<a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>
-									<span class="flex gap-4 w-full text-xl items-center">
-										<svelte:component this={route.icon}/>
-										{route.label}
-									</span>
-								</a>
-							{/if}
-						{:else}
-							{#if currAccessLevel == Role.CHECKOUT || currAccessLevel >= Role.ADMIN}
-								<a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>
-									<span class="flex gap-4 w-full text-xl items-center">
-										<svelte:component this={route.icon}/>
-										{route.label}
-									</span>
-								</a>
+						{#if route.slug != '/recovery'}
+							{#if route.slug != '/check-out' }
+								{#if route.role <= currAccessLevel}
+									<a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>
+										<span class="flex gap-4 w-full text-xl items-center">
+											<svelte:component this={route.icon}/>
+											{route.label}
+										</span>
+									</a>
+								{/if}
+							{:else}
+								{#if currAccessLevel == Role.CHECKOUT || currAccessLevel >= Role.ADMIN}
+									<a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>
+										<span class="flex gap-4 w-full text-xl items-center">
+											<svelte:component this={route.icon}/>
+											{route.label}
+										</span>
+									</a>
+								{/if}
 							{/if}
 						{/if}
-					{/each}
-				</div>
-			{/if}
+					{/each} 
+				{/if}
+				<a on:click={() => (hidden = true)} class={`${routes[7].slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={routes[7].slug}>
+					<span class="flex gap-4 w-full text-xl items-center">
+						<svelte:component this={routes[7].icon}/>
+						{routes[7].label}
+					</span>
+				</a>
+			</div>
 			{#if $user !== null}
 				<div class="dark:text-white flex text-md items-center self-baseline w-full justify-between p-3 rounded-lg bg-gray-100 dark:bg-gray-600">
 					<button id="account" class="flex gap-4 text-md items-center truncate overflow-ellipsis pr-5">
