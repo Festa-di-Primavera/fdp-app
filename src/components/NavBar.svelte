@@ -11,6 +11,7 @@
 	import { Role } from "../models/role";
 	import ChangePwModal from "./ChangePwModal.svelte";
 	import ChangeEmailModal from "./ChangeEmailModal.svelte";
+	import { goto } from "$app/navigation";
 	
 	let currAccessLevel: number | null = null;
 	let color: string = '#000';
@@ -96,6 +97,15 @@
 		}
 	}
 
+	function swichRecoveryMode(){
+		if($page.url.pathname == '/recovery'){
+			goto('/');
+		}
+		else{
+			goto('/recovery');
+		}
+	}
+
 	let deleteModalOpen: boolean = false;
 	function deleteCurrentUser(){
 		if($user !== null){
@@ -116,6 +126,9 @@
 		<Logo/>
 	</a>
 	<div class="flex items-center justify-end mr-5 gap-5">
+		<button on:click={swichRecoveryMode} class="bg-red-600 p-1 rounded-md">
+			<Siren class="text-white"/>
+		</button>
 		<button on:click={changeTheme} class="p-0">
 			<DarkMode btnClass='text-gray-500 dark:text-gray-400 rounded-lg text-sm p-1.5'/>
 		</button>
