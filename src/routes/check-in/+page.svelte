@@ -199,10 +199,10 @@
         
         ticketInfos = document.querySelector('#ticketInfos')
 
-        redirectTimeOut = setTimeout(() => {
+        /* redirectTimeOut = setTimeout(() => {
             clearTimeout(redirectTimeOut);
             goto('/?checkInExpired')
-        }, getRemainingTime());
+        }, getRemainingTime()); */
 
 
 		if(getAuth(getClientApp()).currentUser === null && data.token){
