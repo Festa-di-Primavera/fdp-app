@@ -184,13 +184,13 @@
         focus = null;
     }
 
-    const getRemainingTime = () => {
+    /* const getRemainingTime = () => {
         let now = new Date();
         let checkInTime = new Date('2024-04-18T00:30:00');
         
         return checkInTime.getTime() - now.getTime();
     }
-
+ */
     onMount(async() => {
 		if(data.logout){
 			handleSignOut(true);
@@ -199,10 +199,10 @@
         
         ticketInfos = document.querySelector('#ticketInfos')
 
-        redirectTimeOut = setTimeout(() => {
+        /* redirectTimeOut = setTimeout(() => {
             clearTimeout(redirectTimeOut);
             goto('/?checkInExpired')
-        }, getRemainingTime());
+        }, getRemainingTime()); */
 
 
 		if(getAuth(getClientApp()).currentUser === null && data.token){
