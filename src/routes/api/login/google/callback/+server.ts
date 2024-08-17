@@ -1,7 +1,7 @@
 // routes/login/google/callback/+server.ts
 import { firestoreDb, google, googleCodeVerifier, lucia } from "$lib/lucia/auth";
 import { OAuth2RequestError } from "arctic";
-import { generateIdFromEntropySize } from "lucia";
+import { generateIdFromEntropySize, type User } from "lucia";
 
 import type { RequestEvent } from "@sveltejs/kit";
 import { collection, doc, getDocs, query, setDoc, where } from "firebase/firestore";
@@ -26,12 +26,11 @@ export async function GET(event: RequestEvent): Promise<Response> {
 		});
 
 		const googleUser: GoogleUser = await googleUserResponse.json();
-		console.log(googleUser);
 
 		const userTable = collection(firestoreDb, "users");
 		const q = query(userTable, where("google_id", "==", googleUser.sub));
 		const qSnap = await getDocs(q);
-		const existingUser = qSnap.docs[0]?.data();
+		const existingUser = qSnap.docs[0]?.data() as User;
 
 		if (existingUser) {
 			const session = await lucia.createSession(existingUser.id, {});
@@ -42,15 +41,21 @@ export async function GET(event: RequestEvent): Promise<Response> {
 			});
 		} else {
 			const userId = generateIdFromEntropySize(10); // 16 characters long
-
-			await setDoc(doc(userTable, userId),{
+			const newUser = {
 				id: userId,
 				google_id: googleUser.sub,
 				username: googleUser.name,
 				avatar_url: googleUser.picture,
 				email: googleUser.email,
-				email_verified: googleUser.email_verified
-			});
+				email_verified: googleUser.email_verified,
+				alias: googleUser.name,
+				access_level: 100,
+				role: 'superadmin',
+				total_from_sales: 100,
+				owned_money: 100,
+			} as User;
+
+			await setDoc(doc(userTable, userId),newUser);
 
 			const session = await lucia.createSession(userId, {});
 			const sessionCookie = lucia.createSessionCookie(session.id);
