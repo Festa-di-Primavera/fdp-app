@@ -1,15 +1,10 @@
-import { getAuth } from 'firebase-admin/auth';
-import { Timestamp, updateDoc, doc, getDoc, setDoc } from 'firebase/firestore';
-
-import { getAdminApp } from '$lib/firebase/admin';
+import { Timestamp, updateDoc, doc, getDoc, setDoc, collection } from 'firebase/firestore';
 import { getClientDB } from '$lib/firebase/client.js';
-
 import type { Ticket } from '../../../../models/ticket';
 import { convertCode } from '$lib/codeConverter';
+import type { User } from 'lucia';
 
 export async function GET( { params } ) {
-	const adminApp = getAuth(getAdminApp());
-
 	const code = convertCode(params.ticketID);
 	if(code === null){
 		return new Response(JSON.stringify({ message: 'Codice non valido' }), {
@@ -20,7 +15,7 @@ export async function GET( { params } ) {
 		});
 	}
 
-	const ticketDoc = (await getDoc(doc(getClientDB(), "tickets", code )));
+	const ticketDoc = (await getDoc(doc(getClientDB(), "tickets", code)));
 
 	if(!ticketDoc.exists()) {
 		return new Response(JSON.stringify({ message: 'Biglietto non esistente' }), {
@@ -30,49 +25,33 @@ export async function GET( { params } ) {
 			}
 		});
 	}
+	
+	//* GET DEL NOME DEL VENDITORE
+	const users = collection(getClientDB(), "users");
+	const qUser = doc(users, ticketDoc.data().seller);
+	const seller = (await getDoc(qUser)).data() as User;
+	const sellerName = seller.alias
+	
+	const ticket: Ticket = {
+		ticketID: ticketDoc.id,
+		name: ticketDoc.data().name,
+		surname: ticketDoc.data().surname,
+		seller: sellerName ?? null,
+		soldAt: ticketDoc.data().soldAt?.toDate() || null,
+		checkIn: ticketDoc.data().checkIn?.toDate() || null,
+		checkOut: ticketDoc.data().checkOut?.toDate() || null,
+		newCheckIn: ticketDoc.data().newCheckIn?.toDate() || null
+	};
 
-	const sellerID = ticketDoc.data().seller;
-	if(!sellerID) {
-		const ticket: Ticket = {
-			ticketID: ticketDoc.id,
-			name: ticketDoc.data().name,
-			surname: ticketDoc.data().surname,
-			seller: null,
-			soldAt: ticketDoc.data().soldAt?.toDate() || null,
-			checkIn: ticketDoc.data().checkIn?.toDate() || null,
-			checkOut: ticketDoc.data().checkOut?.toDate() || null,
-			newCheckIn: ticketDoc.data().newCheckIn?.toDate() || null
-		};
-
+	if(!ticketDoc.data().soldAt) {
 		return new Response(JSON.stringify({ ticket }), {
+			// 402 Payment Required (non venduto)
 			status: 402,
 			headers: {
 				'content-type': 'application/json'
 			}
 		});
 	}
-
-	
-	let sellerName;
-	try{
-		const sellerID = ticketDoc.data().seller;
-		const sellerUser = await adminApp.getUser(sellerID);
-		sellerName = sellerUser.customClaims?.alias;
-	}
-	catch(e){
-		sellerName = null;
-	}
-
-	const ticket: Ticket = {
-		ticketID: ticketDoc.id,
-		name: ticketDoc.data().name,
-		surname: ticketDoc.data().surname,
-		seller: sellerName,
-		soldAt: ticketDoc.data().soldAt?.toDate() || null,
-		checkIn: ticketDoc.data().checkIn?.toDate() || null,
-		checkOut: ticketDoc.data().checkOut?.toDate() || null,
-		newCheckIn: ticketDoc.data().newCheckIn?.toDate() || null
-	};
 
 	return new Response(JSON.stringify({ ticket, message: 'Biglietto validato' }), {
 		// 206 Partial Content || 200 OK
@@ -84,7 +63,6 @@ export async function GET( { params } ) {
 }
 
 export async function PUT( { params } ) {
-	const adminApp = getAuth(getAdminApp());
 	const code = convertCode(params.ticketID);
 
 	if(code === null){
@@ -112,19 +90,25 @@ export async function PUT( { params } ) {
 		});
 	}
 
-	//* BIGLIETTO NON VENDUTO
-	if(!ticketDoc.data().soldAt) {
-		const ticket: Ticket = {
-			ticketID: ticketDoc.id,
-			name: ticketDoc.data().name,
-			surname: ticketDoc.data().surname,
-			seller: ticketDoc.data().seller,
-			soldAt: ticketDoc.data().soldAt?.toDate() || null,
-			checkIn: ticketDoc.data().checkIn?.toDate() || null,
-			checkOut: ticketDoc.data().checkOut?.toDate() || null,
-			newCheckIn: ticketDoc.data().newCheckIn?.toDate() || null,
-		};			
+	//* GET DEL NOME DEL VENDITORE
+	const users = collection(getClientDB(), "users");
+	const qUser = doc(users, ticketDoc.data().seller);
+	const seller = (await getDoc(qUser)).data() as User;
+	const sellerName = seller.alias
+	
+	const ticket: Ticket = {
+		ticketID: ticketDoc.id,
+		name: ticketDoc.data().name,
+		surname: ticketDoc.data().surname,
+		seller: sellerName ?? null,
+		soldAt: ticketDoc.data().soldAt?.toDate() || null,
+		checkIn: ticketDoc.data().checkIn?.toDate() || null,
+		checkOut: ticketDoc.data().checkOut?.toDate() || null,
+		newCheckIn: ticketDoc.data().newCheckIn?.toDate() || null
+	};
 
+	//* BIGLIETTO NON VENDUTO
+	if(!ticket.soldAt) {
 		return new Response(JSON.stringify({ ticket, message: 'Biglietto non venduto' }), {
 			// 402 Payment Required
 			status: 402,
@@ -134,32 +118,10 @@ export async function PUT( { params } ) {
 		});
 	}
 
-	//* GET DEL NOME DEL VENDITORE
-	let sellerName;
-	try{
-		const sellerID = ticketDoc.data().seller;
-		const sellerUser = await adminApp.getUser(sellerID);
-		sellerName = sellerUser.customClaims?.alias;
-	}
-	catch(e){
-		sellerName = null;
-	}
-
 	//* BIGLIETTO GIA' VALIDATO
-	if(ticketDoc.data().checkIn) {
+	if(ticket.checkIn) {
 		//* E NON USCITO
-		if(!ticketDoc.data().checkOut) {
-			const ticket: Ticket = {
-				ticketID: ticketDoc.id,
-				name: ticketDoc.data().name,
-				surname: ticketDoc.data().surname,
-				checkIn: ticketDoc.data().checkIn?.toDate() || null,
-				soldAt: ticketDoc.data().soldAt?.toDate() || null,
-				checkOut: ticketDoc.data().checkOut?.toDate() || null,
-				newCheckIn: ticketDoc.data().newCheckIn?.toDate() || null,
-				seller: sellerName
-			};
-
+		if(!ticket.checkOut) {
 			return new Response(JSON.stringify({ ticket, message: 'Biglietto già validato' }), {
 				// 409 Conflict
 				status: 409,
@@ -170,18 +132,7 @@ export async function PUT( { params } ) {
 		}
 		//* E USCITO UNA VOLTA
 		else {
-			if(ticketDoc.data().newCheckIn) {
-				const ticket: Ticket = {
-					ticketID: ticketDoc.id,
-					name: ticketDoc.data().name,
-					surname: ticketDoc.data().surname,
-					checkIn: ticketDoc.data().checkIn?.toDate() || null,
-					soldAt: ticketDoc.data().soldAt?.toDate() || null,
-					checkOut: ticketDoc.data().checkOut?.toDate() || null,
-					newCheckIn: ticketDoc.data().newCheckIn?.toDate() || null,
-					seller: sellerName
-				};
-	
+			if(ticket.newCheckIn) {	
 				return new Response(JSON.stringify({ ticket, message: 'Biglietto già rientrato', second: true }), {
 					// 409 Conflict
 					status: 409,
@@ -195,16 +146,7 @@ export async function PUT( { params } ) {
 				newCheckIn: currentTimestamp
 			});
 
-			const ticket: Ticket = {
-				ticketID: ticketDoc.id,
-				name: ticketDoc.data().name,
-				surname: ticketDoc.data().surname,
-				seller: sellerName,
-				soldAt: ticketDoc.data().soldAt?.toDate() || null,
-				checkIn: ticketDoc.data().checkIn?.toDate() || null,
-				checkOut: ticketDoc.data().checkOut?.toDate() || null,
-				newCheckIn: currentTimestamp?.toDate()
-			};
+			ticket.newCheckIn = currentTimestamp.toDate();
 
 			return new Response(JSON.stringify({ ticket, message: 'Biglietto validato (2^ entrata)', second: true }), {
 				// 206 Partial Content || 200 OK
@@ -222,16 +164,7 @@ export async function PUT( { params } ) {
 		checkIn: currentTimestamp
 	});
 
-	const ticket: Ticket = {
-		ticketID: ticketDoc.id,
-		name: ticketDoc.data().name,
-		surname: ticketDoc.data().surname,
-		seller: sellerName,
-		soldAt: ticketDoc.data().soldAt?.toDate() || null,
-		checkIn: currentTimestamp?.toDate(),
-		checkOut: null,
-		newCheckIn: null
-	};
+	ticket.checkIn = currentTimestamp.toDate();
 
 	return new Response(JSON.stringify({ ticket, message: 'Biglietto validato', second: false }), {
 		// 206 Partial Content || 200 OK
@@ -243,8 +176,6 @@ export async function PUT( { params } ) {
 }
 
 export async function POST( { params, request } ) {
-	const adminApp = getAuth(getAdminApp());
-
 	const formData = await request.json();
 	const code = convertCode(params.ticketID);
 
@@ -297,8 +228,17 @@ export async function POST( { params, request } ) {
 			seller: seller
 		});
 
-		const sellerUser = await adminApp.getUser(seller);
-		await adminApp.setCustomUserClaims(seller, {...sellerUser.customClaims, money: (sellerUser.customClaims?.money ?? 0) + 10, totMoney: (sellerUser.customClaims?.totMoney ?? 0) + 10});
+		//* AGGIORNAMENTO SOLDI DEL VENDITORE
+		const users = collection(getClientDB(), "users");
+		const userDoc = doc(users, seller);
+		const user = (await getDoc(userDoc)).data() as User;
+		const userMoney = user.owned_money + 10;
+		const totMoney = user.total_from_sales + 10;
+		await updateDoc(userDoc, {
+			owned_money: userMoney,
+			total_from_sales: totMoney
+		});
+
 
 		const response = new Response(JSON.stringify({ message: 'Biglietto venduto' }), {
 			status: 200,

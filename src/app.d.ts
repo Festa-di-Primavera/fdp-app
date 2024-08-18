@@ -1,12 +1,11 @@
 // See https://kit.svelte.dev/docs/types#app
 // for information about these interfaces
 declare global {
-	import type {DecodedIdToken} from 'firebase-admin/auth'
 	namespace App {
 		// interface Error {}
 		interface Locals {
-			// theme: Theme | null
-			idToken: DecodedIdToken
+			user: import("lucia").User | null;
+			session: import("lucia").Session | null;
 		}
 		// interface PageData {}
 		// interface PageState {}
