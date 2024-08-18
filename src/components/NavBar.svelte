@@ -1,33 +1,19 @@
 <script lang="ts">
-    import { DarkMode, Drawer, CloseButton, Dropdown, DropdownItem, Modal, Button } from "flowbite-svelte";
-	import { AlignJustify, DollarSign, LayoutDashboard, LogOut, ScanLine, Ticket, Users, Home, DoorOpen } from 'lucide-svelte';
-	import Logo from "./Logo.svelte";
-  	import { sineIn } from 'svelte/easing';
+    import { Button, CloseButton, DarkMode, Drawer, Dropdown, DropdownItem, Modal } from "flowbite-svelte";
+    import { AlignJustify, DollarSign, DoorOpen, Home, LayoutDashboard, LogOut, ScanLine, Ticket, Users } from 'lucide-svelte';
+    import { sineIn } from 'svelte/easing';
+    import Logo from "./Logo.svelte";
 
-	import { page } from '$app/stores';  
-	import { user, theme } from "../store/store";
-	import { onIdTokenChanged, getAuth, deleteUser, } from "firebase/auth";
-	import { getClientApp, handleSignOut } from "$lib/firebase/client";
+	import { page } from '$app/stores';
 	import { Role } from "../models/role";
-	import ChangePwModal from "./ChangePwModal.svelte";
+	import { theme, user } from "../store/store";
 	import ChangeEmailModal from "./ChangeEmailModal.svelte";
+	import ChangePwModal from "./ChangePwModal.svelte";
+	import { enhance } from "$app/forms";
 	
-	let currAccessLevel: number | null = null;
-	let color: string = '#000';
+	$: currAccessLevel = $user?.access_level || null;
 
-	onIdTokenChanged(getAuth(getClientApp()), async (user) => {
-		if(user !== null){
-			$user = user;
-			try{
-				const claims = (await user.getIdTokenResult(true))?.claims;
-				currAccessLevel = (claims?.accessLevel as number);
-				color = claims?.color as string;
-			}
-			catch(e){
-				console.error(e);
-			}
-		}
-	});
+	// TODO: auto update claims when admin changes them. Use realtime firestore listener
 
 	const routes = [
 		{
@@ -93,11 +79,11 @@
 	let deleteModalOpen: boolean = false;
 	function deleteCurrentUser(){
 		if($user !== null){
-			deleteUser($user).then(() => {
-				deleteModalOpen = false;
-			}).catch((error) => {
-				console.error(error);
-			});
+			// deleteUser($user).then(() => {
+			// 	deleteModalOpen = false;
+			// }).catch((error) => {
+			// 	console.error(error);
+			// });
 		}
 	}
 
@@ -157,11 +143,9 @@
 			{#if $user !== null}
 				<div class="dark:text-white flex text-md items-center self-baseline w-full justify-between p-3 rounded-lg bg-gray-100 dark:bg-gray-600">
 					<button id="account" class="flex gap-4 text-md items-center truncate overflow-ellipsis pr-5">
-						<div style="background: {color};" class="h-7 min-w-7 rounded-full flex items-center justify-center text-white" >
-							{$user.displayName?.charAt(0).toUpperCase() || 'NO'}
-						</div>
+						<img src={$user?.avatar_url} alt="{$user.username[0]}" class="rounded-full w-8 h-8"/>
 						
-						<span class="overflow-x-hidden overflow-ellipsis">{$user.displayName || 'Non registrato'}</span>
+						<span class="overflow-x-hidden overflow-ellipsis">{$user?.username || 'Non registrato'}</span>
 					</button>
 					<Dropdown placement="top" triggeredBy="#account">
 						<DropdownItem>
@@ -175,9 +159,11 @@
 						</DropdownItem>
 					</Dropdown>
 					
-					<button on:click={() => {handleSignOut(); hidden=true}}>
-						<LogOut class="text-gray-500 dark:text-white"/>
-					</button>
+					<form use:enhance method="post" action="/">
+						<button type="submit">
+							<LogOut class="text-gray-500 dark:text-white"/>
+						</button>
+					</form>
 				</div>
 			{/if}
 		</div>
@@ -187,7 +173,7 @@
 	<div class="flex flex-col gap-5 items-center justify-center">
 		<span class="text-xl">Vuoi eliminare questo account?</span>
 		<div class="flex flex-col gap-2">
-			<span class="text-md">Nome: {$user?.displayName}</span>
+			<span class="text-md">Nome: {$user?.username}</span>
 			<span class="text-md">E-mail: {$user?.email}</span>
 		</div>
 	</div>

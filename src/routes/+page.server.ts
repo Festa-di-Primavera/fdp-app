@@ -1,26 +1,25 @@
-import { getAuth } from 'firebase-admin/auth';
+import { fail, redirect, type Actions } from "@sveltejs/kit";
+import type { PageServerLoad } from "./$types";
+import { lucia } from "$lib/lucia/auth";
 
-import { getAdminApp, getClaimsFromIdToken } from '$lib/firebase/admin';
+export const load: PageServerLoad = async ({locals}) => {
+	if (!locals.user)
+		redirect(302, "/login");
 
-export async function load({cookies}) {
-	const app = getAuth(getAdminApp());
+	return locals.user;
+};
 
-	const userClaims = await getClaimsFromIdToken(cookies);
-
-	if(userClaims){
-		const user = await app.getUser(userClaims.uid);
-		if(user?.customClaims?.accessLevel !== userClaims?.accessLevel) {
-			return {
-				logout: true
-			}
+export const actions: Actions = {
+	default: async (event) => {
+		if (!event.locals.session) {
+			return fail(401);
 		}
+		await lucia.invalidateSession(event.locals.session.id);
+		const sessionCookie = lucia.createBlankSessionCookie();
+		event.cookies.set(sessionCookie.name, sessionCookie.value, {
+			path: ".",
+			...sessionCookie.attributes
+		});
+		redirect(302, "/login");
 	}
-
-	if (userClaims) {
-		const tok = await app.createCustomToken(userClaims?.uid || '');
-
-		return {
-			token: tok
-		};
-	}
-}
+};

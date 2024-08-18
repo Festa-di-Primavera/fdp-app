@@ -1,28 +1,28 @@
 <script lang="ts">
+	import { Button, Card, Input, Label, Modal, Spinner } from 'flowbite-svelte';
 	import { onDestroy, onMount } from 'svelte';
-	import { Card, Modal, Spinner, Toast, Input, Label, Button } from 'flowbite-svelte';
-	import { getAuth, signInWithCustomToken } from 'firebase/auth';
 
-	import { getClientApp, getClientDB, handleSignOut } from '$lib/firebase/client';
+	import { getClientApp, getClientDB } from '$lib/firebase/client';
 	
-	import { XCircle } from 'lucide-svelte';
-
-	import { user } from '../../store/store';
+	import { CheckInTimeSlot, CheckOutTimeSlot, computeCheckInPerTime, computeCheckOutPerTime, computeSalesPerHour, computeSalesPerTime, computeSellersStats, SalesTimeSlot } from '$lib/graphs/utils';
 	import type { Ticket } from '../../models/ticket';
-	import { computeSellersStats, computeSalesPerHour, computeSalesPerTime, computeCheckInPerTime, SalesTimeSlot, CheckInTimeSlot, computeCheckOutPerTime, CheckOutTimeSlot } from '$lib/graphs/utils';
+	import { user } from '../../store/store';
 
-	import TicketsECharts from '../../components/graphs/TicketsECharts.svelte';
-	import ExportToCsv from '../../components/ExportToCSV.svelte';
-	import SalesPerTimeECharts from '../../components/graphs/SalesPerTimeECharts.svelte';
-	import TicketsPerPersonECharts from '../../components/graphs/TicketsPerPersonECharts.svelte';
-	import CheckInPerTimeECharts from '../../components/graphs/CheckInPerTimeECharts.svelte';
-	import TicketsPerHourECharts from '../../components/graphs/TicketsPerHourECharts.svelte';
-	import { collection, onSnapshot, query, type Unsubscribe } from 'firebase/firestore';
-	import CheckOutPerTimeECharts from '../../components/graphs/CheckOutPerTimeECharts.svelte';
 	import { goto } from '$app/navigation';
+	import { collection, onSnapshot, query, type Unsubscribe } from 'firebase/firestore';
+	import ExportToCsv from '../../components/ExportToCSV.svelte';
 	import SignInToast from '../../components/feedbacks/SignInToast.svelte';
+	import CheckInPerTimeECharts from '../../components/graphs/CheckInPerTimeECharts.svelte';
+	import CheckOutPerTimeECharts from '../../components/graphs/CheckOutPerTimeECharts.svelte';
+	import SalesPerTimeECharts from '../../components/graphs/SalesPerTimeECharts.svelte';
+	import TicketsECharts from '../../components/graphs/TicketsECharts.svelte';
+	import TicketsPerHourECharts from '../../components/graphs/TicketsPerHourECharts.svelte';
+	import TicketsPerPersonECharts from '../../components/graphs/TicketsPerPersonECharts.svelte';
+	import type { User } from 'lucia';
 
-	export let data: {logout?: boolean, token?: string, sellers?: {uid: string; alias: string}[] };
+	export let data: {sellers: User[], user: User};
+	if(data.user)
+		$user = data.user;
 	
 	let signInToastOpen: boolean = false;
 	let signInToastMessage: string = '';
@@ -51,62 +51,32 @@
 
 	// get tickets from firestore
 	function getTickets(){
-		if(getAuth(getClientApp()).currentUser){
-			const q = query(collection(getClientDB(), "tickets"));
-			unsubscribe = onSnapshot(q, (querySnapshot) => {
-				tickets = querySnapshot.docs.map((ticketDoc) => {
-					let currSeller: string | null;
+		const q = query(collection(getClientDB(), "tickets"));
+		unsubscribe = onSnapshot(q, (querySnapshot) => {
+			tickets = querySnapshot.docs.map((ticketDoc) => {
+				let currSeller: string | null;
 
-					if(!ticketDoc.data().seller) {
-						currSeller = null;
-					} else {
-						currSeller = data.sellers?.find((seller) => seller.uid === ticketDoc.data().seller)?.alias || "AnOnImO";
+				if(!ticketDoc.data().seller) {
+					currSeller = null;
+				} else {
+					currSeller = data.sellers?.find((seller) => seller.id === ticketDoc.data().seller)?.alias || "AnOnImO";
+				}
+
+				return (
+					{
+						ticketID: ticketDoc.id,
+						name: ticketDoc.data().name,
+						surname: ticketDoc.data().surname,
+						seller: currSeller,
+						soldAt: ticketDoc.data().soldAt?.toDate() || null,
+						checkIn: ticketDoc.data().checkIn?.toDate() || null,
+						checkOut: ticketDoc.data().checkOut?.toDate() || null,
+						newCheckIn: ticketDoc.data().newCheckIn?.toDate() || null
 					}
-
-					return (
-						{
-							ticketID: ticketDoc.id,
-							name: ticketDoc.data().name,
-							surname: ticketDoc.data().surname,
-							seller: currSeller,
-							soldAt: ticketDoc.data().soldAt?.toDate() || null,
-							checkIn: ticketDoc.data().checkIn?.toDate() || null,
-							checkOut: ticketDoc.data().checkOut?.toDate() || null,
-							newCheckIn: ticketDoc.data().newCheckIn?.toDate() || null
-						}
-					);
-				});
+				);
 			});
-		}
+		});
 	}
-	
-	onMount(async() => {
-		if(data.logout){
-			handleSignOut(true);
-			return;
-		}
-
-		if(getAuth(getClientApp()).currentUser === null && data.token){
-			await signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
-				$user = userCredential.user;
-			}).catch((error) => {
-				if(error.code === 'auth/invalid-custom-token'){
-					signInToastMessage = 'Token non valido';
-				}
-				else if(error.code === 'auth/network-request-failed'){
-					signInToastMessage = 'Errore di rete';
-				}
-				else{
-					signInToastMessage = 'Errore sconosciuto';
-				}
-				signInToastOpen = true;
-				const timeOut = setTimeout(() => {
-					signInToastOpen = false;
-					clearTimeout(timeOut);
-				}, 8000);
-			});
-		}
-	});
 
 	onDestroy(() => {
 		unsubscribe();

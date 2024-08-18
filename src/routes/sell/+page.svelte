@@ -1,17 +1,16 @@
 <script lang="ts">
-	import { Button, Label, Input, Spinner, Toast, Modal } from "flowbite-svelte"
-	import { getAuth, signInWithCustomToken } from "firebase/auth";
+	import { Button, Input, Label, Modal, Spinner } from "flowbite-svelte";
 	import { CheckCircle2, Ticket, XCircle } from 'lucide-svelte';
-	import { onMount } from "svelte";
 
-	import { getClientApp, handleSignOut } from "$lib/firebase/client";
-	
-	import { user } from "../../store/store";
+	import { convertCode } from "$lib/codeConverter";
+	import type { User } from "lucia";
 	import QrReader from "../../components/QrReader.svelte";
 	import SignInToast from "../../components/feedbacks/SignInToast.svelte";
-	import { convertCode } from "$lib/codeConverter";
+	import { user } from "../../store/store";
 
-	export let data: {logout?: boolean, token?: string };
+	export let data: User;
+	if(!$user)
+		$user = data;
 
 	let ticketCode: string;
 
@@ -22,7 +21,6 @@
 	let modalMessage: string = '';
 	let color: 'green' | 'red' = 'green';
 	let error: boolean = false;
-	let timeOut: NodeJS.Timeout;
 
 	let name: string = '';
 	let surname: string = '';
@@ -34,35 +32,6 @@
 			handleSell();
 		}
 	}
-
-	onMount(async() => {
-		if(data.logout){
-			handleSignOut(true);
-			return;
-		}
-
-		if(getAuth(getClientApp()).currentUser === null && data.token){
-			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
-				$user = userCredential.user;
-			}).catch((error) => {
-				if(error.code === 'auth/invalid-custom-token'){
-					signInToastMessage = 'Token non valido';
-				}
-				else if(error.code === 'auth/network-request-failed'){
-					signInToastMessage = 'Errore di rete';
-				}
-				else{
-					signInToastMessage = 'Errore sconosciuto';
-				}
-				signInToastOpen = true;
-				clearTimeout(timeOut);
-				timeOut = setTimeout(() => {
-					signInToastOpen = false;
-					clearTimeout(timeOut);
-				}, 3500);
-			});
-		}
-	});
 
 	async function handleSell() {
 		disableButton = true;
@@ -82,7 +51,7 @@
 						body: JSON.stringify({
 							name,
 							surname,
-							seller: $user?.uid
+							seller: $user?.id
 						})
 					});
 				}

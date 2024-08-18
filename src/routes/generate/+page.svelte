@@ -1,19 +1,21 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
+	import { onMount } from 'svelte';
 
-	import { getAuth, signInWithCustomToken } from 'firebase/auth';
-	import { XCircle, CheckCircle2, icons } from 'lucide-svelte';
-	import { Select, Label, Checkbox, Button, Toast, NumberInput, Spinner, Input, Fileupload } from 'flowbite-svelte';
+	import { Button, Checkbox, Fileupload, Label, NumberInput, Select, Spinner } from 'flowbite-svelte';
+	import { CheckCircle2, XCircle } from 'lucide-svelte';
 	
-	import { getClientApp, handleSignOut } from '$lib/firebase/client';
+	import { getClientApp } from '$lib/firebase/client';
 	
-	import { user } from '../../store/store';
-	import type { Ticket } from '../../models/ticket';
-	import SignInToast from '../../components/feedbacks/SignInToast.svelte';
 	import FeedbackToast from '../../components/feedbacks/FeedbackToast.svelte';
+	import SignInToast from '../../components/feedbacks/SignInToast.svelte';
+	import type { Ticket } from '../../models/ticket';
+	import { user } from '../../store/store';
+	import type { User } from 'lucia';
 
-	export let data: {logout?: boolean, token?: string };
+	export let data: User;
+	if (!$user)
+		$user = data;
 
 	const codeTypesList = [
 		{ value: 'numeric', name: 'Numerico' },
@@ -132,35 +134,9 @@
 	let tickets: Ticket[];
 
 	onMount(async() => {
-		if(data.logout){
-			handleSignOut(true);
-			return;
-		}
 		const res = await fetch('/api/tickets');
 		tickets = (await res.json()).body.tickets;
 		codesInDB = new Set<string>(tickets.map((ticket) => ticket.ticketID));
-
-		if(getAuth(getClientApp()).currentUser === null && data.token){
-			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
-				$user = userCredential.user;
-			}).catch((error) => {
-				if(error.code === 'auth/invalid-custom-token'){
-					signInToastMessage = 'Token non valido';
-				}
-				else if(error.code === 'auth/network-request-failed'){
-					signInToastMessage = 'Errore di rete';
-				}
-				else{
-					signInToastMessage = 'Errore sconosciuto';
-				}
-				signInToastOpen = true;
-				clearTimeout(timeOut);
-				timeOut = setTimeout(() => {
-					signInToastOpen = false;
-					clearTimeout(timeOut);
-				}, 3500);
-			});
-		}
 	});
 
 	$: message = color === 'green' ? 'Codici inseriti nel db con successo' : 'Errore nell\'inserimento dei codici';

@@ -368,7 +368,7 @@
 		</div>
 		<Card padding="none" class="mt-5 w-60">
 			<a class="flex items-center justify-center gap-2 px-4 py-2" href="/api/login/google" role="button">
-				<img class="w-8" alt="Google sign-in" src="/google.svg" />
+				<img class="w-8" alt="G" src="/google.svg" />
 				<span>Login con Google</span>
 			</a>
 		</Card>
