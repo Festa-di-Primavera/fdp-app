@@ -49,10 +49,10 @@ export async function GET(event: RequestEvent): Promise<Response> {
 				email: googleUser.email,
 				email_verified: googleUser.email_verified,
 				alias: googleUser.name,
-				access_level: 100,
-				role: 'superadmin',
-				total_from_sales: 100,
-				owned_money: 100,
+				access_level: 0,
+				role: 'normal',
+				total_from_sales: 0,
+				owned_money: 0,
 			} as User;
 
 			await setDoc(doc(userTable, userId),newUser);

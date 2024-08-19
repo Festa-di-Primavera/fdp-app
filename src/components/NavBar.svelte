@@ -11,7 +11,6 @@
 	import ChangePwModal from "./ChangePwModal.svelte";
 	import { enhance } from "$app/forms";
 	
-	$: currAccessLevel = $user?.access_level || null;
 
 	// TODO: auto update claims when admin changes them. Use realtime firestore listener
 
@@ -115,11 +114,11 @@
 		</div>
 		<hr class="dark:border-gray-600"/>
 		<div class="flex flex-col justify-between h-full">
-			{#if currAccessLevel !== null}
+			{#if $user?.access_level !== null}
 				<div class="flex flex-col gap-4 mt-5">
 					{#each routes as route}
 						{#if route.slug != '/check-out'}
-							{#if route.role <= currAccessLevel}
+							{#if route.role <= ($user?.access_level || Role.NORMAL)}
 								<a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>
 									<span class="flex gap-4 w-full text-xl items-center">
 										<svelte:component this={route.icon}/>
@@ -128,7 +127,7 @@
 								</a>
 							{/if}
 						{:else}
-							{#if currAccessLevel == Role.CHECKOUT || currAccessLevel >= Role.ADMIN}
+							{#if $user?.access_level == Role.CHECKOUT || ($user?.access_level || Role.NORMAL) >= Role.ADMIN}
 								<a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>
 									<span class="flex gap-4 w-full text-xl items-center">
 										<svelte:component this={route.icon}/>
