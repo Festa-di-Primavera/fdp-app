@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({locals}) => {
 		redirect(302, "/login");
 
 	if (!locals.user.email_verified)
-		redirect(302, "login/verify-email");
+		redirect(302, "/login/verify-email");
 
 	if (locals.user.access_level < Role.ADMIN)
 		redirect(302, "/");
