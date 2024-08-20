@@ -142,8 +142,13 @@
 			{#if $user !== null}
 				<div class="dark:text-white flex text-md items-center self-baseline w-full justify-between p-3 rounded-lg bg-gray-100 dark:bg-gray-600">
 					<button id="account" class="flex gap-4 text-md items-center truncate overflow-ellipsis pr-5">
-						<img src={$user?.avatar_url} alt="{$user.username[0]}" class="rounded-full w-8 h-8"/>
-						
+						{#if $user?.avatar_url}
+							<img src={$user?.avatar_url} alt="{$user.username[0]}" class="rounded-full w-8 h-8"/>
+						{:else}
+							<div class="rounded-full w-8 h-8 bg-gradient-to-br from-primary-700 to-primary-400 flex items-center justify-center text-white font-mono">
+								<span>{$user?.username[0].toUpperCase()}</span>
+							</div>
+						{/if}
 						<span class="overflow-x-hidden overflow-ellipsis">{$user?.username || 'Non registrato'}</span>
 					</button>
 					<Dropdown placement="top" triggeredBy="#account">

@@ -275,7 +275,13 @@
 				{#each $sortItems || [] as item}
 					<TableBodyRow class="w-full">
 						<TableBodyCell tdClass="px-6 py-4 whitespace-nowrap font-medium flex items-center gap-4">
-							<img src="{item.avatar_url}" alt="{item.username[0]}" class="rounded-full h-7 w-7"/>
+							{#if item.avatar_url}
+								<img src="{item.avatar_url}" alt="{item.username[0]}" class="rounded-full h-7 w-7"/>
+							{:else}
+								<div class="rounded-full w-7 h-7 bg-gradient-to-br from-primary-700 to-primary-400 flex items-center justify-center text-white font-mono">
+									<span>{item.username[0].toUpperCase()}</span>
+								</div>
+							{/if}
 							<span class="mr-4">{item.username}</span>
 						</TableBodyCell>
 						<TableBodyCell>{item.email}</TableBodyCell>
