@@ -1,7 +1,7 @@
 import { dev } from "$app/environment";
 import { generateCodeVerifier, Google } from "arctic";
 import dotenv from "dotenv";
-import { Lucia } from "lucia";
+import { Lucia, TimeSpan } from "lucia";
 import { resolve } from "path";
 
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI } from "$env/static/private";
@@ -27,13 +27,23 @@ export const lucia = new Lucia(
                 secure: !dev,
             },
         },
+        // session expires in 2 week
+        sessionExpiresIn: new TimeSpan(
+            2,
+            "w"
+        ),
         getUserAttributes: (attributes) => {
             return {
+                // optional attributes from google
                 google_id: attributes.google_id,
-                username: attributes.username,
                 avatar_url: attributes.avatar_url,
-                email: attributes.email ?? null,
+
+                // required attributes
+                username: attributes.username,
+                email: attributes.email,
                 email_verified: attributes.email_verified,
+
+                // custom attributes
                 alias: attributes.alias,
                 access_level: attributes.access_level,
                 role: attributes.role,
@@ -52,11 +62,13 @@ declare module "lucia" {
 }
 
 interface DatabaseUserAttributes {
-    google_id: string;
+    google_id?: string;
+    avatar_url?: string;
+    
     username: string;
-    avatar_url: string | null;
     email: string;
     email_verified: boolean;
+
     alias: string;
     access_level: number;
     role: string;
