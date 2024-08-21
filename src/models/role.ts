@@ -1,4 +1,5 @@
 export enum Role {
+    UNVERIFIED = -5,
     NORMAL = 0,
     CHECKOUT = 2,
     SELLER = 5,
@@ -8,6 +9,7 @@ export enum Role {
 }
 
 export const enumBindings: {[key: string]: Role} = {
+    'unverified': Role.UNVERIFIED,
     'normal': Role.NORMAL,
     'checkout': Role.CHECKOUT,
     'seller': Role.SELLER,

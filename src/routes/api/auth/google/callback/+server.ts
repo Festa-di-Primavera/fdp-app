@@ -27,8 +27,8 @@ export async function GET(event: RequestEvent): Promise<Response> {
 
 		const googleUser: GoogleUser = await googleUserResponse.json();
 
-		const userTable = collection(firestoreDb, "users");
-		const q = query(userTable, where("google_id", "==", googleUser.sub));
+		const usersCollection = collection(firestoreDb, "users");
+		const q = query(usersCollection, where("google_id", "==", googleUser.sub));
 		const qSnap = await getDocs(q);
 		const existingUser = qSnap.docs[0]?.data() as User;
 
@@ -44,7 +44,7 @@ export async function GET(event: RequestEvent): Promise<Response> {
 			const newUser = {
 				id: userId,
 				google_id: googleUser.sub,
-				username: googleUser.name,
+				username: googleUser.name.replace(/\s/g, ''),
 				avatar_url: googleUser.picture,
 				email: googleUser.email,
 				email_verified: googleUser.email_verified,
@@ -55,7 +55,7 @@ export async function GET(event: RequestEvent): Promise<Response> {
 				owned_money: 0,
 			} as User;
 
-			await setDoc(doc(userTable, userId),newUser);
+			await setDoc(doc(usersCollection, userId),newUser);
 
 			const session = await lucia.createSession(userId, {});
 			const sessionCookie = lucia.createSessionCookie(session.id);

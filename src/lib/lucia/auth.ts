@@ -1,18 +1,13 @@
 import { dev } from "$app/environment";
 import { generateCodeVerifier, Google } from "arctic";
-import dotenv from "dotenv";
 import { Lucia, TimeSpan } from "lucia";
-import { resolve } from "path";
 
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI } from "$env/static/private";
 import { getClientDB } from "$lib/firebase/client";
 import { FirestoreAdapter } from "./firestore-adapter";
 
-
 export const google = new Google(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
 export const googleCodeVerifier = generateCodeVerifier();
-
-dotenv.config({ path: `${resolve()}/.env` });
 
 export const firestoreDb = getClientDB();
 
@@ -42,6 +37,7 @@ export const lucia = new Lucia(
                 username: attributes.username,
                 email: attributes.email,
                 email_verified: attributes.email_verified,
+                password_hash: attributes.password_hash,
 
                 // custom attributes
                 alias: attributes.alias,
@@ -68,6 +64,7 @@ interface DatabaseUserAttributes {
     username: string;
     email: string;
     email_verified: boolean;
+    password_hash?: string;
 
     alias: string;
     access_level: number;

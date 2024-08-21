@@ -18,8 +18,8 @@ export const load: PageServerLoad = async ({locals}) => {
 
 	const db = getClientDB();
 
-	const users = collection(db, "users");
-	const qSnap = await getDocs(users);
+	const usersCollection = collection(db, "users");
+	const qSnap = await getDocs(usersCollection);
 	const usersList: User[] = qSnap.docs.map(doc => doc.data() as User);
 
 	return {
