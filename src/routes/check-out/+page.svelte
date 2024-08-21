@@ -1,20 +1,20 @@
 <script lang="ts">
-	import { onMount, onDestroy } from "svelte";
-    import { Toast, Card, Spinner, Label, Input, Modal, Button } from "flowbite-svelte";
-    import { CheckCircle2, XCircle, AlertCircle, Ticket as TicketIcon, Check, X } from 'lucide-svelte';
-	import { getAuth, signInWithCustomToken } from "firebase/auth";
-    
-	import { getClientApp, handleSignOut } from "$lib/firebase/client";
-    
+	import { Button, Input, Label, Modal, Spinner } from "flowbite-svelte";
+	import { AlertCircle, Check, CheckCircle2, Ticket as TicketIcon, X, XCircle } from 'lucide-svelte';
+	import { onDestroy, onMount } from "svelte";
+	    
+    import { goto } from "$app/navigation";
+    import type { User } from "lucia";
+    import FeedbackToast from "../../components/feedbacks/FeedbackToast.svelte";
+    import SignInToast from "../../components/feedbacks/SignInToast.svelte";
+    import InfoCard from "../../components/InfoCard.svelte";
+    import QrReader from "../../components/QrReader.svelte";
+    import type { Ticket } from "../../models/ticket";
     import { user } from "../../store/store";
-	import type { Ticket } from "../../models/ticket";
-	import QrReader from "../../components/QrReader.svelte";
-	import InfoCard from "../../components/InfoCard.svelte";
-	import { goto } from "$app/navigation";
-	import SignInToast from "../../components/feedbacks/SignInToast.svelte";
-	import FeedbackToast from "../../components/feedbacks/FeedbackToast.svelte";
 
-	export let data: {logout?: boolean, token?: string };
+	export let data: User;
+    if(!$user)
+        $user = data;
 
 	let ticketCode: string = '';
 	let ticketCodeInput: string = '';
@@ -188,40 +188,13 @@
         }
     }
 
-    onMount(async() => {
-		if(data.logout){
-			handleSignOut(true);
-			return;
-		}
-        
+    onMount(async() => {        
         ticketInfos = document.querySelector('#ticketInfos')
 
         redirectTimeOut = setTimeout(() => {
             clearTimeout(redirectTimeOut);
             goto('/?checkOutExpired')
         }, getRemainingTime());
-
-		if(getAuth(getClientApp()).currentUser === null && data.token){
-			signInWithCustomToken(getAuth(), data.token).then((userCredential) => {
-				$user = userCredential.user;
-			}).catch((error) => {
-				if(error.code === 'auth/invalid-custom-token'){
-					signInToastMessage = 'Token non valido';
-				}
-				else if(error.code === 'auth/network-request-failed'){
-					signInToastMessage = 'Errore di rete';
-				}
-				else{
-					signInToastMessage = 'Errore sconosciuto';
-				}
-				signInToastOpen = true;
-                clearTimeout(timeOut);
-                timeOut = setTimeout(() => {
-                    signInToastOpen = false;
-                    clearTimeout(timeOut);
-                }, 3500);
-			});
-		}
 	});
     
     onDestroy(() => {

@@ -1,12 +1,11 @@
-import { getAdminApp } from '$lib/firebase/admin.js';
 import { getClientDB } from '$lib/firebase/client.js';
-import { getAuth } from 'firebase-admin/auth';
-import { Timestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
+
+import { Timestamp, collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 import type { Ticket } from '../../../../../models/ticket.js';
 import { convertCode } from '$lib/codeConverter.js';
+import type { User } from 'lucia';
 
 export async function PUT( { params } ) {
-	const adminApp = getAuth(getAdminApp());
 	const code = convertCode(params.ticketID);
 
 	if(code === null){
@@ -57,15 +56,10 @@ export async function PUT( { params } ) {
 	}
 
 	//* GET DEL NOME DEL VENDITORE
-	let sellerName;
-	try{
-		const sellerID = ticketDoc.data().seller;
-		const sellerUser = await adminApp.getUser(sellerID);
-		sellerName = sellerUser.customClaims?.alias;
-	}
-	catch(e){
-		sellerName = null;
-	}
+	const usersCollection = collection(getClientDB(), "users");
+	const qUser = doc(usersCollection, ticketDoc.data().seller);
+	const seller = (await getDoc(qUser)).data() as User;
+	const sellerName = seller.alias
 
 	//* BIGLIETTO NON ANCORA VALIDATO
 	if(!ticketDoc.data().checkIn) {

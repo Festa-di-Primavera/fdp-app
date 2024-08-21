@@ -76,8 +76,10 @@
     });
 
     onDestroy(() => {
-        document.removeEventListener("visibilitychange", handleVisibilityChange);
-        closeScanner();
+        if (typeof document !== 'undefined') {
+            document?.removeEventListener("visibilitychange", handleVisibilityChange);
+            closeScanner();
+        }
     });
 
     function handleVisibilityChange() {

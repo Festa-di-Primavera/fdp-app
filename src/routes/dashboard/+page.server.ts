@@ -1,41 +1,30 @@
-import { getAuth } from 'firebase-admin/auth';
-
-import { getAdminApp, getClaimsFromIdToken } from '$lib/firebase/admin';
-
-import { Role } from '../../models/role';
 import { redirect } from '@sveltejs/kit';
+import type { PageServerLoad } from "../$types";
+import { Role } from "../../models/role";
+import { getClientDB } from '$lib/firebase/client';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import type { User } from 'lucia';
 
-export async function load({cookies}) {
-	const app = getAuth(getAdminApp());
+export const load: PageServerLoad = async ({locals}) => {
+	if (!locals.user)
+		redirect(302, "/login");
 
-	const userClaims = await getClaimsFromIdToken(cookies);
+	if (!locals.user.email_verified)
+		redirect(302, "/login/verify-email");
 
-	if(userClaims){
-		const user = await app.getUser(userClaims.uid);
-		if(user?.customClaims?.accessLevel !== userClaims?.accessLevel) {
-			return {
-				logout: true
-			}
-		}
-	}
+	if (locals.user.access_level < Role.ADMIN)
+		redirect(302, "/");
 
-	if (userClaims?.accessLevel >= Role.ADMIN) {
-		const tok = await app.createCustomToken(userClaims?.uid || '');
+	const usersCollection = collection(getClientDB(), "users");
+	const qUsers = query(usersCollection, where("access_level", ">=", Role.SELLER));
+	const qSnapUsers = await getDocs(qUsers);
 
-		const users = await app.listUsers();
-		
-		const sellers = users.users.filter((user) => user.customClaims?.accessLevel >= Role.SELLER);
+	const sellers = qSnapUsers.docs.map((userDoc) => {
+		return userDoc.data();
+	}) as User[];
 
-		return {
-			sellers:	sellers.map((seller) => {
-							return {
-								uid: seller.uid,
-								alias: seller.customClaims?.alias,
-							};
-						}),
-			token:		tok
-		};
-	}
-
-	throw redirect(302, '/');
-}
+	return {
+		user: locals.user,
+		sellers
+	};
+};

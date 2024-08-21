@@ -1,32 +1,30 @@
+import { lucia } from '$lib/lucia/auth';
 import type { Handle } from '@sveltejs/kit';
-import { createSessionCookieForUserId, getIdTokenFromSessionCookie } from '$lib/firebase/admin';
-import { ONE_DAY_IN_SECONDS, ONE_WEEK_IN_SECONDS } from '$lib/constants'
-import {getCookieValue} from '$lib/getCookieValue'
-import type {DecodedIdToken} from 'firebase-admin/auth'
-
-const SIX_DAYS_IN_SECONDS = ONE_DAY_IN_SECONDS * 6
-
-const shouldRefreshToken = (token: DecodedIdToken | null) =>
-	token && token.exp - Date.now() / 1000 < SIX_DAYS_IN_SECONDS
 
 export const handle: Handle = async ({ event, resolve }) => {
-	const cookie = event.request.headers.get('cookie');
-	const token = await getIdTokenFromSessionCookie(getCookieValue(cookie, 'session'));
-
-	if(event.route.id !== '/api/session' && event.route.id?.startsWith('/api')) {
-		if (!token)
-			return new Response('Unauthorized', { status: 401 });
+	const sessionId = event.cookies.get(lucia.sessionCookieName);
+	if (!sessionId) {
+		event.locals.user = null;
+		event.locals.session = null;
+		return resolve(event);
 	}
 
-	event.locals.idToken = token;
-
-	const response = await resolve(event);
-	
-	if (!response.headers.get('set-cookie') && token && shouldRefreshToken(token)) {
-		const freshSessionCookie = await createSessionCookieForUserId(token.uid, ONE_WEEK_IN_SECONDS);
-		
-		response.headers.set('set-cookie', freshSessionCookie);
+	const { session, user } = await lucia.validateSession(sessionId);
+	if (session && session.fresh) {
+		const sessionCookie = lucia.createSessionCookie(session.id);
+		event.cookies.set(sessionCookie.name, sessionCookie.value, {
+			path: '.',
+			...sessionCookie.attributes
+		});
 	}
-
-	return response;
+	if (!session) {
+		const sessionCookie = lucia.createBlankSessionCookie();
+		event.cookies.set(sessionCookie.name, sessionCookie.value, {
+			path: '.',
+			...sessionCookie.attributes
+		});
+	}
+	event.locals.user = user;
+	event.locals.session = session;
+	return resolve(event);
 };
