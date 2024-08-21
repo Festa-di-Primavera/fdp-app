@@ -15,8 +15,8 @@ export const load: PageServerLoad = async ({locals}) => {
 	if (locals.user.access_level < Role.ADMIN)
 		redirect(302, "/");
 
-	const users = collection(getClientDB(), "users");
-	const qUsers = query(users, where("access_level", ">=", Role.SELLER));
+	const usersCollection = collection(getClientDB(), "users");
+	const qUsers = query(usersCollection, where("access_level", ">=", Role.SELLER));
 	const qSnapUsers = await getDocs(qUsers);
 
 	const sellers = qSnapUsers.docs.map((userDoc) => {

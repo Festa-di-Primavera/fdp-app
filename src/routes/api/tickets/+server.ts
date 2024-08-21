@@ -6,12 +6,13 @@ import type { Ticket } from '../../../models/ticket';
 import type { User } from 'lucia';
 
 export async function GET() {
-	const qTickets = query(collection(getClientDB(), "tickets"));
+	const ticketsCollection = collection(getClientDB(), "tickets");
+	const qTickets = query(ticketsCollection);
 	const qSnapTickets = await getDocs(qTickets);
 
 	//get sellers
-	const users = collection(getClientDB(), "users");
-	const qUsers = query(users, where("access_level", ">=", Role.SELLER));
+	const usersCollection = collection(getClientDB(), "users");
+	const qUsers = query(usersCollection, where("access_level", ">=", Role.SELLER));
 	const qSnapUsers = await getDocs(qUsers);
 
 	const sellers = qSnapUsers.docs.map((userDoc) => {

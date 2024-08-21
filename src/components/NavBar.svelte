@@ -13,6 +13,10 @@
 	
 
 	// TODO: auto update claims when admin changes them. Use realtime firestore listener
+	
+	$: if($page.url.pathname == '/login'){
+		hidden = true;
+	}
 
 	const routes = [
 		{

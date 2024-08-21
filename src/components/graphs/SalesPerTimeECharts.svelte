@@ -23,10 +23,10 @@
 	let selected: SalesTimeSlot = SalesTimeSlot.DAY;
 	const timeOptions = [
 		{ value: SalesTimeSlot.TWELVE_HOURS, name: '12h' },
-		{ value: SalesTimeSlot.DAY, name: '1 day' },
-		{ value: SalesTimeSlot.TWO_DAYS, name: '2 day' },
-		{ value: SalesTimeSlot.WEEK, name: '7 day' },
-		{ value: SalesTimeSlot.TWO_WEEKS, name: '2 weeks' }
+		{ value: SalesTimeSlot.DAY, name: '1 giorno' },
+		{ value: SalesTimeSlot.TWO_DAYS, name: '2 giorni' },
+		{ value: SalesTimeSlot.WEEK, name: '1 settimana' },
+		{ value: SalesTimeSlot.TWO_WEEKS, name: '2 settimane' }
 	];
 	
 	$: numberOfBars = ticketsData.labels.length;

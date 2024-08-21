@@ -3,8 +3,8 @@ import { collection, doc, getDocs, query, updateDoc, where } from 'firebase/fire
 import type { User } from 'lucia';
 
 export async function PUT({ params }) {
-	const users = collection(getClientDB(), 'users');
-	const qUser = query(users, where('alias', '==', params.alias));
+	const usersCollection = collection(getClientDB(), 'users');
+	const qUser = query(usersCollection, where('alias', '==', params.alias));
 	const userDocs = (await getDocs(qUser)).docs.map(doc => doc.data() as User);
 
 	const aliasAlreadyExists = userDocs.length > 0;
@@ -23,7 +23,7 @@ export async function PUT({ params }) {
 	const userID = params.id;
 	
 	try{
-		const userDoc = doc(users, userID);
+		const userDoc = doc(usersCollection, userID);
 
 		await updateDoc(userDoc, {alias: params.alias});
 

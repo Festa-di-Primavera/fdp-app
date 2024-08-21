@@ -56,8 +56,8 @@ export async function PUT( { params } ) {
 	}
 
 	//* GET DEL NOME DEL VENDITORE
-	const users = collection(getClientDB(), "users");
-	const qUser = doc(users, ticketDoc.data().seller);
+	const usersCollection = collection(getClientDB(), "users");
+	const qUser = doc(usersCollection, ticketDoc.data().seller);
 	const seller = (await getDoc(qUser)).data() as User;
 	const sellerName = seller.alias
 

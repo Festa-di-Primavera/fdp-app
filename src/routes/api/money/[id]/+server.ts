@@ -5,8 +5,8 @@ import type { User } from 'lucia';
 export async function POST({request, params}){
 	const amountToSubtract = (await request.json()).money;
 
-	const users = collection(getClientDB(), 'users');
-	const userDoc = doc(users, params.id);
+	const usersCollection = collection(getClientDB(), 'users');
+	const userDoc = doc(usersCollection, params.id);
 	const user = (await getDoc(userDoc)).data() as User;
 
 	const amount = user.owned_money;

@@ -356,7 +356,9 @@
 						</div>
 					</TableBodyCell>
 					<TableBodyCell></TableBodyCell>
-					<TableBodyCell></TableBodyCell>
+					{#if $user.email === import.meta.env.VITE_ADMIN_EMAIL1 || $user.email === import.meta.env.VITE_ADMIN_EMAIL2}
+						<TableBodyCell></TableBodyCell>
+					{/if}
 				</TableBodyRow>
 			</TableBody>
 		</Table>

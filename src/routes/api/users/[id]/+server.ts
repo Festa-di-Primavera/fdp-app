@@ -4,8 +4,8 @@ import { collection, deleteDoc, doc, getDoc } from 'firebase/firestore';
 export async function DELETE({ params }){
 	try{
 		const { id } = params;
-		const users = collection(getClientDB(), 'users');
-		const userDoc = doc(users, id);
+		const usersCollection = collection(getClientDB(), 'users');
+		const userDoc = doc(usersCollection, id);
 
 		const user = await getDoc(userDoc);
 		if(!user.exists()){

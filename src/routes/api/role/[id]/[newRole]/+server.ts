@@ -5,8 +5,8 @@ import { enumBindings } from '../../../../../models/role';
 
 export async function PUT({ params }) {
 	try {
-		const users = collection(getClientDB(), 'users');
-		const userDoc = doc(users, params.id);
+		const usersCollection = collection(getClientDB(), 'users');
+		const userDoc = doc(usersCollection, params.id);
 		await updateDoc(userDoc, {
 			role: params.newRole,
 			access_level: enumBindings[params.newRole],
