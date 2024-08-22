@@ -7,7 +7,6 @@
 	import { page } from '$app/stores';
 	import { Role } from "../models/role";
 	import { theme, user } from "../store/store";
-	import ChangeEmailModal from "./ChangeEmailModal.svelte";
 	import ChangePwModal from "./ChangePwModal.svelte";
 	import { enhance } from "$app/forms";
 	
@@ -91,7 +90,6 @@
 	}
 
 	let changePwModalOpen: boolean = false;
-	let changeEmailModalOpen: boolean = false;
 </script>
 	
 <navbar class="z-[99] sticky top-0 flex items-center justify-between w-full bg-gray-100 dark:bg-gray-900">
@@ -159,9 +157,6 @@
 						<DropdownItem>
 							<button on:click={() =>{ changePwModalOpen = true; hidden=true}}>Cambia Password</button>
 						</DropdownItem>
-						<DropdownItem>
-							<button on:click={() =>{ changeEmailModalOpen = true; hidden=true}}>Cambia Email</button>
-						</DropdownItem>
 						<DropdownItem slot="footer">
 							<button class="text-red-400" on:click={() =>{ deleteModalOpen = true; hidden=true}}>Elimina Account</button>
 						</DropdownItem>
@@ -191,4 +186,3 @@
 	</svelte:fragment>
 </Modal>
 <ChangePwModal bind:changePwModalOpen/>
-<ChangeEmailModal bind:changeEmailModalOpen/>
