@@ -32,7 +32,7 @@ export async function sendVerificationCode(
 	code: string
 ): Promise<{ error: boolean; message: string }> {
 	const { error } = await resend.emails.send({
-		from: 'Festa di Primavera <no-reply@festa-sdb.it>',
+		from: 'Festa di Primavera <no-reply@festa-cus.it>',
 		to: email,
 		subject: 'Codice di Verifica Email',
 		html: `
