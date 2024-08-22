@@ -9,7 +9,7 @@
 	import { user } from '../../store/store';
 
 	$user = null;
-	let option: 'login' | 'register' | 'recover' = 'login';
+	let option: 'login' | 'register' = 'login';
 
 	let username: string = '';
 	let email: string = '';
@@ -60,18 +60,16 @@
 		}
 
 		if (option === 'register') {
-			usernameValidator = (!/^[a-zA-Z0-9_]*$/.test(username));
+			usernameValidator = (!/^[a-zA-Z0-9_\ ]*$/.test(username));
 		}
 	}
 
 	$: disableButton =
 		(option === 'login' && (email === '' || password === '')) ||
 		(option === 'register' && (username === '' || email === '' || password === '' || repeatPassword === '')) ||
-		(option === 'recover' && email === '') ||
 		validatorError ||
 		usernameValidator ||
-		(option === 'register' && (lessThanEightChars || noUpperCase || noNumber || noSpecialChar)) ||
-		(option === 'recover' && email === '');
+		(option === 'register' && (lessThanEightChars || noUpperCase || noNumber || noSpecialChar));
 	$: toastIcon = form?.error ? XCircle : CheckCircle2;
 </script>
 
@@ -94,16 +92,15 @@
 			>
 		</div>
 
-		{#if option !== 'recover'}
-			<Card padding="none" class="mb-5 w-60">
-				<a class="flex items-center justify-center gap-2 px-4 py-2" href="/api/auth/google" role="button">
-					<img class="w-8" alt="G" src="/google.svg" />
-					<span>Login con Google</span>
-				</a>
-			</Card>
-			<div class="border-[1px] border-green-400 w-full mb-5"/>
-		{/if}
-		<form class="flex w-full flex-col gap-3" method="post" use:enhance action="?/{option === 'login' ? 'signin' : option === 'register' ? 'signup' : 'recover'}">
+		
+		<Card padding="none" class="mb-5 w-60">
+			<a class="flex items-center justify-center gap-2 px-4 py-2" href="/api/auth/google" role="button">
+				<img class="w-8" alt="G" src="/google.svg" />
+				<span>Login con Google</span>
+			</a>
+		</Card>
+		<div class="border-[1px] border-green-400 w-full mb-5"/>
+		<form class="flex w-full flex-col gap-3" method="post" use:enhance action="?/{option === 'login' ? 'signin' : 'signup'}">
 			<h1 class="w-max text-3xl font-semibold text-primary-600">
 				{option === 'login' ? 'Accedi' : option === 'register' ? 'Registrati' : 'Recupera password'}
 			</h1>
@@ -127,27 +124,25 @@
 				<Input name="email" bind:value={email} required class="mt-2" />
 			</Label>
 
-			{#if option !== 'recover'}
-				<Label>
-					Password
-					<Input
-						id="password"
-						name="password"
-						type={pwVisible ? 'text' : 'password'}
-						bind:value={password}
-						on:blur={() => {
-							lessThanEightChars = password.length < 8;
-							noUpperCase = !/[A-Z]/.test(password);
-							noNumber = !/[0-9]/.test(password);
-							noSpecialChar = !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password);
-						}}
-						class="mt-2"
-					>
-						<PasswordEye bind:pwVisible slot="right"/>
-					</Input>
-					<InputErrors bind:lessThanEightChars bind:noUpperCase bind:noNumber bind:noSpecialChar bind:option/>
-				</Label>
-			{/if}
+			<Label>
+				Password
+				<Input
+					id="password"
+					name="password"
+					type={pwVisible ? 'text' : 'password'}
+					bind:value={password}
+					on:blur={() => {
+						lessThanEightChars = password.length < 8;
+						noUpperCase = !/[A-Z]/.test(password);
+						noNumber = !/[0-9]/.test(password);
+						noSpecialChar = !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password);
+					}}
+					class="mt-2"
+				>
+					<PasswordEye bind:pwVisible slot="right"/>
+				</Input>
+				<InputErrors bind:lessThanEightChars bind:noUpperCase bind:noNumber bind:noSpecialChar bind:option/>
+			</Label>
 
 			{#if option === 'register'}
 				<Label>
@@ -171,19 +166,11 @@
 				</Label>
 			{/if}
 
-			{#if option !== 'recover'}
-				<button
-					class="mt-1 w-max self-end p-0 text-sm hover:text-primary-500"
-					on:click={() => (option = 'recover')}>Password dimenticata?</button
-				>
-			{/if}
-			<Button class="mt-3 w-full" type="submit" bind:disabled={disableButton}
-				>{option === 'login'
-					? 'Accedi'
-					: option === 'register'
-						? 'Registrati'
-						: 'Invia Email di recupero'}</Button
-			>
+			
+			<a class="mt-1 w-max self-end p-0 text-sm hover:text-primary-500" href="/login/password-reset">Password dimenticata?</a>
+			<Button class="mt-3 w-full" type="submit" bind:disabled={disableButton}>
+				{option === 'login' ? 'Accedi' : 'Registrati'}
+			</Button>
 		</form>
 	</Card>
 </section>
