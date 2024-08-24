@@ -79,17 +79,8 @@
 	}
 
 	let deleteModalOpen: boolean = false;
-	function deleteCurrentUser(){
-		if($user !== null){
-			// deleteUser($user).then(() => {
-			// 	deleteModalOpen = false;
-			// }).catch((error) => {
-			// 	console.error(error);
-			// });
-		}
-	}
 
-	let changePwModalOpen: boolean = false;
+	let changePwModalOpen: boolean = false;		
 </script>
 	
 <navbar class="z-[99] sticky top-0 flex items-center justify-between w-full bg-gray-100 dark:bg-gray-900">
@@ -172,17 +163,17 @@
 		</div>
 	</div>
 </Drawer>
-<Modal title="Elimina account" outsideclose autoclose bind:open={deleteModalOpen} on:close={() => deleteModalOpen = false} size="sm" class="z-50">
-	<div class="flex flex-col gap-5 items-center justify-center">
-		<span class="text-xl">Vuoi eliminare questo account?</span>
-		<div class="flex flex-col gap-2">
-			<span class="text-md">Nome: {$user?.username}</span>
-			<span class="text-md">E-mail: {$user?.email}</span>
+<Modal title="Elimina account" outsideclose bind:open={deleteModalOpen} on:close={() => deleteModalOpen = false} size="sm" class="z-50">
+	<form action="/login?/delete" method="post" use:enhance on:submit={() => {deleteModalOpen = false}}>
+		<div class="flex flex-col gap-5 items-center justify-center">
+			<span class="text-xl">Vuoi eliminare questo account?</span>
+			<div class="flex flex-col gap-2">
+				<span class="text-md">Nome: {$user?.username}</span>
+				<span class="text-md">E-mail: {$user?.email}</span>
+			</div>
 		</div>
-	</div>
-	<svelte:fragment slot="footer">
-		<Button on:click={deleteCurrentUser} color="red">Si</Button>
-		<Button on:click={() => deleteModalOpen = false} color="alternative">No</Button>
-	</svelte:fragment>
+		<Button type="submit" color="red">Sì</Button>
+		<Button type="reset" color="alternative" on:click={() => deleteModalOpen = false}>No</Button>
+	</form>
 </Modal>
 <ChangePwModal bind:changePwModalOpen/>

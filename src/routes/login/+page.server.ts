@@ -3,7 +3,7 @@ import { lucia } from '$lib/lucia/auth';
 import { generateEmailVerificationCode, isValidEmail, sendVerificationCode } from '$lib/lucia/utils/email';
 import { hash, verify } from '@node-rs/argon2';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
-import { collection, doc, getDocs, or, query, setDoc, where } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDocs, or, query, setDoc, where } from 'firebase/firestore';
 import { generateIdFromEntropySize } from 'lucia';
 import type { PageServerLoad } from '../$types';
 
@@ -119,7 +119,6 @@ export const actions: Actions = {
 		const q = query(usersCollection, where(isUsername ? 'username' : 'email', '==', (email as string)));
 		const existingUser = (await getDocs(q)).docs[0]?.data();
 
-		console.log('signin', email, password, existingUser);
 		if(!existingUser) {
 			return fail(400, {
 				error: true,
@@ -158,5 +157,28 @@ export const actions: Actions = {
 			redirect(302, "/");
 		else
 			redirect(302, "/login/verify-email");
+	},
+	delete: async (event) => {
+		console.log('deleteAccount');
+
+		if (!event.locals.user) {
+			return fail(400, {
+				error: true,
+				message: 'Utente non autenticato'
+			});
+		}
+
+		const userId = event.locals.user.id;
+		const usersCollection = collection(getClientDB(), 'users');
+		await deleteDoc(doc(usersCollection, userId));
+
+		lucia.invalidateUserSessions(userId);
+		const sessionCookie = lucia.createBlankSessionCookie();
+		event.cookies.set(sessionCookie.name, sessionCookie.value, {
+			path: ".",
+			...sessionCookie.attributes
+		});
+
+		redirect(302, "/login");
 	}
 };
