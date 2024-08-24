@@ -44,7 +44,7 @@ export async function GET(event: RequestEvent): Promise<Response> {
 			const newUser = {
 				id: userId,
 				google_id: googleUser.sub,
-				username: googleUser.name.replace(/\s/g, ''),
+				username: googleUser.name,
 				avatar_url: googleUser.picture,
 				email: googleUser.email,
 				email_verified: googleUser.email_verified,

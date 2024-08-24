@@ -2,10 +2,8 @@ import { getClientDB } from '$lib/firebase/client';
 import { collection, deleteDoc, doc, getDoc, setDoc, Timestamp, updateDoc } from 'firebase/firestore';
 import { createDate, isWithinExpirationDate, TimeSpan } from 'oslo';
 import { alphabet, generateRandomString } from 'oslo/crypto';
-import { Resend } from 'resend';
-import { RESEND_API_KEY } from '$env/static/private';
+import { sendEmail } from './resend';
 
-const resend = new Resend(RESEND_API_KEY);
 
 export function isValidEmail(email: string): boolean {
 	return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
@@ -31,11 +29,10 @@ export async function sendVerificationCode(
 	email: string,
 	code: string
 ): Promise<{ error: boolean; message: string }> {
-	const { error } = await resend.emails.send({
-		from: 'Festa di Primavera <no-reply@festa-cus.it>',
-		to: email,
-		subject: 'Codice di Verifica Email',
-		html: `
+	return await sendEmail(
+		email, 
+		'Codice di Verifica Email', 
+		`
 			<p>Ciao!</p>
 			<p>Il tuo codice di verifica email è:<br/>
 				<strong style="
@@ -54,14 +51,7 @@ export async function sendVerificationCode(
 
 			<p>Baci e ossequi,<br/>Il Team FDP</p>
 		`
-	});
-
-	if (error) {
-		console.error({ error });
-		return { error: true, message: 'Failed to send email verification code.' };
-	}
-
-	return { error: false, message: 'Email verification code sent successfully.' };
+	)
 }
 
 export const verifyEmailVerificationCode = async (userId: string, code: string) => {

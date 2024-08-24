@@ -1,65 +1,94 @@
-import { generateId } from "lucia";
+import { getClientDB } from "$lib/firebase/client";
+import { collection, doc, getDoc, runTransaction, Timestamp } from "firebase/firestore";
+import { generateId, TimeSpan, type User } from "lucia";
+import { createDate, isWithinExpirationDate } from "oslo";
+import { sendEmail } from "./resend";
+import { verify } from "@node-rs/argon2";
 
-export const verifyPasswordResetToken = async (tokenId: string) => {
-	const [passwordResetToken] = await database
-		.select()
-		.from(passwordResetTokensTable)
-		.where(eq(passwordResetTokensTable.id, tokenId));
-
-	if (!passwordResetToken || passwordResetToken.id !== tokenId) {
-		return {
-			success: false,
-			message: 'The password reset link is invalid. Please request a new one.'
-		};
-	}
-
-	if (!isWithinExpirationDate(passwordResetToken.expiresAt)) {
-		return {
-			success: false,
-			message: 'The password reset link has expired. Please request a new one.'
-		};
-	}
-
-	return {
-		success: true,
-		userId: passwordResetToken.userId,
-		message: 'Password reset token is valid.'
-	};
-};
+interface PasswordResetToken {
+	user_id: string;
+	expires_at: Timestamp;
+}
 
 export const generatePasswordResetToken = async (userId: string) => {
 	const tokenId = generateId(40);
 
-	await database.transaction(async (trx) => {
-		await trx.delete(passwordResetTokensTable).where(eq(passwordResetTokensTable.userId, userId));
+	const db = getClientDB();
+	const passwordResetTokensCollection = collection(db, 'password_reset_tokens');
 
-		await trx.insert(passwordResetTokensTable).values({
-			id: tokenId,
-			userId,
-			expiresAt: createDate(new TimeSpan(15, 'm')) // 15 minutes
+	await runTransaction(db, async (trx) => {
+		trx.delete(doc(passwordResetTokensCollection, userId));
+		trx.set(doc(passwordResetTokensCollection, tokenId), {
+			user_id: userId,
+			expires_at: createDate(new TimeSpan(15, 'm')) // 15 minutes
 		});
 	});
 
 	return tokenId;
 };
 
+export const verifyPasswordResetToken = async (tokenId: string) => {
+	const passwordResetTokensCollection = collection(getClientDB(), 'password_reset_tokens');
+	const passwordResetTokenDoc = (await getDoc(doc(passwordResetTokensCollection, tokenId))).data() as PasswordResetToken;
+
+
+	if (!passwordResetTokenDoc) {
+		return {
+			error: true,
+			message: 'The password reset link is invalid. Please request a new one.'
+		};
+	}
+
+	if (!isWithinExpirationDate(passwordResetTokenDoc.expires_at.toDate())) {
+		return {
+			error: true,
+			message: 'The password reset link has expired. Please request a new one.'
+		};
+	}
+
+	return {
+		error: false,
+		userId: passwordResetTokenDoc.user_id,
+		message: 'Password reset token is valid.'
+	};
+};
+
 export const sendPasswordResetEmail = async (email: string, resetToken: string) => {
 	const htmlContent = `
-	<div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-		<h1>Password Reset Request</h1>
-		<p>We've received a request to reset your password. If you didn't make the request, just ignore this email. Otherwise, you can reset your password using the link below.</p>
+		<div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+			<h1>Richiesta di reset password</h1>
+			<p>Abbiamo ricevuto una richiesta di reset della tua password. Se non hai fatto tu questa richiesta, ignora questa email. Altrimenti, puoi resettare la tua password usando il link qui sotto.</p>
 
-		<p>
-		<a href="http://localhost:5173${route('/auth/reset-password')}?token=${resetToken}" style="color: #337ab7; text-decoration: none;">Reset your password</a>
-		</p>
+			<p>
+			<a href="https://festa-cus.it/login/password-reset/${resetToken}" style="color: #337ab7; text-decoration: none;">Resetta la tua password</a>
+			</p>
 
-		<p>If you need help or have any questions, please contact our support team. We're here to help!</p>
-	</div>
+			<p>Se hai bisogno di aiuto o hai domande, contatta il nostro team di supporto. Siamo qui per aiutarti!</p>
+		</div>
 	`;
 
-	return sendEmail({
+	return await sendEmail(
 		email,
-		subject: 'Password Reset Request',
+		'Richiesta di Reset Password',
 		htmlContent
-	});
+	);
+};
+
+export const isSameAsOldPassword = async (userId: string, newPassword: string) => {
+	const usersCollection = collection(getClientDB(), 'users');
+	const userDoc = (await getDoc(doc(usersCollection, userId))).data() as User;
+
+
+	// If user doesn't exist, return false
+	if (!userDoc) {
+		return false;
+	}
+
+	// Verify the old password
+	let isSamePassword = undefined;
+	if(userDoc.password_hash) {
+		isSamePassword = await verify(userDoc.password_hash, newPassword);
+	}
+
+	return isSamePassword;
 };
