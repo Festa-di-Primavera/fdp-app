@@ -5,7 +5,25 @@ import { Role } from '../../../models/role';
 import type { Ticket } from '../../../models/ticket';
 import type { User } from 'lucia';
 
-export async function GET() {
+export async function GET({locals}) {
+	if(!locals.user){
+		return new Response(JSON.stringify({message: 'Non sei autenticato'}), {
+			status: 401,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
+	if(locals.user.access_level < Role.ADMIN){
+		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
+			status: 403,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
 	const ticketsCollection = collection(getClientDB(), "tickets");
 	const qTickets = query(ticketsCollection);
 	const qSnapTickets = await getDocs(qTickets);
@@ -43,8 +61,26 @@ export async function GET() {
 	});
 }
 
-export async function POST(request) {
-	const body = await request.request.json();
+export async function POST({request, locals}) {
+	if(!locals.user){
+		return new Response(JSON.stringify({message: 'Non sei autenticato'}), {
+			status: 401,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
+	if(locals.user.access_level < Role.SUPERADMIN){
+		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
+			status: 403,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+	
+	const body = await request.json();
 	for (const code of body.codes) {
 		const ticketRef = doc(getClientDB(), "tickets", code);
 		await setDoc(ticketRef, {

@@ -1,9 +1,27 @@
 import { getClientDB } from '$lib/firebase/client';
 
 import { collection, doc, updateDoc } from 'firebase/firestore';
-import { enumBindings } from '../../../../../models/role';
+import { enumBindings, Role } from '../../../../../models/role';
 
-export async function PUT({ params }) {
+export async function PUT({ params, locals }) {
+	if(!locals.user){
+		return new Response(JSON.stringify({message: 'Non sei autenticato'}), {
+			status: 401,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
+	if(locals.user.access_level < Role.SUPERADMIN){
+		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
+			status: 403,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
 	try {
 		const usersCollection = collection(getClientDB(), 'users');
 		const userDoc = doc(usersCollection, params.id);

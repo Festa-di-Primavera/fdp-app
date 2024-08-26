@@ -4,8 +4,26 @@ import { Timestamp, collection, doc, getDoc, updateDoc } from 'firebase/firestor
 import type { Ticket } from '../../../../../models/ticket.js';
 import { convertCode } from '$lib/codeConverter.js';
 import type { User } from 'lucia';
+import { Role } from '../../../../../models/role.js';
 
-export async function PUT( { params } ) {
+export async function PUT( { params, locals } ) {
+	if(!locals.user){
+		return new Response(JSON.stringify({message: 'Non sei autenticato'}), {
+			status: 401,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
+	if(locals.user.access_level < Role.CHECKOUT){
+		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
+			status: 403,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
 	const code = convertCode(params.ticketID);
 
 	if(code === null){

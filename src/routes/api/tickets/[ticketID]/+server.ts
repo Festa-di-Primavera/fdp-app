@@ -3,8 +3,27 @@ import { getClientDB } from '$lib/firebase/client.js';
 import type { Ticket } from '../../../../models/ticket';
 import { convertCode } from '$lib/codeConverter';
 import type { User } from 'lucia';
+import { Role } from '../../../../models/role';
 
-export async function GET( { params } ) {
+export async function GET( { params, locals } ) {
+	if(!locals.user){
+		return new Response(JSON.stringify({message: 'Non sei autenticato'}), {
+			status: 401,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
+	if(locals.user.access_level <= Role.NORMAL){
+		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
+			status: 403,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
 	const code = convertCode(params.ticketID);
 	if(code === null){
 		return new Response(JSON.stringify({ message: 'Codice non valido' }), {
@@ -30,7 +49,7 @@ export async function GET( { params } ) {
 	const usersCollection = collection(getClientDB(), "users");
 	const qUser = doc(usersCollection, ticketDoc.data().seller);
 	const seller = (await getDoc(qUser)).data() as User;
-	const sellerName = seller.alias
+	const sellerName = seller?.alias
 	
 	const ticket: Ticket = {
 		ticketID: ticketDoc.id,
@@ -62,7 +81,25 @@ export async function GET( { params } ) {
 	});
 }
 
-export async function PUT( { params } ) {
+export async function PUT( { params, locals } ) {
+	if(!locals.user){
+		return new Response(JSON.stringify({message: 'Non sei autenticato'}), {
+			status: 401,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
+	if(locals.user.access_level < Role.CHECKIN){
+		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
+			status: 403,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
 	const code = convertCode(params.ticketID);
 
 	if(code === null){
@@ -175,7 +212,25 @@ export async function PUT( { params } ) {
 	});
 }
 
-export async function POST( { params, request } ) {
+export async function POST( { params, request, locals } ) {
+	if(!locals.user){
+		return new Response(JSON.stringify({message: 'Non sei autenticato'}), {
+			status: 401,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
+	if(locals.user.access_level < Role.SELLER){
+		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
+			status: 403,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
 	const formData = await request.json();
 	const code = convertCode(params.ticketID);
 

@@ -1,8 +1,27 @@
 import { getClientDB } from '$lib/firebase/client';
 import { collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore';
 import type { User } from 'lucia';
+import { Role } from '../../../../../models/role.js';
 
-export async function PUT({ params }) {
+export async function PUT({ params, locals }) {
+	if(!locals.user){
+		return new Response(JSON.stringify({message: 'Non sei autenticato'}), {
+			status: 401,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
+	if(locals.user.access_level < Role.SUPERADMIN){
+		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
+			status: 403,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
 	const usersCollection = collection(getClientDB(), 'users');
 	const qUser = query(usersCollection, where('alias', '==', params.alias));
 	const userDocs = (await getDocs(qUser)).docs.map(doc => doc.data() as User);

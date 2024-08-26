@@ -1,8 +1,27 @@
 import { getClientDB } from '$lib/firebase/client';
 import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 import type { User } from 'lucia';
+import { Role } from '../../../../models/role';
 
-export async function POST({request, params}){
+export async function POST({request, params, locals}){
+	if(!locals.user){
+		return new Response(JSON.stringify({message: 'Non sei autenticato'}), {
+			status: 401,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
+	if(locals.user.access_level < Role.SUPERADMIN){
+		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
+			status: 403,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
 	const amountToSubtract = (await request.json()).money;
 
 	const usersCollection = collection(getClientDB(), 'users');

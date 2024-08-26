@@ -1,7 +1,26 @@
 import { getClientDB } from '$lib/firebase/client.js';
 import { collection, getDocs, query, where } from 'firebase/firestore';
+import { Role } from '../../../../../models/role';
 
-export async function GET({params}) {
+export async function GET({params, locals}) {
+	if(!locals.user){
+		return new Response(JSON.stringify({message: 'Non sei autenticato'}), {
+			status: 401,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
+	if(locals.user.access_level < Role.SUPERADMIN){
+		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
+			status: 403,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
 	const userID = params.userID;
 
 	try{
