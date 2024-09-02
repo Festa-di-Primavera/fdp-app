@@ -36,8 +36,8 @@
 	async function handleSell() {
 		disableButton = true;
 		if(name !== '' && surname !== '' && ticketCode !== ''){
-			name = name.trim();
-			surname = surname.trim();
+			name = name.trim().toUpperCase();
+			surname = surname.trim().toUpperCase();
 			ticketCode = convertCode(ticketCode.trim()) ?? '';
 
 			try{
