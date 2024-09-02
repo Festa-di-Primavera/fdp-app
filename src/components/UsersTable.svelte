@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Button, Dropdown, DropdownItem, Input, Popover, Radio, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Toast } from "flowbite-svelte";
-	import { CheckCircle2, ChevronsUpDown, Filter, PenBox, Search, Trash2, XCircle, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowDown10, ArrowUp01, ArrowUp10, Euro, Ticket } from "lucide-svelte";
+	import { Button, Dropdown, DropdownItem, Input, Popover, Radio, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Toast, Tooltip } from "flowbite-svelte";
+	import { CheckCircle2, ChevronsUpDown, Filter, PenBox, Search, Trash2, XCircle, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowDown10, ArrowUp01, ArrowUp10, Euro, Ticket, Check, X } from "lucide-svelte";
 	import { enumBindings, Role } from "../models/role";
 	import { user } from "../store/store";
 	import { writable } from 'svelte/store';
@@ -284,7 +284,13 @@
 							{/if}
 							<span class="mr-4">{item.username}</span>
 						</TableBodyCell>
-						<TableBodyCell>{item.email}</TableBodyCell>
+						<TableBodyCell>
+							<span class="flex gap-2 items-center">
+								<svelte:component this={item.email_verified ? Check : X} color={item.email_verified ? "green" : "red"}/>
+								<Tooltip>{(item.email_verified ? "" : "Non ") + "Verificata"}</Tooltip>
+								{item.email}
+							</span>
+						</TableBodyCell>
 						<TableBodyCell>
 							{#if item.email === import.meta.env.VITE_ADMIN_EMAIL1 || item.email === import.meta.env.VITE_ADMIN_EMAIL2 }<!-- || item.uid === $user?.uid} -->
 								<span class="text-gray-400 dark:text-gray-500 cursor-not-allowed">{item.role ? item.role.toUpperCase() : 'NORMAL'}</span>
@@ -295,8 +301,8 @@
 								</button>
 								<Dropdown placement="bottom" class="z-[100] dark:bg-gray-700 rounded-lg" bind:open={dropdownOpenMap[item.id]}>
 									{#each Object.keys(Role).filter((v) => isNaN(Number(v))) as role}
-										<DropdownItem class={item.role === role.toLowerCase() ? `text-primary-500` : ''}>
-											<button class="drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]" on:click={() => handleRoleChange(item, role.toLowerCase())}> {role.toUpperCase()} </button>
+										<DropdownItem class={item.role === role.toLowerCase() ? `text-primary-500` : ''} on:click={() => handleRoleChange(item, role.toLowerCase())}>
+											{role.toUpperCase()}
 										</DropdownItem>
 									{/each}
 								</Dropdown>
