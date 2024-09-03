@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { Button, CloseButton, DarkMode, Drawer, Dropdown, DropdownItem, Modal } from "flowbite-svelte";
-    import { AlignJustify, DollarSign, DoorOpen, Home, LayoutDashboard, LogOut, ScanLine, Ticket, Users } from 'lucide-svelte';
+    import { Button, CloseButton, DarkMode, Drawer, Dropdown, DropdownItem, Hr, Modal } from "flowbite-svelte";
+    import { AlignJustify, DollarSign, DoorOpen, Home, LayoutDashboard, LogOut, ScanLine, ScrollText, SeparatorHorizontal, Ticket, Users } from 'lucide-svelte';
     import { sineIn } from 'svelte/easing';
     import Logo from "./Logo.svelte";
 
@@ -9,58 +9,106 @@
 	import { theme, user } from "../store/store";
 	import ChangePwModal from "./ChangePwModal.svelte";
 	import { enhance } from "$app/forms";
-	
 
-	// TODO: auto update claims when admin changes them. Use realtime firestore listener
-	
+	interface Route {
+		label: string;
+		slug: string;
+		role: Role;
+		icon: any;
+		isSeparator?: false;
+	}
+
+	interface Separator {
+		isSeparator: true;
+	}
+
+	type RouteItem = Route | Separator;
+		
 	$: if($page.url.pathname == '/login'){
 		hidden = true;
 	}
 
-	const routes = [
+	const routes: RouteItem[]= [
 		{
 			label: 'Home',
 			slug: "/",
 			role: Role.NORMAL,
 			icon: Home
 		},
-		{
-			label: 'Dashboard',
-			slug: "/dashboard",
-			role: Role.ADMIN,
-			icon: LayoutDashboard
-		},
+		{isSeparator: true},
 		{
 			label: 'Utenti',
 			slug: "/users",
 			role: Role.SUPERADMIN,
-			icon: Users
+			icon: Users,
 		},
+		{isSeparator: true},
+		{
+			label: 'Dashboard',
+			slug: "/dashboard",
+			role: Role.ADMIN,
+			icon: LayoutDashboard,
+		},
+		{
+			label: 'Biglietti',
+			slug: "/tickets",
+			role: Role.ADMIN,
+			icon: ScrollText,
+		},
+		{isSeparator: true},
 		{
 			label: 'Check-in',
 			slug: "/check-in",
 			role: Role.CHECKIN,
-			icon: ScanLine
+			icon: ScanLine,
 		},
 		{
 			label: 'Vendi',
 			slug: "/sell",
 			role: Role.SELLER,
-			icon: DollarSign
+			icon: DollarSign,
 		},
 		{
 			label: 'Check-out',
 			slug: "/check-out",
 			role: Role.CHECKOUT,
-			icon: DoorOpen
+			icon: DoorOpen,
 		},
 		{
-			label: 'Info biglietti',
+			label: 'Info biglietto',
 			slug: "/ticket-info",
 			role: Role.CHECKOUT,
-			icon: Ticket
+			icon: Ticket,
 		},
 	]
+
+	function filterRoutes(routes: RouteItem[]): RouteItem[] {
+		// Filtra le route in base al ruolo
+		let filteredRoutes = routes.filter((route) => {
+			if (!route.isSeparator) {
+				if (route.slug === '/check-out') {
+					return $user?.access_level === Role.CHECKOUT || ($user?.access_level || Role.NORMAL) >= Role.ADMIN;
+				}
+				return route.role <= ($user?.access_level || Role.NORMAL);
+			}
+			return true;
+		});
+
+		console.log(filteredRoutes)
+		// Rimuovi separatori inutili
+		let finalRoutes: RouteItem[] = [];
+		filteredRoutes.forEach((route, index) => {
+			if (route.isSeparator) {
+				if(index < filteredRoutes.length-1 && !filteredRoutes[index+1].isSeparator){
+					finalRoutes.push(route)
+				}
+			} else {
+				finalRoutes.push(route);
+			}
+		});
+
+		return finalRoutes;
+	}
 
 	let hidden: boolean = true;
 	let transitionParamsRight = {
@@ -105,33 +153,22 @@
 			</h4>
 			<CloseButton on:click={() => (hidden = true)} class="mb-4 dark:text-white" />
 		</div>
-		<hr class="dark:border-gray-600"/>
+		<!-- <hr class="dark:border-gray-600"/> -->
 		<div class="flex flex-col justify-between h-full">
-			{#if $user?.access_level !== null}
-				<div class="flex flex-col gap-4 mt-5">
-					{#each routes as route}
-						{#if route.slug != '/check-out'}
-							{#if route.role <= ($user?.access_level || Role.NORMAL)}
-								<a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>
-									<span class="flex gap-4 w-full text-xl items-center">
-										<svelte:component this={route.icon}/>
-										{route.label}
-									</span>
-								</a>
-							{/if}
-						{:else}
-							{#if $user?.access_level == Role.CHECKOUT || ($user?.access_level || Role.NORMAL) >= Role.ADMIN}
-								<a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>
-									<span class="flex gap-4 w-full text-xl items-center">
-										<svelte:component this={route.icon}/>
-										{route.label}
-									</span>
-								</a>
-							{/if}
-						{/if}
-					{/each}
-				</div>
-			{/if}
+			<div class="flex flex-col gap-4 mt-5">
+				{#each filterRoutes(routes) as route}
+					{#if !route.isSeparator}
+						<a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>
+							<span class="flex gap-4 w-full text-xl items-center">
+								<svelte:component this={route.icon}/>
+								{route.label}
+							</span>
+						</a>
+					{:else}
+						<hr class="dark:border-gray-600"/>
+					{/if}
+				{/each}
+			</div>					
 			{#if $user !== null}
 				<div class="dark:text-white flex text-md items-center self-baseline w-full justify-between p-3 rounded-lg bg-gray-100 dark:bg-gray-600">
 					<button id="account" class="flex gap-4 text-md items-center truncate overflow-ellipsis pr-5">

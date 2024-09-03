@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import { collection, getDocs, query, setDoc, doc, where } from 'firebase/firestore';
+import { collection, getDocs, query, setDoc, doc, where, updateDoc } from 'firebase/firestore';
 import { getClientDB } from '$lib/firebase/client.js';
 import { Role } from '../../../models/role';
 import type { Ticket } from '../../../models/ticket';
@@ -98,4 +98,52 @@ export async function POST({request, locals}) {
 		status: 200 // TODO: check if all tickets were added
 	});
 
+}
+
+export async function PUT({request, locals}) {
+	if(!locals.user){
+		return new Response(JSON.stringify({message: 'Non sei autenticato'}), {
+			status: 401,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
+	if(locals.user.access_level < Role.SUPERADMIN){
+		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
+			status: 403,
+			headers: {
+				'Content-Type': 'text/plain'
+			}
+		});
+	}
+
+	const body: {
+		attribute: string;
+		toChange: 'name' | 'surname';
+		ticketID: string;
+	} = await request.json();
+
+	let attrs
+	if(body.toChange == 'name'){
+		attrs = {
+			name: body.attribute.toUpperCase()
+		}
+	}
+	else if(body.toChange == 'surname'){
+		attrs = {
+			surname: body.attribute.toUpperCase()
+		}
+	}
+	else{
+		attrs = {}
+	}
+
+	const ticketsCollection = collection(getClientDB(), 'tickets')
+	await updateDoc(doc(ticketsCollection, body.ticketID), attrs)
+	
+	return new Response('', {
+		status: 200,
+	})
 }
