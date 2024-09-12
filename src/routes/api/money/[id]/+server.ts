@@ -2,6 +2,7 @@ import { getClientDB } from '$lib/firebase/client';
 import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 import type { User } from 'lucia';
 import { Role } from '../../../../models/role';
+import { getEnumValueFromString } from '$lib/utils';
 
 export async function POST({request, params, locals}){
 	if(!locals.user){
@@ -13,7 +14,7 @@ export async function POST({request, params, locals}){
 		});
 	}
 
-	if(locals.user.access_level < Role.SUPERADMIN){
+	if(getEnumValueFromString(Role, locals.user.role) < Role.SUPERADMIN){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {

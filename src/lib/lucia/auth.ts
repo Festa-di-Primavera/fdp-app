@@ -41,7 +41,6 @@ export const lucia = new Lucia(
 
                 // custom attributes
                 alias: attributes.alias,
-                access_level: attributes.access_level,
                 role: attributes.role,
                 total_from_sales: attributes.total_from_sales,
                 owned_money: attributes.owned_money,
@@ -67,7 +66,6 @@ interface DatabaseUserAttributes {
     password_hash?: string;
 
     alias: string;
-    access_level: number;
     role: string;
     total_from_sales: number;
     owned_money: number;

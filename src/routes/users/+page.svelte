@@ -288,7 +288,7 @@
 		bind:debtModalOpen
 		bind:blocksModalOpen
 		bind:currentBlocks
-	/><!--  bind:loginToken={data.token}/> -->
+	/>
 	{#if currSelectedUser !== undefined}
 		<Modal title={`Elimina ${currSelectedUser.username}`} bind:open={deleteModalOpen} class="z-50">
 			<span class="text-md">Vuoi eliminare l'utente <b>{currSelectedUser.username}</b>?</span>

@@ -9,5 +9,3 @@ node_modules
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 src/serviceAccount.json
-src/routes/reset-money
-src/routes/api/users/+server.ts

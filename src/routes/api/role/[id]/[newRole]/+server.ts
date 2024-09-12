@@ -1,7 +1,8 @@
 import { getClientDB } from '$lib/firebase/client';
 
 import { collection, doc, updateDoc } from 'firebase/firestore';
-import { enumBindings, Role } from '../../../../../models/role';
+import { Role } from '../../../../../models/role';
+import { getEnumValueFromString, getStringFromEnumValue } from '$lib/utils';
 
 export async function PUT({ params, locals }) {
 	if(!locals.user){
@@ -13,7 +14,7 @@ export async function PUT({ params, locals }) {
 		});
 	}
 
-	if(locals.user.access_level < Role.SUPERADMIN){
+	if(getEnumValueFromString(Role, locals.user.role) < Role.SUPERADMIN){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {
@@ -27,9 +28,8 @@ export async function PUT({ params, locals }) {
 		const userDoc = doc(usersCollection, params.id);
 		await updateDoc(userDoc, {
 			role: params.newRole,
-			access_level: enumBindings[params.newRole],
 			// field email_verified only if newRole == 'unverified'
-			email_verified: params.newRole === 'unverified' ? false : true
+			email_verified: params.newRole === getStringFromEnumValue(Role, Role.UNVERIFIED) ? false : true
 		});
 
 		const resp = new Response(JSON.stringify({ message: 'Ruolo modificato con successo' }), {

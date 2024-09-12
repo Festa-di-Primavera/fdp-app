@@ -4,6 +4,7 @@ import { getClientDB } from '$lib/firebase/client.js';
 import { Role } from '../../../models/role';
 import type { Ticket } from '../../../models/ticket';
 import type { User } from 'lucia';
+import { getEnumValueFromString, getStringFromEnumValue } from '$lib/utils';
 
 export async function GET({locals}) {
 	if(!locals.user){
@@ -15,7 +16,7 @@ export async function GET({locals}) {
 		});
 	}
 
-	if(locals.user.access_level < Role.ADMIN){
+	if(getEnumValueFromString(Role, locals.user.role) < Role.ADMIN){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {
@@ -30,7 +31,7 @@ export async function GET({locals}) {
 
 	//get sellers
 	const usersCollection = collection(getClientDB(), "users");
-	const qUsers = query(usersCollection, where("access_level", ">=", Role.SELLER));
+	const qUsers = query(usersCollection, where("role", ">=", getStringFromEnumValue(Role, Role.SELLER)));
 	const qSnapUsers = await getDocs(qUsers);
 
 	const sellers = qSnapUsers.docs.map((userDoc) => {
@@ -71,7 +72,7 @@ export async function POST({request, locals}) {
 		});
 	}
 
-	if(locals.user.access_level < Role.SUPERADMIN){
+	if(getEnumValueFromString(Role, locals.user.role) < Role.SUPERADMIN){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {
@@ -110,7 +111,7 @@ export async function PUT({request, locals}) {
 		});
 	}
 
-	if(locals.user.access_level < Role.SUPERADMIN){
+	if(getEnumValueFromString(Role, locals.user.role) < Role.SUPERADMIN){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {

@@ -4,6 +4,7 @@ import type { Ticket } from '../../../../models/ticket';
 import { convertCode } from '$lib/codeConverter';
 import type { User } from 'lucia';
 import { Role } from '../../../../models/role';
+import { getEnumValueFromString } from '$lib/utils';
 
 export async function GET( { params, locals } ) {
 	if(!locals.user){
@@ -15,7 +16,7 @@ export async function GET( { params, locals } ) {
 		});
 	}
 
-	if(locals.user.access_level <= Role.NORMAL){
+	if(getEnumValueFromString(Role, locals.user.role) <= Role.NORMAL){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {
@@ -91,7 +92,7 @@ export async function PUT( { params, locals } ) {
 		});
 	}
 
-	if(locals.user.access_level < Role.CHECKIN){
+	if(getEnumValueFromString(Role, locals.user.role) < Role.CHECKIN){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {
@@ -222,7 +223,7 @@ export async function POST( { params, request, locals } ) {
 		});
 	}
 
-	if(locals.user.access_level < Role.SELLER){
+	if(getEnumValueFromString(Role, locals.user.role) < Role.SELLER){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {

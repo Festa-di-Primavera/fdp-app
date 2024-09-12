@@ -9,6 +9,7 @@
 	import { theme, user } from "../store/store";
 	import ChangePwModal from "./ChangePwModal.svelte";
 	import { enhance } from "$app/forms";
+	import { getEnumValueFromString } from "$lib/utils";
 
 	interface Route {
 		label: string;
@@ -87,14 +88,13 @@
 		let filteredRoutes = routes.filter((route) => {
 			if (!route.isSeparator) {
 				if (route.slug === '/check-out') {
-					return $user?.access_level === Role.CHECKOUT || ($user?.access_level || Role.NORMAL) >= Role.ADMIN;
+					return getEnumValueFromString(Role, $user?.role!) === Role.CHECKOUT || (getEnumValueFromString(Role, $user?.role!) || Role.NORMAL) >= Role.ADMIN;
 				}
-				return route.role <= ($user?.access_level || Role.NORMAL);
+				return route.role <= (getEnumValueFromString(Role, $user?.role!) || Role.NORMAL);
 			}
 			return true;
 		});
 
-		console.log(filteredRoutes)
 		// Rimuovi separatori inutili
 		let finalRoutes: RouteItem[] = [];
 		filteredRoutes.forEach((route, index) => {

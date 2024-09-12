@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { Button, Dropdown, DropdownItem, Input, Popover, Radio, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Toast, Tooltip } from "flowbite-svelte";
 	import { CheckCircle2, ChevronsUpDown, Filter, PenBox, Search, Trash2, XCircle, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowDown10, ArrowUp01, ArrowUp10, Euro, Ticket, Check, X } from "lucide-svelte";
-	import { enumBindings, Role } from "../models/role";
+	import { Role } from "../models/role";
 	import { user } from "../store/store";
 	import { writable } from 'svelte/store';
 	import SignInToast from "./feedbacks/SignInToast.svelte";
 	import FeedbackToast from "./feedbacks/FeedbackToast.svelte";
 	import type { User } from "lucia";
+	import { getEnumValueFromString } from "$lib/utils";
 	
 	//TODO: fix stuff around the document
 
@@ -33,7 +34,6 @@
 	});
 
 	const handleRoleChange = async (user: User, role: string) => {
-		let roleEnum = enumBindings[role];
 		dropdownOpenMap = { ...dropdownOpenMap, [user.id]: false };
 
 		if (user.role !== role){
@@ -47,7 +47,6 @@
 					users = users.map((item: User) => {
 						if (item.id === user.id) {
 							item.role = role
-							item.access_level = roleEnum;
 						}
 						return item;
 					});
@@ -134,7 +133,7 @@
 
 	const sortKey = writable('username'); // username, email, role, alias, owned_money, total_from_sales
 	const sortDirection = writable(1);
-	const sortItems = writable(filteredItems.slice()); 
+	const sortItems = writable<User[]>(filteredItems.slice()); 
 
 	const sortTable = (key: string) => {
 		if ($sortKey === key) {
@@ -172,8 +171,8 @@
 					aVal = a[key] || 0;
 					bVal = b[key] || 0;
 				} else if(key == "role"){
-					aVal = a.access_level;
-					bVal = b.access_level;
+					aVal = getEnumValueFromString(Role, a.role);
+					bVal = getEnumValueFromString(Role, b.role);
 				} else if(
 					key == "username" || key == "email" || key == "email_verified"
 				) {
@@ -301,7 +300,7 @@
 								</button>
 								<Dropdown placement="bottom" class="z-[100] dark:bg-gray-700 rounded-lg" bind:open={dropdownOpenMap[item.id]}>
 									{#each Object.keys(Role).filter((v) => isNaN(Number(v))) as role}
-										<DropdownItem class={item.role === role.toLowerCase() ? `text-primary-500` : ''} on:click={() => handleRoleChange(item, role.toLowerCase())}>
+										<DropdownItem class={item.role === role.toLowerCase() ? `text-primary-500` : ''} on:click={() => handleRoleChange(item, role.toUpperCase())}>
 											{role.toUpperCase()}
 										</DropdownItem>
 									{/each}
@@ -329,7 +328,7 @@
 						</TableBodyCell>
 						<TableBodyCell>
 							<div class="grid place-items-center w-full">
-								<Button disabled={item.access_level < Role.SELLER} class="mx-auto px-2 py-1 dark:bg-primary-500 bg-primary-500 hover:bg-primary-600 dark:hover:bg-primary-600" on:click={() => triggerBlocksModal(item)}>
+								<Button disabled={getEnumValueFromString(Role, item.role) < Role.SELLER} class="mx-auto px-2 py-1 dark:bg-primary-500 bg-primary-500 hover:bg-primary-600 dark:hover:bg-primary-600" on:click={() => triggerBlocksModal(item)}>
 									<Ticket class="aspect-square w-4 dark:text-white text-gray-900" />
 								</Button>
 							</div>

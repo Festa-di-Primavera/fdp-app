@@ -2,6 +2,7 @@ import { redirect } from '@sveltejs/kit';
 import { Role } from '../../models/role';
 
 import type { PageServerLoad } from "../$types";
+import { getEnumValueFromString } from '$lib/utils';
 
 export const load: PageServerLoad = async ({locals}) => {
 	if (!locals.user)
@@ -10,7 +11,7 @@ export const load: PageServerLoad = async ({locals}) => {
 	if (!locals.user.email_verified)
 		redirect(302, "/login/verify-email");
 	
-	if (locals.user.access_level != Role.CHECKOUT && locals.user.access_level < Role.ADMIN)
+	if (getEnumValueFromString(Role, locals.user.role) != Role.CHECKOUT && getEnumValueFromString(Role, locals.user.role) < Role.ADMIN)
 		redirect(302, "/");
 	
 	const currentDate = new Date();

@@ -5,6 +5,7 @@ import type { Ticket } from '../../../../../models/ticket.js';
 import { convertCode } from '$lib/codeConverter.js';
 import type { User } from 'lucia';
 import { Role } from '../../../../../models/role.js';
+import { getEnumValueFromString } from '$lib/utils.js';
 
 export async function PUT( { params, locals } ) {
 	if(!locals.user){
@@ -16,7 +17,7 @@ export async function PUT( { params, locals } ) {
 		});
 	}
 
-	if(locals.user.access_level < Role.CHECKOUT){
+	if(getEnumValueFromString(Role, locals.user.role) < Role.CHECKOUT){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {
