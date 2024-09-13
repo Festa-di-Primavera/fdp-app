@@ -4,7 +4,6 @@
 	import { Role } from "../models/role";
 	import { user } from "../store/store";
 	import { writable } from 'svelte/store';
-	import SignInToast from "./feedbacks/SignInToast.svelte";
 	import FeedbackToast from "./feedbacks/FeedbackToast.svelte";
 	import type { User } from "lucia";
 	import { getEnumValueFromString } from "$lib/utils";

@@ -5,7 +5,6 @@
 	import { convertCode } from "$lib/codeConverter";
 	import type { User } from "lucia";
 	import QrReader from "../../components/QrReader.svelte";
-	import SignInToast from "../../components/feedbacks/SignInToast.svelte";
 	import { user } from "../../store/store";
 
 	export let data: User;
@@ -13,9 +12,6 @@
 		$user = data;
 
 	let ticketCode: string;
-
-	let signInToastOpen: boolean = false;
-	let signInToastMessage: string = '';
 
 	let modalOpen: boolean = false;
 	let modalMessage: string = '';
@@ -129,8 +125,6 @@
         {/if}
 	</div>
 </section>
-
-<SignInToast bind:open={signInToastOpen} bind:message={signInToastMessage} />
 
 <Modal bind:open={modalOpen} on:close={closeModal} size="xs" outsideclose autoclose>
 	<span slot="header" class="text-2xl font-semibold text-{color}-500 flex items-center gap-2">

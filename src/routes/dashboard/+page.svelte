@@ -11,7 +11,6 @@
 	import { goto } from '$app/navigation';
 	import { collection, onSnapshot, query, type Unsubscribe } from 'firebase/firestore';
 	import ExportToCsv from '../../components/ExportToCSV.svelte';
-	import SignInToast from '../../components/feedbacks/SignInToast.svelte';
 	import CheckInPerTimeECharts from '../../components/graphs/CheckInPerTimeECharts.svelte';
 	import CheckOutPerTimeECharts from '../../components/graphs/CheckOutPerTimeECharts.svelte';
 	import SalesPerTimeECharts from '../../components/graphs/SalesPerTimeECharts.svelte';
@@ -24,9 +23,6 @@
 	if(data.user)
 		$user = data.user;
 	
-	let signInToastOpen: boolean = false;
-	let signInToastMessage: string = '';
-
 	let tickets: Ticket[] = [];
 	let unsubscribe: Unsubscribe = () => {};
 
@@ -156,7 +152,6 @@
 	</div>
 </section>
 
-<SignInToast bind:open={signInToastOpen} bind:message={signInToastMessage} />
 <Modal bind:open dismissable={false}>
 	<div slot="header" class="flex justify-between items-center">
 		<h1 class="text-2xl text-primary-300">Conferma visita</h1>

@@ -6,7 +6,6 @@
     import { goto } from "$app/navigation";
     import type { User } from "lucia";
     import FeedbackToast from "../../components/feedbacks/FeedbackToast.svelte";
-    import SignInToast from "../../components/feedbacks/SignInToast.svelte";
     import InfoCard from "../../components/InfoCard.svelte";
     import QrReader from "../../components/QrReader.svelte";
     import type { Ticket } from "../../models/ticket";
@@ -34,9 +33,6 @@
     let ticketStatus: 'alert' | 'error' | 'success' | null = null;
 
     let color: 'green' | 'red' | 'yellow' = 'green';
-    
-	let signInToastOpen: boolean = false;
-	let signInToastMessage: string = '';
     
     let ticketInfos: Element | null = null;
 
@@ -267,5 +263,3 @@
         {/if}
     </div>
 </section>
-
-<SignInToast bind:open={signInToastOpen} bind:message={signInToastMessage}/>

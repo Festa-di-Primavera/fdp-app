@@ -7,7 +7,6 @@
     import InfoCard from "../../components/InfoCard.svelte";
     import QrReader from "../../components/QrReader.svelte";
     import FeedbackToast from "../../components/feedbacks/FeedbackToast.svelte";
-    import SignInToast from "../../components/feedbacks/SignInToast.svelte";
     import type { Ticket } from "../../models/ticket";
     import { user } from "../../store/store";
 
@@ -33,9 +32,6 @@
 
     let color: 'green' | 'red' | 'yellow' = 'green';
     let focus: 'checkIn' | 'newCheckIn' | null = null;
-    
-	let signInToastOpen: boolean = false;
-	let signInToastMessage: string = '';
     
     let ticketInfos: Element | null = null;
 
@@ -265,5 +261,3 @@
         {/if}
     </div>
 </section>
-
-<SignInToast bind:open={signInToastOpen} bind:message={signInToastMessage} />

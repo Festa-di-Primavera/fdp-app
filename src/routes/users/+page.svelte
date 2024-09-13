@@ -5,7 +5,6 @@
 	import type { User } from 'lucia';
 	import UsersTable from '../../components/UsersTable.svelte';
 	import FeedbackToast from '../../components/feedbacks/FeedbackToast.svelte';
-	import SignInToast from '../../components/feedbacks/SignInToast.svelte';
 	import { user } from '../../store/store.js';
 
 	export let data: {
@@ -19,10 +18,6 @@
 
 	// modal state variable
 	let deleteModalOpen: boolean = false;
-
-	// login error toast variables
-	let signInToastOpen: boolean = false;
-	let signInToastMessage: string = '';
 
 	// changes toast variables
 	let changeToastOpen: boolean = false;
@@ -438,5 +433,4 @@
 	</div>
 {/if}
 
-<SignInToast bind:open={signInToastOpen} bind:message={signInToastMessage} />
 <FeedbackToast bind:open={changeToastOpen} bind:color bind:icon={toastIcon} bind:message />

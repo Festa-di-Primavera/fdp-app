@@ -8,7 +8,6 @@
 	import { getClientApp } from '$lib/firebase/client';
 	
 	import FeedbackToast from '../../components/feedbacks/FeedbackToast.svelte';
-	import SignInToast from '../../components/feedbacks/SignInToast.svelte';
 	import type { Ticket } from '../../models/ticket';
 	import { user } from '../../store/store';
 	import type { User } from 'lucia';
@@ -101,7 +100,7 @@
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({codes, token: data.token})
+			body: JSON.stringify({codes})
 		})
 			.then((res) => {
 				color = 'green';
@@ -127,9 +126,6 @@
 	let open = false;
 	let color: 'green' | 'red' | 'yellow' = 'red';
 	let timeOut: NodeJS.Timeout;
-
-	let signInToastOpen: boolean = false;
-	let signInToastMessage: string = '';
 
 	let tickets: Ticket[];
 
@@ -212,4 +208,3 @@
 </section>
 
 <FeedbackToast bind:open={open} bind:color bind:message bind:icon/>
-<SignInToast bind:open={signInToastOpen} bind:message={signInToastMessage}/>
