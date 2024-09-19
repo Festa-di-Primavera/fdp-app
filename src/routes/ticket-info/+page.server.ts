@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({locals}) => {
 	if (!locals.user.email_verified)
 		redirect(302, "/login/verify-email");
 
-	if (!hasPermission(locals.user.permissions, UserPermissions.TICKET_INFO))
+	if (!hasPermission(locals.user.permissions, UserPermissions.INFO_BIGLIETTO))
 		redirect(302, "/");
 
 	return locals.user;

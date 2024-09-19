@@ -6,6 +6,8 @@
 	import UsersTable from '../../components/UsersTable.svelte';
 	import FeedbackToast from '../../components/feedbacks/FeedbackToast.svelte';
 	import { user } from '../../store/store.js';
+	import { getStringFromEnumValue, intToBitArray } from '$lib/utils';
+	import { UserPermissions } from '../../models/permissions';
 
 	export let data: {
 		user: User;
@@ -291,7 +293,13 @@
 				<span class="text-sm">UID: {currSelectedUser.id}</span>
 				<span class="text-sm">Nome: {currSelectedUser.username}</span>
 				<span class="text-sm">E-mail: {currSelectedUser.email}</span>
-				<span class="text-sm">Ruolo: {currSelectedUser.permissions}</span>
+				<span class="text-sm"
+					>Permessi:
+					{intToBitArray(currSelectedUser.permissions, Object.keys(UserPermissions).length / 2)
+						.filter((item) => item)
+						.map((item, index) => getStringFromEnumValue(UserPermissions, Math.pow(2, index)))
+						.join(', ')}
+				</span>
 				<span class="text-sm">Alias: {currSelectedUser.alias}</span>
 			</div>
 			<svelte:fragment slot="footer">
@@ -312,13 +320,18 @@
 			title={`Aggiorna l'alias di ${currSelectedUser.username}`}
 			class="z-50"
 		>
-			<span class="text-md">Vuoi aggiornare l'alias di <b>{currSelectedUser.username}</b>?</span
-			>
+			<span class="text-md">Vuoi aggiornare l'alias di <b>{currSelectedUser.username}</b>?</span>
 			<div class="flex flex-col gap-2">
 				<span class="text-sm">UID: {currSelectedUser.id}</span>
 				<span class="text-sm">Nome: {currSelectedUser.username}</span>
 				<span class="text-sm">E-mail: {currSelectedUser.email}</span>
-				<span class="text-sm">Ruolo: {currSelectedUser.permissions}</span>
+				<span class="text-sm"
+					>Permessi:
+					{intToBitArray(currSelectedUser.permissions, Object.keys(UserPermissions).length / 2)
+						.filter((item) => item)
+						.map((item, index) => getStringFromEnumValue(UserPermissions, Math.pow(2, index)))
+						.join(', ')}
+				</span>
 				<span class="text-sm">Alias: {currSelectedUser.alias}</span>
 			</div>
 			<Input bind:value={alias} class="mt-4" />
@@ -345,7 +358,13 @@
 				<span class="text-sm">UID: {currSelectedUser.id}</span>
 				<span class="text-sm">Nome: {currSelectedUser.username}</span>
 				<span class="text-sm">E-mail: {currSelectedUser.email}</span>
-				<span class="text-sm">Ruolo: {currSelectedUser.permissions}</span>
+				<span class="text-sm"
+					>Permessi:
+					{intToBitArray(currSelectedUser.permissions, Object.keys(UserPermissions).length / 2)
+						.filter((item) => item)
+						.map((item, index) => getStringFromEnumValue(UserPermissions, Math.pow(2, index)))
+						.join(', ')}
+				</span>
 				<span class="text-sm">Alias: {currSelectedUser.alias}</span>
 			</div>
 			<div class="justify-left mt-4 flex items-center gap-2">

@@ -16,7 +16,7 @@ export async function GET({locals}) {
 		});
 	}
 
-	if(!hasPermission(locals.user.permissions, UserPermissions.TICKETS)){
+	if(!hasPermission(locals.user.permissions, UserPermissions.LISTA_BIGLIETTI)){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {
@@ -31,7 +31,7 @@ export async function GET({locals}) {
 
 	//get sellers
 	const usersCollection = collection(getClientDB(), "users");
-	const qUsers = query(usersCollection, where("permissions", ">=", UserPermissions.SELL));
+	const qUsers = query(usersCollection, where("permissions", ">=", UserPermissions.VENDITA));
 	const qSnapUsers = await getDocs(qUsers);
 
 	const sellers = (qSnapUsers.docs.map((userDoc) => {
@@ -39,7 +39,7 @@ export async function GET({locals}) {
 	}) as User[])
 	.filter(
 		(user) =>
-			hasPermission(user.permissions, UserPermissions.SELL)
+			hasPermission(user.permissions, UserPermissions.VENDITA)
 	);
 
 	const tickets: Ticket[] = qSnapTickets.docs.map((ticketDoc) => {
@@ -75,7 +75,7 @@ export async function POST({request, locals}) {
 		});
 	}
 
-	if(!hasPermission(locals.user.permissions, UserPermissions.GENERATE)){
+	if(!hasPermission(locals.user.permissions, UserPermissions.GENERAZIONE)){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {
@@ -114,7 +114,7 @@ export async function PUT({request, locals}) {
 		});
 	}
 
-	if(!hasPermission(locals.user.permissions, UserPermissions.TICKETS)){
+	if(!hasPermission(locals.user.permissions, UserPermissions.LISTA_BIGLIETTI)){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {

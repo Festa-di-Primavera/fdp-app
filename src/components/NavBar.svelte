@@ -31,7 +31,7 @@
 		{
 			label: 'Utenti',
 			slug: "/users",
-			permission: UserPermissions.USERS,
+			permission: UserPermissions.UTENTI,
 			icon: Users,
 		},
 		{
@@ -43,7 +43,7 @@
 		{
 			label: 'Biglietti',
 			slug: "/tickets",
-			permission: UserPermissions.TICKETS,
+			permission: UserPermissions.LISTA_BIGLIETTI,
 			icon: ScrollText,
 		},
 		{
@@ -55,7 +55,7 @@
 		{
 			label: 'Vendi',
 			slug: "/sell",
-			permission: UserPermissions.SELL,
+			permission: UserPermissions.VENDITA,
 			icon: DollarSign,
 		},
 		{
@@ -67,13 +67,13 @@
 		{
 			label: 'Info biglietto',
 			slug: "/ticket-info",
-			permission: UserPermissions.TICKET_INFO,
+			permission: UserPermissions.INFO_BIGLIETTO,
 			icon: Ticket,
 		},
 		{
 			label: 'Genera biglietti',
 			slug: "/generate",
-			permission: UserPermissions.GENERATE,
+			permission: UserPermissions.GENERAZIONE,
 			icon: Dna,
 		},
 	]

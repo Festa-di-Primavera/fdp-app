@@ -70,17 +70,21 @@
 
 	// association between userpermissions and their respective icons
 	const permissionIcons = {
-		[UserPermissions.TICKET_INFO]: Info,
+		[UserPermissions.INFO_BIGLIETTO]: Info,
 		[UserPermissions.CHECK_OUT]: DoorOpen,
-		[UserPermissions.SELL]: DollarSign,
+		[UserPermissions.VENDITA]: DollarSign,
 		[UserPermissions.CHECK_IN]: ScanLine,
-		[UserPermissions.KITCHEN]: ChefHat,
-		[UserPermissions.CASHIER]: Coins,
+		[UserPermissions.CUCINA]: ChefHat,
+		[UserPermissions.CASSA]: Coins,
 		[UserPermissions.DASHBOARD]: LayoutDashboard,
-		[UserPermissions.TICKETS]: Ticket,
-		[UserPermissions.USERS]: Users,
-		[UserPermissions.GENERATE]: Dna
+		[UserPermissions.LISTA_BIGLIETTI]: Ticket,
+		[UserPermissions.UTENTI]: Users,
+		[UserPermissions.GENERAZIONE]: Dna
 	};
+
+	function getPermissionIcon(permission: UserPermissions) {
+		return permissionIcons[permission];
+	}
 
 	const handlePermissionChange = async (user: User, permission: UserPermissions, add: boolean) => {
 		dropdownOpenMap = { ...dropdownOpenMap, [user.id]: false };
@@ -366,7 +370,7 @@
 							<div class="grid grid-cols-5 gap-2 min-w-28">
 								{#each intToBitArray(item.permissions, Object.keys(UserPermissions).length / 2).reverse() as perm, index}
 									<button on:click={() => handlePermissionChange(item, Math.pow(2, index), !perm)}>
-										<svelte:component this={permissionIcons[Math.pow(2, index)]} class={`w-4 ${perm ? "text-primary-300" : "text-slate-500"}`} />
+										<svelte:component this={getPermissionIcon(Math.pow(2, index))} class={`w-4 ${perm ? "text-primary-300" : "text-slate-500"}`} />
 									</button>
 									<Tooltip color="primary" border>
 										{
@@ -405,7 +409,7 @@
 						<TableBodyCell>
 							<div class="grid w-full place-items-center">
 								<Button
-									disabled={!hasPermission(item.permissions, UserPermissions.SELL)}
+									disabled={!hasPermission(item.permissions, UserPermissions.VENDITA)}
 									class="mx-auto bg-primary-500 px-2 py-1 hover:bg-primary-600 dark:bg-primary-500 dark:hover:bg-primary-600"
 									on:click={() => triggerBlocksModal(item)}
 								>

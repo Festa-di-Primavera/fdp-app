@@ -17,7 +17,7 @@ export const load: PageServerLoad = async ({locals}) => {
 		redirect(302, "/");
 
 	const usersCollection = collection(getClientDB(), "users");
-	const qUsers = query(usersCollection, where("permissions", ">=", UserPermissions.SELL));
+	const qUsers = query(usersCollection, where("permissions", ">=", UserPermissions.VENDITA));
 	const qSnapUsers = await getDocs(qUsers);
 
 	const sellers = (qSnapUsers.docs.map((userDoc) => {
@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({locals}) => {
 	}) as User[])
 	.filter(
 		(user) =>
-			hasPermission(user.permissions, UserPermissions.SELL)
+			hasPermission(user.permissions, UserPermissions.VENDITA)
 	);
 
 	return {

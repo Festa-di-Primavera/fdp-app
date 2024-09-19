@@ -14,7 +14,7 @@ export async function POST({request, params, locals}){
 		});
 	}
 
-	if(!hasPermission(locals.user.permissions, UserPermissions.USERS)){
+	if(!hasPermission(locals.user.permissions, UserPermissions.UTENTI)){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {

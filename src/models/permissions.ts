@@ -14,14 +14,14 @@
 */
 
 export enum UserPermissions {
-    TICKET_INFO=1 << 0,     // 1
+    INFO_BIGLIETTO=1 << 0,     // 1
     CHECK_OUT=1 << 1,       // 2
-    SELL=1 << 2,            // 4
+    VENDITA=1 << 2,            // 4
     CHECK_IN=1 << 3,        // 8
-    KITCHEN=1 << 4,         // 16
-    CASHIER=1 << 5,         // 32
+    CUCINA=1 << 4,         // 16
+    CASSA=1 << 5,         // 32
     DASHBOARD=1 << 6,       // 64
-    TICKETS=1 << 7,         // 128
-    USERS=1 << 8,           // 256
-    GENERATE=1 << 9,        // 512
+    LISTA_BIGLIETTI=1 << 7,         // 128
+    UTENTI=1 << 8,           // 256
+    GENERAZIONE=1 << 9,        // 512
 }

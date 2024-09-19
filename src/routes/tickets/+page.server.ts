@@ -13,12 +13,12 @@ export const load: PageServerLoad = async ({locals}) => {
 	if (!locals.user.email_verified)
 		redirect(302, "/login/verify-email");
 
-	if(!hasPermission(locals.user.permissions, UserPermissions.TICKETS)) {
+	if(!hasPermission(locals.user.permissions, UserPermissions.LISTA_BIGLIETTI)) {
 		redirect(302, "/")
 	}
 
 	const usersCollection = collection(getClientDB(), "users");
-	const qUsers = query(usersCollection, where("permissions", ">=", UserPermissions.SELL));
+	const qUsers = query(usersCollection, where("permissions", ">=", UserPermissions.VENDITA));
 	const qSnapUsers = await getDocs(qUsers);
 
 	const sellersList = (qSnapUsers.docs.map((userDoc) => {
@@ -26,7 +26,7 @@ export const load: PageServerLoad = async ({locals}) => {
 	}) as User[])
 	.filter(
 		(user) =>
-			hasPermission(user.permissions, UserPermissions.SELL)
+			hasPermission(user.permissions, UserPermissions.VENDITA)
 	);
 
 	const sellers: Map<string, string> = new Map();

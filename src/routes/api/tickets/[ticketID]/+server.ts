@@ -16,7 +16,7 @@ export async function GET( { params, locals } ) {
 		});
 	}
 
-	if(!hasPermission(locals.user.permissions, UserPermissions.TICKET_INFO)){
+	if(!hasPermission(locals.user.permissions, UserPermissions.INFO_BIGLIETTO)){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {
@@ -223,7 +223,7 @@ export async function POST( { params, request, locals } ) {
 		});
 	}
 
-	if(!hasPermission(locals.user.permissions, UserPermissions.SELL)){
+	if(!hasPermission(locals.user.permissions, UserPermissions.VENDITA)){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {
