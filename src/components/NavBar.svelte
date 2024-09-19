@@ -1,113 +1,87 @@
 <script lang="ts">
-    import { Button, CloseButton, DarkMode, Drawer, Dropdown, DropdownItem, Hr, Modal } from "flowbite-svelte";
-    import { AlignJustify, DollarSign, DoorOpen, Home, LayoutDashboard, LogOut, ScanLine, ScrollText, SeparatorHorizontal, Ticket, Users } from 'lucide-svelte';
+    import { Button, CloseButton, DarkMode, Drawer, Dropdown, DropdownItem, Modal } from "flowbite-svelte";
+    import { AlignJustify, DollarSign, DoorOpen, Home, LayoutDashboard, LogOut, ScanLine, ScrollText, Ticket, Users, Dna } from 'lucide-svelte';
     import { sineIn } from 'svelte/easing';
     import Logo from "./Logo.svelte";
 
+	import { enhance } from "$app/forms";
 	import { page } from '$app/stores';
-	import { Role } from "../models/role";
+	import { hasPermission } from "$lib/utils";
+	import { UserPermissions } from "../models/permissions";
 	import { theme, user } from "../store/store";
 	import ChangePwModal from "./ChangePwModal.svelte";
-	import { enhance } from "$app/forms";
-	import { getEnumValueFromString } from "$lib/utils";
 
 	interface Route {
 		label: string;
 		slug: string;
-		role: Role;
+		permission?: number;
 		icon: any;
-		isSeparator?: false;
 	}
-
-	interface Separator {
-		isSeparator: true;
-	}
-
-	type RouteItem = Route | Separator;
 		
 	$: if($page.url.pathname == '/login'){
 		hidden = true;
 	}
 
-	const routes: RouteItem[]= [
+	const routes: Route[]= [
 		{
 			label: 'Home',
 			slug: "/",
-			role: Role.NORMAL,
 			icon: Home
 		},
-		{isSeparator: true},
 		{
 			label: 'Utenti',
 			slug: "/users",
-			role: Role.SUPERADMIN,
+			permission: UserPermissions.USERS,
 			icon: Users,
 		},
-		{isSeparator: true},
 		{
 			label: 'Dashboard',
 			slug: "/dashboard",
-			role: Role.ADMIN,
+			permission: UserPermissions.DASHBOARD,
 			icon: LayoutDashboard,
 		},
 		{
 			label: 'Biglietti',
 			slug: "/tickets",
-			role: Role.ADMIN,
+			permission: UserPermissions.TICKETS,
 			icon: ScrollText,
 		},
-		{isSeparator: true},
 		{
 			label: 'Check-in',
 			slug: "/check-in",
-			role: Role.CHECKIN,
+			permission: UserPermissions.CHECK_IN,
 			icon: ScanLine,
 		},
 		{
 			label: 'Vendi',
 			slug: "/sell",
-			role: Role.SELLER,
+			permission: UserPermissions.SELL,
 			icon: DollarSign,
 		},
 		{
 			label: 'Check-out',
 			slug: "/check-out",
-			role: Role.CHECKOUT,
+			permission: UserPermissions.CHECK_OUT,
 			icon: DoorOpen,
 		},
 		{
 			label: 'Info biglietto',
 			slug: "/ticket-info",
-			role: Role.CHECKOUT,
+			permission: UserPermissions.TICKET_INFO,
 			icon: Ticket,
+		},
+		{
+			label: 'Genera biglietti',
+			slug: "/generate",
+			permission: UserPermissions.GENERATE,
+			icon: Dna,
 		},
 	]
 
-	function filterRoutes(routes: RouteItem[]): RouteItem[] {
-		// Filtra le route in base al ruolo
-		let filteredRoutes = routes.filter((route) => {
-			if (!route.isSeparator) {
-				if (route.slug === '/check-out') {
-					return getEnumValueFromString(Role, $user?.role!) === Role.CHECKOUT || (getEnumValueFromString(Role, $user?.role!) || Role.NORMAL) >= Role.ADMIN;
-				}
-				return route.role <= (getEnumValueFromString(Role, $user?.role!) || Role.NORMAL);
-			}
-			return true;
+	function filterRoutes(routes: Route[]): Route[] {
+		return routes.filter((route) => {
+			return hasPermission($user?.permissions, route.permission);
 		});
-
-		// Rimuovi separatori inutili
-		let finalRoutes: RouteItem[] = [];
-		filteredRoutes.forEach((route, index) => {
-			if (route.isSeparator) {
-				if(index < filteredRoutes.length-1 && !filteredRoutes[index+1].isSeparator){
-					finalRoutes.push(route)
-				}
-			} else {
-				finalRoutes.push(route);
-			}
-		});
-
-		return finalRoutes;
 	}
 
 	let hidden: boolean = true;
@@ -157,16 +131,12 @@
 		<div class="flex flex-col justify-between h-full">
 			<div class="flex flex-col gap-4 mt-5">
 				{#each filterRoutes(routes) as route}
-					{#if !route.isSeparator}
-						<a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>
-							<span class="flex gap-4 w-full text-xl items-center">
-								<svelte:component this={route.icon}/>
-								{route.label}
-							</span>
-						</a>
-					{:else}
-						<hr class="dark:border-gray-600"/>
-					{/if}
+					<a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>
+						<span class="flex gap-4 w-full text-xl items-center">
+							<svelte:component this={route.icon}/>
+							{route.label}
+						</span>
+					</a>
 				{/each}
 			</div>					
 			{#if $user !== null}

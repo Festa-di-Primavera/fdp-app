@@ -291,7 +291,7 @@
 				<span class="text-sm">UID: {currSelectedUser.id}</span>
 				<span class="text-sm">Nome: {currSelectedUser.username}</span>
 				<span class="text-sm">E-mail: {currSelectedUser.email}</span>
-				<span class="text-sm">Ruolo: {currSelectedUser.role}</span>
+				<span class="text-sm">Ruolo: {currSelectedUser.permissions}</span>
 				<span class="text-sm">Alias: {currSelectedUser.alias}</span>
 			</div>
 			<svelte:fragment slot="footer">
@@ -318,7 +318,7 @@
 				<span class="text-sm">UID: {currSelectedUser.id}</span>
 				<span class="text-sm">Nome: {currSelectedUser.username}</span>
 				<span class="text-sm">E-mail: {currSelectedUser.email}</span>
-				<span class="text-sm">Ruolo: {currSelectedUser.role}</span>
+				<span class="text-sm">Ruolo: {currSelectedUser.permissions}</span>
 				<span class="text-sm">Alias: {currSelectedUser.alias}</span>
 			</div>
 			<Input bind:value={alias} class="mt-4" />
@@ -345,7 +345,7 @@
 				<span class="text-sm">UID: {currSelectedUser.id}</span>
 				<span class="text-sm">Nome: {currSelectedUser.username}</span>
 				<span class="text-sm">E-mail: {currSelectedUser.email}</span>
-				<span class="text-sm">Ruolo: {currSelectedUser.role}</span>
+				<span class="text-sm">Ruolo: {currSelectedUser.permissions}</span>
 				<span class="text-sm">Alias: {currSelectedUser.alias}</span>
 			</div>
 			<div class="justify-left mt-4 flex items-center gap-2">

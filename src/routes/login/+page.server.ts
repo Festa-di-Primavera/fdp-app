@@ -6,8 +6,6 @@ import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { collection, deleteDoc, doc, getDocs, or, query, setDoc, where } from 'firebase/firestore';
 import { generateIdFromEntropySize } from 'lucia';
 import type { PageServerLoad } from '../$types';
-import { getStringFromEnumValue } from '$lib/utils';
-import { Role } from '../../models/role';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.user) {
@@ -90,7 +88,7 @@ export const actions: Actions = {
 			password_hash: passwordHash,
 
 			alias: username,
-			role: getStringFromEnumValue(Role, Role.UNVERIFIED),
+			permissions: 0,
 			owned_money: 0,
 			total_from_sales: 0
 		});

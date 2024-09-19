@@ -1,10 +1,10 @@
 import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import { Role } from "../../models/role";
 import { getClientDB } from "$lib/firebase/client";
 import { collection, getDocs } from "firebase/firestore";
 import type { User } from "lucia";
-import { getEnumValueFromString } from "$lib/utils";
+import { hasPermission } from "$lib/utils";
+import { UserPermissions } from "../../models/permissions";
 
 export const load: PageServerLoad = async ({locals}) => {
 	if (!locals.user)
@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({locals}) => {
 	if (!locals.user.email_verified)
 		redirect(302, "/login/verify-email");
 
-	if(getEnumValueFromString(Role, locals.user.role) < Role.SUPERADMIN){
+	if(!hasPermission(locals.user.permissions, UserPermissions.USERS)) {
 		redirect(302, "/")
 	}
 

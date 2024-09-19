@@ -25,6 +25,11 @@ export function formatDate(date: Date | null, alt: string): string {
 	return `${day} ${month} ${year} - ${hours}:${minutes}:${seconds}`;
 }
 
+// Capitalize first letter of every word in a string
+export function capitalizeFirstLetter(str: string): string {
+	return str.replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 // Generic function that given a string returns the enum value
 export function getEnumValueFromString<T>(enumType: T, value: string): T[keyof T] {
 	return enumType[value as keyof T];
@@ -33,4 +38,28 @@ export function getEnumValueFromString<T>(enumType: T, value: string): T[keyof T
 // Generic function that given an enum value returns the string
 export function getStringFromEnumValue<T extends object>(enumType: T, value: T[keyof T]): string {
     return (Object.keys(enumType) as Array<keyof T>).find(key => enumType[key] === value) as string;
+}
+
+// PERMISSIONS UTILS
+export function addPermission(currentPermissions: number, permission: number): number {
+	return currentPermissions | permission;
+}
+
+export function removePermission(currentPermissions: number, permission: number): number {
+	return currentPermissions & ~permission;
+}
+
+export function hasPermission(currentPermissions?: number, permission?: number): boolean {
+	if (!currentPermissions)
+		return false;
+
+	if (!permission)
+		return true;
+
+	return (currentPermissions & permission) === permission;
+}
+
+export function intToBitArray(num: number, length: number): number[] {
+	const bitString = num.toString(2).padStart(length, '0');
+	return bitString.split('').map(bit => parseInt(bit));
 }

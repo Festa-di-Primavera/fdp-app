@@ -4,8 +4,8 @@ import { Timestamp, collection, doc, getDoc, updateDoc } from 'firebase/firestor
 import type { Ticket } from '../../../../../models/ticket.js';
 import { convertCode } from '$lib/codeConverter.js';
 import type { User } from 'lucia';
-import { Role } from '../../../../../models/role.js';
-import { getEnumValueFromString } from '$lib/utils.js';
+import { hasPermission } from '$lib/utils.js';
+import { UserPermissions } from '../../../../../models/permissions.js';
 
 export async function PUT( { params, locals } ) {
 	if(!locals.user){
@@ -17,7 +17,7 @@ export async function PUT( { params, locals } ) {
 		});
 	}
 
-	if(getEnumValueFromString(Role, locals.user.role) < Role.CHECKOUT){
+	if(!hasPermission(locals.user.permissions, UserPermissions.CHECK_OUT)){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {

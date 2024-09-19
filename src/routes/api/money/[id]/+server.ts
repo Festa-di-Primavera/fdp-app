@@ -1,8 +1,8 @@
 import { getClientDB } from '$lib/firebase/client';
+import { hasPermission } from '$lib/utils.js';
 import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 import type { User } from 'lucia';
-import { Role } from '../../../../models/role';
-import { getEnumValueFromString } from '$lib/utils';
+import { UserPermissions } from '../../../../models/permissions';
 
 export async function POST({request, params, locals}){
 	if(!locals.user){
@@ -14,7 +14,7 @@ export async function POST({request, params, locals}){
 		});
 	}
 
-	if(getEnumValueFromString(Role, locals.user.role) < Role.SUPERADMIN){
+	if(!hasPermission(locals.user.permissions, UserPermissions.USERS)){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {

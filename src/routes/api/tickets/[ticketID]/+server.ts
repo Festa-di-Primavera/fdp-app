@@ -3,8 +3,8 @@ import { getClientDB } from '$lib/firebase/client.js';
 import type { Ticket } from '../../../../models/ticket';
 import { convertCode } from '$lib/codeConverter';
 import type { User } from 'lucia';
-import { Role } from '../../../../models/role';
-import { getEnumValueFromString } from '$lib/utils';
+import { hasPermission } from '$lib/utils';
+import { UserPermissions } from '../../../../models/permissions';
 
 export async function GET( { params, locals } ) {
 	if(!locals.user){
@@ -16,7 +16,7 @@ export async function GET( { params, locals } ) {
 		});
 	}
 
-	if(getEnumValueFromString(Role, locals.user.role) <= Role.NORMAL){
+	if(!hasPermission(locals.user.permissions, UserPermissions.TICKET_INFO)){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {
@@ -92,7 +92,7 @@ export async function PUT( { params, locals } ) {
 		});
 	}
 
-	if(getEnumValueFromString(Role, locals.user.role) < Role.CHECKIN){
+	if(!hasPermission(locals.user.permissions, UserPermissions.CHECK_IN)){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {
@@ -223,7 +223,7 @@ export async function POST( { params, request, locals } ) {
 		});
 	}
 
-	if(getEnumValueFromString(Role, locals.user.role) < Role.SELLER){
+	if(!hasPermission(locals.user.permissions, UserPermissions.SELL)){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {

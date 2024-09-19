@@ -1,10 +1,10 @@
 import { json } from '@sveltejs/kit';
 import { collection, getDocs, query, setDoc, doc, where, updateDoc } from 'firebase/firestore';
 import { getClientDB } from '$lib/firebase/client.js';
-import { Role } from '../../../models/role';
 import type { Ticket } from '../../../models/ticket';
 import type { User } from 'lucia';
-import { getEnumValueFromString, getStringFromEnumValue } from '$lib/utils';
+import { hasPermission } from '$lib/utils';
+import { UserPermissions } from '../../../models/permissions';
 
 export async function GET({locals}) {
 	if(!locals.user){
@@ -16,7 +16,7 @@ export async function GET({locals}) {
 		});
 	}
 
-	if(getEnumValueFromString(Role, locals.user.role) < Role.ADMIN){
+	if(!hasPermission(locals.user.permissions, UserPermissions.TICKETS)){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {
@@ -31,13 +31,16 @@ export async function GET({locals}) {
 
 	//get sellers
 	const usersCollection = collection(getClientDB(), "users");
-	const qUsers = query(usersCollection, where("role", ">=", getStringFromEnumValue(Role, Role.SELLER)));
+	const qUsers = query(usersCollection, where("permissions", ">=", UserPermissions.SELL));
 	const qSnapUsers = await getDocs(qUsers);
 
-	const sellers = qSnapUsers.docs.map((userDoc) => {
+	const sellers = (qSnapUsers.docs.map((userDoc) => {
 		return userDoc.data();
-	}) as User[];
-
+	}) as User[])
+	.filter(
+		(user) =>
+			hasPermission(user.permissions, UserPermissions.SELL)
+	);
 
 	const tickets: Ticket[] = qSnapTickets.docs.map((ticketDoc) => {
     	return (
@@ -72,7 +75,7 @@ export async function POST({request, locals}) {
 		});
 	}
 
-	if(getEnumValueFromString(Role, locals.user.role) < Role.SUPERADMIN){
+	if(!hasPermission(locals.user.permissions, UserPermissions.GENERATE)){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {
@@ -111,7 +114,7 @@ export async function PUT({request, locals}) {
 		});
 	}
 
-	if(getEnumValueFromString(Role, locals.user.role) < Role.SUPERADMIN){
+	if(!hasPermission(locals.user.permissions, UserPermissions.TICKETS)){
 		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
 			status: 403,
 			headers: {

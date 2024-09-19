@@ -20,7 +20,7 @@
 	$: toastIcon = error ? AlertCircle : XCircle;
 
 	onMount(async () => {
-		if (window.location.search.split('?')[1] == 'roleUpdate') {
+		if (window.location.search.split('?')[1] == 'permissionsUpdate') {
 			feedbackToastMessage = 'Ruolo aggiornato! Rifai il login';
 			feedbackToastOpen = true;
 			error = false;

@@ -2,6 +2,8 @@ import { getClientDB } from '$lib/firebase/client.js';
 import { fail, redirect } from '@sveltejs/kit';
 import { doc, setDoc } from 'firebase/firestore';
 import type { PageServerLoad } from '../$types';
+import { hasPermission } from '$lib/utils';
+import { UserPermissions } from '../../models/permissions';
 
 
 export const load: PageServerLoad = async ({locals}) => {
@@ -11,10 +13,7 @@ export const load: PageServerLoad = async ({locals}) => {
 	if (!locals.user.email_verified)
 		redirect(302, "/login/verify-email");
 
-	if (
-		locals.user.email !== import.meta.env.VITE_ADMIN_EMAIL1 &&
-		locals.user.email !== import.meta.env.VITE_ADMIN_EMAIL2
-	)
+	if (!hasPermission(locals.user.permissions, UserPermissions.GENERATE))
 		redirect(302, "/");
 
 	return locals.user;

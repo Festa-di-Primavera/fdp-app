@@ -1,17 +1,53 @@
 <script lang="ts">
-	import { Button, Dropdown, DropdownItem, Input, Popover, Radio, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Toast, Tooltip } from "flowbite-svelte";
-	import { CheckCircle2, ChevronsUpDown, Filter, PenBox, Search, Trash2, XCircle, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowDown10, ArrowUp01, ArrowUp10, Euro, Ticket, Check, X } from "lucide-svelte";
-	import { Role } from "../models/role";
-	import { user } from "../store/store";
+	import { addPermission, capitalizeFirstLetter, getStringFromEnumValue, hasPermission, intToBitArray, removePermission } from '$lib/utils';
+	import {
+		Badge,
+		Checkbox,
+		Button,
+		Input,
+		Popover,
+		Radio,
+		Table,
+		TableBody,
+		TableBodyCell,
+		TableBodyRow,
+		TableHead,
+		TableHeadCell,
+		Tooltip
+	} from 'flowbite-svelte';
+	import type { User } from 'lucia';
+	import {
+		ArrowDown01,
+		ArrowDownAZ,
+		ArrowUp01,
+		ArrowUpAZ,
+		Check,
+		CheckCircle2,
+		Euro,
+		Filter,
+		PenBox,
+		Search,
+		Ticket,
+		Trash2,
+		X,
+		XCircle,
+		Info,
+		DoorOpen,
+		Users,
+		LayoutDashboard,
+		Coins,
+		ChefHat,
+		DollarSign,
+		ScanLine,
+		Dna
+	} from 'lucide-svelte';
 	import { writable } from 'svelte/store';
-	import FeedbackToast from "./feedbacks/FeedbackToast.svelte";
-	import type { User } from "lucia";
-	import { getEnumValueFromString } from "$lib/utils";
-	
-	//TODO: fix stuff around the document
+	import { UserPermissions } from '../models/permissions';
+	import { user } from '../store/store';
+	import FeedbackToast from './feedbacks/FeedbackToast.svelte';
 
 	export let users: User[];
-	
+
 	export let currSelectedUser: User;
 	export let currentBlocks: string[];
 
@@ -25,62 +61,80 @@
 	let error: boolean = false;
 	let feedbackToastOpen: boolean = false;
 	let timeOut: NodeJS.Timeout;
-	
+
 	// dropdown state variables
 	let dropdownOpenMap: { [key: string]: boolean } = {};
 	users?.forEach((user: User) => {
-		dropdownOpenMap = {...dropdownOpenMap, [user.id]: false}
+		dropdownOpenMap = { ...dropdownOpenMap, [user.id]: false };
 	});
 
-	const handleRoleChange = async (user: User, role: string) => {
+	// association between userpermissions and their respective icons
+	const permissionIcons = {
+		[UserPermissions.TICKET_INFO]: Info,
+		[UserPermissions.CHECK_OUT]: DoorOpen,
+		[UserPermissions.SELL]: DollarSign,
+		[UserPermissions.CHECK_IN]: ScanLine,
+		[UserPermissions.KITCHEN]: ChefHat,
+		[UserPermissions.CASHIER]: Coins,
+		[UserPermissions.DASHBOARD]: LayoutDashboard,
+		[UserPermissions.TICKETS]: Ticket,
+		[UserPermissions.USERS]: Users,
+		[UserPermissions.GENERATE]: Dna
+	};
+
+	const handlePermissionChange = async (user: User, permission: UserPermissions, add: boolean) => {
 		dropdownOpenMap = { ...dropdownOpenMap, [user.id]: false };
 
-		if (user.role !== role){
-			try{
-				const response = await fetch(`/api/role/${user.id}/${role}`, {method: 'PUT', headers: {'Content-Type': 'application/json'}})
-				
-				if(response.ok){
-					error = false;
-					color = 'green';
+		try{
+			const response = await fetch(
+				`/api/permissions/${user.id}/${permission}`,
+				{
+					method: 'PUT',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify({add: add})
+				},
+			)
+			
+			if(response.ok){
+				error = false;
+				color = 'green';
 
-					users = users.map((item: User) => {
-						if (item.id === user.id) {
-							item.role = role
-						}
-						return item;
-					});
-					if($user?.id == user.id){
-						//$user?.reload();
-						//TODO: reload user
+				users = users.map((item: User) => {
+					if (item.id === user.id) {
+						item.permissions = add ? addPermission(user.permissions, permission) : removePermission(user.permissions, permission);
 					}
+					return item;
+				});
+				if($user?.id == user.id){
+					$user.permissions = add ? addPermission($user.permissions, permission) : removePermission($user.permissions, permission);
 				}
-				else{
-					error = true;
-					color = 'red';
-				}
-				
-				feedbackToastMessage = (await response.json()).message;
-				feedbackToastOpen = true;
-
-				clearTimeout(timeOut);
-				timeOut = setTimeout(() => {
-					feedbackToastOpen = false;
-					clearTimeout(timeOut);
-				}, 3500);
 			}
-			catch(e) {
+			else{
 				error = true;
 				color = 'red';
-				feedbackToastOpen = true;
-
-				clearTimeout(timeOut);
-				timeOut = setTimeout(() => {
-					feedbackToastOpen = false;
-					clearTimeout(timeOut);
-				}, 3500);
-
-				feedbackToastMessage = 'Errore di rete';
 			}
+			
+			feedbackToastMessage = (await response.json()).message;
+			feedbackToastOpen = true;
+
+			clearTimeout(timeOut);
+			timeOut = setTimeout(() => {
+				feedbackToastOpen = false;
+				clearTimeout(timeOut);
+			}, 3500);
+		}
+		catch(e) {
+			error = true;
+			color = 'red';
+			feedbackToastOpen = true;
+
+			clearTimeout(timeOut);
+			timeOut = setTimeout(() => {
+				feedbackToastOpen = false;
+				clearTimeout(timeOut);
+			}, 3500);
+
+			feedbackToastMessage = 'Errore di rete';
 		}
 	};
 
@@ -93,23 +147,20 @@
 		currSelectedUser = user;
 		debtModalOpen = true;
 	};
-	
+
 	const triggerBlocksModal = async (user: User) => {
 		currSelectedUser = user;
-		const response = await fetch(`/api/tickets/blocks/${user.id}`,
-			{
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-					/* 'Authorization': `Bearer ${loginToken}` */
-				}
+		const response = await fetch(`/api/tickets/blocks/${user.id}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json'
+				/* 'Authorization': `Bearer ${loginToken}` */
 			}
-		);
-		if(response.ok){
+		});
+		if (response.ok) {
 			currentBlocks = (await response.json()).blocks;
 			blocksModalOpen = true;
-		}
-		else{
+		} else {
 			error = true;
 			color = 'red';
 			feedbackToastOpen = true;
@@ -122,7 +173,6 @@
 
 			feedbackToastMessage = 'Errore nella lettura dei blocchetti';
 		}
-
 	};
 
 	// search and filter variables
@@ -130,9 +180,9 @@
 	let filter = 'nome';
 	let filteredItems: User[] = [];
 
-	const sortKey = writable('username'); // username, email, role, alias, owned_money, total_from_sales
+	const sortKey = writable('username'); // username, email, alias, owned_money, total_from_sales
 	const sortDirection = writable(1);
-	const sortItems = writable<User[]>(filteredItems.slice()); 
+	const sortItems = writable<User[]>(filteredItems.slice());
 
 	const sortTable = (key: string) => {
 		if ($sortKey === key) {
@@ -141,40 +191,32 @@
 			sortKey.set(key);
 			sortDirection.set(1);
 		}
-  	};
+	};
 
 	$: {
-		filteredItems = (users?.filter((item: User) => {
+		filteredItems = users?.filter((item: User) => {
 			if (filter === 'nome')
 				return item.username.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
 			else if (filter === 'email')
 				return item.email?.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
-			else if (filter === 'ruolo')
-				return item.role.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
 			else if (filter === 'alias')
 				return item.alias.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
 			else return true;
-		}));
-		
+		});
+
 		const key = $sortKey;
 		const direction = $sortDirection;
 		sortItems.set(filteredItems);
-		
-		if($sortItems?.length > 0) {
-			const sorted = [...$sortItems].sort((a, b) => {
 
+		if ($sortItems?.length > 0) {
+			const sorted = [...$sortItems].sort((a, b) => {
 				let aVal: any;
 				let bVal: any;
 
-				if(key == "alias" || key == "owned_money" || key == "total_from_sales"){
+				if (key == 'alias' || key == 'owned_money' || key == 'total_from_sales') {
 					aVal = a[key] || 0;
 					bVal = b[key] || 0;
-				} else if(key == "role"){
-					aVal = getEnumValueFromString(Role, a.role);
-					bVal = getEnumValueFromString(Role, b.role);
-				} else if(
-					key == "username" || key == "email" || key == "email_verified"
-				) {
+				} else if (key == 'username' || key == 'email' || key == 'email_verified') {
 					aVal = a[key];
 					bVal = b[key];
 				}
@@ -192,7 +234,10 @@
 	$: toastIcon = error ? XCircle : CheckCircle2;
 
 	let totalToClaim = users?.reduce((acc: number, curr: User) => acc + (curr.owned_money || 0), 0);
-	let totalProfit = users?.reduce((acc: number, curr: User) => acc + (curr.total_from_sales || 0), 0);
+	let totalProfit = users?.reduce(
+		(acc: number, curr: User) => acc + (curr.total_from_sales || 0),
+		0
+	);
 </script>
 
 {#if $user}
@@ -206,7 +251,6 @@
 					<ul class="w-48 divide-y divide-gray-200 dark:divide-gray-600">
 						<li><Radio class="p-3" bind:group={filter} value="nome">Nome</Radio></li>
 						<li><Radio class="p-3" bind:group={filter} value="email">E-Mail</Radio></li>
-						<li><Radio class="p-3" bind:group={filter} value="ruolo">Ruolo</Radio></li>
 						<li><Radio class="p-3" bind:group={filter} value="alias">Alias</Radio></li>
 					</ul>
 				</Popover>
@@ -214,13 +258,19 @@
 		</Input>
 	</div>
 	<div class="mx-5 mt-5">
-		<Table hoverable={true} divClass="tableDiv relative overflow-x-auto overflow-y-visible pb-40" class="relative overflow-x-auto rounded-md shadow-md sm:rounded-lg overflow-visible">
+		<Table
+			divClass="tableDiv relative overflow-x-auto overflow-y-visible pb-40"
+			class="relative overflow-visible overflow-x-auto rounded-md shadow-md sm:rounded-lg"
+		>
 			<TableHead>
 				<TableHeadCell on:click={() => sortTable('username')} class="cursor-pointer select-none">
 					<div class="flex gap-1">
 						Nome
 						{#if $sortKey === 'username'}
-							<svelte:component this={$sortDirection > 0 ? ArrowDownAZ : ArrowUpAZ} class="w-4 h-4 ml-1" />
+							<svelte:component
+								this={$sortDirection > 0 ? ArrowDownAZ : ArrowUpAZ}
+								class="ml-1 h-4 w-4"
+							/>
 						{/if}
 					</div>
 				</TableHeadCell>
@@ -228,43 +278,53 @@
 					<div class="flex gap-1">
 						Email
 						{#if $sortKey === 'email'}
-							<svelte:component this={$sortDirection > 0 ? ArrowDownAZ : ArrowUpAZ} class="w-4 h-4 ml-1" />
+							<svelte:component
+								this={$sortDirection > 0 ? ArrowDownAZ : ArrowUpAZ}
+								class="ml-1 h-4 w-4"
+							/>
 						{/if}
 					</div>
 				</TableHeadCell>
-				<TableHeadCell on:click={() => sortTable('role')} class="cursor-pointer select-none">
-					<div class="flex gap-1">
-						Ruolo
-						{#if $sortKey === 'role'}
-							<svelte:component this={$sortDirection > 0 ? ArrowDownAZ : ArrowUpAZ} class="w-4 h-4 ml-1" />
-						{/if}
-					</div>
+				<TableHeadCell class="cursor-pointer select-none">
+					<div class="flex gap-1">Permessi</div>
 				</TableHeadCell>
 				<TableHeadCell on:click={() => sortTable('alias')} class="cursor-pointer select-none">
-					<div class="flex gap-1 justify-center">
+					<div class="flex justify-center gap-1">
 						Alias
 						{#if $sortKey === 'alias'}
-							<svelte:component this={$sortDirection > 0 ? ArrowDownAZ : ArrowUpAZ} class="w-4 h-4 ml-1" />
+							<svelte:component
+								this={$sortDirection > 0 ? ArrowDownAZ : ArrowUpAZ}
+								class="ml-1 h-4 w-4"
+							/>
 						{/if}
 					</div>
 				</TableHeadCell>
 				<TableHeadCell on:click={() => sortTable('owned_money')} class="cursor-pointer select-none">
-					<div class="flex gap-1 justify-center">
+					<div class="flex justify-center gap-1">
 						Debito (€)
 						{#if $sortKey === 'owned_money'}
-							<svelte:component this={$sortDirection > 0 ? ArrowDown01 : ArrowUp01} class="w-4 h-4 ml-1" />
+							<svelte:component
+								this={$sortDirection > 0 ? ArrowDown01 : ArrowUp01}
+								class="ml-1 h-4 w-4"
+							/>
 						{/if}
 					</div>
 				</TableHeadCell>
-				<TableHeadCell on:click={() => sortTable('total_from_sales')} class="cursor-pointer select-none max-w-[8.5rem]">
-					<div class="flex gap-1 justify-left">
+				<TableHeadCell
+					on:click={() => sortTable('total_from_sales')}
+					class="max-w-[8.5rem] cursor-pointer select-none"
+				>
+					<div class="justify-left flex gap-1">
 						Tot. Vendite (€)
 						{#if $sortKey === 'total_from_sales'}
-							<svelte:component this={$sortDirection > 0 ? ArrowDown01 : ArrowUp01} class="w-4 h-4 ml-1" />
+							<svelte:component
+								this={$sortDirection > 0 ? ArrowDown01 : ArrowUp01}
+								class="ml-1 h-4 w-4"
+							/>
 						{/if}
 					</div>
 				</TableHeadCell>
-				<TableHeadCell class="text-center max-w-20 px-0">Blocchetti</TableHeadCell>
+				<TableHeadCell class="max-w-20 px-0 text-center">Blocchetti</TableHeadCell>
 				{#if $user.email === import.meta.env.VITE_ADMIN_EMAIL1 || $user.email === import.meta.env.VITE_ADMIN_EMAIL2}
 					<TableHeadCell class="text-center">Elimina</TableHeadCell>
 				{/if}
@@ -272,53 +332,70 @@
 			<TableBody tableBodyClass="divide-y">
 				{#each $sortItems || [] as item}
 					<TableBodyRow class="w-full">
-						<TableBodyCell tdClass="px-6 py-4 whitespace-nowrap font-medium flex items-center gap-4">
-							{#if item.avatar_url}
-								<img src="{item.avatar_url}" alt="{item.username[0]}" class="rounded-full h-7 w-7"/>
-							{:else}
-								<div class="rounded-full w-7 h-7 bg-gradient-to-br from-primary-700 to-primary-400 flex items-center justify-center text-white font-mono">
-									<span>{item.username[0].toUpperCase()}</span>
-								</div>
-							{/if}
-							<span class="mr-4">{item.username}</span>
+						<TableBodyCell>
+							<span class="flex items-center gap-4 font-medium">
+								{#if item.avatar_url}
+									<img src={item.avatar_url} alt={item.username[0]} class="h-7 w-7 rounded-full" />
+								{:else}
+									<div
+										class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary-700 to-primary-400 font-mono text-white"
+									>
+										<span>{item.username[0].toUpperCase()}</span>
+									</div>
+								{/if}
+								<span class="mr-4">{item.username}</span>
+							</span>
 						</TableBodyCell>
 						<TableBodyCell>
-							<span class="flex gap-2 items-center">
-								<svelte:component this={item.email_verified ? Check : X} color={item.email_verified ? "green" : "red"}/>
-								<Tooltip>{(item.email_verified ? "" : "Non ") + "Verificata"}</Tooltip>
+							<span class="flex items-center gap-2">
+								{#if item.avatar_url}
+									<img class="w-5" alt="Google" src="/google.svg" />
+									<Tooltip>Google</Tooltip>
+								{:else}
+									<svelte:component
+										this={item.email_verified ? Check : X}
+										color={item.email_verified ? 'green' : 'red'}
+										class="w-5"
+									/>
+									<Tooltip>{(item.email_verified ? '' : 'Non ') + 'Verificata'}</Tooltip>
+								{/if}
 								{item.email}
 							</span>
 						</TableBodyCell>
 						<TableBodyCell>
-							{#if item.email === import.meta.env.VITE_ADMIN_EMAIL1 || item.email === import.meta.env.VITE_ADMIN_EMAIL2 }<!-- || item.uid === $user?.uid} -->
-								<span class="text-gray-400 dark:text-gray-500 cursor-not-allowed">{item.role ? item.role.toUpperCase() : 'NORMAL'}</span>
-							{:else}
-								<button class="flex w-[8.25rem] justify-between border-gray-200 border-[1px] rounded-md px-2 py-1">
-									{item.role ? item.role.toUpperCase() : 'NORMAL'}
-									<ChevronsUpDown class="aspect-square w-4" />
-								</button>
-								<Dropdown placement="bottom" class="z-[100] dark:bg-gray-700 rounded-lg" bind:open={dropdownOpenMap[item.id]}>
-									{#each Object.keys(Role).filter((v) => isNaN(Number(v))) as role}
-										<DropdownItem class={item.role === role.toLowerCase() ? `text-primary-500` : ''} on:click={() => handleRoleChange(item, role.toUpperCase())}>
-											{role.toUpperCase()}
-										</DropdownItem>
-									{/each}
-								</Dropdown>
-							{/if}
+							<div class="grid grid-cols-5 gap-2 min-w-28">
+								{#each intToBitArray(item.permissions, Object.keys(UserPermissions).length / 2).reverse() as perm, index}
+									<button on:click={() => handlePermissionChange(item, Math.pow(2, index), !perm)}>
+										<svelte:component this={permissionIcons[Math.pow(2, index)]} class={`w-4 ${perm ? "text-primary-300" : "text-slate-500"}`} />
+									</button>
+									<Tooltip color="primary" border>
+										{
+											capitalizeFirstLetter(getStringFromEnumValue(UserPermissions, Math.pow(2, index))
+											.toLowerCase()
+											.replace('_', ' '))
+										}
+									</Tooltip>
+								{/each}
+							</div>
 						</TableBodyCell>
 						<TableBodyCell>
-							<div class="flex gap-3 w-full justify-between items-center">
+							<div class="flex w-full items-center justify-between gap-3">
 								{item.alias}
 								<button on:click={() => triggerAliasModal(item)}>
-									<PenBox class="w-5 h-5" />
+									<PenBox class="h-5 w-5" />
 								</button>
 							</div>
 						</TableBodyCell>
 						<TableBodyCell class="min-w-52 max-w-64">
-							<div class="flex w-full justify-around items-center">
-								<span class="text-right w-12">{item.owned_money || 0},00</span>
-								<Button disabled={!item.owned_money} size="xs" class="flex items-center gap-1" on:click={()=>triggerDebtModal(item)}>
-									<Euro class="w-4 h-4" /> Salda
+							<div class="flex w-full items-center justify-around">
+								<span class="w-12 text-right">{item.owned_money || 0},00</span>
+								<Button
+									disabled={!item.owned_money}
+									size="xs"
+									class="flex items-center gap-1"
+									on:click={() => triggerDebtModal(item)}
+								>
+									<Euro class="h-4 w-4" /> Salda
 								</Button>
 							</div>
 						</TableBodyCell>
@@ -326,17 +403,29 @@
 							<span class="w-max">{item.total_from_sales || 0},00</span>
 						</TableBodyCell>
 						<TableBodyCell>
-							<div class="grid place-items-center w-full">
-								<Button disabled={getEnumValueFromString(Role, item.role) < Role.SELLER} class="mx-auto px-2 py-1 dark:bg-primary-500 bg-primary-500 hover:bg-primary-600 dark:hover:bg-primary-600" on:click={() => triggerBlocksModal(item)}>
-									<Ticket class="aspect-square w-4 dark:text-white text-gray-900" />
+							<div class="grid w-full place-items-center">
+								<Button
+									disabled={!hasPermission(item.permissions, UserPermissions.SELL)}
+									class="mx-auto bg-primary-500 px-2 py-1 hover:bg-primary-600 dark:bg-primary-500 dark:hover:bg-primary-600"
+									on:click={() => triggerBlocksModal(item)}
+								>
+									<Ticket class="aspect-square w-4 text-gray-900 dark:text-white" />
 								</Button>
 							</div>
 						</TableBodyCell>
 						{#if $user.email === import.meta.env.VITE_ADMIN_EMAIL1 || $user.email === import.meta.env.VITE_ADMIN_EMAIL2}
 							<TableBodyCell>
-								<div class="grid place-items-center w-full">
-									<Button disabled={item.email === import.meta.env.VITE_ADMIN_EMAIL1 || item.email === import.meta.env.VITE_ADMIN_EMAIL2} class="px-2 py-1 dark:bg-red-500 bg-red-500 hover:bg-red-600 dark:hover:bg-red-600" on:click={()=> {currSelectedUser=item; deleteModalOpen = true; }}>
-										<Trash2 class="aspect-square w-4 dark:text-white text-gray-900" />
+								<div class="grid w-full place-items-center">
+									<Button
+										disabled={item.email === import.meta.env.VITE_ADMIN_EMAIL1 ||
+											item.email === import.meta.env.VITE_ADMIN_EMAIL2}
+										class="bg-red-500 px-2 py-1 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600"
+										on:click={() => {
+											currSelectedUser = item;
+											deleteModalOpen = true;
+										}}
+									>
+										<Trash2 class="aspect-square w-4 text-gray-900 dark:text-white" />
 									</Button>
 								</div>
 							</TableBodyCell>
@@ -350,12 +439,12 @@
 					<TableBodyCell></TableBodyCell>
 					<TableBodyCell></TableBodyCell>
 					<TableBodyCell>
-						<div class="flex w-full justify-center items-center">
+						<div class="flex w-full items-center justify-center">
 							<span class="text-left">{totalToClaim},00 €</span>
 						</div>
 					</TableBodyCell>
 					<TableBodyCell>
-						<div class="flex w-full justify-left items-center">
+						<div class="justify-left flex w-full items-center">
 							<span class="text-left">{totalProfit},00 €</span>
 						</div>
 					</TableBodyCell>
@@ -369,4 +458,9 @@
 	</div>
 {/if}
 
-<FeedbackToast bind:open={feedbackToastOpen} bind:color bind:message={feedbackToastMessage} bind:icon={toastIcon} />
+<FeedbackToast
+	bind:open={feedbackToastOpen}
+	bind:color
+	bind:message={feedbackToastMessage}
+	bind:icon={toastIcon}
+/>

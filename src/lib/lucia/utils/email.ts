@@ -3,9 +3,6 @@ import { collection, deleteDoc, doc, getDoc, setDoc, Timestamp, updateDoc } from
 import { createDate, isWithinExpirationDate, TimeSpan } from 'oslo';
 import { alphabet, generateRandomString } from 'oslo/crypto';
 import { sendEmail } from './resend';
-import { getStringFromEnumValue } from '$lib/utils';
-import { Role } from '../../../models/role';
-
 
 export function isValidEmail(email: string): boolean {
 	return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
@@ -86,7 +83,6 @@ export const verifyEmailVerificationCode = async (userId: string, code: string) 
 	await deleteDoc(doc(codesCollection, userId));
 	await updateDoc(doc(usersCollection, userId),{
 		email_verified: true,
-		role: getStringFromEnumValue(Role, Role.NORMAL)
 	});
 
 	// Return a success message

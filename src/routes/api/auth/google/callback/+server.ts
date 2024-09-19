@@ -5,8 +5,6 @@ import { generateIdFromEntropySize, type User } from "lucia";
 
 import type { RequestEvent } from "@sveltejs/kit";
 import { collection, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
-import { getStringFromEnumValue } from "$lib/utils";
-import { Role } from "../../../../../models/role";
 
 export async function GET(event: RequestEvent): Promise<Response> {
 	const code = event.url.searchParams.get("code");
@@ -74,7 +72,7 @@ export async function GET(event: RequestEvent): Promise<Response> {
 					email: googleUser.email,
 					email_verified: googleUser.email_verified,
 					alias: googleUser.name,
-					role: getStringFromEnumValue(Role, Role.NORMAL),
+					permissions: 0,
 					total_from_sales: 0,
 					owned_money: 0,
 				} as User;
