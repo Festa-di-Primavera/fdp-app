@@ -1,10 +1,10 @@
 import { json } from '@sveltejs/kit';
 import { collection, getDocs, query, setDoc, doc, where, updateDoc } from 'firebase/firestore';
 import { getClientDB } from '$lib/firebase/client.js';
-import type { Ticket } from '../../../models/ticket';
+import type { Ticket } from '$models/ticket';
 import type { User } from 'lucia';
 import { hasPermission } from '$lib/utils';
-import { UserPermissions } from '../../../models/permissions';
+import { UserPermissions } from '$models/permissions';
 
 export async function GET({locals}) {
 	if(!locals.user){

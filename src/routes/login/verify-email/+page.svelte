@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Button, Input, Label, Spinner } from "flowbite-svelte";
 	import type { User } from "lucia";
-	import { user } from "../../../store/store";
+	import { user } from "$store/store";
 	import { enhance } from "$app/forms";
-	import FeedbackToast from "../../../components/feedbacks/FeedbackToast.svelte";
+	import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
 	import { XCircle } from "lucide-svelte";
 
 	export let data: User;

@@ -4,8 +4,8 @@
 
 	import { convertCode } from "$lib/codeConverter";
 	import type { User } from "lucia";
-	import QrReader from "../../components/QrReader.svelte";
-	import { user } from "../../store/store";
+	import QrReader from "$components/QrReader.svelte";
+	import { user } from "$store/store";
 
 	export let data: User;
 	if(!$user)

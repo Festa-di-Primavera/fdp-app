@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Card } from 'flowbite-svelte';
 	import { Chart, type EChartsOptions } from 'svelte-echarts';
-	import { theme } from '../../store/store';
+	import { theme } from '$store/store';
 	import { onMount } from 'svelte';
 
 	export let checkedTicketsCount: number;

@@ -5,7 +5,7 @@
 	import { onMount } from 'svelte';
 	import FeedbackToast from '../components/feedbacks/FeedbackToast.svelte';
 	import { enhance } from '$app/forms';
-	import { user } from '../store/store';
+	import { user } from '$store/store';
 	import type { User } from 'lucia';
 
 	export let data;

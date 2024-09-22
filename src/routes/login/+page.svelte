@@ -3,10 +3,10 @@
 	import { CheckCircle2, XCircle } from 'lucide-svelte';
 
 	import { enhance } from '$app/forms';
-	import FeedbackToast from '../../components/feedbacks/FeedbackToast.svelte';
-	import InputErrors from '../../components/form/InputErrors.svelte';
-	import PasswordEye from '../../components/form/PasswordEye.svelte';
-	import { user } from '../../store/store';
+	import FeedbackToast from '$components/feedbacks/FeedbackToast.svelte';
+	import InputErrors from '$components/form/InputErrors.svelte';
+	import PasswordEye from '$components/form/PasswordEye.svelte';
+	import { user } from '$store/store';
 
 	$user = null;
 	let option: 'login' | 'register' = 'login';

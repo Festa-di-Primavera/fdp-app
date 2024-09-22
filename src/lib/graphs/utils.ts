@@ -1,4 +1,4 @@
-import type { Ticket } from '../../models/ticket';
+import type { Ticket } from '$models/ticket';
 
 export interface ChartData {
 	labels: string[];

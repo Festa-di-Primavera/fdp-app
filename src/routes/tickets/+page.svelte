@@ -25,9 +25,9 @@
 		XCircle
 	} from 'lucide-svelte';
 	import { writable } from 'svelte/store';
-	import FeedbackToast from '../../components/feedbacks/FeedbackToast.svelte';
-	import type { Ticket } from '../../models/ticket';
-	import { user } from '../../store/store';
+	import FeedbackToast from '$components/feedbacks/FeedbackToast.svelte';
+	import type { Ticket } from '$models/ticket';
+	import { user } from '$store/store';
 	import { collection, onSnapshot, query, type Unsubscribe } from 'firebase/firestore';
 	import { getClientDB } from '$lib/firebase/client';
 	import { formatDate } from '$lib/utils';

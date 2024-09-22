@@ -2,7 +2,7 @@
 	import { enhance } from "$app/forms";
 	import { Button, Input, Label } from "flowbite-svelte";
 	import { XCircle } from "lucide-svelte";
-	import FeedbackToast from "../../../components/feedbacks/FeedbackToast.svelte";
+	import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
 
 	let feedbackToastOpen: boolean = false;
 	let color: 'green' | 'red' | 'yellow' = 'green';

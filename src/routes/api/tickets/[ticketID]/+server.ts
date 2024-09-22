@@ -1,10 +1,10 @@
 import { Timestamp, updateDoc, doc, getDoc, setDoc, collection } from 'firebase/firestore';
 import { getClientDB } from '$lib/firebase/client.js';
-import type { Ticket } from '../../../../models/ticket';
+import type { Ticket } from '$models/ticket';
 import { convertCode } from '$lib/codeConverter';
 import type { User } from 'lucia';
 import { hasPermission } from '$lib/utils';
-import { UserPermissions } from '../../../../models/permissions';
+import { UserPermissions } from '$models/permissions';
 
 export async function GET( { params, locals } ) {
 	if(!locals.user){

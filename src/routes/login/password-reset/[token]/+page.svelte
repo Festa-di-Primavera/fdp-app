@@ -5,9 +5,9 @@
 	import { page } from '$app/stores';
 	import { Button, Helper, Input, Label } from 'flowbite-svelte';
 	import { CheckCircle2, EyeOff, XCircle } from 'lucide-svelte';
-	import PasswordEye from '../../../../components/form/PasswordEye.svelte';
+	import PasswordEye from '$components/form/PasswordEye.svelte';
 	import { enhance } from '$app/forms';
-	import FeedbackToast from '../../../../components/feedbacks/FeedbackToast.svelte';
+	import FeedbackToast from '$components/feedbacks/FeedbackToast.svelte';
 
 	let feedbackToastOpen: boolean = false;
 	let color: 'green' | 'red' | 'yellow' = 'green';
@@ -15,7 +15,6 @@
 	let toastMessage: string = '';
 
 	export let form;
-	console.log(form);
 	$: if (form && form.error) {
 		color = 'red';
 		toastMessage = form.message;

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Card } from "flowbite-svelte";
-	import type { Ticket } from "../models/ticket";
+	import type { Ticket } from "$models/ticket";
 	import { convertCode } from "$lib/codeConverter";
 
 	export let ticketCode: string;

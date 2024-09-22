@@ -1,7 +1,7 @@
 import { getClientDB } from '$lib/firebase/client.js';
 import { hasPermission } from '$lib/utils.js';
 import { collection, deleteDoc, doc, getDoc } from 'firebase/firestore';
-import { UserPermissions } from '../../../../models/permissions';
+import { UserPermissions } from '$models/permissions';
 
 export async function DELETE({ params, locals }){
 	if(!locals.user){

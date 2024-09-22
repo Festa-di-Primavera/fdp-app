@@ -2,12 +2,10 @@ import { getClientDB } from '$lib/firebase/client';
 import { addPermission, hasPermission, removePermission } from '$lib/utils';
 
 import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
-import { UserPermissions } from '../../../../../models/permissions';
+import { UserPermissions } from '$models/permissions';
 import type { User } from 'lucia';
 
 export async function PUT({ params, locals, request }) {
-	//LOG
-	console.log('params', params);
 	if(!locals.user){
 		return new Response(JSON.stringify({message: 'Non sei autenticato'}), {
 			status: 401,
@@ -33,8 +31,6 @@ export async function PUT({ params, locals, request }) {
 		const userDoc = doc(usersCollection, params.id);
 		const currentUser = (await getDoc(userDoc)).data() as User;
 		const permission = parseInt(params.newPermission, 10);
-
-		console.log('params', add, permission, currentUser.permissions);
 
 		await updateDoc(userDoc, {
 			permissions: add ? addPermission(currentUser.permissions, permission) : removePermission(currentUser.permissions, permission)

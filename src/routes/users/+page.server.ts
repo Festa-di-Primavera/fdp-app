@@ -4,7 +4,7 @@ import { getClientDB } from "$lib/firebase/client";
 import { collection, getDocs } from "firebase/firestore";
 import type { User } from "lucia";
 import { hasPermission } from "$lib/utils";
-import { UserPermissions } from "../../models/permissions";
+import { UserPermissions } from "$models/permissions";
 
 export const load: PageServerLoad = async ({locals}) => {
 	if (!locals.user)

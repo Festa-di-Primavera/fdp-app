@@ -2,7 +2,7 @@ import { redirect } from '@sveltejs/kit';
 
 import { hasPermission } from '$lib/utils';
 import type { PageServerLoad } from "../$types";
-import { UserPermissions } from '../../models/permissions';
+import { UserPermissions } from '$models/permissions';
 
 export const load: PageServerLoad = async ({locals}) => {
 	if (!locals.user)

@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import '../app.pcss';
 	import NavBar from '../components/NavBar.svelte';
-	import { theme } from '../store/store';
+	import { theme } from '$store/store';
 
 	onMount(() => {
 		if(!localStorage.getItem('color-theme'))

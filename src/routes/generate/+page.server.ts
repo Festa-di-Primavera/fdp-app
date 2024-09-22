@@ -3,7 +3,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { doc, setDoc } from 'firebase/firestore';
 import type { PageServerLoad } from '../$types';
 import { hasPermission } from '$lib/utils';
-import { UserPermissions } from '../../models/permissions';
+import { UserPermissions } from '$models/permissions';
 
 
 export const load: PageServerLoad = async ({locals}) => {

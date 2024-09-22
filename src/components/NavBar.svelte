@@ -7,8 +7,8 @@
 	import { enhance } from "$app/forms";
 	import { page } from '$app/stores';
 	import { hasPermission } from "$lib/utils";
-	import { UserPermissions } from "../models/permissions";
-	import { theme, user } from "../store/store";
+	import { UserPermissions } from "$models/permissions";
+	import { theme, user } from "$store/store";
 	import ChangePwModal from "./ChangePwModal.svelte";
 
 	interface Route {

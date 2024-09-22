@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Button, Helper, Input, Label, Modal, Toast } from 'flowbite-svelte';
 	import { CheckCircle2, Eye, EyeOff, XCircle } from 'lucide-svelte';
-	import { user } from '../store/store';
+	import { user } from '$store/store';
 	import {
 		EmailAuthProvider,
 		reauthenticateWithCredential,

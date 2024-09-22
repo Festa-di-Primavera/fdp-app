@@ -7,9 +7,9 @@
 	
 	import { getClientApp } from '$lib/firebase/client';
 	
-	import FeedbackToast from '../../components/feedbacks/FeedbackToast.svelte';
-	import type { Ticket } from '../../models/ticket';
-	import { user } from '../../store/store';
+	import FeedbackToast from '$components/feedbacks/FeedbackToast.svelte';
+	import type { Ticket } from '$models/ticket';
+	import { user } from '$store/store';
 	import type { User } from 'lucia';
 
 	export let data: User;

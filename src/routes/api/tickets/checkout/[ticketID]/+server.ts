@@ -1,11 +1,11 @@
 import { getClientDB } from '$lib/firebase/client.js';
 
 import { Timestamp, collection, doc, getDoc, updateDoc } from 'firebase/firestore';
-import type { Ticket } from '../../../../../models/ticket.js';
+import type { Ticket } from '$models/ticket.js';
 import { convertCode } from '$lib/codeConverter.js';
 import type { User } from 'lucia';
 import { hasPermission } from '$lib/utils.js';
-import { UserPermissions } from '../../../../../models/permissions.js';
+import { UserPermissions } from '$models/permissions.js';
 
 export async function PUT( { params, locals } ) {
 	if(!locals.user){

@@ -3,11 +3,11 @@
 	import { CheckCircle2, Ticket, XCircle } from 'lucide-svelte';
 
 	import type { User } from 'lucia';
-	import UsersTable from '../../components/UsersTable.svelte';
-	import FeedbackToast from '../../components/feedbacks/FeedbackToast.svelte';
-	import { user } from '../../store/store.js';
+	import UsersTable from '$components/UsersTable.svelte';
+	import FeedbackToast from '$components/feedbacks/FeedbackToast.svelte';
+	import { user } from '$store/store.js';
 	import { getStringFromEnumValue, intToBitArray } from '$lib/utils';
-	import { UserPermissions } from '../../models/permissions';
+	import { UserPermissions } from '$models/permissions';
 
 	export let data: {
 		user: User;

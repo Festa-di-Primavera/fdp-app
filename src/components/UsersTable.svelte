@@ -42,8 +42,8 @@
 		Dna
 	} from 'lucide-svelte';
 	import { writable } from 'svelte/store';
-	import { UserPermissions } from '../models/permissions';
-	import { user } from '../store/store';
+	import { UserPermissions } from '$models/permissions';
+	import { user } from '$store/store';
 	import FeedbackToast from './feedbacks/FeedbackToast.svelte';
 
 	export let users: User[];

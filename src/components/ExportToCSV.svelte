@@ -1,7 +1,7 @@
 <script lang="ts">
 	import moment from 'moment-timezone';
 	import { Button } from 'flowbite-svelte';
-	import type { Ticket } from '../models/ticket';
+	import type { Ticket } from '$models/ticket';
 
 	export let tickets: Ticket[] = [];
 
