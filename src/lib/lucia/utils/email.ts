@@ -12,7 +12,7 @@ export async function generateEmailVerificationCode(
 	userId: string,
 	email: string
 ): Promise<string> {
-	const codesCollection = collection(getClientDB(), 'email_verification_code');
+	const codesCollection = collection(getClientDB(), 'email_verification_codes');
 	await deleteDoc(doc(codesCollection, userId));
 
 	const code = generateRandomString(6, alphabet('0-9', 'A-Z'));
@@ -56,7 +56,7 @@ export async function sendVerificationCode(
 export const verifyEmailVerificationCode = async (userId: string, code: string) => {
 	const usersCollection = collection(getClientDB(), 'users');
 	
-	const codesCollection = collection(getClientDB(), 'email_verification_code');
+	const codesCollection = collection(getClientDB(), 'email_verification_codes');
 	const codeDoc = (await getDoc(doc(codesCollection, userId))).data() as CodeDoc;
 
 	const { code: verificationCode, expires_at } = codeDoc

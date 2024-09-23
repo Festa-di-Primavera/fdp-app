@@ -167,8 +167,15 @@ export const actions: Actions = {
 		}
 
 		const userId = event.locals.user.id;
+
 		const usersCollection = collection(getClientDB(), 'users');
 		await deleteDoc(doc(usersCollection, userId));
+
+		const emailCodesCollection = collection(getClientDB(), 'email_verification_codes');
+		await deleteDoc(doc(emailCodesCollection, userId));
+		
+		const passwordTokensCollection = collection(getClientDB(), 'password_reset_tokens');
+		await deleteDoc(doc(passwordTokensCollection, userId));
 
 		lucia.invalidateUserSessions(userId);
 		const sessionCookie = lucia.createBlankSessionCookie();

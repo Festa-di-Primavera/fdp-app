@@ -1,0 +1,8 @@
+{
+	"crons": [
+		{
+			"path": "/api/clean-db",
+			"schedule": "0 3 * * 0"
+		}
+	]
+}
