@@ -329,9 +329,7 @@
 					</div>
 				</TableHeadCell>
 				<TableHeadCell class="max-w-20 px-0 text-center">Blocchetti</TableHeadCell>
-				{#if $user.email === import.meta.env.VITE_ADMIN_EMAIL1 || $user.email === import.meta.env.VITE_ADMIN_EMAIL2}
-					<TableHeadCell class="text-center">Elimina</TableHeadCell>
-				{/if}
+				<TableHeadCell class="text-center">Elimina</TableHeadCell>
 			</TableHead>
 			<TableBody tableBodyClass="divide-y">
 				{#each $sortItems || [] as item}
@@ -417,23 +415,19 @@
 								</Button>
 							</div>
 						</TableBodyCell>
-						{#if $user.email === import.meta.env.VITE_ADMIN_EMAIL1 || $user.email === import.meta.env.VITE_ADMIN_EMAIL2}
-							<TableBodyCell>
-								<div class="grid w-full place-items-center">
-									<Button
-										disabled={item.email === import.meta.env.VITE_ADMIN_EMAIL1 ||
-											item.email === import.meta.env.VITE_ADMIN_EMAIL2}
-										class="bg-red-500 px-2 py-1 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600"
-										on:click={() => {
-											currSelectedUser = item;
-											deleteModalOpen = true;
-										}}
-									>
-										<Trash2 class="aspect-square w-4 text-gray-900 dark:text-white" />
-									</Button>
-								</div>
-							</TableBodyCell>
-						{/if}
+						<TableBodyCell>
+							<div class="grid w-full place-items-center">
+								<Button
+									class="bg-red-500 px-2 py-1 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600"
+									on:click={() => {
+										currSelectedUser = item;
+										deleteModalOpen = true;
+									}}
+								>
+									<Trash2 class="aspect-square w-4 text-gray-900 dark:text-white" />
+								</Button>
+							</div>
+						</TableBodyCell>
 					</TableBodyRow>
 				{/each}
 				<TableBodyRow>
@@ -453,9 +447,7 @@
 						</div>
 					</TableBodyCell>
 					<TableBodyCell></TableBodyCell>
-					{#if $user.email === import.meta.env.VITE_ADMIN_EMAIL1 || $user.email === import.meta.env.VITE_ADMIN_EMAIL2}
-						<TableBodyCell></TableBodyCell>
-					{/if}
+					<TableBodyCell></TableBodyCell>
 				</TableBodyRow>
 			</TableBody>
 		</Table>
