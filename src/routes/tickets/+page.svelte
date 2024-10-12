@@ -19,7 +19,7 @@
 		TableHead,
 		TableHeadCell
 	} from 'flowbite-svelte';
-	import type { User } from 'lucia';
+	import type { User } from "$lib/auth/user";
 	import {
 		ArrowDown01,
 		ArrowDownAZ,

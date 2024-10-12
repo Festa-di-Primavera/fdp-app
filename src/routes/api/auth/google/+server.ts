@@ -1,5 +1,5 @@
 // routes/login/google/+server.ts
-import { google } from "$lib/lucia/auth";
+import { google } from "$lib/auth/google";
 import { redirect } from "@sveltejs/kit";
 import { generateCodeVerifier, generateState } from "arctic";
 

@@ -17,7 +17,7 @@
 	import TicketsECharts from '$components/charts/TicketsECharts.svelte';
 	import TicketsPerHourECharts from '$components/charts/TicketsPerHourECharts.svelte';
 	import TicketsPerPersonECharts from '$components/charts/TicketsPerPersonECharts.svelte';
-	import type { User } from 'lucia';
+	import type { User } from "$lib/auth/user";
 
 	export let data: {sellers: User[], user: User};
 	if(data.user)

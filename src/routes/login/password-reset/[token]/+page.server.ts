@@ -1,10 +1,10 @@
 import { getClientDB } from '$lib/firebase/client';
-import { lucia } from '$lib/lucia/auth';
 import { isSameAsOldPassword, verifyPasswordResetToken } from '$lib/auth/utils/password';
 import { hash } from '@node-rs/argon2';
 import { fail, redirect } from '@sveltejs/kit';
 import { collection, doc, runTransaction } from 'firebase/firestore';
 import type { PageServerLoad } from '../$types';
+import { invalidateUserSessions } from '$lib/auth/session';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const passwordResetToken = params.token;
@@ -74,7 +74,7 @@ export const actions = {
 				outputLen: 32,
 				parallelism: 1
 			});
-			await lucia.invalidateUserSessions(userId);
+			await invalidateUserSessions(userId);
 
 			const db = getClientDB();
 			const passwordResetTokensCollection = collection(db, 'password_reset_tokens');

@@ -2,9 +2,9 @@ import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { getClientDB } from "$lib/firebase/client";
 import { collection, getDocs } from "firebase/firestore";
-import type { User } from "lucia";
 import { hasPermission } from "$lib/utils/permissions";
 import { UserPermissions } from "$models/permissions";
+import type { User } from "$lib/auth/user";
 
 export const load: PageServerLoad = async ({locals}) => {
 	if (!locals.user)

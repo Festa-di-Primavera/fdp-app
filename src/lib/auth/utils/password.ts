@@ -1,13 +1,25 @@
 import { getClientDB } from "$lib/firebase/client";
 import { collection, doc, getDoc, runTransaction, Timestamp } from "firebase/firestore";
-import { generateId, TimeSpan, type User } from "lucia";
 import { createDate, isWithinExpirationDate } from "oslo";
 import { sendEmail } from "./resend";
-import { verify } from "@node-rs/argon2";
+import { hash, verify } from "@node-rs/argon2";
 
 interface PasswordResetToken {
 	user_id: string;
 	expires_at: Timestamp;
+}
+
+export async function hashPassword(password: string): Promise<string> {
+	return await hash(password, {
+		memoryCost: 19456,
+		timeCost: 2,
+		outputLen: 32,
+		parallelism: 1
+	});
+}
+
+export async function verifyPasswordHash(hash: string, password: string): Promise<boolean> {
+	return await verify(hash, password);
 }
 
 export const generatePasswordResetToken = async (userId: string) => {

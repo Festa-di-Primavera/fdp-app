@@ -2,7 +2,7 @@
 	import { Button, Input, Label, Modal, NumberInput, Spinner, Toggle } from 'flowbite-svelte';
 	import { CheckCircle2, Ticket, XCircle } from 'lucide-svelte';
 
-	import type { User } from 'lucia';
+	import type { User } from "$lib/auth/user";
 	import UsersTable from '$components/UsersTable.svelte';
 	import FeedbackToast from '$components/feedbacks/FeedbackToast.svelte';
 	import { user } from '$store/store.js';

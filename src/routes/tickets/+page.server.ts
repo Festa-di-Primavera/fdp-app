@@ -2,7 +2,7 @@ import { getClientDB } from "$lib/firebase/client";
 import { hasPermission } from "$lib/utils/permissions";
 import { redirect } from "@sveltejs/kit";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import type { User } from "lucia";
+import type { User } from "$lib/auth/user";
 import type { PageServerLoad } from "./$types";
 import { UserPermissions } from "$models/permissions";
 

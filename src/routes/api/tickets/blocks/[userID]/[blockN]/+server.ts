@@ -1,7 +1,7 @@
 import { getClientDB } from '$lib/firebase/client';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { UserPermissions } from '$models/permissions';
 import { hasPermission } from '$lib/utils/permissions';
+import { UserPermissions } from '$models/permissions';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 export async function POST({params, locals}) {
 	if(!locals.user){

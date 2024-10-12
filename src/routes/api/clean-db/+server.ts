@@ -1,8 +1,8 @@
 // Endpoint adibito alla pulizia del database (sessioni scadute, token e codici di verifica scaduti)
 // Aggiunta la variabile d'ambiente CRON_SECRET per l'autenticazione (su vercel, è un token generato randomicamente)
 
+import { invalidateExpiredSessions } from '$lib/auth/session.js';
 import { getClientDB } from '$lib/firebase/client';
-import { lucia } from '$lib/lucia/auth';
 import { collection, getDocs, query, Timestamp, where, writeBatch } from 'firebase/firestore';
 
 export async function GET({request}) {
@@ -17,7 +17,7 @@ export async function GET({request}) {
 	}
 
 	// Lucia - Eliminazione sessioni scadute
-	lucia.deleteExpiredSessions();
+	invalidateExpiredSessions();
 
 	// Eliminazione token di reset password scaduti
 	const passwordTokensCollection = collection(getClientDB(), 'password_reset_tokens');

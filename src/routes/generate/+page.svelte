@@ -10,7 +10,7 @@
 	import FeedbackToast from '$components/feedbacks/FeedbackToast.svelte';
 	import type { Ticket } from '$models/ticket';
 	import { user } from '$store/store';
-	import type { User } from 'lucia';
+	import type { User } from "$lib/auth/user";
 
 	export let data: User;
 	if (!$user)

@@ -1,9 +1,9 @@
-// routes/login/google/callback/+server.ts
-import { firestoreDb, google, lucia } from "$lib/lucia/auth";
-import { OAuth2RequestError } from "arctic";
-import { generateIdFromEntropySize, type User } from "lucia";
-
+import { google } from "$lib/auth/google";
+import { createSession, generateSessionToken, setSessionTokenCookie } from "$lib/auth/session";
+import { createUser, createUserWithGoogle, type GoogleUser, type User } from "$lib/auth/user";
+import { getClientDB } from "$lib/firebase/client";
 import type { RequestEvent } from "@sveltejs/kit";
+import { OAuth2RequestError } from "arctic";
 import { collection, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 
 export async function GET(event: RequestEvent): Promise<Response> {
@@ -28,7 +28,7 @@ export async function GET(event: RequestEvent): Promise<Response> {
 
 		const googleUser: GoogleUser = await googleUserResponse.json();
 
-		const usersCollection = collection(firestoreDb, "users");
+		const usersCollection = collection(getClientDB(), "users");
 
 		const googleQuery = query(usersCollection, where("google_id", "==", googleUser.sub));
 		const googleQuerySnap = await getDocs(googleQuery);
@@ -36,12 +36,9 @@ export async function GET(event: RequestEvent): Promise<Response> {
 		
 		// check if google user exists
 		if (existingGoogleUser) {
-			const session = await lucia.createSession(existingGoogleUser.id, {});
-			const sessionCookie = lucia.createSessionCookie(session.id);
-			event.cookies.set(sessionCookie.name, sessionCookie.value, {
-				path: ".",
-				...sessionCookie.attributes
-			});
+			const token = generateSessionToken();
+			const session = await createSession(token, existingGoogleUser.id);
+			setSessionTokenCookie(event, token, session.expiresAt);
 		} else {
 			// check if the user already registered with that email
 			const emailQuery = query(usersCollection, where("email", "==", googleUser.email));
@@ -56,36 +53,16 @@ export async function GET(event: RequestEvent): Promise<Response> {
 					}
 				)
 
-				const session = await lucia.createSession(existingEmailUser.id, {});
-				const sessionCookie = lucia.createSessionCookie(session.id);
-				event.cookies.set(sessionCookie.name, sessionCookie.value, {
-					path: ".",
-					...sessionCookie.attributes
-				});
+				const token = generateSessionToken();
+				const session = await createSession(token, existingEmailUser.id);
+				setSessionTokenCookie(event, token, session.expiresAt);
 			}
-			else{
-				const userId = generateIdFromEntropySize(10); // 16 characters long
-				const newUser = {
-					id: userId,
-					google_id: googleUser.sub,
-					username: googleUser.name,
-					avatar_url: googleUser.picture,
-					email: googleUser.email,
-					email_verified: googleUser.email_verified,
-					alias: googleUser.name,
-					permissions: 0,
-					total_from_sales: 0,
-					owned_money: 0,
-				} as User;
+			else {
+				const user = await createUserWithGoogle(googleUser);
 	
-				await setDoc(doc(usersCollection, userId),newUser);
-	
-				const session = await lucia.createSession(userId, {});
-				const sessionCookie = lucia.createSessionCookie(session.id);
-				event.cookies.set(sessionCookie.name, sessionCookie.value, {
-					path: ".",
-					...sessionCookie.attributes
-				});
+				const token = generateSessionToken();
+				const session = await createSession(token, user.id);
+				setSessionTokenCookie(event, token, session.expiresAt);
 			}
 		}
 		return new Response(null, {
@@ -107,12 +84,4 @@ export async function GET(event: RequestEvent): Promise<Response> {
 			status: 500
 		});
 	}
-}
-
-interface GoogleUser {
-	sub: string;
-	name: string;
-	picture: string;
-	email: string;
-	email_verified: boolean;
 }
