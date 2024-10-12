@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button, Input, Label, Spinner } from "flowbite-svelte";
-	import type { User } from "lucia";
+	import type { User } from "$lib/auth/user";
 	import { user } from "$store/store";
 	import { enhance } from "$app/forms";
 	import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
@@ -114,7 +114,7 @@
 				on:keydown={(e) => onKeyDown(e, index)}
 				on:paste={onPaste}
 				bind:value={code[index]}
-				maxlength="1" 
+				maxlength={1}
 				class="w-12 aspect-square text-center rounded-md border-2 border-muted" 
 				pattern="[0-9A-Z]" 
 				id="code{index}" 

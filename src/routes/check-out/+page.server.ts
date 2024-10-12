@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 
-import { hasPermission } from '$lib/utils';
+import { hasPermission } from '$lib/utils/permissions';
 import type { PageServerLoad } from "../$types";
 import { UserPermissions } from '$models/permissions';
 

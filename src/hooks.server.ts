@@ -1,28 +1,22 @@
-import { lucia } from '$lib/lucia/auth';
+// import { lucia } from '$lib/lucia/auth';
+import { deleteSessionTokenCookie, setSessionTokenCookie, validateSessionToken } from '$lib/auth/session';
 import type { Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	const sessionId = event.cookies.get(lucia.sessionCookieName);
-	if (!sessionId) {
+	const token = event.cookies.get("session");
+	if (!token) {
 		event.locals.user = null;
 		event.locals.session = null;
 		return resolve(event);
 	}
 
-	const { session, user } = await lucia.validateSession(sessionId);
-	if (session && session.fresh) {
-		const sessionCookie = lucia.createSessionCookie(session.id);
-		event.cookies.set(sessionCookie.name, sessionCookie.value, {
-			path: '.',
-			...sessionCookie.attributes
-		});
+	const { session, user } = await validateSessionToken(token);
+	if (session /* && session.fresh */) {
+		setSessionTokenCookie(event, token, session.expiresAt);
 	}
-	if (!session) {
-		const sessionCookie = lucia.createBlankSessionCookie();
-		event.cookies.set(sessionCookie.name, sessionCookie.value, {
-			path: '.',
-			...sessionCookie.attributes
-		});
+	// if (!session) {
+	else{
+		deleteSessionTokenCookie(event);
 	}
 	event.locals.user = user;
 	event.locals.session = session;

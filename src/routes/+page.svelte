@@ -6,7 +6,7 @@
 	import FeedbackToast from '../components/feedbacks/FeedbackToast.svelte';
 	import { enhance } from '$app/forms';
 	import { user } from '$store/store';
-	import type { User } from 'lucia';
+	import type { User } from "$lib/auth/user";
 
 	export let data;
 	$user = data as User;

@@ -1,8 +1,8 @@
+import type { User } from '$lib/auth/user';
 import { getClientDB } from '$lib/firebase/client';
-import { hasPermission } from '$lib/utils.js';
-import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
-import type { User } from 'lucia';
+import { hasPermission } from '$lib/utils/permissions.js';
 import { UserPermissions } from '$models/permissions';
+import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 
 export async function POST({request, params, locals}){
 	if(!locals.user){

@@ -3,7 +3,7 @@
 	import { CheckCircle2, Ticket, XCircle } from 'lucide-svelte';
 
 	import { convertCode } from "$lib/codeConverter";
-	import type { User } from "lucia";
+	import type { User } from "$lib/auth/user";
 	import QrReader from "$components/QrReader.svelte";
 	import { user } from "$store/store";
 

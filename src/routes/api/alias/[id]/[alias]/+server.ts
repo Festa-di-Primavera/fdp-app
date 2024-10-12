@@ -1,8 +1,8 @@
 import { getClientDB } from '$lib/firebase/client';
-import { hasPermission } from '$lib/utils.js';
-import { collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore';
-import type { User } from 'lucia';
+import { hasPermission } from '$lib/utils/permissions.js';
 import { UserPermissions } from '$models/permissions';
+import { collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore';
+import type { User } from '$lib/auth/user';
 
 export async function PUT({ params, locals }) {
 	if(!locals.user){

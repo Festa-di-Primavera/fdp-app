@@ -1,6 +1,6 @@
 import { fail, redirect, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import { lucia } from "$lib/lucia/auth";
+import { deleteSessionTokenCookie, invalidateSession } from "$lib/auth/session";
 
 export const load: PageServerLoad = async ({locals}) => {
 	if (!locals.user)
@@ -17,12 +17,10 @@ export const actions: Actions = {
 		if (!event.locals.session) {
 			return fail(401);
 		}
-		await lucia.invalidateSession(event.locals.session.id);
-		const sessionCookie = lucia.createBlankSessionCookie();
-		event.cookies.set(sessionCookie.name, sessionCookie.value, {
-			path: ".",
-			...sessionCookie.attributes
-		});
+
+		await invalidateSession(event.locals.session.id);
+		deleteSessionTokenCookie(event);
+		
 		redirect(302, "/login");
 	}
 };

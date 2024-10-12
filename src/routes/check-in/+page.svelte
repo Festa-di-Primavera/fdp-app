@@ -3,12 +3,12 @@
 	import { AlertCircle, Check, CheckCircle2, Ticket as TicketIcon, X, XCircle } from 'lucide-svelte';
 	import { onDestroy, onMount } from "svelte";
     
-    import type { User } from "lucia";
     import InfoCard from "$components/InfoCard.svelte";
     import QrReader from "$components/QrReader.svelte";
     import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
     import type { Ticket } from "$models/ticket";
     import { user } from "$store/store";
+	import type { User } from "$lib/auth/user";
 
 	export let data: User;
     if(!$user)

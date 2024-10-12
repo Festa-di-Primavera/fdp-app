@@ -4,20 +4,20 @@
 
 	import { getClientApp, getClientDB } from '$lib/firebase/client';
 	
-	import { CheckInTimeSlot, CheckOutTimeSlot, computeCheckInPerTime, computeCheckOutPerTime, computeSalesPerHour, computeSalesPerTime, computeSellersStats, SalesTimeSlot } from '$lib/graphs/utils';
+	import { CheckInTimeSlot, CheckOutTimeSlot, computeCheckInPerTime, computeCheckOutPerTime, computeSalesPerHour, computeSalesPerTime, computeSellersStats, SalesTimeSlot } from '$lib/charts/utils';
 	import type { Ticket } from '$models/ticket';
 	import { user } from '$store/store';
 
 	import { goto } from '$app/navigation';
 	import { collection, onSnapshot, query, type Unsubscribe } from 'firebase/firestore';
 	import ExportToCsv from '$components/ExportToCSV.svelte';
-	import CheckInPerTimeECharts from '$components/graphs/CheckInPerTimeECharts.svelte';
-	import CheckOutPerTimeECharts from '$components/graphs/CheckOutPerTimeECharts.svelte';
-	import SalesPerTimeECharts from '$components/graphs/SalesPerTimeECharts.svelte';
-	import TicketsECharts from '$components/graphs/TicketsECharts.svelte';
-	import TicketsPerHourECharts from '$components/graphs/TicketsPerHourECharts.svelte';
-	import TicketsPerPersonECharts from '$components/graphs/TicketsPerPersonECharts.svelte';
-	import type { User } from 'lucia';
+	import CheckInPerTimeECharts from '$components/charts/CheckInPerTimeECharts.svelte';
+	import CheckOutPerTimeECharts from '$components/charts/CheckOutPerTimeECharts.svelte';
+	import SalesPerTimeECharts from '$components/charts/SalesPerTimeECharts.svelte';
+	import TicketsECharts from '$components/charts/TicketsECharts.svelte';
+	import TicketsPerHourECharts from '$components/charts/TicketsPerHourECharts.svelte';
+	import TicketsPerPersonECharts from '$components/charts/TicketsPerPersonECharts.svelte';
+	import type { User } from "$lib/auth/user";
 
 	export let data: {sellers: User[], user: User};
 	if(data.user)

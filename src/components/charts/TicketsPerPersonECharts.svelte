@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { type ChartData, CheckOutTimeSlot } from "$lib/graphs/utils";
-	import { Card, Select } from "flowbite-svelte";
-	import { Chart, type EChartsOptions } from "svelte-echarts";
-	import { theme } from "$store/store";
-	import { onMount } from "svelte";
+	import type { ChartData } from '$lib/charts/utils';
+	import { Card } from 'flowbite-svelte';
+	import { Chart, type EChartsOptions } from 'svelte-echarts';
+	import { theme } from '$store/store';
+	import { onMount } from 'svelte';
 
 	let currentTheme: 'dark' | 'light';
 
@@ -14,22 +14,11 @@
 	theme.subscribe((value) => {
 		currentTheme = value;
 	});
-	
-	const MAX_VISIBLE_BARS = 16;
 
-	export let ticketsData: ChartData;
-	export let timeWindow: number;
+	export let sellersStats: ChartData;
+	const MAX_VISIBLE_BARS = 4;
 
-	let selected: CheckOutTimeSlot = CheckOutTimeSlot.HALF_HOUR;
-	const timeOptions = [
-		{ value: CheckOutTimeSlot.FIFTEEN_MINUTES, name: '15 min ' },
-		{ value: CheckOutTimeSlot.HALF_HOUR, name: '30 min' },
-		{ value: CheckOutTimeSlot.HOUR, name: '1 ora' }
-	];
-	
-	$: numberOfBars = ticketsData.labels.length;
-	$: numberOfSales = ticketsData.datasets.reduce((acc, curr) => acc + curr, 0);
-	$: timeWindow = selected;
+	$: numberOfBars = sellersStats.labels.length;
 	$: options = {
 		grid: {
 			containLabel: true,
@@ -38,12 +27,10 @@
 		},
 		backgroundColor: currentTheme == 'dark' ? 'rgb(31 41 55)' : 'white',
         xAxis: {
-            data: ticketsData.labels,
+            data: sellersStats.labels,
 			axisLabel: {
-				formatter: (value: string) => {
-					// replace , with \n
-					return value.replace(/,/g, '\n');
-				},
+				interval: 0,
+				overflow: 'truncate',
 				color: currentTheme == 'dark' ? 'white' : 'rgb(55 65 81)'
 			},
 			axisLine: {
@@ -55,6 +42,10 @@
         yAxis: {
 			show: true,
 			offset: 5,
+			splitLine:{
+				show: true,
+				interval: 3,
+			},
 			axisLine: {
 				show: true,
 				symbol: ['none', 'arrow'],
@@ -69,23 +60,24 @@
 			},
 			minInterval: 5,
 			min: 0,
-			max: Math.ceil((Math.max(...ticketsData.datasets)+1) / 5) * 5,
+			max: Math.ceil((Math.max(...sellersStats.datasets)+1) / 5) * 5,
 		},
 		tooltip: {
 			trigger: 'item',
 			axisPointer: {
 				type: 'shadow',
 			},
-			triggerOn: 'click',
+			triggerOn: 'click'
 		},
         series: [
             {
                 type: "bar",
-				data: ticketsData.datasets,
+				barWidth: '60%',
+				data: sellersStats.datasets,
 				labelLine: {
 					show: true,
 				},
-				name: 'Biglietti Usciti',
+				name: 'Biglietti Venduti',
 				color: '#C114C8',
             }
 		],
@@ -97,7 +89,7 @@
 			end: numberOfBars > MAX_VISIBLE_BARS ? 100 / (numberOfBars / MAX_VISIBLE_BARS) : 100,
 			zoomOnMouseWheel: true,
 			moveOnMouseMove: true,
-			moveOnMouseWheel: false
+			moveOnMouseWheel: false,
 		}],
 		toolbox: {
 			show : true,
@@ -107,46 +99,38 @@
 			feature : {
 				saveAsImage: {
 					show: true, 
-					type: 'png', 
-					
+					type: 'png',
 					name: 'graph',
 					iconStyle: {
 						borderColor: currentTheme == 'dark' ? 'white' : 'rgb(55 65 81)',
 						borderWidth: 1.5,
-						
 					},
 					icon: `path://M 7 10 L 12 15 L 17 10 M 21 15 v 4 a 2 2 0 0 1 -2 2 H 5 a 2 2 0 0 1 -2 -2 v -4 M 12 4 L 12 15`,
 					emphasis:{
 						iconStyle:{
 							borderColor: '#C114C8'
 						}
-					}
+					},
 				},
 			}
 		},
     } as EChartsOptions;
 </script>
 
-<Card class=" w-full h-96">
-	<div class="mb-3 flex justify-between">
-		<div class="grid grid-cols-2 gap-4">
-			<div>
-				<h5 class="mb-2 inline-flex items-center font-normal leading-none text-gray-500 dark:text-gray-400 w-max">
-					Check-out
+<Card class="h-96 w-full">
+	<div class="flex w-full items-start justify-between">
+		<div class="flex-col items-center">
+			<div class="mb-1 flex items-center">
+				<h5 class="me-1 text-xl font-bold leading-none text-gray-900 dark:text-white">
+					Biglietti venduti a persona
 				</h5>
-				<p class="text-2xl font-bold leading-none text-gray-900 dark:text-white">
-					{numberOfSales}
-				</p>
 			</div>
 		</div>
-		<div>
-			<Select
-				class="mt-2"
-				items={timeOptions}
-				bind:value={selected}
-				placeholder="Scegli un'opzione"
-			/>
-		</div>
 	</div>
-	<Chart renderer="svg" {options}/>
+
+	{#if options !== null}
+		<div class="mt-5 h-full w-full">
+			<Chart renderer="svg" bind:options />
+		</div>
+	{/if}
 </Card>

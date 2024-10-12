@@ -10,7 +10,7 @@
 	import FeedbackToast from '$components/feedbacks/FeedbackToast.svelte';
 	import type { Ticket } from '$models/ticket';
 	import { user } from '$store/store';
-	import type { User } from 'lucia';
+	import type { User } from "$lib/auth/user";
 
 	export let data: User;
 	if (!$user)
@@ -34,7 +34,6 @@
 	};
 
 	const insertCodes = async () => {
-		// TODO: cambiare la funzione per generare i codici in modo che ne inserisca 50 alla volta per evitare blocchi da vercel
 		const codes = generateCodes();
 
 		for (let i = 0; i < codes.length; i += 50) {

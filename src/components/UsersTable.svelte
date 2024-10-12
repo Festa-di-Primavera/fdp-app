@@ -1,8 +1,10 @@
 <script lang="ts">
-	import { addPermission, capitalizeFirstLetter, getStringFromEnumValue, hasPermission, intToBitArray, removePermission } from '$lib/utils';
+	import { getStringFromEnumValue } from '$lib/utils/enums';
+	import { addPermission, hasPermission, intToBitArray, removePermission } from '$lib/utils/permissions';
+	import { capitalizeFirstLetter } from '$lib/utils/textFormat';
+	import { UserPermissions } from '$models/permissions';
+	import { user } from '$store/store';
 	import {
-		Badge,
-		Checkbox,
 		Button,
 		Input,
 		Popover,
@@ -15,7 +17,7 @@
 		TableHeadCell,
 		Tooltip
 	} from 'flowbite-svelte';
-	import type { User } from 'lucia';
+	import type { User } from "$lib/auth/user";
 	import {
 		ArrowDown01,
 		ArrowDownAZ,
@@ -23,27 +25,25 @@
 		ArrowUpAZ,
 		Check,
 		CheckCircle2,
+		ChefHat,
+		Coins,
+		Dna,
+		DollarSign,
+		DoorOpen,
 		Euro,
 		Filter,
+		Info,
+		LayoutDashboard,
 		PenBox,
+		ScanLine,
 		Search,
 		Ticket,
 		Trash2,
-		X,
-		XCircle,
-		Info,
-		DoorOpen,
 		Users,
-		LayoutDashboard,
-		Coins,
-		ChefHat,
-		DollarSign,
-		ScanLine,
-		Dna
+		X,
+		XCircle
 	} from 'lucide-svelte';
 	import { writable } from 'svelte/store';
-	import { UserPermissions } from '$models/permissions';
-	import { user } from '$store/store';
 	import FeedbackToast from './feedbacks/FeedbackToast.svelte';
 
 	export let users: User[];
@@ -369,14 +369,14 @@
 								{#each intToBitArray(item.permissions, Object.keys(UserPermissions).length / 2).reverse() as perm, index}
 									<button on:click={() => handlePermissionChange(item, Math.pow(2, index), !perm)}>
 										<svelte:component this={getPermissionIcon(Math.pow(2, index))} class={`w-4 ${perm ? "text-primary-300" : "text-slate-500"}`} />
+										<Tooltip color="primary" border>
+											{
+												capitalizeFirstLetter(getStringFromEnumValue(UserPermissions, Math.pow(2, index))
+												.toLowerCase()
+												.replace('_', ' '))
+											}
+										</Tooltip>
 									</button>
-									<Tooltip color="primary" border>
-										{
-											capitalizeFirstLetter(getStringFromEnumValue(UserPermissions, Math.pow(2, index))
-											.toLowerCase()
-											.replace('_', ' '))
-										}
-									</Tooltip>
 								{/each}
 							</div>
 						</TableBodyCell>

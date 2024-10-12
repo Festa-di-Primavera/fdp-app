@@ -1,7 +1,7 @@
 import { getClientDB } from '$lib/firebase/client.js';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { UserPermissions } from '$models/permissions';
-import { hasPermission } from '$lib/utils';
+import { hasPermission } from '$lib/utils/permissions';
 
 export async function GET({params, locals}) {
 	if(!locals.user){

@@ -4,12 +4,12 @@
 	import { onDestroy, onMount } from "svelte";
 	    
     import { goto } from "$app/navigation";
-    import type { User } from "lucia";
     import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
     import InfoCard from "$components/InfoCard.svelte";
     import QrReader from "$components/QrReader.svelte";
     import type { Ticket } from "$models/ticket";
     import { user } from "$store/store";
+	import type { User } from "$lib/auth/user";
 
 	export let data: User;
     if(!$user)

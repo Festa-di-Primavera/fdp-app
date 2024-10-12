@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ChartData } from '$lib/graphs/utils';
+	import type { ChartData } from '$lib/charts/utils';
 	import { Card } from 'flowbite-svelte';
 	import { Chart, type EChartsOptions } from 'svelte-echarts';
 	import { theme } from '$store/store';
