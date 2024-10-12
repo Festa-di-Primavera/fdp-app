@@ -1,20 +1,26 @@
 // routes/login/google/+server.ts
+import { google } from "$lib/lucia/auth";
 import { redirect } from "@sveltejs/kit";
-import { generateState } from "arctic";
-import { google, googleCodeVerifier } from "$lib/lucia/auth";
+import { generateCodeVerifier, generateState } from "arctic";
 
 import type { RequestEvent } from "@sveltejs/kit";
 
 export async function GET(event: RequestEvent): Promise<Response> {
 	const state = generateState();
-	const scopes = ["openid", "profile", "email"];
-	const url = await google.createAuthorizationURL(state, googleCodeVerifier, {scopes});
+	const codeVerifier = generateCodeVerifier();
+	const url = await google.createAuthorizationURL(state, codeVerifier, {scopes: ["openid", "profile", "email"]});
 
 	event.cookies.set("google_oauth_state", state, {
 		path: "/",
 		secure: import.meta.env.PROD,
 		httpOnly: true,
 		maxAge: 60 * 10,
+		sameSite: "lax"
+	});
+	event.cookies.set("google_code_verifier", codeVerifier, {
+		path: "/",
+		httpOnly: true,
+		maxAge: 60 * 10, // 10 minutes
 		sameSite: "lax"
 	});
 

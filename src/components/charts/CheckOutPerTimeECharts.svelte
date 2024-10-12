@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type ChartData, CheckInTimeSlot } from "$lib/graphs/utils";
+	import { type ChartData, CheckOutTimeSlot } from "$lib/charts/utils";
 	import { Card, Select } from "flowbite-svelte";
 	import { Chart, type EChartsOptions } from "svelte-echarts";
 	import { theme } from "$store/store";
@@ -20,12 +20,11 @@
 	export let ticketsData: ChartData;
 	export let timeWindow: number;
 
-	let selected: CheckInTimeSlot = CheckInTimeSlot.HOUR;
+	let selected: CheckOutTimeSlot = CheckOutTimeSlot.HALF_HOUR;
 	const timeOptions = [
-		{ value: CheckInTimeSlot.FIFTEEN_MINUTES, name: '15 min ' },
-		{ value: CheckInTimeSlot.HALF_HOUR, name: '30 min' },
-		{ value: CheckInTimeSlot.HOUR, name: '1 ora' },
-		{ value: CheckInTimeSlot.TWO_HOURS, name: '2 ore' }
+		{ value: CheckOutTimeSlot.FIFTEEN_MINUTES, name: '15 min ' },
+		{ value: CheckOutTimeSlot.HALF_HOUR, name: '30 min' },
+		{ value: CheckOutTimeSlot.HOUR, name: '1 ora' }
 	];
 	
 	$: numberOfBars = ticketsData.labels.length;
@@ -86,7 +85,7 @@
 				labelLine: {
 					show: true,
 				},
-				name: 'Biglietti Validati',
+				name: 'Biglietti Usciti',
 				color: '#C114C8',
             }
 		],
@@ -132,8 +131,8 @@
 	<div class="mb-3 flex justify-between">
 		<div class="grid grid-cols-2 gap-4">
 			<div>
-				<h5 class="mb-2 inline-flex items-center font-normal leading-none text-gray-500 dark:text-gray-400">
-					Check-in
+				<h5 class="mb-2 inline-flex items-center font-normal leading-none text-gray-500 dark:text-gray-400 w-max">
+					Check-out
 				</h5>
 				<p class="text-2xl font-bold leading-none text-gray-900 dark:text-white">
 					{numberOfSales}

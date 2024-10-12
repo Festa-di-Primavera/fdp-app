@@ -1,6 +1,6 @@
 import { getClientDB } from '$lib/firebase/client';
 import { lucia } from '$lib/lucia/auth';
-import { isSameAsOldPassword, verifyPasswordResetToken } from '$lib/lucia/utils/password';
+import { isSameAsOldPassword, verifyPasswordResetToken } from '$lib/auth/utils/password';
 import { hash } from '@node-rs/argon2';
 import { fail, redirect } from '@sveltejs/kit';
 import { collection, doc, runTransaction } from 'firebase/firestore';

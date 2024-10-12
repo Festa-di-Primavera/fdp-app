@@ -1,5 +1,5 @@
 // routes/login/google/callback/+server.ts
-import { firestoreDb, google, googleCodeVerifier, lucia } from "$lib/lucia/auth";
+import { firestoreDb, google, lucia } from "$lib/lucia/auth";
 import { OAuth2RequestError } from "arctic";
 import { generateIdFromEntropySize, type User } from "lucia";
 
@@ -10,15 +10,16 @@ export async function GET(event: RequestEvent): Promise<Response> {
 	const code = event.url.searchParams.get("code");
 	const state = event.url.searchParams.get("state");
 	const storedState = event.cookies.get("google_oauth_state") ?? null;
+	const codeVerifier = event.cookies.get("google_code_verifier") ?? null;
 
-	if (!code || !state || !storedState || state !== storedState) {
+	if (!code || !state || !storedState || state !== storedState || !codeVerifier) {
 		return new Response(null, {
 			status: 400
 		});
 	}
 
 	try {
-		const tokens = await google.validateAuthorizationCode(code, googleCodeVerifier);
+		const tokens = await google.validateAuthorizationCode(code, codeVerifier);
 		const googleUserResponse = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
 			headers: {
 				Authorization: `Bearer ${tokens.accessToken}`

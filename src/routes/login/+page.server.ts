@@ -1,6 +1,6 @@
 import { getClientDB } from '$lib/firebase/client';
 import { lucia } from '$lib/lucia/auth';
-import { generateEmailVerificationCode, isValidEmail, sendVerificationCode } from '$lib/lucia/utils/email';
+import { generateEmailVerificationCode, isValidEmail, sendVerificationCode } from '$lib/auth/utils/email';
 import { hash, verify } from '@node-rs/argon2';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { collection, deleteDoc, doc, getDocs, or, query, setDoc, where } from 'firebase/firestore';

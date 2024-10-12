@@ -1,7 +1,12 @@
 <script lang="ts">
+	import FeedbackToast from '$components/feedbacks/FeedbackToast.svelte';
+	import { getClientDB } from '$lib/firebase/client';
+	import { formatDate } from '$lib/utils/textFormat';
+	import type { Ticket } from '$models/ticket';
+	import { user } from '$store/store';
+	import { collection, onSnapshot, query, type Unsubscribe } from 'firebase/firestore';
 	import {
 		Button,
-		Datepicker,
 		Hr,
 		Indicator,
 		Input,
@@ -24,14 +29,8 @@
 		Pen,
 		XCircle
 	} from 'lucide-svelte';
-	import { writable } from 'svelte/store';
-	import FeedbackToast from '$components/feedbacks/FeedbackToast.svelte';
-	import type { Ticket } from '$models/ticket';
-	import { user } from '$store/store';
-	import { collection, onSnapshot, query, type Unsubscribe } from 'firebase/firestore';
-	import { getClientDB } from '$lib/firebase/client';
-	import { formatDate } from '$lib/utils';
 	import { onDestroy, onMount } from 'svelte';
+	import { writable } from 'svelte/store';
 
 	export let data: { currUser: User; sellers: Map<string, string> };
 

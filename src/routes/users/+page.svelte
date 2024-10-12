@@ -6,7 +6,8 @@
 	import UsersTable from '$components/UsersTable.svelte';
 	import FeedbackToast from '$components/feedbacks/FeedbackToast.svelte';
 	import { user } from '$store/store.js';
-	import { getStringFromEnumValue, intToBitArray } from '$lib/utils';
+	import { intToBitArray } from '$lib/utils/permissions';
+	import { getStringFromEnumValue } from '$lib/utils/enums';
 	import { UserPermissions } from '$models/permissions';
 
 	export let data: {

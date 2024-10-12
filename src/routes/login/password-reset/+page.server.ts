@@ -1,5 +1,5 @@
 import { getClientDB } from "$lib/firebase/client";
-import { generatePasswordResetToken, sendPasswordResetEmail } from "$lib/lucia/utils/password";
+import { generatePasswordResetToken, sendPasswordResetEmail } from "$lib/auth/utils/password";
 import { redirect, type Actions } from "@sveltejs/kit";
 import { collection, getDocs, query, where } from "firebase/firestore";
 

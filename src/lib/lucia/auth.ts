@@ -1,5 +1,5 @@
 import { dev } from "$app/environment";
-import { generateCodeVerifier, Google } from "arctic";
+import { Google } from "arctic";
 import { Lucia, TimeSpan } from "lucia";
 
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI } from "$env/static/private";
@@ -7,7 +7,6 @@ import { getClientDB } from "$lib/firebase/client";
 import { FirestoreAdapter } from "./firestore-adapter";
 
 export const google = new Google(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
-export const googleCodeVerifier = generateCodeVerifier();
 
 export const firestoreDb = getClientDB();
 

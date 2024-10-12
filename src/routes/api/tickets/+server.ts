@@ -3,7 +3,7 @@ import { collection, getDocs, query, setDoc, doc, where, updateDoc } from 'fireb
 import { getClientDB } from '$lib/firebase/client.js';
 import type { Ticket } from '$models/ticket';
 import type { User } from 'lucia';
-import { hasPermission } from '$lib/utils';
+import { hasPermission } from '$lib/utils/permissions';
 import { UserPermissions } from '$models/permissions';
 
 export async function GET({locals}) {

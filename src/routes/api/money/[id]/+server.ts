@@ -1,5 +1,5 @@
 import { getClientDB } from '$lib/firebase/client';
-import { hasPermission } from '$lib/utils.js';
+import { hasPermission } from '$lib/utils/permissions.js';
 import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 import type { User } from 'lucia';
 import { UserPermissions } from '$models/permissions';

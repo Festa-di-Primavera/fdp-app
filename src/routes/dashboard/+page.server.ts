@@ -3,7 +3,7 @@ import type { PageServerLoad } from "../$types";
 import { getClientDB } from '$lib/firebase/client';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import type { User } from 'lucia';
-import { hasPermission } from '$lib/utils';
+import { hasPermission } from '$lib/utils/permissions';
 import { UserPermissions } from '$models/permissions';
 
 export const load: PageServerLoad = async ({locals}) => {

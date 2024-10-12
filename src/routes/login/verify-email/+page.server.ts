@@ -1,6 +1,6 @@
 import { redirect, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "../$types";
-import { generateEmailVerificationCode, sendVerificationCode, verifyEmailVerificationCode } from "$lib/lucia/utils/email";
+import { generateEmailVerificationCode, sendVerificationCode, verifyEmailVerificationCode } from "$lib/auth/utils/email";
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) 

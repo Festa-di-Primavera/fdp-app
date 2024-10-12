@@ -6,7 +6,7 @@
 
 	import { enhance } from "$app/forms";
 	import { page } from '$app/stores';
-	import { hasPermission } from "$lib/utils";
+	import { hasPermission } from "$lib/utils/permissions";
 	import { UserPermissions } from "$models/permissions";
 	import { theme, user } from "$store/store";
 	import ChangePwModal from "./ChangePwModal.svelte";

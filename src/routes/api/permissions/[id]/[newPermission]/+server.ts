@@ -1,5 +1,5 @@
 import { getClientDB } from '$lib/firebase/client';
-import { addPermission, hasPermission, removePermission } from '$lib/utils';
+import { addPermission, hasPermission, removePermission } from '$lib/utils/permissions';
 
 import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { UserPermissions } from '$models/permissions';

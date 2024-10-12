@@ -34,7 +34,6 @@
 	};
 
 	const insertCodes = async () => {
-		// TODO: cambiare la funzione per generare i codici in modo che ne inserisca 50 alla volta per evitare blocchi da vercel
 		const codes = generateCodes();
 
 		for (let i = 0; i < codes.length; i += 50) {

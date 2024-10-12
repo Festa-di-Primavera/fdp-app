@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type ChartData, SalesTimeSlot } from "$lib/graphs/utils";
+	import { type ChartData, SalesTimeSlot } from "$lib/charts/utils";
 	import { Card, Select } from "flowbite-svelte";
 	import { Chart, type EChartsOptions } from "svelte-echarts";
 	import { theme } from "$store/store";
