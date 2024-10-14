@@ -2,7 +2,7 @@
 	import { Button, Input, Label, Modal, Spinner } from "flowbite-svelte";
 	import { CheckCircle2, Ticket, XCircle } from 'lucide-svelte';
 
-	import { convertCode } from "$lib/codeConverter";
+	import { convertCode } from "$lib/utils/tickets";
 	import type { User } from "$lib/auth/user";
 	import QrReader from "$components/QrReader.svelte";
 	import { user } from "$store/store";

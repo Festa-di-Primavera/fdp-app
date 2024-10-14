@@ -1,6 +1,6 @@
 <script lang="ts">
     import { Button, CloseButton, DarkMode, Drawer, Dropdown, DropdownItem, Modal } from "flowbite-svelte";
-    import { AlignJustify, DollarSign, DoorOpen, Home, LayoutDashboard, LogOut, ScanLine, ScrollText, Ticket, Users, Dna } from 'lucide-svelte';
+    import { AlignJustify, DollarSign, DoorOpen, Home, LayoutDashboard, LogOut, ScanLine, ScrollText, Ticket, Users, Dna, NotepadText} from 'lucide-svelte';
     import { sineIn } from 'svelte/easing';
     import Logo from "./Logo.svelte";
 
@@ -33,6 +33,12 @@
 			slug: "/users",
 			permission: UserPermissions.UTENTI,
 			icon: Users,
+		},
+		{
+			label: 'Blocchetti',
+			slug: "/blocks",
+			permission: UserPermissions.UTENTI,
+			icon: NotepadText,
 		},
 		{
 			label: 'Dashboard',
@@ -143,7 +149,7 @@
 				<div class="dark:text-white flex text-md items-center self-baseline w-full justify-between p-3 rounded-lg bg-gray-100 dark:bg-gray-600">
 					<button id="account" class="flex gap-4 text-md items-center truncate overflow-ellipsis pr-5">
 						{#if $user?.avatar_url}
-							<img src={$user?.avatar_url} alt="{$user.username[0]}" class="rounded-full w-8 h-8"/>
+							<img loading="lazy" src={$user?.avatar_url} alt="{$user.username[0]}" class="rounded-full w-8 h-8"/>
 						{:else}
 							<div class="rounded-full w-8 h-8 bg-gradient-to-br from-primary-700 to-primary-400 flex items-center justify-center text-white font-mono">
 								<span>{$user?.username[0].toUpperCase()}</span>

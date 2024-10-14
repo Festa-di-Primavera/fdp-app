@@ -22,7 +22,7 @@ export function formatDate(date: Date | null, alt: string): string {
 	const minutes = date.getMinutes().toString().padStart(2, '0'); // Minuti a due cifre
 	const seconds = date.getSeconds().toString().padStart(2, '0'); // Secondi a due cifre
 
-	return `${day} ${month} ${year} - ${hours}:${minutes}:${seconds}`;
+	return `${day} ${month} ${year}, ${hours}:${minutes}:${seconds}`;
 }
 
 // Capitalize first letter of every word in a string

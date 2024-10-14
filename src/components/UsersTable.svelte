@@ -328,7 +328,6 @@
 						{/if}
 					</div>
 				</TableHeadCell>
-				<TableHeadCell class="max-w-20 px-0 text-center">Blocchetti</TableHeadCell>
 				<TableHeadCell class="text-center">Elimina</TableHeadCell>
 			</TableHead>
 			<TableBody tableBodyClass="divide-y">
@@ -337,7 +336,7 @@
 						<TableBodyCell>
 							<span class="flex items-center gap-4 font-medium">
 								{#if item.avatar_url}
-									<img src={item.avatar_url} alt={item.username[0]} class="h-7 w-7 rounded-full" />
+									<img loading="lazy" src={item.avatar_url} alt={item.username[0]} class="h-7 w-7 rounded-full" />
 								{:else}
 									<div
 										class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary-700 to-primary-400 font-mono text-white"
@@ -407,17 +406,6 @@
 						<TableBodyCell>
 							<div class="grid w-full place-items-center">
 								<Button
-									disabled={!hasPermission(item.permissions, UserPermissions.VENDITA)}
-									class="mx-auto bg-primary-500 px-2 py-1 hover:bg-primary-600 dark:bg-primary-500 dark:hover:bg-primary-600"
-									on:click={() => triggerBlocksModal(item)}
-								>
-									<Ticket class="aspect-square w-4 text-gray-900 dark:text-white" />
-								</Button>
-							</div>
-						</TableBodyCell>
-						<TableBodyCell>
-							<div class="grid w-full place-items-center">
-								<Button
 									class="bg-red-500 px-2 py-1 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600"
 									on:click={() => {
 										currSelectedUser = item;
@@ -446,7 +434,6 @@
 							<span class="text-left">{totalProfit},00 €</span>
 						</div>
 					</TableBodyCell>
-					<TableBodyCell></TableBodyCell>
 					<TableBodyCell></TableBodyCell>
 				</TableBodyRow>
 			</TableBody>

@@ -1,7 +1,7 @@
 import { Timestamp, updateDoc, doc, getDoc, setDoc, collection } from 'firebase/firestore';
 import { getClientDB } from '$lib/firebase/client.js';
 import type { Ticket } from '$models/ticket';
-import { convertCode } from '$lib/codeConverter';
+import { convertCode } from '$lib/utils/tickets';
 import { hasPermission } from '$lib/utils/permissions';
 import { UserPermissions } from '$models/permissions';
 import type { User } from '$lib/auth/user';
