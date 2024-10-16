@@ -50,7 +50,7 @@ export async function sendVerificationCode(
 			<body style="font-family: Arial, sans-serif; margin: 0; padding: 0; color: #333;">
 				<div style="background-color: #ffffff; margin: 50px auto; padding: 20px; max-width: 600px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
 					<div style="text-align: center; background-color: #CD42D3; padding: 20px 0; border-radius: 10px 10px 0 0;">
-						<img src="https://festa-cus.it/email-logo.svg" alt="Festa di Primavera">
+						<img src="https://i.ibb.co/vJ1qSG5/email-logo.png" alt="email-logo" border="0" height="75rem"></a>
 					</div>
 					<div style="padding: 30px; text-align: center;">
 						<h2 style="font-size: 24px; color: #333; margin-bottom: 20px;">Benvenuto nell'app della Festa di Primavera!</h2>
