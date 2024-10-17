@@ -1,20 +1,21 @@
 <script lang="ts">
-	import { Button, Input, Label, Modal, NumberInput, Spinner, Toggle } from 'flowbite-svelte';
-	import { CheckCircle2, Ticket, XCircle } from 'lucide-svelte';
+	import { Button, Input, Modal, NumberInput, Spinner, Toggle } from 'flowbite-svelte';
+	import { CheckCircle2, XCircle } from 'lucide-svelte';
 
-	import type { User } from "$lib/auth/user";
 	import UsersTable from '$components/UsersTable.svelte';
 	import FeedbackToast from '$components/feedbacks/FeedbackToast.svelte';
-	import { user } from '$store/store.js';
-	import { intToBitArray } from '$lib/utils/permissions';
+	import type { User } from "$lib/auth/user";
 	import { getStringFromEnumValue } from '$lib/utils/enums';
+	import { intToBitArray } from '$lib/utils/permissions';
 	import { UserPermissions } from '$models/permissions';
+	import { user } from '$store/store.js';
 
 	export let data: {
 		user: User;
 		usersList: User[];
 	};
-	if (!$user) $user = data.user;
+	if (!$user)
+	$user = data.user;
 
 	// fetch all users
 	let users = data.usersList;
@@ -28,6 +29,7 @@
 	let message: string = '';
 	let error: boolean = false;
 	let timeOut: NodeJS.Timeout;
+	$: toastIcon = error ? XCircle : CheckCircle2;
 
 	// function to handle user delete
 	const handleUserDelete = async (user: User) => {
@@ -177,12 +179,6 @@
 		aliasModalOpen = false;
 		alias = '';
 	};
-
-	let blocksModalOpen: boolean = false;
-	let currentBlocks: string[] = [];
-	let ticketCode: string = '';
-	
-	$: toastIcon = error ? XCircle : CheckCircle2;
 </script>
 
 <svelte:head>
@@ -196,8 +192,6 @@
 		bind:aliasModalOpen
 		bind:deleteModalOpen
 		bind:debtModalOpen
-		bind:blocksModalOpen
-		bind:currentBlocks
 	/>
 	{#if currSelectedUser !== undefined}
 		<Modal title={`Elimina ${currSelectedUser.username}`} bind:open={deleteModalOpen} class="z-50">
@@ -309,53 +303,6 @@
 					Annulla
 				</Button>
 			</svelte:fragment>
-		</Modal>
-		<Modal
-			bind:open={blocksModalOpen}
-			title={`Blocchetti assegnati a ${currSelectedUser.username}`}
-			class="z-50"
-			outsideclose
-			autoclose
-			on:close={() => (ticketCode = '')}
-		>
-			<span class="text-md">
-				{#if currentBlocks.length > 0}
-					Blocchetti di
-				{/if}
-				<b>{currSelectedUser.username}</b>
-				{#if currentBlocks.length == 0}
-					non ha blocchetti assegnati
-				{/if}
-			</span>
-			{#if currentBlocks.length > 0}
-				<div class="flex flex-col gap-2">
-					{#each currentBlocks as block}
-						<span class="text-sm"> - {block}</span>
-					{/each}
-				</div>
-			{/if}
-			<div>
-				<Label class="text-md w-full font-medium text-black dark:text-white">
-					<div class="mb-2 flex flex-col">
-						Codice Blocco
-						<span class="text-xs font-normal text-gray-500"
-							>(biglietto qualsiasi del blocchetto)</span
-						>
-					</div>
-					<div class="flex w-full items-center justify-center gap-6">
-						<Input bind:value={ticketCode} autocomplete="off" placeholder="XNRF 45151">
-							<Ticket slot="left" class="h-6 w-6 text-primary-600 dark:text-white" />
-						</Input>
-						<Button
-							on:click={() => {
-								//addBlock(ticketCode, currSelectedUser.uid);
-							}}
-						>
-							Aggiungi
-						</Button>
-					</div>
-				</Label>
-			</div>
 		</Modal>
 	{/if}
 {:else}

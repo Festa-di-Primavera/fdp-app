@@ -1,6 +1,7 @@
 <script lang="ts">
+	import type { User } from "$lib/auth/user";
 	import { getStringFromEnumValue } from '$lib/utils/enums';
-	import { addPermission, hasPermission, intToBitArray, removePermission } from '$lib/utils/permissions';
+	import { addPermission, intToBitArray, removePermission } from '$lib/utils/permissions';
 	import { capitalizeFirstLetter } from '$lib/utils/textFormat';
 	import { UserPermissions } from '$models/permissions';
 	import { user } from '$store/store';
@@ -17,7 +18,6 @@
 		TableHeadCell,
 		Tooltip
 	} from 'flowbite-svelte';
-	import type { User } from "$lib/auth/user";
 	import {
 		ArrowDown01,
 		ArrowDownAZ,
@@ -49,12 +49,10 @@
 	export let users: User[];
 
 	export let currSelectedUser: User;
-	export let currentBlocks: string[];
 
 	export let aliasModalOpen: boolean;
 	export let deleteModalOpen: boolean;
 	export let debtModalOpen: boolean;
-	export let blocksModalOpen: boolean;
 
 	let color: 'green' | 'red' = 'green';
 	let feedbackToastMessage: string = '';
@@ -150,33 +148,6 @@
 	const triggerDebtModal = async (user: User) => {
 		currSelectedUser = user;
 		debtModalOpen = true;
-	};
-
-	const triggerBlocksModal = async (user: User) => {
-		currSelectedUser = user;
-		const response = await fetch(`/api/tickets/blocks/${user.id}`, {
-			method: 'GET',
-			headers: {
-				'Content-Type': 'application/json'
-				/* 'Authorization': `Bearer ${loginToken}` */
-			}
-		});
-		if (response.ok) {
-			currentBlocks = (await response.json()).blocks;
-			blocksModalOpen = true;
-		} else {
-			error = true;
-			color = 'red';
-			feedbackToastOpen = true;
-
-			clearTimeout(timeOut);
-			timeOut = setTimeout(() => {
-				feedbackToastOpen = false;
-				clearTimeout(timeOut);
-			}, 3500);
-
-			feedbackToastMessage = 'Errore nella lettura dei blocchetti';
-		}
 	};
 
 	// search and filter variables

@@ -18,8 +18,8 @@
 	bind:toastStatus={open}
 	{color}
 	class="fixed left-0 right-0 top-20 z-[999] mx-auto mb-5 mt-10 w-max rounded-lg border-{color}-500"
-	divClass="w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3 border border-{color}-600"
+	divClass="w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3 border"
 >
-	<svelte:component this={icon} class="h-6 w-6  text-{color}-400" slot="icon" />
-	<span class={`text-${color}-400 font-semibold`}>{message}</span>
+	<svelte:component this={icon} class="h-6 w-6 text-{color}-400" slot="icon" />
+	<span class="text-{color}-400 font-semibold">{message}</span>
 </Toast>

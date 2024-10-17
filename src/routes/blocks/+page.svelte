@@ -37,7 +37,7 @@
 			const resp = await fetch(
 				`/api/tickets/blocks/${seller?.id}/${encodeURIComponent(ticketCode)}`,
 				{
-					method: 'POST',
+					method: 'PUT',
 					headers: {
 						'Content-Type': 'application/json'
 					}

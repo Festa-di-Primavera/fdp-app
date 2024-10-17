@@ -3,7 +3,7 @@ import { hasPermission } from '$lib/utils/permissions';
 import { UserPermissions } from '$models/permissions';
 import { collection, doc, setDoc } from 'firebase/firestore';
 
-export async function POST({ params, locals }) {
+export async function PUT({ params, locals }) {
 	if (!locals.user) {
 		return new Response(JSON.stringify({ message: 'Non sei autenticato' }), {
 			status: 401,
