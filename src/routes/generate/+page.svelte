@@ -94,7 +94,7 @@
 </svelte:head>
 
 {#if $user}
-	<section class="flex h-full w-full flex-grow flex-wrap items-start justify-center gap-4 py-6">
+	<section class="flex h-full w-full flex-grow flex-wrap items-start justify-center gap-4 py-6 px-6">
 		<Card padding="md">
 			<div class="flex w-full max-w-96 flex-grow flex-col items-start gap-2">
 				<h1 class="text-4xl font-bold text-primary-600">Genera Biglietti</h1>

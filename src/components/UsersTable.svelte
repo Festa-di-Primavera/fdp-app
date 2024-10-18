@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { User } from "$lib/auth/user";
+	import type { User } from '$lib/auth/user';
 	import { getStringFromEnumValue } from '$lib/utils/enums';
 	import { addPermission, intToBitArray, removePermission } from '$lib/utils/permissions';
 	import { capitalizeFirstLetter } from '$lib/utils/textFormat';
@@ -19,9 +19,7 @@
 		Tooltip
 	} from 'flowbite-svelte';
 	import {
-		ArrowDown01,
 		ArrowDownAZ,
-		ArrowUp01,
 		ArrowUpAZ,
 		Check,
 		CheckCircle2,
@@ -30,7 +28,6 @@
 		Dna,
 		DollarSign,
 		DoorOpen,
-		Euro,
 		Filter,
 		Info,
 		LayoutDashboard,
@@ -52,13 +49,13 @@
 
 	export let aliasModalOpen: boolean;
 	export let deleteModalOpen: boolean;
-	export let debtModalOpen: boolean;
 
 	let color: 'green' | 'red' = 'green';
 	let feedbackToastMessage: string = '';
 	let error: boolean = false;
 	let feedbackToastOpen: boolean = false;
 	let timeOut: NodeJS.Timeout;
+	$: toastIcon = error ? XCircle : CheckCircle2;
 
 	// dropdown state variables
 	let dropdownOpenMap: { [key: string]: boolean } = {};
@@ -87,35 +84,35 @@
 	const handlePermissionChange = async (user: User, permission: UserPermissions, add: boolean) => {
 		dropdownOpenMap = { ...dropdownOpenMap, [user.id]: false };
 
-		try{
-			const response = await fetch(
-				`/api/permissions/${user.id}/${permission}`,
-				{
-					method: 'PUT',
-					headers: {'Content-Type': 'application/json'},
-					body: JSON.stringify({add: add})
-				},
-			)
-			
-			if(response.ok){
+		try {
+			const response = await fetch(`/api/permissions/${user.id}/${permission}`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ add: add })
+			});
+
+			if (response.ok) {
 				error = false;
 				color = 'green';
 
 				users = users.map((item: User) => {
 					if (item.id === user.id) {
-						item.permissions = add ? addPermission(user.permissions, permission) : removePermission(user.permissions, permission);
+						item.permissions = add
+							? addPermission(user.permissions, permission)
+							: removePermission(user.permissions, permission);
 					}
 					return item;
 				});
-				if($user?.id == user.id){
-					$user.permissions = add ? addPermission($user.permissions, permission) : removePermission($user.permissions, permission);
+				if ($user?.id == user.id) {
+					$user.permissions = add
+						? addPermission($user.permissions, permission)
+						: removePermission($user.permissions, permission);
 				}
-			}
-			else{
+			} else {
 				error = true;
 				color = 'red';
 			}
-			
+
 			feedbackToastMessage = (await response.json()).message;
 			feedbackToastOpen = true;
 
@@ -124,8 +121,7 @@
 				feedbackToastOpen = false;
 				clearTimeout(timeOut);
 			}, 3500);
-		}
-		catch(e) {
+		} catch (e) {
 			error = true;
 			color = 'red';
 			feedbackToastOpen = true;
@@ -145,17 +141,12 @@
 		aliasModalOpen = true;
 	};
 
-	const triggerDebtModal = async (user: User) => {
-		currSelectedUser = user;
-		debtModalOpen = true;
-	};
-
 	// search and filter variables
 	let searchTerm = '';
 	let filter = 'nome';
 	let filteredItems: User[] = [];
 
-	const sortKey = writable('username'); // username, email, alias, owned_money, total_from_sales
+	const sortKey = writable('username'); // username, email, alias
 	const sortDirection = writable(1);
 	const sortItems = writable<User[]>(filteredItems.slice());
 
@@ -188,7 +179,7 @@
 				let aVal: any;
 				let bVal: any;
 
-				if (key == 'alias' || key == 'owned_money' || key == 'total_from_sales') {
+				if (key == 'alias') {
 					aVal = a[key] || 0;
 					bVal = b[key] || 0;
 				} else if (key == 'username' || key == 'email' || key == 'email_verified') {
@@ -206,13 +197,6 @@
 			sortItems.set(sorted);
 		}
 	}
-	$: toastIcon = error ? XCircle : CheckCircle2;
-
-	let totalToClaim = users?.reduce((acc: number, curr: User) => acc + (curr.owned_money || 0), 0);
-	let totalProfit = users?.reduce(
-		(acc: number, curr: User) => acc + (curr.total_from_sales || 0),
-		0
-	);
 </script>
 
 {#if $user}
@@ -274,31 +258,6 @@
 						{/if}
 					</div>
 				</TableHeadCell>
-				<TableHeadCell on:click={() => sortTable('owned_money')} class="cursor-pointer select-none">
-					<div class="flex justify-center gap-1">
-						Debito (€)
-						{#if $sortKey === 'owned_money'}
-							<svelte:component
-								this={$sortDirection > 0 ? ArrowDown01 : ArrowUp01}
-								class="ml-1 h-4 w-4"
-							/>
-						{/if}
-					</div>
-				</TableHeadCell>
-				<TableHeadCell
-					on:click={() => sortTable('total_from_sales')}
-					class="max-w-[8.5rem] cursor-pointer select-none"
-				>
-					<div class="justify-left flex gap-1">
-						Tot. Vendite (€)
-						{#if $sortKey === 'total_from_sales'}
-							<svelte:component
-								this={$sortDirection > 0 ? ArrowDown01 : ArrowUp01}
-								class="ml-1 h-4 w-4"
-							/>
-						{/if}
-					</div>
-				</TableHeadCell>
 				<TableHeadCell class="text-center">Elimina</TableHeadCell>
 			</TableHead>
 			<TableBody tableBodyClass="divide-y">
@@ -307,7 +266,12 @@
 						<TableBodyCell>
 							<span class="flex items-center gap-4 font-medium">
 								{#if item.avatar_url}
-									<img loading="lazy" src={item.avatar_url} alt={item.username[0]} class="h-7 w-7 rounded-full" />
+									<img
+										loading="lazy"
+										src={item.avatar_url}
+										alt={item.username[0]}
+										class="h-7 w-7 rounded-full"
+									/>
 								{:else}
 									<div
 										class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary-700 to-primary-400 font-mono text-white"
@@ -335,16 +299,19 @@
 							</span>
 						</TableBodyCell>
 						<TableBodyCell>
-							<div class="grid grid-cols-5 gap-2 min-w-28">
+							<div class="grid min-w-28 grid-cols-5 gap-2">
 								{#each intToBitArray(item.permissions, Object.keys(UserPermissions).length / 2).reverse() as perm, index}
 									<button on:click={() => handlePermissionChange(item, Math.pow(2, index), !perm)}>
-										<svelte:component this={getPermissionIcon(Math.pow(2, index))} class={`w-4 ${perm ? "text-primary-300" : "text-slate-500"}`} />
+										<svelte:component
+											this={getPermissionIcon(Math.pow(2, index))}
+											class={`w-4 ${perm ? 'text-primary-300' : 'text-slate-500'}`}
+										/>
 										<Tooltip color="primary" border>
-											{
-												capitalizeFirstLetter(getStringFromEnumValue(UserPermissions, Math.pow(2, index))
-												.toLowerCase()
-												.replace('_', ' '))
-											}
+											{capitalizeFirstLetter(
+												getStringFromEnumValue(UserPermissions, Math.pow(2, index))
+													.toLowerCase()
+													.replace('_', ' ')
+											)}
 										</Tooltip>
 									</button>
 								{/each}
@@ -357,22 +324,6 @@
 									<PenBox class="h-5 w-5" />
 								</button>
 							</div>
-						</TableBodyCell>
-						<TableBodyCell class="min-w-52 max-w-64">
-							<div class="flex w-full items-center justify-around">
-								<span class="w-12 text-right">{item.owned_money || 0},00</span>
-								<Button
-									disabled={!item.owned_money}
-									size="xs"
-									class="flex items-center gap-1"
-									on:click={() => triggerDebtModal(item)}
-								>
-									<Euro class="h-4 w-4" /> Salda
-								</Button>
-							</div>
-						</TableBodyCell>
-						<TableBodyCell class="max-w-40">
-							<span class="w-max">{item.total_from_sales || 0},00</span>
 						</TableBodyCell>
 						<TableBodyCell>
 							<div class="grid w-full place-items-center">
@@ -389,24 +340,6 @@
 						</TableBodyCell>
 					</TableBodyRow>
 				{/each}
-				<TableBodyRow>
-					<!-- 4 empty table body cells -->
-					<TableBodyCell></TableBodyCell>
-					<TableBodyCell></TableBodyCell>
-					<TableBodyCell></TableBodyCell>
-					<TableBodyCell></TableBodyCell>
-					<TableBodyCell>
-						<div class="flex w-full items-center justify-center">
-							<span class="text-left">{totalToClaim},00 €</span>
-						</div>
-					</TableBodyCell>
-					<TableBodyCell>
-						<div class="justify-left flex w-full items-center">
-							<span class="text-left">{totalProfit},00 €</span>
-						</div>
-					</TableBodyCell>
-					<TableBodyCell></TableBodyCell>
-				</TableBodyRow>
 			</TableBody>
 		</Table>
 	</div>
