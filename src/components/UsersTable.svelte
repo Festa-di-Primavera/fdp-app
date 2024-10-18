@@ -299,7 +299,7 @@
 							</span>
 						</TableBodyCell>
 						<TableBodyCell>
-							<div class="grid min-w-28 grid-cols-5 gap-2">
+							<div class="grid w-max min-w-28 grid-cols-5 gap-2">
 								{#each intToBitArray(item.permissions, Object.keys(UserPermissions).length / 2).reverse() as perm, index}
 									<button on:click={() => handlePermissionChange(item, Math.pow(2, index), !perm)}>
 										<svelte:component

@@ -3,16 +3,15 @@
 	import type { User } from '$lib/auth/user';
 	import { user } from '$store/store';
 	import {
+		Button,
+		NumberInput,
 		Spinner,
 		Table,
 		TableBody,
 		TableBodyCell,
 		TableBodyRow,
 		TableHead,
-		TableHeadCell,
-		Button,
-		NumberInput,
-		Card
+		TableHeadCell
 	} from 'flowbite-svelte';
 	import { CheckCircle2, XCircle } from 'lucide-svelte';
 
@@ -102,19 +101,25 @@
 			class="relative overflow-visible overflow-x-auto rounded-md shadow-md sm:rounded-lg"
 		>
 			<TableHead>
-				<TableHeadCell class="p-0 max-w-5"></TableHeadCell>
+				<TableHeadCell class="max-w-5 text-nowrap p-0"></TableHeadCell>
 				<TableHeadCell
-					class="sticky left-0 h-full cursor-pointer select-none bg-gray-50 dark:bg-gray-700"
+					class="sticky left-0 h-full cursor-pointer select-none text-nowrap bg-gray-50 dark:bg-gray-700"
 					>Venditore</TableHeadCell
 				>
-				<TableHeadCell class="cursor-pointer select-none text-center">Totale Venduto</TableHeadCell>
-				<TableHeadCell class="cursor-pointer select-none text-center">Da riscuotere</TableHeadCell>
-				<TableHeadCell class="cursor-pointer select-none text-center">Salda debito</TableHeadCell>
+				<TableHeadCell class="cursor-pointer select-none text-nowrap text-center"
+					>Totale Venduto</TableHeadCell
+				>
+				<TableHeadCell class="cursor-pointer select-none text-nowrap text-center"
+					>Da riscuotere</TableHeadCell
+				>
+				<TableHeadCell class="cursor-pointer select-none text-nowrap text-center"
+					>Salda debito</TableHeadCell
+				>
 			</TableHead>
 			<TableBody tableBodyClass="divide-y">
 				{#each data.sellers || [] as item, index}
 					<TableBodyRow class="w-full">
-						<TableBodyCell class="sticky left-0 bg-inherit p-0 pl-5">
+						<TableBodyCell class="bg-inherit p-0 pl-5">
 							{#if index < 3}
 								<!-- Classifica -->
 								<span
@@ -122,27 +127,33 @@
 										? 'text-yellow-400'
 										: index == 1
 											? 'text-gray-400'
-											: 'text-orange-500'} p-0 m-0 font-mono text-xl">#{index + 1}</span
+											: 'text-orange-500'} m-0 p-0 font-mono text-xl">#{index + 1}</span
 								>
 							{/if}
 						</TableBodyCell>
-						<TableBodyCell class="sticky left-0 bg-inherit">
-							<span class="flex items-center gap-4 font-medium">
-								{#if item.avatar_url}
-									<img
-										loading="lazy"
-										src={item.avatar_url}
-										alt={item.username[0]}
-										class="h-7 w-7 rounded-full"
-									/>
-								{:else}
-									<div
-										class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary-700 to-primary-400 font-mono text-white"
-									>
-										<span>{item.username[0].toUpperCase()}</span>
-									</div>
-								{/if}
-								<span class="mr-4">{item.username}</span>
+						<TableBodyCell class="sticky left-0 z-10 bg-inherit">
+							<span
+								class="flex items-center gap-0 overflow-hidden font-medium md:gap-4 md:overflow-visible"
+							>
+								<div class="hidden md:block">
+									{#if item.avatar_url}
+										<img
+											loading="lazy"
+											src={item.avatar_url}
+											alt={item.username[0]}
+											class="h-7 w-7 rounded-full object-cover"
+										/>
+									{:else}
+										<div
+											class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary-700 to-primary-400 font-mono text-white"
+										>
+											<span>{item.username[0].toUpperCase()}</span>
+										</div>
+									{/if}
+								</div>
+								<span class="max-w-24 overflow-hidden overflow-ellipsis md:max-w-none"
+									>{item.username}</span
+								>
 							</span>
 						</TableBodyCell>
 						<TableBodyCell class="text-center">
@@ -157,7 +168,7 @@
 									min="1"
 									max={item.owned_money}
 									bind:value={debtToClaimMap[item.id]}
-									class="w-24 text-center"
+									class="z-[1] w-max text-center"
 									disabled={item.owned_money === 0}
 								/>
 								<span class="text-nowrap">su € {item.owned_money}</span>
