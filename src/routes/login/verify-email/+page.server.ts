@@ -14,7 +14,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 export const actions: Actions = {
 	resend: async ({locals}) => {
-		console.log("resend");
 		if (!locals.user)
 			return redirect(302, "/login");
 

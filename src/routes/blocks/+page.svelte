@@ -31,8 +31,6 @@
 	$: toastIcon = error ? XCircle : CheckCircle2;
 
 	const addBlock = async (ticketCode: string, seller: User | null) => {
-		console.log(seller);
-		console.log(ticketCode);
 		try {
 			const resp = await fetch(
 				`/api/tickets/blocks/${seller?.id}/${encodeURIComponent(ticketCode)}`,

@@ -139,7 +139,6 @@ export const actions: Actions = {
 		else redirect(302, '/login/verify-email');
 	},
 	delete: async (event) => {
-		console.log('deleteAccount');
 
 		if (!event.locals.user) {
 			return fail(400, {

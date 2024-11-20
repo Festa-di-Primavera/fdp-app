@@ -16,6 +16,7 @@ export function isValidEmail(email: string): boolean {
 	return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
 }
 
+/// Generate a random 6-digit code and store it in the database
 export async function generateEmailVerificationCode(
 	userId: string,
 	email: string
@@ -32,6 +33,7 @@ export async function generateEmailVerificationCode(
 	return code;
 }
 
+/// Send an email with the verification code to the user using resend
 export async function sendVerificationCode(
 	email: string,
 	code: string
@@ -69,6 +71,7 @@ export async function sendVerificationCode(
 	);
 }
 
+/// Verify the email verification code and update the user's email_verified field
 export const verifyEmailVerificationCode = async (userId: string, code: string) => {
 	const usersCollection = collection(getClientDB(), 'users');
 

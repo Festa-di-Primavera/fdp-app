@@ -82,7 +82,7 @@
 	};
 
 	let open = false;
-	let color: 'green' | 'red' | 'yellow' = 'red';
+	let color: 'green' | 'red' | 'yellow';
 	let timeOut: NodeJS.Timeout;
 	let message = '';
 	let error = false;

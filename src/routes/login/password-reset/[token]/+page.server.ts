@@ -10,7 +10,6 @@ export const load: PageServerLoad = async ({ params }) => {
 	const passwordResetToken = params.token;
 
 	if (!passwordResetToken) {
-		console.log('invalid token');
 		fail(400, {
 			error: true,
 			message: 'Invalid password reset token'
@@ -20,7 +19,6 @@ export const load: PageServerLoad = async ({ params }) => {
 	const { error, message } = await verifyPasswordResetToken(passwordResetToken);
 
 	if (error) {
-		console.log('error', message);
 		fail(400, {
 			error: true,
 			message
@@ -39,32 +37,27 @@ export const actions = {
 		const passwordResetToken = formData.get('token') as string;
 
 		if (!password || !passwordRepeat) {
-			console.log('password fields are required');
-			return { error: true, message: 'Password fields are required' };
+			return { error: true, message: 'La nuova password non può essere vuota' };
 		}
 
 		if (!passwordResetToken) {
-			console.log('invalid token');
-			return { error: true, message: 'Invalid password reset token' };
+			return { error: true, message: 'Token di reset password invalido!' };
 		}
 
 		if (password !== passwordRepeat) {
-			console.log('passwords do not match');
-			return { error: true, message: 'Passwords do not match' };
+			return { error: true, message: 'Le password non coincidono' };
 		}
 
 		const { error, userId, message } = await verifyPasswordResetToken(passwordResetToken);
 
 		if (error) {
-			console.log('error', message);
 			return { error: true, message };
 		}
 
 		if (userId) {
 			//check if password is equal to previous password
 			if(await isSameAsOldPassword(userId, password)){
-				console.log('Password is the same as the previous one');
-				return { error: true, message: 'Password is the same as the previous one' };
+				return { error: true, message: 'La password è uguale alla precedente' };
 			}
 
 			const passwordHash = await hash(password, {
@@ -90,6 +83,6 @@ export const actions = {
 			redirect(302, '/login');
 		}
 
-		return { error: false, message: 'Password reset successful' };
+		return { error: false, message: 'Password resettata correttamente!' };
 	}
 };

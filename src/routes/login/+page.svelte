@@ -99,7 +99,7 @@
 				<span>Login con Google</span>
 			</a>
 		</Card>
-		<div class="border-[1px] border-green-400 w-full mb-5"/>
+		<div class="border-[1px] w-full mb-5"/>
 		<form class="flex w-full flex-col gap-3" method="post" use:enhance action="?/{option === 'login' ? 'signin' : 'signup'}">
 			<h1 class="w-max text-3xl font-semibold text-primary-600">
 				{option === 'login' ? 'Accedi' : option === 'register' ? 'Registrati' : 'Recupera password'}
