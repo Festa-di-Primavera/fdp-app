@@ -1,8 +1,11 @@
 import type { User } from "$lib/auth/user";
 
 const OFFSET = -45150;
-export function convertCode(code: string){
+export function convertCode(code: string | undefined): string | null {
 	try{
+		if(code === undefined || code === null)
+			return null;
+		
 		code = decodeURIComponent(code);
 	}
 	catch{

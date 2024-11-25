@@ -191,4 +191,4 @@
 	</div>
 {/if}
 
-<FeedbackToast bind:open={changeToastOpen} bind:color bind:icon={toastIcon} bind:message />
+<FeedbackToast bind:open={changeToastOpen} bind:color bind:ToastIcon={toastIcon} bind:message />

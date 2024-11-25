@@ -86,7 +86,7 @@
 	let timeOut: NodeJS.Timeout;
 	let message = '';
 	let error = false;
-	$: icon = error ? XCircle : CheckCircle2;
+	$: toastIcon= error ? XCircle : CheckCircle2;
 </script>
 
 <svelte:head>
@@ -227,4 +227,4 @@
 	</div>
 {/if}
 
-<FeedbackToast bind:open bind:color bind:message bind:icon />
+<FeedbackToast bind:open bind:color bind:message bind:toastIcon />

@@ -48,7 +48,7 @@
 	}
 	$: disableButton =
 		validatorError || lessThanEightChars || noUpperCase || noNumber || noSpecialChar;
-	$: toastIcon = error ? XCircle : CheckCircle2;
+	$: ToastIcon = error ? XCircle : CheckCircle2;
 
 	async function passwordReset() {
 		if (newPassword === oldPassword) {
@@ -239,5 +239,5 @@
 	bind:open={feedbackToastOpen}
 	bind:color
 	bind:message={toastMessage}
-	bind:icon={toastIcon}
+	bind:ToastIcon
 />

@@ -3,7 +3,11 @@
 	import { Button } from 'flowbite-svelte';
 	import type { Ticket } from '$models/ticket';
 
-	export let tickets: Ticket[] = [];
+	interface Props {
+		tickets?: Ticket[];
+	}
+
+	let { tickets = $bindable([]) }: Props = $props();
 
 	function downloadCSV() {
 		const rows = [

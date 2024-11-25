@@ -20,15 +20,23 @@
 	} from 'flowbite-svelte';
 	import { CheckCircle2, UserCog, UserPlus, XCircle, UserMinus, Search } from 'lucide-svelte';
 
-	export let data: { user: User; sellers: User[]; blockList: Block[] };
-	if (!$user) $user = data.user;
+	interface Props {
+		data: { user: User; sellers: User[]; blockList: Block[] };
+	}
 
-	let error: boolean = false;
-	let color: 'green' | 'red' = 'green';
-	let message: string = '';
-	let changeToastOpen: boolean = false;
+	let { data }: Props = $props();
+	if (!$user)
+		$user = data.user;
+
+	let error: boolean = $state(false);
+	let color: 'green' | 'red' = $state('green');
+	let message: string = $state('');
+	let changeToastOpen: boolean = $state(false);
 	let timeOut: NodeJS.Timeout;
-	$: toastIcon = error ? XCircle : CheckCircle2;
+	let ToastIcon = $state(CheckCircle2);
+	$effect(() => {
+		ToastIcon = error ? XCircle : CheckCircle2;
+	});
 
 	const addBlock = async (ticketCode: string, seller: User | null) => {
 		try {
@@ -79,8 +87,8 @@
 		}
 	};
 
-	let searchTerm: string = '';
-	$: blocks = data.blockList.filter((block) => block.id.includes(searchTerm));
+	let searchTerm: string = $state('');
+	let blocks = $derived(data.blockList.filter((block) => block.id.includes(searchTerm)));
 </script>
 
 <svelte:head>
@@ -146,7 +154,7 @@
 									{#if block.assigned_by?.avatar_url}
 										<img
 											loading="lazy"
-											on:error={() => console.log('error')}
+											onerror={() => console.log('error')}
 											src={block.assigned_by?.avatar_url}
 											alt={block.assigned_by?.alias[0]}
 											class="h-7 w-7 rounded-full"
@@ -265,4 +273,4 @@
 	</div>
 {/if}
 
-<FeedbackToast bind:open={changeToastOpen} bind:color bind:icon={toastIcon} bind:message />
+<FeedbackToast bind:open={changeToastOpen} bind:color bind:ToastIcon bind:message />

@@ -1,7 +1,11 @@
 <script lang="ts">
-  export let hatClass: string = "dark:fill-white fill-black";
-  export let birdClass: string = "dark:fill-white fill-black";
-  export let textClass: string = "dark:fill-white fill-black";
+  interface Props {
+    hatClass?: string;
+    birdClass?: string;
+    textClass?: string;
+  }
+
+  let { hatClass = "dark:fill-white fill-black", birdClass = "dark:fill-white fill-black", textClass = "dark:fill-white fill-black" }: Props = $props();
 </script>
 
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="100 320 400 200" class="w-36">

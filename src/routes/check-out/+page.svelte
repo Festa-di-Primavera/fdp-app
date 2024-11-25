@@ -1,265 +1,298 @@
 <script lang="ts">
-	import { Button, Input, Label, Modal, Spinner } from "flowbite-svelte";
-	import { AlertCircle, Check, CheckCircle2, Ticket as TicketIcon, X, XCircle } from 'lucide-svelte';
-	import { onDestroy, onMount } from "svelte";
-	    
-    import { goto } from "$app/navigation";
-    import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
-    import InfoCard from "$components/InfoCard.svelte";
-    import QrReader from "$components/QrReader.svelte";
-    import type { Ticket } from "$models/ticket";
-    import { user } from "$store/store";
-	import type { User } from "$lib/auth/user";
+	import { Button, Input, Label, Modal, Spinner } from 'flowbite-svelte';
+	import {
+		AlertCircle,
+		Check,
+		CheckCircle2,
+		Ticket as TicketIcon,
+		X,
+		XCircle
+	} from 'lucide-svelte';
+	import { onDestroy, onMount } from 'svelte';
 
-	export let data: User;
-    if(!$user)
-        $user = data;
+	import { goto } from '$app/navigation';
+	import FeedbackToast from '$components/feedbacks/FeedbackToast.svelte';
+	import InfoCard from '$components/InfoCard.svelte';
+	import QrReader from '$components/QrReader.svelte';
+	import type { Ticket } from '$models/ticket';
+	import { user } from '$store/store';
+	import type { User } from '$lib/auth/user';
 
-	let ticketCode: string = '';
-	let ticketCodeInput: string = '';
-
-    let ticket: Ticket;
-    let feedbackToastOpen: boolean = false;
-    let feedbackMessage: string = '';
-    let redirectTimeOut: NodeJS.Timeout;
-    let timeOut: NodeJS.Timeout;
-    let errorsModalOpen: boolean = false;
-
-    const closeErrorsModal = () => {
-		errorsModalOpen = false;
+	interface Props {
+		data: User;
 	}
 
+	let { data }: Props = $props();
+	if (!$user) $user = data;
 
-    let ticketStatus: 'alert' | 'error' | 'success' | null = null;
+	let ticketCode: string = $state('');
+	let ticketCodeInput: string = $state('');
 
-    let color: 'green' | 'red' | 'yellow' = 'green';
-    
-    let ticketInfos: Element | null = null;
+	let ticket: Ticket | undefined = $state();
+	let feedbackToastOpen: boolean = $state(false);
+	let feedbackMessage: string = $state('');
+	let redirectTimeOut: NodeJS.Timeout;
+	let timeOut: NodeJS.Timeout;
+	let errorsModalOpen: boolean = $state(false);
 
-    function scrollToDiv() {
-        ticketInfos?.scrollIntoView({
-            behavior: 'smooth',
-        });
-    }
+	const closeErrorsModal = () => {
+		errorsModalOpen = false;
+	};
 
-    async function checkOutTicket(code: string){        
-        scrollToDiv();
+	let ticketStatus: 'alert' | 'error' | 'success' | null = $state(null);
 
-        const response = await fetch(`/api/tickets/checkout/${encodeURIComponent(code)}`,
-            {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
+	let color: 'green' | 'red' | 'yellow' = $state('green');
 
-        const body = (await response.json());
-        let message = body.message
-        
-        if(response.status == 404){
-            ticket = {
-                ticketID: code,
-                name: '',
-                surname: '',
-                seller: '',
-                soldAt: null,
-                checkIn: null,
-                checkOut: null,
-                newCheckIn: null,
-            };
+	let ticketInfos: Element | null = null;
 
-            triggerPopup(message, 'red', 'error');
-            ticketCodeInput = '';
-            return
-        }
-        
-        let tick = body.ticket
+	function scrollToDiv() {
+		ticketInfos?.scrollIntoView({
+			behavior: 'smooth'
+		});
+	}
 
-        if(response.status == 402){
-            ticket = {
-                ticketID: code,
-                name: tick.name,
-                surname: tick.surname,
-                seller: tick.seller,
-                soldAt: tick.soldAt,
-                checkIn: tick.checkIn,
-                checkOut: tick.checkOut,
-                newCheckIn: tick.newCheckIn
-            };
+	async function checkOutTicket(code: string) {
+		scrollToDiv();
 
-            triggerPopup(message, 'red', 'error');
-            ticketCodeInput = '';
-            return
-        }
+		const response = await fetch(`/api/tickets/checkout/${encodeURIComponent(code)}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
 
-        if(response.status === 409 || response.status === 406){
-            ticket = {
-                ticketID: code,
-                name: tick.name,
-                surname: tick.surname,
-                seller: tick.seller,
-                soldAt: tick.soldAt,
-                checkIn: tick.checkIn,
-                checkOut: tick.checkOut,
-                newCheckIn: tick.newCheckIn,
-            };
+		const body = await response.json();
+		let message = body.message;
 
-            triggerPopup(message, 'yellow', 'alert');
-            ticketCodeInput = '';
-            return
-        }
+		if (response.status == 404) {
+			ticket = {
+				ticketID: code,
+				name: '',
+				surname: '',
+				seller: '',
+				soldAt: null,
+				checkIn: null,
+				checkOut: null,
+				newCheckIn: null
+			};
 
-        try{
-            ticket = {
-                ticketID: code,
-                name: tick.name,
-                surname: tick.surname,
-                seller: response.status !== 206 ? tick.seller : 'Non Trovato',
-                soldAt: tick.soldAt,
-                checkIn: tick.checkIn,
-                checkOut: tick.checkOut,
-                newCheckIn: tick.newCheckIn,
-            };
+			triggerPopup(message, 'red', 'error');
+			ticketCodeInput = '';
+			return;
+		}
 
-            triggerPopup(message, 'green', null);
-            ticketCodeInput = '';
-        }
-        catch(e){
-            triggerPopup('Errore inaspettato', 'red', 'error');
-            ticketCodeInput = '';
-        }
-        return;
-    }
+		let tick = body.ticket;
 
-    function triggerPopup(message: string, col: 'red' | 'green' | 'yellow', status: 'error' | 'alert' | 'success' | null){
-        feedbackMessage = message;
-        if(status != null)
-            errorsModalOpen = true;
-        else
-            feedbackToastOpen = true;
-        color = col;
-        ticketStatus = status;
+		if (response.status == 402) {
+			ticket = {
+				ticketID: code,
+				name: tick.name,
+				surname: tick.surname,
+				seller: tick.seller,
+				soldAt: tick.soldAt,
+				checkIn: tick.checkIn,
+				checkOut: tick.checkOut,
+				newCheckIn: tick.newCheckIn
+			};
 
-        clearTimeout(timeOut);
-        if(ticketStatus === null){
-            timeOut = setTimeout(() => {
-                ticketStatus = null;
-                feedbackToastOpen = false;
-                clearTimeout(timeOut);
-            }, 3500);
-        }
-    }   
+			triggerPopup(message, 'red', 'error');
+			ticketCodeInput = '';
+			return;
+		}
 
-    const reset = () => {
-        ticket = {
-            ticketID: '',
-            name: '',
-            surname: '',
-            seller: '',
-            soldAt: null,
-            checkIn: null,
-            checkOut: null,
-            newCheckIn: null,
-        };
+		if (response.status === 409 || response.status === 406) {
+			ticket = {
+				ticketID: code,
+				name: tick.name,
+				surname: tick.surname,
+				seller: tick.seller,
+				soldAt: tick.soldAt,
+				checkIn: tick.checkIn,
+				checkOut: tick.checkOut,
+				newCheckIn: tick.newCheckIn
+			};
 
-        ticketCodeInput = '';
-        ticketCode = '';
-        feedbackToastOpen = false;
-        ticketStatus = null;
-        color = 'green';
-    }
+			triggerPopup(message, 'yellow', 'alert');
+			ticketCodeInput = '';
+			return;
+		}
 
-    const getRemainingTime = () => {
-        let now = new Date();
-        let checkOutTime = new Date();
-        checkOutTime.setHours(16,52,0, 0);
-        
-        return checkOutTime.getTime() - now.getTime();
-    }
+		try {
+			ticket = {
+				ticketID: code,
+				name: tick.name,
+				surname: tick.surname,
+				seller: response.status !== 206 ? tick.seller : 'Non Trovato',
+				soldAt: tick.soldAt,
+				checkIn: tick.checkIn,
+				checkOut: tick.checkOut,
+				newCheckIn: tick.newCheckIn
+			};
 
-    const onKeyDown = (e: KeyboardEvent) => {
-        if(e.key === 'Enter' && ticketCodeInput !== ''){
-            checkOutTicket(ticketCodeInput);
-        }
-    }
+			triggerPopup(message, 'green', null);
+			ticketCodeInput = '';
+		} catch (e) {
+			triggerPopup('Errore inaspettato', 'red', 'error');
+			ticketCodeInput = '';
+		}
+		return;
+	}
 
-    onMount(async() => {        
-        ticketInfos = document.querySelector('#ticketInfos')
+	function triggerPopup(
+		message: string,
+		col: 'red' | 'green' | 'yellow',
+		status: 'error' | 'alert' | 'success' | null
+	) {
+		feedbackMessage = message;
+		if (status != null) errorsModalOpen = true;
+		else feedbackToastOpen = true;
+		color = col;
+		ticketStatus = status;
 
-        redirectTimeOut = setTimeout(() => {
-            clearTimeout(redirectTimeOut);
-            goto('/?checkOutExpired')
-        }, getRemainingTime());
+		clearTimeout(timeOut);
+		if (ticketStatus === null) {
+			timeOut = setTimeout(() => {
+				ticketStatus = null;
+				feedbackToastOpen = false;
+				clearTimeout(timeOut);
+			}, 3500);
+		}
+	}
+
+	const reset = () => {
+		ticket = {
+			ticketID: '',
+			name: '',
+			surname: '',
+			seller: '',
+			soldAt: null,
+			checkIn: null,
+			checkOut: null,
+			newCheckIn: null
+		};
+
+		ticketCodeInput = '';
+		ticketCode = '';
+		feedbackToastOpen = false;
+		ticketStatus = null;
+		color = 'green';
+	};
+
+	const getRemainingTime = () => {
+		let now = new Date();
+		let checkOutTime = new Date();
+		checkOutTime.setHours(16, 52, 0, 0);
+
+		return checkOutTime.getTime() - now.getTime();
+	};
+
+	const onKeyDown = (e: KeyboardEvent) => {
+		if (e.key === 'Enter' && ticketCodeInput !== '') {
+			checkOutTicket(ticketCodeInput);
+		}
+	};
+
+	onMount(async () => {
+		ticketInfos = document.querySelector('#ticketInfos');
+
+		redirectTimeOut = setTimeout(() => {
+			clearTimeout(redirectTimeOut);
+			goto('/?checkOutExpired');
+		}, getRemainingTime());
 	});
-    
-    onDestroy(() => {
-        clearTimeout(redirectTimeOut);
-    });
 
-    $:{
-        if(ticketCode !== ''){
-            checkOutTicket(ticketCode)
-        }
-        else{
-            reset();
-        }
-    }
-    $: toastIcon = ticketStatus === 'error' ? XCircle : (ticketStatus === 'alert' ? AlertCircle : CheckCircle2)
+	onDestroy(() => {
+		clearTimeout(redirectTimeOut);
+	});
+
+	$effect(() => {
+		if (ticketCode !== '') {
+			checkOutTicket(ticketCode);
+		} else {
+			reset();
+		}
+	});
+	let ToastIcon = $state(CheckCircle2);
+	$effect(() => {
+		ToastIcon =
+			ticketStatus === 'error' ? XCircle : ticketStatus === 'alert' ? AlertCircle : CheckCircle2;
+	});
 </script>
 
 <svelte:head>
-    <title>Check-out</title>
+	<title>Check-out</title>
 </svelte:head>
 
-<section class="w-full h-full flex flex-col items-center gap-4 flex-grow">
-    <div class="w-full px-5 pt-5 flex flex-col gap-4 items-start max-w-96 pb-12 flex-grow">
-        {#if $user}
-            <h1 class="text-primary-600 font-bold text-4xl">Check-out</h1>
-            <p class="dark:text-white text-justify">Scansionare il QR per effettuare il check-out entro le 20:00</p>
-            <div class="w-full">
-                <Label class="text-black dark:text-white font-medium text-md">
+<section class="flex h-full w-full flex-grow flex-col items-center gap-4">
+	<div class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5">
+		{#if $user}
+			<h1 class="text-4xl font-bold text-primary-600">Check-out</h1>
+			<p class="text-justify dark:text-white">
+				Scansionare il QR per effettuare il check-out entro le 20:00
+			</p>
+			<div class="w-full">
+				<Label class="text-md font-medium text-black dark:text-white">
 					Codice Biglietto <span class="text-primary-700">*</span>
-					<Input required class="mt-1" bind:value={ticketCodeInput} name="code" autocomplete="off" on:keypress={onKeyDown}>
-						<TicketIcon slot="left" class="w-6 h-6 text-primary-600 dark:text-white"/>
+					<Input
+						required
+						class="mt-1"
+						bind:value={ticketCodeInput}
+						name="code"
+						autocomplete="off"
+						on:keypress={onKeyDown}
+					>
+						<TicketIcon slot="left" class="h-6 w-6 text-primary-600 dark:text-white" />
 
-                        <div slot="right" class="h-full flex items-center gap-2">
-                            {#if ticketCodeInput !== ''}
-                                <button on:click={() => checkOutTicket(ticketCodeInput)}>
-                                    <Check color="green"/>
-                                </button>
-                                <button on:click={reset}>
-                                    <X color="indianred"/>
-                                </button>
-                            {/if}
-                        </div>
+						<div slot="right" class="flex h-full items-center gap-2">
+							{#if ticketCodeInput !== ''}
+								<button onclick={() => checkOutTicket(ticketCodeInput)}>
+									<Check color="green" />
+								</button>
+								<button onclick={reset}>
+									<X color="indianred" />
+								</button>
+							{/if}
+						</div>
 					</Input>
 				</Label>
-                <div class="w-full my-6 flex items-center justify-center">
-                    <QrReader bind:codeResult={ticketCode}/>
-                </div>
+				<div class="my-6 flex w-full items-center justify-center">
+					<QrReader bind:codeResult={ticketCode} />
+				</div>
 
-                <InfoCard
-                    bind:ticketCode
-                    bind:ticket
-                    bind:color
-                    focus="checkOut"
-                />
+				<InfoCard bind:ticketCode bind:ticket bind:color focus="checkOut" />
 
-                <FeedbackToast bind:open={feedbackToastOpen} bind:color bind:message={feedbackMessage} bind:icon={toastIcon}/>
-                <Modal bind:open={errorsModalOpen} on:close={closeErrorsModal} size="xs" dismissable={false}>
-                    <span class="text-3xl justify-center my-5 font-semibold text-{color}-500 flex items-center gap-2">
-                        <svelte:component this={ticketStatus === 'error' ? XCircle : (ticketStatus === 'alert' ? AlertCircle : CheckCircle2)} class="w-6 h-6  text-{color}-400"/>
-                        {feedbackMessage}
-                    </span>
-                    <Button class="w-full" on:click={closeErrorsModal} slot="footer">Chiudi</Button>
-                </Modal>
-            </div>
-        {:else}
-            <div class="w-full flex flex-col flex-grow gap-5 items-center justify-center mt-10">
-                <Spinner size="sm" class="max-w-12 self-center"/>
-                <span class="text-primary-600 font-semibold text-2xl">Attendere...</span>
-            </div>
-        {/if}
-    </div>
+				<FeedbackToast
+					bind:open={feedbackToastOpen}
+					bind:color
+					bind:message={feedbackMessage}
+					bind:ToastIcon
+				/>
+				<Modal
+					bind:open={errorsModalOpen}
+					on:close={closeErrorsModal}
+					size="xs"
+					dismissable={false}
+				>
+					{@const SvelteComponent =
+						ticketStatus === 'error'
+							? XCircle
+							: ticketStatus === 'alert'
+								? AlertCircle
+								: CheckCircle2}
+					<span
+						class="my-5 justify-center text-3xl font-semibold text-{color}-500 flex items-center gap-2"
+					>
+						<SvelteComponent class="h-6 w-6  text-{color}-400" />
+						{feedbackMessage}
+					</span>
+					<Button slot="footer" class="w-full" on:click={closeErrorsModal}>Chiudi</Button>
+				</Modal>
+			</div>
+		{:else}
+			<div class="mt-10 flex w-full flex-grow flex-col items-center justify-center gap-5">
+				<Spinner size="sm" class="max-w-12 self-center" />
+				<span class="text-2xl font-semibold text-primary-600">Attendere...</span>
+			</div>
+		{/if}
+	</div>
 </section>

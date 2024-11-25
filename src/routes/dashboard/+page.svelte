@@ -3,8 +3,18 @@
 	import { onDestroy, onMount } from 'svelte';
 
 	import { getClientApp, getClientDB } from '$lib/firebase/client';
-	
-	import { CheckInTimeSlot, CheckOutTimeSlot, computeCheckInPerTime, computeCheckOutPerTime, computeSalesPerHour, computeSalesPerTime, computeSellersStats, SalesTimeSlot } from '$lib/charts/utils';
+
+	import {
+		CheckInTimeSlot,
+		CheckOutTimeSlot,
+		computeCheckInPerTime,
+		computeCheckOutPerTime,
+		computeSalesPerHour,
+		computeSalesPerTime,
+		computeSellersStats,
+		SalesTimeSlot,
+		type ChartData
+	} from '$lib/charts/utils';
 	import type { Ticket } from '$models/ticket';
 	import { user } from '$store/store';
 
@@ -17,59 +27,90 @@
 	import TicketsECharts from '$components/charts/TicketsECharts.svelte';
 	import TicketsPerHourECharts from '$components/charts/TicketsPerHourECharts.svelte';
 	import TicketsPerPersonECharts from '$components/charts/TicketsPerPersonECharts.svelte';
-	import type { User } from "$lib/auth/user";
+	import type { User } from '$lib/auth/user';
 
-	export let data: {sellers: User[], user: User};
-	if(data.user)
-		$user = data.user;
-	
-	let tickets: Ticket[] = [];
+	interface Props {
+		data: { sellers: User[]; user: User };
+	}
+
+	let { data }: Props = $props();
+	if (data.user) $user = data.user;
+
+	let tickets: Ticket[] = $state([]);
 	let unsubscribe: Unsubscribe = () => {};
 
 	// cards and pie chart data
-	$: checkedTicketsCount = tickets.filter((ticket) => ticket.checkIn !== null).length;
-	$: notCheckedTicketsCount = tickets.filter((ticket) => ticket.soldAt !== null).length - checkedTicketsCount;
-	$: notSoldTicketsCount = tickets.filter((ticket) => ticket.soldAt === null).length;
+	let checkedTicketsCount = $state(0);
+	$effect(() => {
+		checkedTicketsCount = tickets.filter((ticket) => ticket.checkIn !== null).length;
+	});
+	let notCheckedTicketsCount = $state(0);
+	$effect(() => {
+		notCheckedTicketsCount =
+			tickets.filter((ticket) => ticket.soldAt !== null).length - checkedTicketsCount;
+	});
+	let notSoldTicketsCount = $state(0);
+	$effect(() => {
+		notSoldTicketsCount = tickets.filter((ticket) => ticket.soldAt === null).length;
+	});
 
-	let timeWindowSalesPerTime: SalesTimeSlot = SalesTimeSlot.DAY;
-	let timeWindowCheckInPerTime: CheckInTimeSlot = CheckInTimeSlot.HOUR;
-	let timeWindowCheckOutPerTime: CheckOutTimeSlot = CheckOutTimeSlot.HALF_HOUR;
-	
-	$: sellersStats = computeSellersStats(tickets);
-	$: sellHoursStats = computeSalesPerHour(tickets);
-	$: salesPerTime = computeSalesPerTime(tickets, timeWindowSalesPerTime);
-	$: checkInPerTime = computeCheckInPerTime(tickets, timeWindowCheckInPerTime);
-	$: checkOutPerTime = computeCheckOutPerTime(tickets, timeWindowCheckOutPerTime);
+	let timeWindowSalesPerTime: SalesTimeSlot = $state(SalesTimeSlot.DAY);
+	let timeWindowCheckInPerTime: CheckInTimeSlot = $state(CheckInTimeSlot.HOUR);
+	let timeWindowCheckOutPerTime: CheckOutTimeSlot = $state(CheckOutTimeSlot.HALF_HOUR);
 
-	let open: boolean = true;
-	let value: string = '';
-	$: validate = value !== 'Festa di Primavera';
+	let sellersStats = $state({ labels: [], datasets: [] } as ChartData);
+	$effect(() => {
+		sellersStats = computeSellersStats(tickets);
+	});
+	let sellHoursStats = $state({ labels: [], datasets: [] } as ChartData);
+	$effect(() => {
+		sellHoursStats = computeSalesPerHour(tickets);
+	});
+	let salesPerTime = $state({ labels: [], datasets: [] } as ChartData);
+	$effect(() => {
+		salesPerTime = computeSalesPerTime(tickets, timeWindowSalesPerTime);
+	});
+	let checkInPerTime = $state({ labels: [], datasets: [] } as ChartData);
+	$effect(() => {
+		checkInPerTime = computeCheckInPerTime(tickets, timeWindowCheckInPerTime);
+	});
+	let checkOutPerTime = $state({ labels: [], datasets: [] } as ChartData);
+	$effect(() => {
+		checkOutPerTime = computeCheckOutPerTime(tickets, timeWindowCheckOutPerTime);
+	});
+
+	let open: boolean = $state(true);
+	let value: string = $state('');
+	let validate = $state(false);
+	$effect(() => {
+		validate = value !== 'Festa di Primavera';
+	});
 
 	// get tickets from firestore
-	function getTickets(){
-		const q = query(collection(getClientDB(), "tickets"));
+	function getTickets() {
+		const q = query(collection(getClientDB(), 'tickets'));
 		unsubscribe = onSnapshot(q, (querySnapshot) => {
 			tickets = querySnapshot.docs.map((ticketDoc) => {
 				let currSeller: string | null;
 
-				if(!ticketDoc.data().seller) {
+				if (!ticketDoc.data().seller) {
 					currSeller = null;
 				} else {
-					currSeller = data.sellers?.find((seller) => seller.id === ticketDoc.data().seller)?.alias || "AnOnImO";
+					currSeller =
+						data.sellers?.find((seller) => seller.id === ticketDoc.data().seller)?.alias ||
+						'AnOnImO';
 				}
 
-				return (
-					{
-						ticketID: ticketDoc.id,
-						name: ticketDoc.data().name,
-						surname: ticketDoc.data().surname,
-						seller: currSeller,
-						soldAt: ticketDoc.data().soldAt?.toDate() || null,
-						checkIn: ticketDoc.data().checkIn?.toDate() || null,
-						checkOut: ticketDoc.data().checkOut?.toDate() || null,
-						newCheckIn: ticketDoc.data().newCheckIn?.toDate() || null
-					}
-				);
+				return {
+					ticketID: ticketDoc.id,
+					name: ticketDoc.data().name,
+					surname: ticketDoc.data().surname,
+					seller: currSeller,
+					soldAt: ticketDoc.data().soldAt?.toDate() || null,
+					checkIn: ticketDoc.data().checkIn?.toDate() || null,
+					checkOut: ticketDoc.data().checkOut?.toDate() || null,
+					newCheckIn: ticketDoc.data().newCheckIn?.toDate() || null
+				};
 			});
 		});
 	}
@@ -80,18 +121,18 @@
 </script>
 
 <svelte:head>
-    <title>Dashboard</title>
+	<title>Dashboard</title>
 </svelte:head>
 
-<section class="w-full h-full flex flex-col items-center gap-4 flex-grow">
-	<div class="w-full px-5 pt-5 flex flex-col gap-4 pb-12 flex-grow">
+<section class="flex h-full w-full flex-grow flex-col items-center gap-4">
+	<div class="flex w-full flex-grow flex-col gap-4 px-5 pb-12 pt-5">
 		{#if $user}
 			{#if tickets.length > 0}
 				<div class="m-auto w-full max-w-sm md:max-w-3xl xl:max-w-6xl 2xl:max-w-[1584px]">
 					<h1 class="text-4xl font-bold text-primary-600">Dashboard</h1>
 					<p class="text-justify dark:text-white">Informazioni relative ai biglietti</p>
 				</div>
-				
+
 				<div class="m-auto grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
 					<div class="grid h-full w-full max-w-sm grid-flow-row-dense grid-cols-2 gap-2">
 						<Card
@@ -122,7 +163,11 @@
 						</Card>
 					</div>
 
-					<TicketsECharts bind:checkedTicketsCount bind:notCheckedTicketsCount bind:notSoldTicketsCount />
+					<TicketsECharts
+						bind:checkedTicketsCount
+						bind:notCheckedTicketsCount
+						bind:notSoldTicketsCount
+					/>
 					<TicketsPerPersonECharts bind:sellersStats />
 					<TicketsPerHourECharts bind:sellHoursStats />
 
@@ -144,30 +189,43 @@
 				<ExportToCsv bind:tickets />
 			{/if}
 		{:else}
-			<div class="w-full flex flex-col flex-grow gap-5 items-center justify-center mt-10">
-				<Spinner size="sm" class="max-w-12 self-center"/>
-				<span class="text-primary-600 font-semibold text-2xl">Attendere...</span>
+			<div class="mt-10 flex w-full flex-grow flex-col items-center justify-center gap-5">
+				<Spinner size="sm" class="max-w-12 self-center" />
+				<span class="text-2xl font-semibold text-primary-600">Attendere...</span>
 			</div>
 		{/if}
 	</div>
 </section>
 
 <Modal bind:open dismissable={false}>
-	<div slot="header" class="flex justify-between items-center">
+	<div slot="header" class="flex items-center justify-between">
 		<h1 class="text-2xl text-primary-300">Conferma visita</h1>
 	</div>
 	<div class="leading-8">
 		<p class="select-none">
-			Per evitare letture non necessarie, confermare di voler visitare questa pagina.<br/>
-			Inserisci nel campo sottostante il codice <span class="py-1 px-2 break-keep whitespace-nowrap font-mono bg-primary-400 rounded-md bg-opacity-20">Festa di Primavera</span> per confermare.
+			Per evitare letture non necessarie, confermare di voler visitare questa pagina.<br />
+			Inserisci nel campo sottostante il codice
+			<span
+				class="whitespace-nowrap break-keep rounded-md bg-primary-400 bg-opacity-20 px-2 py-1 font-mono"
+				>Festa di Primavera</span
+			> per confermare.
 		</p>
-		<Label class="flex flex-col mt-7 gap-1">
+		<Label class="mt-7 flex flex-col gap-1">
 			Codice di conferma
-			<Input placeholder="Festa di Primavera" bind:value/>
+			<Input placeholder="Festa di Primavera" bind:value />
 		</Label>
 	</div>
 	<div slot="footer" class="flex gap-3">
-		<Button bind:disabled={validate} color="primary" on:click={() => {if(value === 'Festa di Primavera') {getTickets(); open=false}}}>Conferma</Button>
-		<Button color="alternative" on:click={() => goto("/")}>Annulla</Button>
+		<Button
+			bind:disabled={validate}
+			color="primary"
+			on:click={() => {
+				if (value === 'Festa di Primavera') {
+					getTickets();
+					open = false;
+				}
+			}}>Conferma</Button
+		>
+		<Button color="alternative" on:click={() => goto('/')}>Annulla</Button>
 	</div>
 </Modal>

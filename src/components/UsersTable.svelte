@@ -43,24 +43,28 @@
 	import { writable } from 'svelte/store';
 	import FeedbackToast from './feedbacks/FeedbackToast.svelte';
 
-	export let users: User[];
+	interface Props {
+		users: User[];
+		currSelectedUser: User;
+		aliasModalOpen: boolean;
+		deleteModalOpen: boolean;
+	}
 
-	export let currSelectedUser: User;
+	let {
+		users = $bindable(),
+		currSelectedUser = $bindable(),
+		aliasModalOpen = $bindable(),
+		deleteModalOpen = $bindable()
+	}: Props = $props();
 
-	export let aliasModalOpen: boolean;
-	export let deleteModalOpen: boolean;
-
-	let color: 'green' | 'red' = 'green';
-	let feedbackToastMessage: string = '';
-	let error: boolean = false;
-	let feedbackToastOpen: boolean = false;
+	let color: 'green' | 'red' = $state('green');
+	let feedbackToastMessage: string = $state('');
+	let error: boolean = $state(false);
+	let feedbackToastOpen: boolean = $state(false);
 	let timeOut: NodeJS.Timeout;
-	$: toastIcon = error ? XCircle : CheckCircle2;
-
-	// dropdown state variables
-	let dropdownOpenMap: { [key: string]: boolean } = {};
-	users?.forEach((user: User) => {
-		dropdownOpenMap = { ...dropdownOpenMap, [user.id]: false };
+	let ToastIcon = $state(XCircle);
+	$effect(() => {
+		ToastIcon = error ? XCircle : CheckCircle2;
 	});
 
 	// association between userpermissions and their respective icons
@@ -81,11 +85,13 @@
 		return permissionIcons[permission];
 	}
 
-	const handlePermissionChange = async (user: User, permission: UserPermissions, add: boolean) => {
-		dropdownOpenMap = { ...dropdownOpenMap, [user.id]: false };
-
+	const handlePermissionChange = async (
+		currentUser: User,
+		permission: UserPermissions,
+		add: boolean
+	) => {
 		try {
-			const response = await fetch(`/api/permissions/${user.id}/${permission}`, {
+			const response = await fetch(`/api/permissions/${currentUser.id}/${permission}`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ add: add })
@@ -96,18 +102,19 @@
 				color = 'green';
 
 				users = users.map((item: User) => {
-					if (item.id === user.id) {
+					if (item.id === currentUser.id) {
 						item.permissions = add
-							? addPermission(user.permissions, permission)
-							: removePermission(user.permissions, permission);
+							? addPermission(currentUser.permissions, permission)
+							: removePermission(currentUser.permissions, permission);
 					}
 					return item;
 				});
-				if ($user?.id == user.id) {
+				if ($user?.id == currentUser.id) {
 					$user.permissions = add
 						? addPermission($user.permissions, permission)
 						: removePermission($user.permissions, permission);
 				}
+				users = [...users];
 			} else {
 				error = true;
 				color = 'red';
@@ -136,30 +143,16 @@
 		}
 	};
 
-	const triggerAliasModal = async (user: User) => {
-		currSelectedUser = user;
+	const triggerAliasModal = async (currentUser: User) => {
+		currSelectedUser = currentUser;
 		aliasModalOpen = true;
 	};
 
 	// search and filter variables
-	let searchTerm = '';
-	let filter = 'nome';
-	let filteredItems: User[] = [];
-
-	const sortKey = writable('username'); // username, email, alias
-	const sortDirection = writable(1);
-	const sortItems = writable<User[]>(filteredItems.slice());
-
-	const sortTable = (key: string) => {
-		if ($sortKey === key) {
-			sortDirection.update((val) => -val);
-		} else {
-			sortKey.set(key);
-			sortDirection.set(1);
-		}
-	};
-
-	$: {
+	let searchTerm = $state('');
+	let filter = $state('nome');
+	let filteredItems: User[] = $state([]);
+	$effect(() => {
 		filteredItems = users?.filter((item: User) => {
 			if (filter === 'nome')
 				return item.username.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
@@ -169,34 +162,7 @@
 				return item.alias.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
 			else return true;
 		});
-
-		const key = $sortKey;
-		const direction = $sortDirection;
-		sortItems.set(filteredItems);
-
-		if ($sortItems?.length > 0) {
-			const sorted = [...$sortItems].sort((a, b) => {
-				let aVal: any;
-				let bVal: any;
-
-				if (key == 'alias') {
-					aVal = a[key] || 0;
-					bVal = b[key] || 0;
-				} else if (key == 'username' || key == 'email' || key == 'email_verified') {
-					aVal = a[key];
-					bVal = b[key];
-				}
-
-				if (aVal < bVal) {
-					return -direction;
-				} else if (aVal > bVal) {
-					return direction;
-				}
-				return 0;
-			});
-			sortItems.set(sorted);
-		}
-	}
+	});
 </script>
 
 {#if $user}
@@ -222,46 +188,22 @@
 			class="relative overflow-visible overflow-x-auto rounded-md shadow-md sm:rounded-lg"
 		>
 			<TableHead>
-				<TableHeadCell on:click={() => sortTable('username')} class="cursor-pointer select-none">
-					<div class="flex gap-1">
-						Nome
-						{#if $sortKey === 'username'}
-							<svelte:component
-								this={$sortDirection > 0 ? ArrowDownAZ : ArrowUpAZ}
-								class="ml-1 h-4 w-4"
-							/>
-						{/if}
-					</div>
+				<TableHeadCell class="cursor-pointer select-none">
+					<div class="flex gap-1">Nome</div>
 				</TableHeadCell>
-				<TableHeadCell on:click={() => sortTable('email')} class="cursor-pointer select-none">
-					<div class="flex gap-1">
-						Email
-						{#if $sortKey === 'email'}
-							<svelte:component
-								this={$sortDirection > 0 ? ArrowDownAZ : ArrowUpAZ}
-								class="ml-1 h-4 w-4"
-							/>
-						{/if}
-					</div>
+				<TableHeadCell class="cursor-pointer select-none">
+					<div class="flex gap-1">Email</div>
 				</TableHeadCell>
 				<TableHeadCell class="cursor-pointer select-none">
 					<div class="flex gap-1">Permessi</div>
 				</TableHeadCell>
-				<TableHeadCell on:click={() => sortTable('alias')} class="cursor-pointer select-none">
-					<div class="flex justify-center gap-1">
-						Alias
-						{#if $sortKey === 'alias'}
-							<svelte:component
-								this={$sortDirection > 0 ? ArrowDownAZ : ArrowUpAZ}
-								class="ml-1 h-4 w-4"
-							/>
-						{/if}
-					</div>
+				<TableHeadCell class="cursor-pointer select-none">
+					<div class="flex justify-center gap-1">Alias</div>
 				</TableHeadCell>
 				<TableHeadCell class="text-center">Elimina</TableHeadCell>
 			</TableHead>
 			<TableBody tableBodyClass="divide-y">
-				{#each $sortItems || [] as item}
+				{#each filteredItems || [] as item}
 					<TableBodyRow class="w-full">
 						<TableBodyCell>
 							<span class="flex items-center gap-4 font-medium">
@@ -288,11 +230,8 @@
 									<img class="w-5" alt="Google" src="/google.svg" />
 									<Tooltip>Google</Tooltip>
 								{:else}
-									<svelte:component
-										this={item.email_verified ? Check : X}
-										color={item.email_verified ? 'green' : 'red'}
-										class="w-5"
-									/>
+									{@const EmailVerified = item.email_verified ? Check : X}
+									<EmailVerified color={item.email_verified ? 'green' : 'red'} class="w-5" />
 									<Tooltip>{(item.email_verified ? '' : 'Non ') + 'Verificata'}</Tooltip>
 								{/if}
 								{item.email}
@@ -301,9 +240,9 @@
 						<TableBodyCell>
 							<div class="grid w-max min-w-28 grid-cols-5 gap-2">
 								{#each intToBitArray(item.permissions, Object.keys(UserPermissions).length / 2).reverse() as perm, index}
-									<button on:click={() => handlePermissionChange(item, Math.pow(2, index), !perm)}>
-										<svelte:component
-											this={getPermissionIcon(Math.pow(2, index))}
+									{@const PermissionIcon = getPermissionIcon(Math.pow(2, index))}
+									<button onclick={() => handlePermissionChange(item, Math.pow(2, index), !perm)}>
+										<PermissionIcon
 											class={`w-4 ${perm ? 'text-primary-300' : 'text-slate-500'}`}
 										/>
 										<Tooltip color="primary" border>
@@ -320,7 +259,7 @@
 						<TableBodyCell>
 							<div class="flex w-full items-center justify-between gap-3">
 								{item.alias}
-								<button on:click={() => triggerAliasModal(item)}>
+								<button onclick={() => triggerAliasModal(item)}>
 									<PenBox class="h-5 w-5" />
 								</button>
 							</div>
@@ -349,5 +288,5 @@
 	bind:open={feedbackToastOpen}
 	bind:color
 	bind:message={feedbackToastMessage}
-	bind:icon={toastIcon}
+	bind:ToastIcon
 />

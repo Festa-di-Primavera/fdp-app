@@ -42,9 +42,11 @@
 		children?: Route[];
 	}
 
-	$: if ($page.url.pathname == '/login') {
-		hidden = true;
-	}
+	$effect(() => {
+		if ($page.url.pathname == '/login') {
+			hidden = true;
+		}
+	});
 
 	const routes: Route[] = [
 		{
@@ -124,7 +126,7 @@
 		});
 	}
 
-	let hidden: boolean = true;
+	let hidden: boolean = $state(true);
 	let transitionParamsRight = {
 		x: 200,
 		duration: 200,
@@ -139,9 +141,9 @@
 		}
 	}
 
-	let deleteModalOpen: boolean = false;
+	let deleteModalOpen: boolean = $state(false);
 
-	let changePwModalOpen: boolean = false;
+	let changePwModalOpen: boolean = $state(false);
 </script>
 
 <navbar
@@ -151,13 +153,14 @@
 		<Logo />
 	</a>
 	<div class="mr-5 flex items-center justify-end gap-5">
-		<button on:click={changeTheme} class="p-0">
-			<DarkMode btnClass="text-gray-500 dark:text-gray-400 rounded-lg text-sm p-1.5" />
-		</button>
+		<DarkMode
+			onclick={changeTheme}
+			btnClass="text-gray-500 dark:text-gray-400 rounded-lg text-sm p-1.5"
+		/>
 
 		{#if $user !== null}
 			<button
-				on:click={() => {
+				onclick={() => {
 					hidden = false;
 				}}
 				class="rounded-md border-2 border-black border-opacity-10 p-1 dark:border-white dark:border-opacity-20"
@@ -181,78 +184,114 @@
 			</h4>
 			<CloseButton on:click={() => (hidden = true)} class="mb-4 dark:text-white" />
 		</div>
-		<div class="flex h-full flex-col justify-between sidebar">
+		<div class="sidebar flex h-full flex-col justify-between">
 			<!-- Sezione dei pulsanti -->
-			<div class="py-2 flex flex-col gap-4 overflow-y-auto max-h-[calc(100vh-10rem)]">
-			  {#each filterRoutes(routes) as route}
-				{#if route.children}
-				  <Accordion flush>
-					<AccordionItem borderBottomClass="" paddingFlush="p-0 justify-start" open={route.children.some(child => child.slug === $page.url.pathname)}>
-					  <span slot="header" class="flex gap-4 mr-4 text-xl w-max items-center font-normal">
-						<svelte:component this={route.icon}/>
-						{route.label}
-					  </span>
-					  <div class="pl-5 mt-2">
-						{#each route.children as childRoute}
-						  <a on:click={() => (hidden = true)} class={`${childRoute.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={childRoute.slug}>
-							<span class="flex gap-4 w-full text-xl items-center py-2">
-							  <svelte:component this={childRoute.icon}/>
-							  {childRoute.label}
+			<div class="flex max-h-[calc(100vh-10rem)] flex-col gap-4 overflow-y-auto py-2">
+				{#each filterRoutes(routes) as route}
+					{#if route.children}
+						<Accordion flush>
+							<AccordionItem
+								borderBottomClass=""
+								paddingFlush="p-0 justify-start"
+								open={route.children.some((child) => child.slug === $page.url.pathname)}
+							>
+								<span slot="header" class="mr-4 flex w-max items-center gap-4 text-xl font-normal">
+									<route.icon />
+									{route.label}
+								</span>
+								<div class="mt-2 pl-5">
+									{#each route.children as childRoute}
+										<a
+											onclick={() => (hidden = true)}
+											class={`${childRoute.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`}
+											href={childRoute.slug}
+										>
+											<span class="flex w-full items-center gap-4 py-2 text-xl">
+												<childRoute.icon />
+												{childRoute.label}
+											</span>
+										</a>
+									{/each}
+								</div>
+							</AccordionItem>
+						</Accordion>
+					{:else}
+						<a
+							onclick={() => (hidden = true)}
+							class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`}
+							href={route.slug}
+						>
+							<span class="flex w-full items-center gap-4 text-xl">
+								<route.icon />
+								{route.label}
 							</span>
-						  </a>
-						{/each}
-					  </div>
-					</AccordionItem>
-				  </Accordion>
-				{:else}
-				  <a on:click={() => (hidden = true)} class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`} href={route.slug}>
-					<span class="flex gap-4 w-full text-xl items-center">
-					  <svelte:component this={route.icon}/>
-					  {route.label}
-					</span>
-				  </a>
-				{/if}
-			  {/each}
+						</a>
+					{/if}
+				{/each}
 			</div>
-			
+
 			<!-- Div in fondo -->
 			{#if $user !== null}
-			  <div class="mx-auto text-md flex w-full items-center justify-between self-baseline rounded-lg bg-gray-100 p-3 dark:bg-gray-600 dark:text-white">
-				<button id="account" class="text-md flex items-center gap-4 truncate overflow-ellipsis pr-5">
-				  {#if $user?.avatar_url}
-					<img loading="lazy" src={$user?.avatar_url} alt={$user.username[0]} class="h-8 w-8 rounded-full"/>
-				  {:else}
-					<div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary-700 to-primary-400 font-mono text-white">
-					  <span>{$user?.username[0].toUpperCase()}</span>
-					</div>
-				  {/if}
-				  <span class="overflow-x-hidden overflow-ellipsis">{$user?.username || 'Non registrato'}</span>
-				</button>
-				<Dropdown placement="top" triggeredBy="#account">
-				  <DropdownItem>
-					<button on:click={() => { changePwModalOpen = true; hidden = true; }}>Cambia Password</button>
-				  </DropdownItem>
-				  <DropdownItem slot="footer">
-					<button class="text-red-400" on:click={() => { deleteModalOpen = true; hidden = true; }}>Elimina Account</button>
-				  </DropdownItem>
-				</Dropdown>
-		  
-				<form use:enhance method="post" action="/">
-				  <button type="submit">
-					<LogOut class="text-gray-500 dark:text-white" />
-				  </button>
-				</form>
-			  </div>
+				<div
+					class="text-md mx-auto flex w-full items-center justify-between self-baseline rounded-lg bg-gray-100 p-3 dark:bg-gray-600 dark:text-white"
+				>
+					<button
+						id="account"
+						class="text-md flex items-center gap-4 truncate overflow-ellipsis pr-5"
+					>
+						{#if $user?.avatar_url}
+							<img
+								loading="lazy"
+								src={$user?.avatar_url}
+								alt={$user.username[0]}
+								class="h-8 w-8 rounded-full"
+							/>
+						{:else}
+							<div
+								class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary-700 to-primary-400 font-mono text-white"
+							>
+								<span>{$user?.username[0].toUpperCase()}</span>
+							</div>
+						{/if}
+						<span class="overflow-x-hidden overflow-ellipsis"
+							>{$user?.username || 'Non registrato'}</span
+						>
+					</button>
+					<Dropdown placement="top" triggeredBy="#account">
+						<DropdownItem>
+							<button
+								onclick={() => {
+									changePwModalOpen = true;
+									hidden = true;
+								}}>Cambia Password</button
+							>
+						</DropdownItem>
+						<DropdownItem slot="footer">
+							<button
+								class="text-red-400"
+								onclick={() => {
+									deleteModalOpen = true;
+									hidden = true;
+								}}>Elimina Account</button
+							>
+						</DropdownItem>
+					</Dropdown>
+
+					<form use:enhance method="post" action="/">
+						<button type="submit">
+							<LogOut class="text-gray-500 dark:text-white" />
+						</button>
+					</form>
+				</div>
 			{/if}
-		  </div>
-		  
+		</div>
 	</div>
 </Drawer>
 <Modal
 	title="Elimina account"
 	outsideclose
 	bind:open={deleteModalOpen}
-	on:close={() => (deleteModalOpen = false)}
+	onclose={() => (deleteModalOpen = false)}
 	size="sm"
 	class="z-50"
 >
@@ -260,7 +299,7 @@
 		action="/login?/delete"
 		method="post"
 		use:enhance
-		on:submit={() => {
+		onsubmit={() => {
 			deleteModalOpen = false;
 		}}
 	>

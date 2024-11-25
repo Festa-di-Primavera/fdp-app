@@ -17,7 +17,7 @@
 	let color: 'red' | 'yellow';
 
 	$: color = error ? 'red' : 'yellow';
-	$: toastIcon = error ? AlertCircle : XCircle;
+	$: ToastIcon = error ? AlertCircle : XCircle;
 
 	onMount(async () => {
 		if (window.location.search.split('?')[1] == 'checkOutExpired') {
@@ -76,5 +76,5 @@
 	bind:open={feedbackToastOpen}
 	bind:color
 	bind:message={feedbackToastMessage}
-	bind:icon={toastIcon}
+	bind:ToastIcon
 />

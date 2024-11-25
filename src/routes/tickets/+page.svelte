@@ -1,4 +1,5 @@
 <script lang="ts">
+	// TODO: MIGRATE TO SVELTE 5 AND REMOVE SORTING
 	import FeedbackToast from '$components/feedbacks/FeedbackToast.svelte';
 	import { getClientDB } from '$lib/firebase/client';
 	import { formatDate } from '$lib/utils/textFormat';
@@ -148,7 +149,7 @@
 			sortItems.set(sorted);
 		}
 	}
-	$: toastIcon = error ? XCircle : CheckCircle2;
+	$: ToastIcon = error ? XCircle : CheckCircle2;
 
 	let currSelectedTicket: Ticket;
 
@@ -240,7 +241,7 @@
 								class="ml-1 h-4 w-4"
 							/>
 						{:else}
-							<div class="ml-1 h-4 w-4" />
+							<div class="ml-1 h-4 w-4" > </div>
 						{/if}
 					</div>
 				</TableHeadCell>
@@ -253,7 +254,7 @@
 								class="ml-1 h-4 w-4"
 							/>
 						{:else}
-							<div class="ml-1 h-4 w-4" />
+							<div class="ml-1 h-4 w-4" > </div>
 						{/if}
 					</div>
 				</TableHeadCell>
@@ -266,7 +267,7 @@
 								class="ml-1 h-4 w-4"
 							/>
 						{:else}
-							<div class="ml-1 h-4 w-4" />
+							<div class="ml-1 h-4 w-4" > </div>
 						{/if}
 					</div>
 				</TableHeadCell>
@@ -279,7 +280,7 @@
 								class="ml-1 h-4 w-4"
 							/>
 						{:else}
-							<div class="ml-1 h-4 w-4" />
+							<div class="ml-1 h-4 w-4" > </div>
 						{/if}
 					</div>
 				</TableHeadCell>
@@ -292,7 +293,7 @@
 								class="ml-1 h-4 w-4"
 							/>
 						{:else}
-							<div class="ml-1 h-4 w-4" />
+							<div class="ml-1 h-4 w-4" > </div>
 						{/if}
 					</div>
 				</TableHeadCell>
@@ -362,7 +363,7 @@
 	bind:open={feedbackToastOpen}
 	bind:color
 	bind:message={feedbackToastMessage}
-	bind:icon={toastIcon}
+	bind:ToastIcon
 />
 <Modal
 	autoclose

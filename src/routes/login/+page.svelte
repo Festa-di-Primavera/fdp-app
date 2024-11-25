@@ -9,68 +9,86 @@
 	import { user } from '$store/store';
 
 	$user = null;
-	let option: 'login' | 'register' = 'login';
+	let option: 'login' | 'register' = $state('login');
 
-	let username: string = '';
-	let email: string = '';
-	let password: string = '';
-	let repeatPassword: string = '';
-	let pwVisible: boolean = false;
-	
-	let feedbackToastOpen: boolean = false;
-	let color: 'green' | 'red' | 'yellow' = 'green';
+	let username: string = $state('');
+	let email: string = $state('');
+	let password: string = $state('');
+	let repeatPassword: string = $state('');
+	let pwVisible: boolean = $state(false);
+
+	let feedbackToastOpen: boolean = $state(false);
+	let color: 'green' | 'red' | 'yellow' = $state('green');
 	let timeOut: NodeJS.Timeout;
-	let toastMessage: string = '';
+	let toastMessage: string = $state('');
 
-	export let form;
-	$: if(form && form.error){
-		color = 'red';
-		toastMessage = form.message;
-		feedbackToastOpen = true;
-		timeOut = setTimeout(() => {
-			feedbackToastOpen = false;
-			clearTimeout(timeOut);
-		}, 3500);
+	interface Props {
+		form: {
+			error: boolean;
+			message: string;
+		};
 	}
-	
-	let validatorError: boolean = true;
-	let lessThanEightChars = false;
-	let noUpperCase = false;
-	let noNumber = false;
-	let noSpecialChar = false;
-	let usernameValidator: boolean = false;
 
-	$: {
+	let { form }: Props = $props();
+
+	$effect(() => {
+		if (form) {
+			if (form.error) {
+				color = 'red';
+				toastMessage = form.message;
+				feedbackToastOpen = true;
+				timeOut = setTimeout(() => {
+					feedbackToastOpen = false;
+					clearTimeout(timeOut);
+				}, 3500);
+			} else {
+				color = 'green';
+				toastMessage = form.message;
+				feedbackToastOpen = true;
+				timeOut = setTimeout(() => {
+					feedbackToastOpen = false;
+					clearTimeout(timeOut);
+				}, 3500);
+			}
+		}
+	});
+
+	let validatorError: boolean = $state(true);
+	let lessThanEightChars = $state(false);
+	let noUpperCase = $state(false);
+	let noNumber = $state(false);
+	let noSpecialChar = $state(false);
+	let usernameValidator: boolean = $state(false);
+
+	$effect(() => {
 		if (validatorError) {
 			validatorError = !(password === repeatPassword);
 		}
 
 		if (option === 'register') {
-			if (lessThanEightChars)
-				lessThanEightChars = password.length < 8;
-			
-			if (noUpperCase)
-				noUpperCase = !/[A-Z]/.test(password);
-			
-			if (noNumber)
-				noNumber = !/[0-9]/.test(password);
+			if (lessThanEightChars) lessThanEightChars = password.length < 8;
 
-			if (noSpecialChar)
-				noSpecialChar = !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password);
+			if (noUpperCase) noUpperCase = !/[A-Z]/.test(password);
+
+			if (noNumber) noNumber = !/[0-9]/.test(password);
+
+			if (noSpecialChar) noSpecialChar = !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password);
 		}
 
 		if (option === 'register') {
-			usernameValidator = (!/^[a-zA-Z0-9_\ ]*$/.test(username));
+			usernameValidator = !/^[a-zA-Z0-9_\ ]*$/.test(username);
 		}
-	}
+	});
 
-	$: disableButton =
-		(option === 'login' && (email === '' || password === '')) ||
-		(option === 'register' && (username === '' || email === '' || password === '' || repeatPassword === '')) ||
-		validatorError ||
-		usernameValidator ||
-		(option === 'register' && (lessThanEightChars || noUpperCase || noNumber || noSpecialChar));
-	$: toastIcon = form?.error ? XCircle : CheckCircle2;
+	let disableButton = $state(false);
+	// let x = (option === 'login' && (email === '' || password === '')) || (option === 'register' && (username === ''));
+	// (option === 'login' && (email === '' || password === '')) ||
+	// (option === 'register' &&
+	// 	(username === '' || email === '' || password === '' || repeatPassword === '')) ||
+	// validatorError ||
+	// usernameValidator ||
+	// (option === 'register' && (lessThanEightChars || noUpperCase || noNumber || noSpecialChar));
+	let ToastIcon = $state(XCircle);
 </script>
 
 <section
@@ -79,28 +97,36 @@
 	<Card class="flex w-full max-w-96 flex-col items-center justify-center">
 		<div class="mb-5 flex w-full justify-around">
 			<button
-				on:click={() => (option = 'login')}
+				onclick={() => (option = 'login')}
 				class="w-[40%] border-b-2 {option == 'login'
 					? 'border-primary-500 text-black dark:text-white'
 					: 'border-transparent'} pb-3">Login</button
 			>
 			<button
-				on:click={() => (option = 'register')}
+				onclick={() => (option = 'register')}
 				class="w-[40%] border-b-2 {option == 'register'
 					? 'border-primary-500 text-black dark:text-white'
 					: 'border-transparent'} pb-3">Registrati</button
 			>
 		</div>
 
-		
 		<Card padding="none" class="mb-5 w-60">
-			<a class="flex items-center justify-center gap-2 px-4 py-2" href="/api/auth/google" role="button">
+			<a
+				class="flex items-center justify-center gap-2 px-4 py-2"
+				href="/api/auth/google"
+				role="button"
+			>
 				<img class="w-8" alt="G" src="/google.svg" />
 				<span>Login con Google</span>
 			</a>
 		</Card>
-		<div class="border-[1px] w-full mb-5"/>
-		<form class="flex w-full flex-col gap-3" method="post" use:enhance action="?/{option === 'login' ? 'signin' : 'signup'}">
+		<div class="mb-5 w-full border-[1px]"></div>
+		<form
+			class="flex w-full flex-col gap-3"
+			method="post"
+			use:enhance
+			action="?/{option === 'login' ? 'signin' : 'signup'}"
+		>
 			<h1 class="w-max text-3xl font-semibold text-primary-600">
 				{option === 'login' ? 'Accedi' : option === 'register' ? 'Registrati' : 'Recupera password'}
 			</h1>
@@ -109,7 +135,7 @@
 				<Label>
 					Nome utente
 					<Input name="username" bind:value={username} class="mt-2" />
-					
+
 					{#if usernameValidator}
 						<Helper class="mt-1 flex items-center gap-1" color="gray">
 							<XCircle class="h-3 w-3" />
@@ -139,9 +165,15 @@
 					}}
 					class="mt-2"
 				>
-					<PasswordEye bind:pwVisible slot="right"/>
+					<PasswordEye bind:pwVisible slot="right" />
 				</Input>
-				<InputErrors bind:lessThanEightChars bind:noUpperCase bind:noNumber bind:noSpecialChar bind:option/>
+				<InputErrors
+					bind:lessThanEightChars
+					bind:noUpperCase
+					bind:noNumber
+					bind:noSpecialChar
+					bind:option
+				/>
 			</Label>
 
 			{#if option === 'register'}
@@ -155,7 +187,7 @@
 						on:blur={() => (validatorError = !(password === repeatPassword))}
 						class="mt-2"
 					>
-						<PasswordEye bind:pwVisible slot="right"/>
+						<PasswordEye bind:pwVisible slot="right" />
 					</Input>
 					{#if validatorError}
 						<Helper class="mt-1 flex items-center gap-1" color="gray">
@@ -166,8 +198,9 @@
 				</Label>
 			{/if}
 
-			
-			<a class="mt-1 w-max self-end p-0 text-sm hover:text-primary-500" href="/login/password-reset">Password dimenticata?</a>
+			<a class="mt-1 w-max self-end p-0 text-sm hover:text-primary-500" href="/login/password-reset"
+				>Password dimenticata?</a
+			>
 			<Button class="mt-3 w-full" type="submit" bind:disabled={disableButton}>
 				{option === 'login' ? 'Accedi' : 'Registrati'}
 			</Button>
@@ -178,5 +211,5 @@
 	bind:open={feedbackToastOpen}
 	bind:color
 	bind:message={toastMessage}
-	bind:icon={toastIcon}
+	bind:ToastIcon
 />

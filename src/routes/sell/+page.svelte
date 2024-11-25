@@ -1,44 +1,50 @@
 <script lang="ts">
-	import { Button, Input, Label, Modal, Spinner } from "flowbite-svelte";
+	import { Button, Input, Label, Modal, Spinner } from 'flowbite-svelte';
 	import { CheckCircle2, Ticket, XCircle } from 'lucide-svelte';
 
-	import { convertCode } from "$lib/utils/tickets";
-	import type { User } from "$lib/auth/user";
-	import QrReader from "$components/QrReader.svelte";
-	import { user } from "$store/store";
+	import { convertCode } from '$lib/utils/tickets';
+	import type { User } from '$lib/auth/user';
+	import QrReader from '$components/QrReader.svelte';
+	import { user } from '$store/store';
 
-	export let data: User;
-	if(!$user)
-		$user = data;
+	interface Props {
+		data: User;
+	}
 
-	let ticketCode: string;
+	let { data }: Props = $props();
+	if (!$user) $user = data;
 
-	let modalOpen: boolean = false;
-	let modalMessage: string = '';
-	let color: 'green' | 'red' = 'green';
-	let error: boolean = false;
+	let ticketCode: string = $state('');
 
-	let name: string = '';
-	let surname: string = '';
+	let modalOpen: boolean = $state(false);
+	let modalMessage: string = $state('');
+	let color: 'green' | 'red' = $state('green');
+	let error: boolean = $state(false);
 
-	$: disableButton = name === '' || surname === '' || ticketCode === '';
+	let name: string = $state('');
+	let surname: string = $state('');
+
+	let disableButton = $state(true);
+	$effect(() => {
+		disableButton = name === '' || surname === '' || ticketCode === '';
+	});
 
 	const onKeyDown = (e: KeyboardEvent) => {
-		if(e.key === 'Enter' && name !== '' && surname !== '' && ticketCode !== ''){
+		if (e.key === 'Enter' && name !== '' && surname !== '' && ticketCode !== '') {
 			handleSell();
 		}
-	}
+	};
 
 	async function handleSell() {
 		disableButton = true;
-		if(name !== '' && surname !== '' && ticketCode !== ''){
+		if (name !== '' && surname !== '' && ticketCode !== '') {
 			name = name.trim().toUpperCase();
 			surname = surname.trim().toUpperCase();
-			ticketCode = convertCode(ticketCode.trim()) ?? '';
+			ticketCode = convertCode(ticketCode?.trim()) ?? '';
 
-			try{
+			try {
 				let response;
-				if(ticketCode !== ''){
+				if (ticketCode !== '') {
 					response = await fetch(`/api/tickets/${ticketCode}`, {
 						method: 'POST',
 						headers: {
@@ -52,26 +58,24 @@
 					});
 				}
 
-				if(response?.ok){
+				if (response?.ok) {
 					error = false;
 					color = 'green';
-				}
-				else{
+				} else {
 					error = true;
 					color = 'red';
 				}
-				
-				modalMessage = ticketCode !== '' ? (await response!.json()).message : 'Biglietto non valido';
+
+				modalMessage =
+					ticketCode !== '' ? (await response!.json()).message : 'Biglietto non valido';
 				modalOpen = true;
-			}
-			catch(e){
+			} catch (e) {
 				color = 'red';
 				modalMessage = 'Errore di rete';
 				error = true;
 				modalOpen = true;
 			}
-		}
-		else{
+		} else {
 			modalMessage = 'Compilare tutti i campi';
 			color = 'red';
 			modalOpen = true;
@@ -79,56 +83,59 @@
 	}
 
 	const closeModal = () => {
-		if(!error){
+		if (!error) {
 			name = '';
 			surname = '';
 		}
 		ticketCode = '';
 		modalOpen = false;
-	}
+	};
 </script>
 
 <svelte:head>
-    <title>Vendi</title>
+	<title>Vendi</title>
 </svelte:head>
 
-<section class="w-full h-full flex flex-col items-center gap-4 flex-grow">
-	<div class="w-full px-5 pt-5 flex flex-col gap-4 items-start max-w-96 pb-12 flex-grow">
+<section class="flex h-full w-full flex-grow flex-col items-center gap-4">
+	<div class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5">
 		{#if $user}
-			<h1 class="text-primary-600 font-bold text-4xl">Vendi</h1>
-			<p class="dark:text-white text-justify">Inserire nome, cognome e, scansionando il QR, il codice del biglietto.</p>
-			
-			<Label class="text-black dark:text-white font-medium text-md w-full">
+			<h1 class="text-4xl font-bold text-primary-600">Vendi</h1>
+			<p class="text-justify dark:text-white">
+				Inserire nome, cognome e, scansionando il QR, il codice del biglietto.
+			</p>
+
+			<Label class="text-md w-full font-medium text-black dark:text-white">
 				Nome Ospite <span class="text-primary-700">*</span>
-				<Input class="mt-1" bind:value={name} autocomplete="off" on:keypress={onKeyDown}/>
+				<Input class="mt-1" bind:value={name} autocomplete="off" on:keypress={onKeyDown} />
 			</Label>
-			<Label class="text-black dark:text-white font-medium text-md w-full">
+			<Label class="text-md w-full font-medium text-black dark:text-white">
 				Cognome Ospite <span class="text-primary-700">*</span>
-				<Input class="mt-1" bind:value={surname} autocomplete="off" on:keypress={onKeyDown}/>
+				<Input class="mt-1" bind:value={surname} autocomplete="off" on:keypress={onKeyDown} />
 			</Label>
-			<Label class="text-black dark:text-white font-medium text-md w-full">
+			<Label class="text-md w-full font-medium text-black dark:text-white">
 				Codice Biglietto <span class="text-primary-700">*</span>
 				<Input class="mt-1" bind:value={ticketCode} autocomplete="off" on:keypress={onKeyDown}>
-					<Ticket slot="left" class="w-6 h-6 text-primary-600 dark:text-white"/>
+					<Ticket slot="left" class="h-6 w-6 text-primary-600 dark:text-white" />
 				</Input>
 			</Label>
 
-			<div class="w-full mt-6 flex items-center justify-center">
-				<QrReader bind:codeResult={ticketCode}/>
+			<div class="mt-6 flex w-full items-center justify-center">
+				<QrReader bind:codeResult={ticketCode} />
 			</div>
-			<Button class="w-full mt-6" on:click={handleSell} bind:disabled={disableButton}>Vendi</Button>
+			<Button class="mt-6 w-full" on:click={handleSell} bind:disabled={disableButton}>Vendi</Button>
 		{:else}
-            <div class="w-full flex flex-col flex-grow gap-5 items-center justify-center mt-10">
-                <Spinner size="sm" class="max-w-12 self-center"/>
-                <span class="text-primary-600 font-semibold text-2xl">Attendere...</span>
-            </div>
-        {/if}
+			<div class="mt-10 flex w-full flex-grow flex-col items-center justify-center gap-5">
+				<Spinner size="sm" class="max-w-12 self-center" />
+				<span class="text-2xl font-semibold text-primary-600">Attendere...</span>
+			</div>
+		{/if}
 	</div>
 </section>
 
-<Modal bind:open={modalOpen} on:close={closeModal} size="xs" outsideclose autoclose>
-	<span slot="header" class="text-2xl font-semibold text-{color}-500 flex items-center gap-2">
-		<svelte:component this={error ? XCircle : CheckCircle2} class="w-6 h-6  text-{color}-500"/>
+<Modal bind:open={modalOpen} onclose={closeModal} size="xs" outsideclose autoclose>
+	{@const ModalIcon = error ? XCircle : CheckCircle2}
+	<span class="text-2xl font-semibold text-{color}-500 flex items-center gap-2">
+		<ModalIcon class="h-6 w-6  text-{color}-500" />
 		{error ? 'Errore' : 'Successo'}
 	</span>
 	<div class="flex flex-col gap-5">
@@ -141,5 +148,5 @@
 			</div>
 		{/if}
 	</div>
-	<Button class="w-full" on:click={closeModal} slot="footer">Chiudi</Button>
+	<Button slot="footer" class="w-full" on:click={closeModal}>Chiudi</Button>
 </Modal>
