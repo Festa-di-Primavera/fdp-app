@@ -131,13 +131,13 @@
 	theme.subscribe((value) => {
 		currentTheme = value;
 	});
-	
+
 	onMount(() => {
 		$theme = localStorage.getItem('color-theme') as 'light' | 'dark';
 		// wait 100ms before displaying the chart
 		setTimeout(() => {
 			displayChart = true;
-		}, 100);
+		}, 300);
 	});
 </script>
 

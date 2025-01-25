@@ -16,9 +16,8 @@
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.50.0",
-		"@sveltejs/adapter-auto": "^3.3.1",
 		"@sveltejs/kit": "^2.16.1",
-		"@sveltejs/vite-plugin-svelte": "^4.0.2",
+		"@sveltejs/vite-plugin-svelte": "^5.0.3",
 		"@types/dotenv-flow": "^3.3.3",
 		"@types/eslint": "^9.6.1",
 		"@types/uuid": "^10.0.0",
@@ -28,7 +27,7 @@
 		"dotenv-flow": "^4.1.0",
 		"echarts": "^5.6.0",
 		"eslint": "^9.19.0",
-		"eslint-config-prettier": "^9.1.0",
+		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^2.46.1",
 		"flowbite": "^2.5.2",
 		"flowbite-svelte": "^0.47.4",
@@ -41,10 +40,9 @@
 		"svelte-check": "^4.1.4",
 		"svelte-echarts": "^0.1.1",
 		"tailwindcss": "^3.4.15",
-		"tslib": "^2.8.1",
 		"typescript": "^5.7.3",
-		"vite": "^5.4.11",
-		"vitest": "^2.1.5"
+		"vite": "^6.0.11",
+		"vitest": "^3.0.4"
 	},
 	"type": "module",
 	"dependencies": {
@@ -52,7 +50,7 @@
 		"@oslojs/crypto": "^1.0.1",
 		"@oslojs/encoding": "^1.1.0",
 		"@sveltejs/adapter-vercel": "^5.5.3",
-		"arctic": "^2.3.0",
+		"arctic": "^3.2.1",
 		"dotenv": "^16.4.7",
 		"firebase": "^11.2.0",
 		"lucide-svelte": "^0.474.0",

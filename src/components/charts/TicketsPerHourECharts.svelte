@@ -111,7 +111,7 @@
 		$theme = localStorage.getItem('color-theme') as 'light' | 'dark';
 		setTimeout(() => {
 			displayChart = true;
-		}, 100);
+		}, 300);
 	});
 
 	theme.subscribe((value) => {
