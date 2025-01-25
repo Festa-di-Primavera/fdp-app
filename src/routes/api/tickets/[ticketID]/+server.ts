@@ -26,7 +26,6 @@ export async function GET( { params, locals } ) {
 	}
 
 	const code = convertCode(params.ticketID);
-	console.log(code);
 	if(code === null){
 		return new Response(JSON.stringify({ message: 'Codice non valido' }), {
 			status: 404,
@@ -36,7 +35,7 @@ export async function GET( { params, locals } ) {
 		});
 	}
 
-	const ticketDoc = (await getDoc(doc(getClientDB(), "tickets", "FDP25-0001")));
+	const ticketDoc = (await getDoc(doc(getClientDB(), "tickets", code)));
 
 	if(!ticketDoc.exists()) {
 		return new Response(JSON.stringify({ message: 'Biglietto non esistente' }), {
@@ -46,25 +45,41 @@ export async function GET( { params, locals } ) {
 			}
 		});
 	}
-	
-	//* GET DEL NOME DEL VENDITORE
-	const usersCollection = collection(getClientDB(), "users");
-	const qUser = doc(usersCollection, ticketDoc.data().seller);
-	const seller = (await getDoc(qUser)).data() as User;
-	const sellerName = seller?.alias
-	
-	const ticket: Ticket = {
-		ticketID: ticketDoc.id,
-		name: ticketDoc.data().name,
-		surname: ticketDoc.data().surname,
-		seller: sellerName ?? null,
-		soldAt: ticketDoc.data().soldAt?.toDate() || null,
-		checkIn: ticketDoc.data().checkIn?.toDate() || null,
-		checkOut: ticketDoc.data().checkOut?.toDate() || null,
-		newCheckIn: ticketDoc.data().newCheckIn?.toDate() || null
-	};
 
-	if(!ticketDoc.data().soldAt) {
+	const ticketData = ticketDoc.data();
+	let ticket: Ticket;
+	
+	if (ticketData?.seller === null) {
+		ticket = {
+			ticketID: ticketDoc.id,
+			name: ticketData?.name,
+			surname: ticketData?.surname,
+			seller: null,
+			soldAt: ticketData?.soldAt?.toDate() || null,
+			checkIn: ticketData?.checkIn?.toDate() || null,
+			checkOut: ticketData?.checkOut?.toDate() || null,
+			newCheckIn: ticketData?.newCheckIn?.toDate() || null
+		};
+	} else {
+		//* GET DEL NOME DEL VENDITORE
+		const usersCollection = collection(getClientDB(), "users");
+		const qUser = doc(usersCollection, ticketData.seller);
+		const seller = (await getDoc(qUser)).data() as User;
+		const sellerName = seller?.alias;
+		
+		ticket = {
+			ticketID: ticketDoc.id,
+			name: ticketData.name,
+			surname: ticketData.surname,
+			seller: sellerName ?? null,
+			soldAt: ticketData.soldAt?.toDate() || null,
+			checkIn: ticketData.checkIn?.toDate() || null,
+			checkOut: ticketData.checkOut?.toDate() || null,
+			newCheckIn: ticketData.newCheckIn?.toDate() || null
+		};
+	}
+
+	if(!ticketData.soldAt) {
 		return new Response(JSON.stringify({ ticket }), {
 			// 402 Payment Required (non venduto)
 			status: 402,
@@ -76,7 +91,7 @@ export async function GET( { params, locals } ) {
 
 	return new Response(JSON.stringify({ ticket, message: 'Biglietto validato' }), {
 		// 206 Partial Content || 200 OK
-		status: sellerName === null ? 206 : 200,
+		status: ticket.seller === null ? 206 : 200,
 		headers: {
 			'content-type': 'application/json'
 		}
@@ -129,22 +144,38 @@ export async function PUT( { params, locals } ) {
 		});
 	}
 
-	//* GET DEL NOME DEL VENDITORE
-	const usersCollection = collection(getClientDB(), "users");
-	const qUser = doc(usersCollection, ticketDoc.data().seller);
-	const seller = (await getDoc(qUser)).data() as User;
-	const sellerName = seller.alias
+	const ticketData = ticketDoc.data();
+	let ticket: Ticket;
 	
-	const ticket: Ticket = {
-		ticketID: ticketDoc.id,
-		name: ticketDoc.data().name,
-		surname: ticketDoc.data().surname,
-		seller: sellerName ?? null,
-		soldAt: ticketDoc.data().soldAt?.toDate() || null,
-		checkIn: ticketDoc.data().checkIn?.toDate() || null,
-		checkOut: ticketDoc.data().checkOut?.toDate() || null,
-		newCheckIn: ticketDoc.data().newCheckIn?.toDate() || null
-	};
+	if (ticketData?.seller === null) {
+		ticket = {
+			ticketID: ticketDoc.id,
+			name: ticketData?.name,
+			surname: ticketData?.surname,
+			seller: null,
+			soldAt: ticketData?.soldAt?.toDate() || null,
+			checkIn: ticketData?.checkIn?.toDate() || null,
+			checkOut: ticketData?.checkOut?.toDate() || null,
+			newCheckIn: ticketData?.newCheckIn?.toDate() || null
+		};
+	} else {
+		//* GET DEL NOME DEL VENDITORE
+		const usersCollection = collection(getClientDB(), "users");
+		const qUser = doc(usersCollection, ticketData.seller);
+		const seller = (await getDoc(qUser)).data() as User;
+		const sellerName = seller?.alias;
+		
+		ticket = {
+			ticketID: ticketDoc.id,
+			name: ticketData.name,
+			surname: ticketData.surname,
+			seller: sellerName ?? null,
+			soldAt: ticketData.soldAt?.toDate() || null,
+			checkIn: ticketData.checkIn?.toDate() || null,
+			checkOut: ticketData.checkOut?.toDate() || null,
+			newCheckIn: ticketData.newCheckIn?.toDate() || null
+		};
+	}
 
 	//* BIGLIETTO NON VENDUTO
 	if(!ticket.soldAt) {
@@ -189,7 +220,7 @@ export async function PUT( { params, locals } ) {
 
 			return new Response(JSON.stringify({ ticket, message: 'Biglietto validato (2^ entrata)', second: true }), {
 				// 206 Partial Content || 200 OK
-				status: sellerName === null ? 206 : 200,
+				status: ticket.seller === null ? 206 : 200,
 				headers: {
 					'content-type': 'application/json'
 				}
@@ -207,7 +238,7 @@ export async function PUT( { params, locals } ) {
 
 	return new Response(JSON.stringify({ ticket, message: 'Biglietto validato', second: false }), {
 		// 206 Partial Content || 200 OK
-		status: sellerName === null ? 206 : 200,
+		status: ticket.name === null ? 206 : 200,
 		headers: {
 			'content-type': 'application/json'
 		}
