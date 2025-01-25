@@ -1,4 +1,5 @@
 <script lang="ts">
+
 	import { enhance } from '$app/forms';
 
 	import { Button, Card, Fileupload, Input, Label, NumberInput, Spinner } from 'flowbite-svelte';
@@ -8,15 +9,19 @@
 	import type { User } from '$lib/auth/user';
 	import { user } from '$store/store';
 
-	export let data: User;
+	interface Props {
+		data: User;
+	}
+
+	let { data }: Props = $props();
 	if (!$user) $user = data;
 
 	// prefisso = FDP24 se 2024, FDP25 se 2025, ecc.
-	let prefix = 'FDP' + (new Date().getFullYear() - 2000).toString() + '-';
-	let suffix = '';
-	let startingNumber = 1;
-	let codeLength = 4;
-	let numberOfCodes = 1250;
+	let prefix = $state('FDP' + (new Date().getFullYear() - 2000).toString() + '-');
+	let suffix = $state('');
+	let startingNumber = $state(1);
+	let codeLength = $state(4);
+	let numberOfCodes = $state(1250);
 	let codes: string[] = [];
 
 	const insertCodes = async () => {
@@ -52,10 +57,10 @@
 		}
 	};
 
-	let ticketsNumber = 1250;
-	let ticketsPerBlock = 50;
-	let startCode = 45151;
-	$: isNotDivisibile = ticketsNumber % ticketsPerBlock != 0;
+	let ticketsNumber = $state(1250);
+	let ticketsPerBlock = $state(50);
+	let startCode = $state(45151);
+	let isNotDivisibile = $derived(ticketsNumber % ticketsPerBlock != 0);
 
 	const insertBlocks = async () => {
 		const res = await fetch('/api/tickets/blocks', {
@@ -81,12 +86,12 @@
 		}, 3500);
 	};
 
-	let open = false;
-	let color: 'green' | 'red' | 'yellow';
+	let open = $state(false);
+	let color: 'green' | 'red' | 'yellow' = $state('green');
 	let timeOut: NodeJS.Timeout;
-	let message = '';
-	let error = false;
-	$: toastIcon= error ? XCircle : CheckCircle2;
+	let message = $state('');
+	let error = $state(false);
+	let ToastIcon = $derived(error ? XCircle : CheckCircle2);
 </script>
 
 <svelte:head>
@@ -213,7 +218,7 @@
 						<Button
 							on:click={insertBlocks}
 							class="rounded text-white"
-							bind:disabled={isNotDivisibile}>Genera Blocchetti</Button
+							disabled={isNotDivisibile}>Genera Blocchetti</Button
 						>
 					</div>
 				</main>
@@ -227,4 +232,4 @@
 	</div>
 {/if}
 
-<FeedbackToast bind:open bind:color bind:message bind:toastIcon />
+<FeedbackToast bind:open bind:color bind:message {ToastIcon} />

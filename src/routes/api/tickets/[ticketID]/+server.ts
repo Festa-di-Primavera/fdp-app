@@ -26,6 +26,7 @@ export async function GET( { params, locals } ) {
 	}
 
 	const code = convertCode(params.ticketID);
+	console.log(code);
 	if(code === null){
 		return new Response(JSON.stringify({ message: 'Codice non valido' }), {
 			status: 404,
@@ -35,7 +36,7 @@ export async function GET( { params, locals } ) {
 		});
 	}
 
-	const ticketDoc = (await getDoc(doc(getClientDB(), "tickets", code)));
+	const ticketDoc = (await getDoc(doc(getClientDB(), "tickets", "FDP25-0001")));
 
 	if(!ticketDoc.exists()) {
 		return new Response(JSON.stringify({ message: 'Biglietto non esistente' }), {

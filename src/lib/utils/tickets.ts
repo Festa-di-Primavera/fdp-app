@@ -12,12 +12,12 @@ export function convertCode(code: string | undefined): string | null {
 		return null;
 	}
 
-	if(code.includes('FDP24'))
+	if(code.includes('FDP25'))
 		return code;
 
 	if(code.includes('XNRF')){
 		code = code.replace('XNRF', '');
-		code = code.replace('/24', '');
+		code = code.replace('/25', '');
 		code = code.trim(); 
 
 		let num = parseInt(code);
@@ -27,7 +27,7 @@ export function convertCode(code: string | undefined): string | null {
 		while(str.length < 4){
 			str = '0' + str;
 		}
-		return `FDP24-${str}`;
+		return `FDP25-${str}`;
 	}
 	
     return null;

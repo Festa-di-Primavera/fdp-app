@@ -1,3 +1,4 @@
+<!-- To keep in Svelte 4 (Legacy Mode) until new svelte-echart version (for Svelte 5) -->
 <script lang="ts">
 	import { type ChartData, SalesTimeSlot } from "$lib/charts/utils";
 	import { Card, Select } from "flowbite-svelte";
