@@ -1,14 +1,14 @@
-import { addDoc, doc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
+import { v4 as uuidv4 } from "uuid";
 import { userCollection } from "./database";
 import { hashPassword } from "./utils/password";
-import {v4 as uuidv4} from "uuid";
 
 export interface GoogleUser {
-	sub: string;
-	name: string;
-	picture: string;
-	email: string;
-	email_verified: boolean;
+    sub: string;
+    name: string;
+    picture: string;
+    email: string;
+    email_verified: boolean;
 }
 
 export interface User {
@@ -16,7 +16,7 @@ export interface User {
 
     google_id?: string;
     avatar_url?: string;
-    
+
     username: string;
     email: string;
     email_verified: boolean;
@@ -28,50 +28,56 @@ export interface User {
     owned_money: number;
 }
 
-export async function createUser(email:string, username: string, password: string): Promise<User> {
-	const passwordHash = await hashPassword(password);
+export async function createUser(
+    email: string,
+    username: string,
+    password: string
+): Promise<User> {
+    const passwordHash = await hashPassword(password);
 
-	const userId = uuidv4();
+    const userId = uuidv4();
 
-	const user: User = {
-		id: userId,
+    const user: User = {
+        id: userId,
 
-		username: username,
-		email: email,
-		email_verified: false,
-		password_hash: passwordHash,
+        username: username,
+        email: email,
+        email_verified: false,
+        password_hash: passwordHash,
 
-		alias: username,
-		permissions: 0,
-		owned_money: 0,
-		total_from_sales: 0
-	};
+        alias: username,
+        permissions: 0,
+        owned_money: 0,
+        total_from_sales: 0,
+    };
 
-	await setDoc(doc(userCollection, userId), user);
+    await setDoc(doc(userCollection, userId), user);
 
-	return user;
+    return user;
 }
 
-export async function createUserWithGoogle(googleUser: GoogleUser): Promise<User> {
-	const userId = uuidv4();
+export async function createUserWithGoogle(
+    googleUser: GoogleUser
+): Promise<User> {
+    const userId = uuidv4();
 
-	const user: User = {
-		id: userId,
+    const user: User = {
+        id: userId,
 
-		google_id: googleUser.sub,
-		avatar_url: googleUser.picture,
+        google_id: googleUser.sub,
+        avatar_url: googleUser.picture,
 
-		username: googleUser.name,
-		email: googleUser.email,
-		email_verified: googleUser.email_verified,
+        username: googleUser.name,
+        email: googleUser.email,
+        email_verified: googleUser.email_verified,
 
-		alias: googleUser.name,
-		permissions: 0,
-		total_from_sales: 0,
-		owned_money: 0,
-	};
+        alias: googleUser.name,
+        permissions: 0,
+        total_from_sales: 0,
+        owned_money: 0,
+    };
 
-	await setDoc(doc(userCollection, userId), user);
+    await setDoc(doc(userCollection, userId), user);
 
-	return user;
+    return user;
 }

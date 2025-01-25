@@ -1,350 +1,375 @@
-import { Timestamp, updateDoc, doc, getDoc, setDoc, collection } from 'firebase/firestore';
-import { getClientDB } from '$lib/firebase/client.js';
-import type { Ticket } from '$models/ticket';
-import { convertCode } from '$lib/utils/tickets';
-import { hasPermission } from '$lib/utils/permissions';
-import { UserPermissions } from '$models/permissions';
-import type { User } from '$lib/auth/user';
+import type { User } from "$lib/auth/user";
+import { getClientDB } from "$lib/firebase/client.js";
+import { hasPermission } from "$lib/utils/permissions";
+import { convertCode } from "$lib/utils/tickets";
+import { UserPermissions } from "$models/permissions";
+import type { Ticket } from "$models/ticket";
+import {
+    collection,
+    doc,
+    getDoc,
+    setDoc,
+    Timestamp,
+    updateDoc,
+} from "firebase/firestore";
 
-export async function GET( { params, locals } ) {
-	if(!locals.user){
-		return new Response(JSON.stringify({message: 'Non sei autenticato'}), {
-			status: 401,
-			headers: {
-				'Content-Type': 'text/plain'
-			}
-		});
-	}
+export async function GET({ params, locals }) {
+    if (!locals.user) {
+        return new Response(
+            JSON.stringify({ message: "Non sei autenticato" }),
+            {
+                status: 401,
+                headers: {
+                    "Content-Type": "text/plain",
+                },
+            }
+        );
+    }
 
-	if(!hasPermission(locals.user.permissions, UserPermissions.INFO_BIGLIETTO)){
-		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
-			status: 403,
-			headers: {
-				'Content-Type': 'text/plain'
-			}
-		});
-	}
+    if (
+        !hasPermission(locals.user.permissions, UserPermissions.INFO_BIGLIETTO)
+    ) {
+        return new Response(
+            JSON.stringify({ message: "Non hai i permessi necessari" }),
+            {
+                status: 403,
+                headers: {
+                    "Content-Type": "text/plain",
+                },
+            }
+        );
+    }
 
-	const code = convertCode(params.ticketID);
-	if(code === null){
-		return new Response(JSON.stringify({ message: 'Codice non valido' }), {
-			status: 404,
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
-	}
+    const code = convertCode(params.ticketID);
+    if (code === null) {
+        return new Response(JSON.stringify({ message: "Codice non valido" }), {
+            status: 404,
+            headers: {
+                "content-type": "application/json",
+            },
+        });
+    }
 
-	const ticketDoc = (await getDoc(doc(getClientDB(), "tickets", code)));
+    const ticketDoc = await getDoc(doc(getClientDB(), "tickets", code));
 
-	if(!ticketDoc.exists()) {
-		return new Response(JSON.stringify({ message: 'Biglietto non esistente' }), {
-			status: 404,
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
-	}
+    if (!ticketDoc.exists()) {
+        return new Response(
+            JSON.stringify({ message: "Biglietto non esistente" }),
+            {
+                status: 404,
+                headers: {
+                    "content-type": "application/json",
+                },
+            }
+        );
+    }
 
-	const ticketData = ticketDoc.data();
-	let ticket: Ticket;
-	
-	if (ticketData?.seller === null) {
-		ticket = {
-			ticketID: ticketDoc.id,
-			name: ticketData?.name,
-			surname: ticketData?.surname,
-			seller: null,
-			soldAt: ticketData?.soldAt?.toDate() || null,
-			checkIn: ticketData?.checkIn?.toDate() || null,
-			checkOut: ticketData?.checkOut?.toDate() || null,
-			newCheckIn: ticketData?.newCheckIn?.toDate() || null
-		};
-	} else {
-		//* GET DEL NOME DEL VENDITORE
-		const usersCollection = collection(getClientDB(), "users");
-		const qUser = doc(usersCollection, ticketData.seller);
-		const seller = (await getDoc(qUser)).data() as User;
-		const sellerName = seller?.alias;
-		
-		ticket = {
-			ticketID: ticketDoc.id,
-			name: ticketData.name,
-			surname: ticketData.surname,
-			seller: sellerName ?? null,
-			soldAt: ticketData.soldAt?.toDate() || null,
-			checkIn: ticketData.checkIn?.toDate() || null,
-			checkOut: ticketData.checkOut?.toDate() || null,
-			newCheckIn: ticketData.newCheckIn?.toDate() || null
-		};
-	}
+    const ticketData = ticketDoc.data();
+    let ticket: Ticket;
 
-	if(!ticketData.soldAt) {
-		return new Response(JSON.stringify({ ticket }), {
-			// 402 Payment Required (non venduto)
-			status: 402,
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
-	}
+    if (ticketData?.seller === null) {
+        ticket = {
+            ticketID: ticketDoc.id,
+            name: ticketData?.name,
+            surname: ticketData?.surname,
+            seller: null,
+            soldAt: ticketData?.soldAt?.toDate() || null,
+            checkIn: ticketData?.checkIn?.toDate() || null,
+        };
+    } else {
+        //* GET DEL NOME DEL VENDITORE
+        const usersCollection = collection(getClientDB(), "users");
+        const qUser = doc(usersCollection, ticketData.seller);
+        const seller = (await getDoc(qUser)).data() as User;
+        const sellerName = seller?.alias;
 
-	return new Response(JSON.stringify({ ticket, message: 'Biglietto validato' }), {
-		// 206 Partial Content || 200 OK
-		status: ticket.seller === null ? 206 : 200,
-		headers: {
-			'content-type': 'application/json'
-		}
-	});
+        ticket = {
+            ticketID: ticketDoc.id,
+            name: ticketData.name,
+            surname: ticketData.surname,
+            seller: sellerName ?? null,
+            soldAt: ticketData.soldAt?.toDate() || null,
+            checkIn: ticketData.checkIn?.toDate() || null,
+        };
+    }
+
+    if (!ticketData.soldAt) {
+        return new Response(JSON.stringify({ ticket }), {
+            // 402 Payment Required (non venduto)
+            status: 402,
+            headers: {
+                "content-type": "application/json",
+            },
+        });
+    }
+
+    return new Response(
+        JSON.stringify({ ticket, message: "Biglietto validato" }),
+        {
+            // 206 Partial Content || 200 OK
+            status: ticket.seller === null ? 206 : 200,
+            headers: {
+                "content-type": "application/json",
+            },
+        }
+    );
 }
 
-export async function PUT( { params, locals } ) {
-	if(!locals.user){
-		return new Response(JSON.stringify({message: 'Non sei autenticato'}), {
-			status: 401,
-			headers: {
-				'Content-Type': 'text/plain'
-			}
-		});
-	}
+export async function PUT({ params, locals }) {
+    if (!locals.user) {
+        return new Response(
+            JSON.stringify({ message: "Non sei autenticato" }),
+            {
+                status: 401,
+                headers: {
+                    "Content-Type": "text/plain",
+                },
+            }
+        );
+    }
 
-	if(!hasPermission(locals.user.permissions, UserPermissions.CHECK_IN)){
-		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
-			status: 403,
-			headers: {
-				'Content-Type': 'text/plain'
-			}
-		});
-	}
+    if (!hasPermission(locals.user.permissions, UserPermissions.CHECK_IN)) {
+        return new Response(
+            JSON.stringify({ message: "Non hai i permessi necessari" }),
+            {
+                status: 403,
+                headers: {
+                    "Content-Type": "text/plain",
+                },
+            }
+        );
+    }
 
-	const code = convertCode(params.ticketID);
+    const code = convertCode(params.ticketID);
 
-	if(code === null){
-		return new Response(JSON.stringify({ message: 'Codice non valido' }), {
-			// 404 Not Found
-			status: 404,
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
-	}
+    if (code === null) {
+        return new Response(JSON.stringify({ message: "Codice non valido" }), {
+            // 404 Not Found
+            status: 404,
+            headers: {
+                "content-type": "application/json",
+            },
+        });
+    }
 
-	const ticketDocRef = doc(getClientDB(), "tickets", code);
+    const ticketDocRef = doc(getClientDB(), "tickets", code);
 
-	const ticketDoc = (await getDoc(ticketDocRef));
+    const ticketDoc = await getDoc(ticketDocRef);
 
-	//* BIGLIETTO NON ESISTENTE
-	if(!ticketDoc.exists()) {
-		return new Response(JSON.stringify({ message: 'Biglietto non valido' }), {
-			// 404 Not Found
-			status: 404,
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
-	}
+    //* BIGLIETTO NON ESISTENTE
+    if (!ticketDoc.exists()) {
+        return new Response(
+            JSON.stringify({ message: "Biglietto non valido" }),
+            {
+                // 404 Not Found
+                status: 404,
+                headers: {
+                    "content-type": "application/json",
+                },
+            }
+        );
+    }
 
-	const ticketData = ticketDoc.data();
-	let ticket: Ticket;
-	
-	if (ticketData?.seller === null) {
-		ticket = {
-			ticketID: ticketDoc.id,
-			name: ticketData?.name,
-			surname: ticketData?.surname,
-			seller: null,
-			soldAt: ticketData?.soldAt?.toDate() || null,
-			checkIn: ticketData?.checkIn?.toDate() || null,
-			checkOut: ticketData?.checkOut?.toDate() || null,
-			newCheckIn: ticketData?.newCheckIn?.toDate() || null
-		};
-	} else {
-		//* GET DEL NOME DEL VENDITORE
-		const usersCollection = collection(getClientDB(), "users");
-		const qUser = doc(usersCollection, ticketData.seller);
-		const seller = (await getDoc(qUser)).data() as User;
-		const sellerName = seller?.alias;
-		
-		ticket = {
-			ticketID: ticketDoc.id,
-			name: ticketData.name,
-			surname: ticketData.surname,
-			seller: sellerName ?? null,
-			soldAt: ticketData.soldAt?.toDate() || null,
-			checkIn: ticketData.checkIn?.toDate() || null,
-			checkOut: ticketData.checkOut?.toDate() || null,
-			newCheckIn: ticketData.newCheckIn?.toDate() || null
-		};
-	}
+    const ticketData = ticketDoc.data();
+    let ticket: Ticket;
 
-	//* BIGLIETTO NON VENDUTO
-	if(!ticket.soldAt) {
-		return new Response(JSON.stringify({ ticket, message: 'Biglietto non venduto' }), {
-			// 402 Payment Required
-			status: 402,
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
-	}
+    if (ticketData?.seller === null) {
+        ticket = {
+            ticketID: ticketDoc.id,
+            name: ticketData?.name,
+            surname: ticketData?.surname,
+            seller: null,
+            soldAt: ticketData?.soldAt?.toDate() || null,
+            checkIn: ticketData?.checkIn?.toDate() || null,
+        };
+    } else {
+        //* GET DEL NOME DEL VENDITORE
+        const usersCollection = collection(getClientDB(), "users");
+        const qUser = doc(usersCollection, ticketData.seller);
+        const seller = (await getDoc(qUser)).data() as User;
+        const sellerName = seller?.alias;
 
-	//* BIGLIETTO GIA' VALIDATO
-	if(ticket.checkIn) {
-		//* E NON USCITO
-		if(!ticket.checkOut) {
-			return new Response(JSON.stringify({ ticket, message: 'Biglietto già validato' }), {
-				// 409 Conflict
-				status: 409,
-				headers: {
-					'content-type': 'application/json'
-				}
-			});
-		}
-		//* E USCITO UNA VOLTA
-		else {
-			if(ticket.newCheckIn) {	
-				return new Response(JSON.stringify({ ticket, message: 'Biglietto già rientrato', second: true }), {
-					// 409 Conflict
-					status: 409,
-					headers: {
-						'content-type': 'application/json'
-					}
-				});
-			}
-			const currentTimestamp = Timestamp.fromDate(new Date());
-			await updateDoc(doc(getClientDB(), "tickets", code), {
-				newCheckIn: currentTimestamp
-			});
+        ticket = {
+            ticketID: ticketDoc.id,
+            name: ticketData.name,
+            surname: ticketData.surname,
+            seller: sellerName ?? null,
+            soldAt: ticketData.soldAt?.toDate() || null,
+            checkIn: ticketData.checkIn?.toDate() || null,
+        };
+    }
 
-			ticket.newCheckIn = currentTimestamp.toDate();
+    //* BIGLIETTO NON VENDUTO
+    if (!ticket.soldAt) {
+        return new Response(
+            JSON.stringify({ ticket, message: "Biglietto non venduto" }),
+            {
+                // 402 Payment Required
+                status: 402,
+                headers: {
+                    "content-type": "application/json",
+                },
+            }
+        );
+    }
 
-			return new Response(JSON.stringify({ ticket, message: 'Biglietto validato (2^ entrata)', second: true }), {
-				// 206 Partial Content || 200 OK
-				status: ticket.seller === null ? 206 : 200,
-				headers: {
-					'content-type': 'application/json'
-				}
-			});
-		}
-	}
+    //* BIGLIETTO GIA' VALIDATO
+    if (ticket.checkIn) {
+        return new Response(
+            JSON.stringify({ ticket, message: "Biglietto già validato" }),
+            {
+                // 409 Conflict
+                status: 409,
+                headers: {
+                    "content-type": "application/json",
+                },
+            }
+        );
+    }
 
-	//* BIGLIETTO NON ANCORA VALIDATO
-	const currentTimestamp = Timestamp.fromDate(new Date());
-	await updateDoc(doc(getClientDB(), "tickets", code), {
-		checkIn: currentTimestamp
-	});
+    //* BIGLIETTO NON ANCORA VALIDATO
+    const currentTimestamp = Timestamp.fromDate(new Date());
+    await updateDoc(doc(getClientDB(), "tickets", code), {
+        checkIn: currentTimestamp,
+    });
 
-	ticket.checkIn = currentTimestamp.toDate();
+    ticket.checkIn = currentTimestamp.toDate();
 
-	return new Response(JSON.stringify({ ticket, message: 'Biglietto validato', second: false }), {
-		// 206 Partial Content || 200 OK
-		status: ticket.name === null ? 206 : 200,
-		headers: {
-			'content-type': 'application/json'
-		}
-	});
+    return new Response(
+        JSON.stringify({
+            ticket,
+            message: "Biglietto validato",
+            second: false,
+        }),
+        {
+            // 206 Partial Content || 200 OK
+            status: ticket.name === null ? 206 : 200,
+            headers: {
+                "content-type": "application/json",
+            },
+        }
+    );
 }
 
-export async function POST( { params, request, locals } ) {
-	if(!locals.user){
-		return new Response(JSON.stringify({message: 'Non sei autenticato'}), {
-			status: 401,
-			headers: {
-				'Content-Type': 'text/plain'
-			}
-		});
-	}
+export async function POST({ params, request, locals }) {
+    if (!locals.user) {
+        return new Response(
+            JSON.stringify({ message: "Non sei autenticato" }),
+            {
+                status: 401,
+                headers: {
+                    "Content-Type": "text/plain",
+                },
+            }
+        );
+    }
 
-	if(!hasPermission(locals.user.permissions, UserPermissions.VENDITA)){
-		return new Response(JSON.stringify({message: 'Non hai i permessi necessari'}), {
-			status: 403,
-			headers: {
-				'Content-Type': 'text/plain'
-			}
-		});
-	}
+    if (!hasPermission(locals.user.permissions, UserPermissions.VENDITA)) {
+        return new Response(
+            JSON.stringify({ message: "Non hai i permessi necessari" }),
+            {
+                status: 403,
+                headers: {
+                    "Content-Type": "text/plain",
+                },
+            }
+        );
+    }
 
-	const formData = await request.json();
-	const code = convertCode(params.ticketID);
+    const formData = await request.json();
+    const code = convertCode(params.ticketID);
 
-	if(code === null){
-		const response = new Response(JSON.stringify({ message: 'Codice non valido' }), {
-			status: 404,
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
+    if (code === null) {
+        const response = new Response(
+            JSON.stringify({ message: "Codice non valido" }),
+            {
+                status: 404,
+                headers: {
+                    "content-type": "application/json",
+                },
+            }
+        );
 
-		return response;
-	}
+        return response;
+    }
 
-	const name = formData.name;
-	const surname = formData.surname;
-	const seller = formData.seller;
-	const soldAt = Timestamp.fromDate(new Date());
+    const name = formData.name;
+    const surname = formData.surname;
+    const seller = formData.seller;
+    const soldAt = Timestamp.fromDate(new Date());
 
-	const ticket = await getDoc(doc(getClientDB(), "tickets", code));
+    const ticket = await getDoc(doc(getClientDB(), "tickets", code));
 
-	if(!ticket.exists()){
-		const response = new Response(JSON.stringify({ message: 'Biglietto non esistente' }), {
-			status: 404,
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
+    if (!ticket.exists()) {
+        const response = new Response(
+            JSON.stringify({ message: "Biglietto non esistente" }),
+            {
+                status: 404,
+                headers: {
+                    "content-type": "application/json",
+                },
+            }
+        );
 
-		return response;
-	}
-	
-	if(ticket.data().soldAt){
-		const response = new Response(JSON.stringify({ message: 'Biglietto già venduto' }), {
-			status: 403,
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
+        return response;
+    }
 
-		return response;
-	}
+    if (ticket.data().soldAt) {
+        const response = new Response(
+            JSON.stringify({ message: "Biglietto già venduto" }),
+            {
+                status: 403,
+                headers: {
+                    "content-type": "application/json",
+                },
+            }
+        );
 
-	try{
-		await setDoc(doc(getClientDB(), "tickets", `${code}`), {
-			name: name,
-			surname: surname,
-			checkIn: null,
-			soldAt: soldAt,
-			seller: seller
-		});
+        return response;
+    }
 
-		//* AGGIORNAMENTO SOLDI DEL VENDITORE
-		const usersCollection = collection(getClientDB(), "users");
-		const userDoc = doc(usersCollection, seller);
-		const user = (await getDoc(userDoc)).data() as User;
-		const userMoney = user.owned_money + 10;
-		const totMoney = user.total_from_sales + 10;
-		await updateDoc(userDoc, {
-			owned_money: userMoney,
-			total_from_sales: totMoney
-		});
+    try {
+        await setDoc(doc(getClientDB(), "tickets", `${code}`), {
+            name: name,
+            surname: surname,
+            checkIn: null,
+            soldAt: soldAt,
+            seller: seller,
+        });
 
+        //* AGGIORNAMENTO SOLDI DEL VENDITORE
+        const usersCollection = collection(getClientDB(), "users");
+        const userDoc = doc(usersCollection, seller);
+        const user = (await getDoc(userDoc)).data() as User;
+        const userMoney = user.owned_money + 10;
+        const totMoney = user.total_from_sales + 10;
+        await updateDoc(userDoc, {
+            owned_money: userMoney,
+            total_from_sales: totMoney,
+        });
 
-		const response = new Response(JSON.stringify({ message: 'Biglietto venduto' }), {
-			status: 200,
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
+        const response = new Response(
+            JSON.stringify({ message: "Biglietto venduto" }),
+            {
+                status: 200,
+                headers: {
+                    "content-type": "application/json",
+                },
+            }
+        );
 
-		return response;
-	}
-	catch(e) {
-		const response = new Response(JSON.stringify({ message: 'Errore nella vendita' }), {
-			status: 500,
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
+        return response;
+    } catch (e) {
+        const response = new Response(
+            JSON.stringify({ message: "Errore nella vendita" }),
+            {
+                status: 500,
+                headers: {
+                    "content-type": "application/json",
+                },
+            }
+        );
 
-		return response;
-	}
+        return response;
+    }
 }

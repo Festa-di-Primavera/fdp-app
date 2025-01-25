@@ -6,23 +6,27 @@ import { generateCodeVerifier, generateState } from "arctic";
 import type { RequestEvent } from "@sveltejs/kit";
 
 export async function GET(event: RequestEvent): Promise<Response> {
-	const state = generateState();
-	const codeVerifier = generateCodeVerifier();
-	const url = await google.createAuthorizationURL(state, codeVerifier, ["openid", "profile", "email"]);
+    const state = generateState();
+    const codeVerifier = generateCodeVerifier();
+    const url = await google.createAuthorizationURL(state, codeVerifier, [
+        "openid",
+        "profile",
+        "email",
+    ]);
 
-	event.cookies.set("google_oauth_state", state, {
-		path: "/",
-		secure: import.meta.env.PROD,
-		httpOnly: true,
-		maxAge: 60 * 10,
-		sameSite: "lax"
-	});
-	event.cookies.set("google_code_verifier", codeVerifier, {
-		path: "/",
-		httpOnly: true,
-		maxAge: 60 * 10, // 10 minutes
-		sameSite: "lax"
-	});
+    event.cookies.set("google_oauth_state", state, {
+        path: "/",
+        secure: import.meta.env.PROD,
+        httpOnly: true,
+        maxAge: 60 * 10,
+        sameSite: "lax",
+    });
+    event.cookies.set("google_code_verifier", codeVerifier, {
+        path: "/",
+        httpOnly: true,
+        maxAge: 60 * 10, // 10 minutes
+        sameSite: "lax",
+    });
 
-	redirect(302, url.toString());
+    redirect(302, url.toString());
 }
