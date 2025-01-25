@@ -6,16 +6,6 @@
 	import { theme } from '$store/store';
 	import { onMount } from 'svelte';
 
-	let currentTheme: 'dark' | 'light';
-
-	onMount(() => {
-		$theme = localStorage.getItem('color-theme') as 'light' | 'dark';
-	});
-
-	theme.subscribe((value) => {
-		currentTheme = value;
-	});
-
 	export let sellersStats: ChartData;
 	const MAX_VISIBLE_BARS = 4;
 
@@ -116,6 +106,20 @@
 			}
 		},
     } as EChartsOptions;
+
+	let currentTheme: 'dark' | 'light';
+	let displayChart = false;
+
+	onMount(() => {
+		$theme = localStorage.getItem('color-theme') as 'light' | 'dark';
+		setTimeout(() => {
+			displayChart = true;
+		}, 100);
+	});
+
+	theme.subscribe((value) => {
+		currentTheme = value;
+	});
 </script>
 
 <Card class="h-96 w-full">
@@ -131,7 +135,9 @@
 
 	{#if options !== null}
 		<div class="mt-5 h-full w-full">
-			<Chart renderer="svg" bind:options />
+			{#if displayChart}
+				<Chart renderer="svg" bind:options />
+			{/if}
 		</div>
 	{/if}
 </Card>

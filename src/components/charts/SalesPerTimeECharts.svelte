@@ -5,15 +5,6 @@
 	import { Chart, type EChartsOptions } from "svelte-echarts";
 	import { theme } from "$store/store";
 	import { onMount } from "svelte";
-
-	let currentTheme: 'light' | 'dark';
-	onMount(() => {
-		$theme = localStorage.getItem('color-theme') as 'light' | 'dark';
-	});
-
-	theme.subscribe((value) => {
-		currentTheme = value;
-	});
 	
 	const MAX_VISIBLE_BARS = 10;
 
@@ -133,6 +124,21 @@
 			}
 		},
     } as EChartsOptions;
+
+	let displayChart = false;
+	let currentTheme: 'light' | 'dark';
+
+	theme.subscribe((value) => {
+		currentTheme = value;
+	});
+	
+	onMount(() => {
+		$theme = localStorage.getItem('color-theme') as 'light' | 'dark';
+		// wait 100ms before displaying the chart
+		setTimeout(() => {
+			displayChart = true;
+		}, 100);
+	});
 </script>
 
 <Card class=" w-full h-96">
@@ -156,5 +162,7 @@
 			/>
 		</div>
 	</div>
-	<Chart renderer="svg" {options} />
+	{#if displayChart}
+		<Chart renderer="svg" {options} />
+	{/if}
 </Card>

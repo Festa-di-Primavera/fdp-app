@@ -1,38 +1,37 @@
 <script lang="ts">
 	import {
+		Accordion,
+		AccordionItem,
 		Button,
 		CloseButton,
 		DarkMode,
 		Drawer,
 		Dropdown,
 		DropdownItem,
-		Modal,
-		Accordion,
-		AccordionItem
+		Modal
 	} from 'flowbite-svelte';
 	import {
 		AlignJustify,
+		Dna,
 		DollarSign,
 		DoorOpen,
 		Home,
 		LayoutDashboard,
 		LogOut,
+		NotepadText,
 		ScanLine,
 		ScrollText,
 		Ticket,
-		Users,
-		Dna,
-		NotepadText
+		Users
 	} from 'lucide-svelte';
 	import { sineIn } from 'svelte/easing';
 	import Logo from './Logo.svelte';
 
 	import { enhance } from '$app/forms';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { hasPermission } from '$lib/utils/permissions';
 	import { UserPermissions } from '$models/permissions';
 	import { theme, user } from '$store/store';
-	import ChangePwModal from './ChangePwModal.svelte';
 
 	interface Route {
 		label: string;
@@ -43,7 +42,7 @@
 	}
 
 	$effect(() => {
-		if ($page.url.pathname == '/login') {
+		if (page.url.pathname == '/login') {
 			hidden = true;
 		}
 	});
@@ -142,8 +141,6 @@
 	}
 
 	let deleteModalOpen: boolean = $state(false);
-
-	let changePwModalOpen: boolean = $state(false);
 </script>
 
 <navbar
@@ -193,7 +190,7 @@
 							<AccordionItem
 								borderBottomClass=""
 								paddingFlush="p-0 justify-start"
-								open={route.children.some((child) => child.slug === $page.url.pathname)}
+								open={route.children.some((child) => child.slug === page.url.pathname)}
 							>
 								<span slot="header" class="mr-4 flex w-max items-center gap-4 text-xl font-normal">
 									<route.icon />
@@ -203,7 +200,7 @@
 									{#each route.children as childRoute}
 										<a
 											onclick={() => (hidden = true)}
-											class={`${childRoute.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`}
+											class={`${childRoute.slug == page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`}
 											href={childRoute.slug}
 										>
 											<span class="flex w-full items-center gap-4 py-2 text-xl">
@@ -218,7 +215,7 @@
 					{:else}
 						<a
 							onclick={() => (hidden = true)}
-							class={`${route.slug == $page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`}
+							class={`${route.slug == page.url.pathname ? 'text-primary-500' : 'text-gray-500 dark:text-gray-400'}`}
 							href={route.slug}
 						>
 							<span class="flex w-full items-center gap-4 text-xl">
@@ -259,14 +256,6 @@
 					</button>
 					<Dropdown placement="top" triggeredBy="#account">
 						<DropdownItem>
-							<button
-								onclick={() => {
-									changePwModalOpen = true;
-									hidden = true;
-								}}>Cambia Password</button
-							>
-						</DropdownItem>
-						<DropdownItem slot="footer">
 							<button
 								class="text-red-400"
 								onclick={() => {
@@ -314,4 +303,3 @@
 		<Button type="reset" color="alternative" on:click={() => (deleteModalOpen = false)}>No</Button>
 	</form>
 </Modal>
-<ChangePwModal bind:changePwModalOpen />

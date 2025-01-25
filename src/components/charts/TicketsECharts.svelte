@@ -9,23 +9,13 @@
 	export let notCheckedTicketsCount: number;
 	export let notSoldTicketsCount: number;
 
-	let currentTheme: 'dark' | 'light';
-
-	onMount(() => {
-		$theme = localStorage.getItem('color-theme') as 'light' | 'dark';
-	});
-
-	theme.subscribe((value) => {
-		currentTheme = value;
-	});
-
 	$: options = {
 		legend: {
 			orient: 'horizontal',
 			left: 10,
 			data: ['Validati', 'Non validati', 'Non venduti'],
 			formatter: (name: string) => {
-				return name
+				return name;
 			},
 			textStyle: {
 				color: currentTheme == 'dark' ? 'white' : 'rgb(55 65 81)'
@@ -81,37 +71,50 @@
 							color: currentTheme == 'dark' ? 'white' : 'rgb(55 65 81)'
 						}
 					}
-				],
+				]
 			}
 		],
 		toolbox: {
-			show : true,
+			show: true,
 			bottom: 0,
 			showTitle: false,
 			itemSize: 20,
-			feature : {
+			feature: {
 				saveAsImage: {
-					show: true, 
-					type: 'png', 
+					show: true,
+					type: 'png',
 					name: 'graph',
 					iconStyle: {
 						borderColor: currentTheme == 'dark' ? 'white' : 'rgb(55 65 81)',
-						borderWidth: 1.5,
-						
+						borderWidth: 1.5
 					},
 					icon: `path://M 7 10 L 12 15 L 17 10 M 21 15 v 4 a 2 2 0 0 1 -2 2 H 5 a 2 2 0 0 1 -2 -2 v -4 M 12 4 L 12 15`,
-					emphasis:{
-						iconStyle:{
+					emphasis: {
+						iconStyle: {
 							borderColor: '#C114C8'
 						}
 					}
-				},
+				}
 			}
-		},
+		}
 	} as EChartsOptions;
+
+	let currentTheme: 'dark' | 'light';
+	let displayChart = false;
+
+	onMount(() => {
+		$theme = localStorage.getItem('color-theme') as 'light' | 'dark';
+		setTimeout(() => {
+			displayChart = true;
+		}, 100);
+	});
+
+	theme.subscribe((value) => {
+		currentTheme = value;
+	});
 </script>
 
-<Card class=" w-full h-96" padding="md">
+<Card class=" h-96 w-full" padding="md">
 	<div class="flex w-full items-start justify-between">
 		<div class="flex-col items-center">
 			<div class="mb-1 flex items-center">
@@ -121,8 +124,10 @@
 	</div>
 
 	{#if options !== null}
-		<div class="pt-4 w-full h-full">
-			<Chart renderer="svg" bind:options />
+		<div class="h-full w-full pt-4">
+			{#if displayChart}
+				<Chart renderer="svg" bind:options />
+			{/if}
 		</div>
 	{/if}
 </Card>

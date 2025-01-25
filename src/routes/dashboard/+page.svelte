@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Button, Card, Input, Label, Modal, Spinner } from 'flowbite-svelte';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy } from 'svelte';
 
-	import { getClientApp, getClientDB } from '$lib/firebase/client';
+	import { getClientDB } from '$lib/firebase/client';
 
 	import {
 		CheckInTimeSlot,
@@ -12,14 +12,12 @@
 		computeSalesPerHour,
 		computeSalesPerTime,
 		computeSellersStats,
-		SalesTimeSlot,
-		type ChartData
+		SalesTimeSlot
 	} from '$lib/charts/utils';
 	import type { Ticket } from '$models/ticket';
 	import { user } from '$store/store';
 
 	import { goto } from '$app/navigation';
-	import { collection, onSnapshot, query, type Unsubscribe } from 'firebase/firestore';
 	import ExportToCsv from '$components/ExportToCSV.svelte';
 	import CheckInPerTimeECharts from '$components/charts/CheckInPerTimeECharts.svelte';
 	import CheckOutPerTimeECharts from '$components/charts/CheckOutPerTimeECharts.svelte';
@@ -28,6 +26,7 @@
 	import TicketsPerHourECharts from '$components/charts/TicketsPerHourECharts.svelte';
 	import TicketsPerPersonECharts from '$components/charts/TicketsPerPersonECharts.svelte';
 	import type { User } from '$lib/auth/user';
+	import { collection, onSnapshot, query, type Unsubscribe } from 'firebase/firestore';
 
 	interface Props {
 		data: { sellers: User[]; user: User };
@@ -58,33 +57,15 @@
 	let timeWindowCheckInPerTime: CheckInTimeSlot = $state(CheckInTimeSlot.HOUR);
 	let timeWindowCheckOutPerTime: CheckOutTimeSlot = $state(CheckOutTimeSlot.HALF_HOUR);
 
-	let sellersStats = $state({ labels: [], datasets: [] } as ChartData);
-	$effect(() => {
-		sellersStats = computeSellersStats(tickets);
-	});
-	let sellHoursStats = $state({ labels: [], datasets: [] } as ChartData);
-	$effect(() => {
-		sellHoursStats = computeSalesPerHour(tickets);
-	});
-	let salesPerTime = $state({ labels: [], datasets: [] } as ChartData);
-	$effect(() => {
-		salesPerTime = computeSalesPerTime(tickets, timeWindowSalesPerTime);
-	});
-	let checkInPerTime = $state({ labels: [], datasets: [] } as ChartData);
-	$effect(() => {
-		checkInPerTime = computeCheckInPerTime(tickets, timeWindowCheckInPerTime);
-	});
-	let checkOutPerTime = $state({ labels: [], datasets: [] } as ChartData);
-	$effect(() => {
-		checkOutPerTime = computeCheckOutPerTime(tickets, timeWindowCheckOutPerTime);
-	});
+	let sellersStats = $derived(computeSellersStats(tickets));
+	let sellHoursStats = $derived(computeSalesPerHour(tickets));
+	let salesPerTime = $derived(computeSalesPerTime(tickets, timeWindowSalesPerTime));
+	let checkInPerTime = $derived(computeCheckInPerTime(tickets, timeWindowCheckInPerTime));
+	let checkOutPerTime = $derived(computeCheckOutPerTime(tickets, timeWindowCheckOutPerTime));
 
 	let open: boolean = $state(true);
 	let value: string = $state('');
-	let validate = $state(false);
-	$effect(() => {
-		validate = value !== 'Festa di Primavera';
-	});
+	let validate = $derived(value !== 'Festa di Primavera');
 
 	// get tickets from firestore
 	function getTickets() {
@@ -168,21 +149,21 @@
 						bind:notCheckedTicketsCount
 						bind:notSoldTicketsCount
 					/>
-					<TicketsPerPersonECharts bind:sellersStats />
-					<TicketsPerHourECharts bind:sellHoursStats />
+					<TicketsPerPersonECharts {sellersStats} />
+					<TicketsPerHourECharts {sellHoursStats} />
 
 					<SalesPerTimeECharts
-						bind:ticketsData={salesPerTime}
+						ticketsData={salesPerTime}
 						bind:timeWindow={timeWindowSalesPerTime}
 					/>
 
 					<CheckInPerTimeECharts
-						bind:ticketsData={checkInPerTime}
+						ticketsData={checkInPerTime}
 						bind:timeWindow={timeWindowCheckInPerTime}
 					/>
 
 					<CheckOutPerTimeECharts
-						bind:ticketsData={checkOutPerTime}
+						ticketsData={checkOutPerTime}
 						bind:timeWindow={timeWindowCheckOutPerTime}
 					/>
 				</div>
@@ -217,7 +198,7 @@
 	</div>
 	<div slot="footer" class="flex gap-3">
 		<Button
-			bind:disabled={validate}
+			disabled={validate}
 			color="primary"
 			on:click={() => {
 				if (value === 'Festa di Primavera') {
