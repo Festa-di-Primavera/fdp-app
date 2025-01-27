@@ -1,18 +1,22 @@
 <script lang="ts">
-	import { Eye, EyeOff } from "lucide-svelte";
+    import { Eye, EyeOff } from "lucide-svelte";
 
-	export let pwVisible: boolean;
+    interface Props {
+        pwVisible: boolean;
+    }
+
+    let { pwVisible = $bindable() }: Props = $props();
 </script>
 
 <button
-	type="button"
-	class="flex items-center justify-center"
-	tabindex="-1"
-	on:click={() => (pwVisible = !pwVisible)}
+    type="button"
+    class="flex items-center justify-center"
+    tabindex="-1"
+    onclick={() => (pwVisible = !pwVisible)}
 >
-	{#if pwVisible}
-		<EyeOff />
-	{:else}
-		<Eye />
-	{/if}
+    {#if pwVisible}
+        <EyeOff />
+    {:else}
+        <Eye />
+    {/if}
 </button>

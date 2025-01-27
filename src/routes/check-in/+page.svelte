@@ -1,81 +1,88 @@
 <script lang="ts">
-	import { Button, Input, Label, Modal, Spinner } from "flowbite-svelte";
-	import { AlertCircle, Check, CheckCircle2, Ticket as TicketIcon, X, XCircle } from 'lucide-svelte';
-	import { onDestroy, onMount } from "svelte";
-    
+    import { Button, Input, Label, Modal, Spinner } from "flowbite-svelte";
+    import {
+        AlertCircle,
+        Check,
+        CheckCircle2,
+        Ticket as TicketIcon,
+        X,
+        XCircle,
+    } from "lucide-svelte";
+    import { onMount } from "svelte";
+
     import InfoCard from "$components/InfoCard.svelte";
     import QrReader from "$components/QrReader.svelte";
     import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
+    import type { User } from "$lib/auth/user";
     import type { Ticket } from "$models/ticket";
     import { user } from "$store/store";
-	import type { User } from "$lib/auth/user";
 
-	export let data: User;
-    if(!$user)
-        $user = data;
+    interface Props {
+        data: User;
+    }
 
-	let ticketCode: string = '';
-	let ticketCodeInput: string = '';
+    let { data }: Props = $props();
+    if (!$user) $user = data;
 
-    let ticket: Ticket;
-    let feedbackToastOpen: boolean = false;
-    let errorsModalOpen: boolean = false;
-    let feedbackMessage: string = '';
+    let ticketCode: string = $state("");
+    let ticketCodeInput: string = $state("");
+
+    let ticket: Ticket | undefined = $state();
+    let feedbackToastOpen: boolean = $state(false);
+    let errorsModalOpen: boolean = $state(false);
+    let feedbackMessage: string = $state("");
     let timeOut: NodeJS.Timeout;
-    let redirectTimeOut: NodeJS.Timeout;
 
     const closeErrorsModal = () => {
-		errorsModalOpen = false;
-	}
+        errorsModalOpen = false;
+    };
 
-    let ticketStatus: 'notFound' | 'alreadyChecked' | 'notSold' | null = null;
+    let ticketStatus: "notFound" | "alreadyChecked" | "notSold" | null =
+        $state(null);
 
-    let color: 'green' | 'red' | 'yellow' = 'green';
-    let focus: 'checkIn' | 'newCheckIn' | null = null;
-    
+    let color: "green" | "red" | "yellow" = $state("green");
+
     let ticketInfos: Element | null = null;
 
     function scrollToDiv() {
         ticketInfos?.scrollIntoView({
-            behavior: 'smooth',
+            behavior: "smooth",
         });
     }
 
     async function checkTicket(code: string) {
         scrollToDiv();
-        const response = await fetch(`/api/tickets/${encodeURIComponent(code)}`,
+        const response = await fetch(
+            `/api/tickets/${encodeURIComponent(code)}`,
             {
-                method: 'PUT',
+                method: "PUT",
                 headers: {
-                    'Content-Type': 'application/json'
-                }
+                    "Content-Type": "application/json",
+                },
             }
         );
 
-        const body = (await response.json());
+        const body = await response.json();
         let message = body.message;
-        focus = (body.second) ? 'newCheckIn' : 'checkIn';
-        
-        if(response.status == 404){
+
+        if (response.status == 404) {
             ticket = {
                 ticketID: code,
-                name: '',
-                surname: '',
-                seller: '',
+                name: "",
+                surname: "",
+                seller: "",
                 soldAt: null,
                 checkIn: null,
-                checkOut: null,
-                newCheckIn: null,
             };
 
-            triggerPopup(message, 'red', 'notFound');
-            ticketCodeInput = '';
-            return
+            triggerPopup(message, "red", "notFound");
+            ticketCodeInput = "";
+            return;
         }
-        
-        let tick = body.ticket
 
-        if(response.status == 402){
+        let tick = body.ticket;
+
+        if (response.status == 402) {
             ticket = {
                 ticketID: code,
                 name: tick.name,
@@ -83,16 +90,14 @@
                 seller: tick.seller,
                 soldAt: tick.soldAt,
                 checkIn: tick.checkIn,
-                checkOut: tick.checkOut,
-                newCheckIn: tick.newCheckIn,
             };
 
-            triggerPopup(message, 'red', 'notSold');
-            ticketCodeInput = '';
-            return
+            triggerPopup(message, "red", "notSold");
+            ticketCodeInput = "";
+            return;
         }
 
-        if(response.status === 409){
+        if (response.status === 409) {
             ticket = {
                 ticketID: code,
                 name: tick.name,
@@ -100,56 +105,52 @@
                 seller: tick.seller,
                 soldAt: tick.soldAt,
                 checkIn: tick.checkIn,
-                checkOut: tick.checkOut,
-                newCheckIn: tick.newCheckIn,
             };
 
-            triggerPopup(message, 'yellow', 'alreadyChecked');
-            ticketCodeInput = '';
-            return
+            triggerPopup(message, "yellow", "alreadyChecked");
+            ticketCodeInput = "";
+            return;
         }
 
-        try{
+        try {
             ticket = {
                 ticketID: code,
                 name: tick.name,
                 surname: tick.surname,
-                seller: response.status !== 206 ? tick.seller : 'Non Trovato',
+                seller: response.status !== 206 ? tick.seller : "Non Trovato",
                 soldAt: tick.soldAt,
                 checkIn: tick.checkIn,
-                checkOut: tick.checkOut,
-                newCheckIn: tick.newCheckIn
             };
 
-            triggerPopup(message, 'green', null);
-            ticketCodeInput = '';
-            
-        }
-        catch(e){
-            triggerPopup('Errore inaspettato', 'red', 'notFound');
-            ticketCodeInput = '';
+            triggerPopup(message, "green", null);
+            ticketCodeInput = "";
+        } catch (e) {
+            triggerPopup("Errore inaspettato", "red", "notFound");
+            ticketCodeInput = "";
         }
 
         return;
     }
 
     const onKeyDown = (e: KeyboardEvent) => {
-        if(e.key === 'Enter' && ticketCodeInput !== ''){
+        if (e.key === "Enter" && ticketCodeInput !== "") {
             checkTicket(ticketCodeInput);
         }
-    }
+    };
 
-    function triggerPopup(message: string, col: 'red' | 'green' | 'yellow', status: 'notFound' | 'alreadyChecked' | 'notSold' | null){
+    function triggerPopup(
+        message: string,
+        col: "red" | "green" | "yellow",
+        status: "notFound" | "alreadyChecked" | "notSold" | null
+    ) {
         feedbackMessage = message;
-        if(status != null)
-            errorsModalOpen = true;
-        else
-            feedbackToastOpen = true;
+        if (status != null) errorsModalOpen = true;
+        else feedbackToastOpen = true;
         color = col;
         ticketStatus = status;
 
         clearTimeout(timeOut);
-        if(ticketStatus === null){
+        if (ticketStatus === null) {
             timeOut = setTimeout(() => {
                 ticketStatus = null;
                 feedbackToastOpen = false;
@@ -157,106 +158,145 @@
             }, 3500);
         }
     }
-        
 
     const reset = () => {
         ticket = {
-            ticketID: '',
-            name: '',
-            surname: '',
-            seller: '',
+            ticketID: "",
+            name: "",
+            surname: "",
+            seller: "",
             soldAt: null,
             checkIn: null,
-            checkOut: null,
-            newCheckIn: null
         };
 
-        ticketCodeInput = '';
-        ticketCode = '';
+        ticketCodeInput = "";
+        ticketCode = "";
         feedbackToastOpen = false;
         ticketStatus = null;
-        color = 'green';
-        focus = null;
-    }
+        color = "green";
+    };
 
     const getRemainingTime = () => {
         let now = new Date();
-        let checkInTime = new Date('2024-04-18T00:30:00');
-        
+        let checkInTime = new Date("2024-04-18T00:30:00");
+
         return checkInTime.getTime() - now.getTime();
-    }
+    };
 
-    onMount(async() => {        
-        ticketInfos = document.querySelector('#ticketInfos')
-	});
-
-    onDestroy(() => {
-        clearTimeout(redirectTimeOut);
+    onMount(async () => {
+        ticketInfos = document.querySelector("#ticketInfos");
     });
 
-    $:{
-        if(ticketCode !== ''){
+    $effect(() => {
+        if (ticketCode !== "") {
             scrollToDiv();
-            checkTicket(ticketCode)
-        }
-        else{
+            checkTicket(ticketCode);
+        } else {
             reset();
         }
-    }
-    $: toastIcon = ticketStatus === 'notFound' || ticketStatus === 'notSold' ? XCircle : (ticketStatus === 'alreadyChecked' ? AlertCircle : CheckCircle2)
+    });
+    let ToastIcon = $derived(
+        ticketStatus === "notFound" || ticketStatus === "notSold"
+            ? XCircle
+            : ticketStatus === "alreadyChecked"
+              ? AlertCircle
+              : CheckCircle2
+    );
 </script>
 
 <svelte:head>
     <title>Check-in</title>
 </svelte:head>
 
-<section class="w-full h-full flex flex-col items-center gap-4 flex-grow">
-    <div class="w-full px-5 pt-5 flex flex-col gap-4 items-start max-w-96 pb-12 flex-grow">
+<section class="flex h-full w-full flex-grow flex-col items-center gap-4">
+    <div
+        class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5"
+    >
         {#if $user}
-            <h1 class="text-primary-600 font-bold text-4xl">Check-in</h1>
-            <p class="dark:text-white text-justify">Scansionare il QR e verificare la validità del biglietto</p>
+            <h1 class="text-4xl font-bold text-primary-600">Check-in</h1>
+            <p class="text-justify dark:text-white">
+                Scansionare il QR e verificare la validità del biglietto
+            </p>
             <div class="w-full">
-                <Label class="text-black dark:text-white font-medium text-md">
-					Codice Biglietto <span class="text-primary-700">*</span>
-					<Input required class="mt-1" bind:value={ticketCodeInput} name="code" autocomplete="off" on:keypress={onKeyDown}>
-						<TicketIcon slot="left" class="w-6 h-6 text-primary-600 dark:text-white"/>
+                <Label class="text-md font-medium text-black dark:text-white">
+                    Codice Biglietto <span class="text-primary-700">*</span>
+                    <Input
+                        required
+                        class="mt-1"
+                        bind:value={ticketCodeInput}
+                        name="code"
+                        autocomplete="off"
+                        on:keypress={onKeyDown}
+                    >
+                        <TicketIcon
+                            slot="left"
+                            class="h-6 w-6 text-primary-600 dark:text-white"
+                        />
 
-                        <div slot="right" class="h-full flex items-center gap-2">
-                            {#if ticketCodeInput !== ''}
-                                <button on:click={() => checkTicket(ticketCodeInput)}>
-                                    <Check color="green"/>
+                        <div
+                            slot="right"
+                            class="flex h-full items-center gap-2"
+                        >
+                            {#if ticketCodeInput !== ""}
+                                <button
+                                    onclick={() => checkTicket(ticketCodeInput)}
+                                >
+                                    <Check color="green" />
                                 </button>
-                                <button on:click={reset}>
-                                    <X color="indianred"/>
+                                <button onclick={reset}>
+                                    <X color="indianred" />
                                 </button>
                             {/if}
                         </div>
-					</Input>
-				</Label>
-                <div class="w-full my-6 flex items-center justify-center">
-                    <QrReader bind:codeResult={ticketCode}/>
+                    </Input>
+                </Label>
+                <div class="my-6 flex w-full items-center justify-center">
+                    <QrReader bind:codeResult={ticketCode} />
                 </div>
 
-                <InfoCard
-                    bind:ticketCode
-                    bind:ticket
+                <InfoCard bind:ticketCode bind:ticket bind:color />
+
+                <FeedbackToast
+                    bind:open={feedbackToastOpen}
                     bind:color
-                    bind:focus
+                    bind:message={feedbackMessage}
+                    {ToastIcon}
                 />
-                
-                <FeedbackToast bind:open={feedbackToastOpen} bind:color bind:message={feedbackMessage} bind:icon={toastIcon}/>
-                <Modal bind:open={errorsModalOpen} on:close={closeErrorsModal} size="xs" dismissable={false}>
-                    <span class="text-3xl justify-center my-5 font-semibold text-{color}-500 flex items-center gap-2">
-                        <svelte:component this={ticketStatus === 'notFound' || ticketStatus === 'notSold' ? XCircle : (ticketStatus === 'alreadyChecked' ? AlertCircle : CheckCircle2)} class="w-6 h-6  text-{color}-400"/>
+                <Modal
+                    bind:open={errorsModalOpen}
+                    on:close={closeErrorsModal}
+                    size="xs"
+                    dismissable={false}
+                >
+                    {@const SvelteComponent =
+                        ticketStatus === "notFound" ||
+                        ticketStatus === "notSold"
+                            ? XCircle
+                            : ticketStatus === "alreadyChecked"
+                              ? AlertCircle
+                              : CheckCircle2}
+                    <span
+                        class="my-5 justify-center text-3xl font-semibold text-{color}-500 flex items-center gap-2"
+                    >
+                        <SvelteComponent class="h-6 w-6  text-{color}-400" />
                         {feedbackMessage}
                     </span>
-                    <Button class="w-full" on:click={closeErrorsModal} slot="footer">Chiudi</Button>
+
+                    <Button
+                        slot="footer"
+                        class="w-full"
+                        on:click={closeErrorsModal}>Chiudi</Button
+                    >
                 </Modal>
             </div>
         {:else}
-            <div class="w-full flex flex-col flex-grow gap-5 items-center justify-center mt-10">
-                <Spinner size="sm" class="max-w-12 self-center"/>
-                <span class="text-primary-600 font-semibold text-2xl">Attendere...</span>
+            <div
+                class="mt-10 flex w-full flex-grow flex-col items-center justify-center gap-5"
+            >
+                <Spinner size="sm" class="max-w-12 self-center" />
+                <span class="text-2xl font-semibold text-primary-600"
+                    >Attendere...</span
+                >
             </div>
         {/if}
     </div>

@@ -1,18 +1,23 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import '../app.pcss';
-	import NavBar from '../components/NavBar.svelte';
-	import { theme } from '$store/store';
+    import { theme } from "$store/store";
+    import { onMount } from "svelte";
+    import "../app.pcss";
+    import NavBar from "../components/NavBar.svelte";
+    interface Props {
+        children?: import('svelte').Snippet;
+    }
 
-	onMount(() => {
-		if(!localStorage.getItem('color-theme'))
-			localStorage.setItem('color-theme', 'dark');
+    let { children }: Props = $props();
 
-		$theme = localStorage.getItem('color-theme') as 'light' | 'dark';
-	});
+    onMount(() => {
+        if (!localStorage.getItem("color-theme"))
+            localStorage.setItem("color-theme", "dark");
+
+        $theme = localStorage.getItem("color-theme") as "light" | "dark";
+    });
 </script>
 
 <div class="min-h-[100svh] dark:bg-gray-800 flex flex-col">
-	<NavBar />
-	<slot />
+    <NavBar />
+    {@render children?.()}
 </div>
