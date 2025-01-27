@@ -103,6 +103,15 @@ export async function GET({ params, locals }) {
         });
     }
 
+    if (!ticketData.checkIn) {
+        return new Response(JSON.stringify({ ticket }), {
+            status: 425, // Too Early instead of 403
+            headers: {
+                "content-type": "application/json",
+            },
+        });
+    }
+
     return new Response(
         JSON.stringify({ ticket, message: "Biglietto validato" }),
         {
