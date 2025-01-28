@@ -374,7 +374,7 @@
     </div>
 </section>
 
-<Modal bind:open={showModal} size="md">
+<Modal bind:open={showModal} size="md" class="z-[9999]">
     <h2 class="text-xl font-bold" slot="header">Personalizza {currentItem.type}</h2>
         <div class="flex gap-3 mb-4 items-center">
             Quantità

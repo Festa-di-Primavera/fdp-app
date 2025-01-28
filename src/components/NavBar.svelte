@@ -12,6 +12,7 @@
     } from "flowbite-svelte";
     import {
         AlignJustify,
+        CoinsIcon,
         Dna,
         DollarSign,
         Home,
@@ -97,6 +98,12 @@
             slug: "/sell",
             permission: UserPermissions.VENDITA,
             icon: DollarSign,
+        },
+        {
+            label: "Cassa",
+            slug: "/cashier",
+            permission: UserPermissions.CASSA,
+            icon: CoinsIcon,
         },
         {
             label: "Info biglietto",
