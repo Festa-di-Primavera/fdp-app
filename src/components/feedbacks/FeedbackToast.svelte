@@ -38,7 +38,7 @@
     }}
     bind:toastStatus={open}
     {color}
-    class="fixed left-0 right-0 top-20 z-[999] mx-auto mb-5 mt-10 w-max rounded-lg"
+    class="fixed left-0 right-0 top-20 z-50 mx-auto mb-5 mt-10 w-max rounded-lg"
     divClass="w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3"
 >
     <ToastIcon slot="icon" class="h-6 w-6 {textColorClass}"></ToastIcon>

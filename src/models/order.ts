@@ -26,7 +26,10 @@ export interface OrderItem {
 
 export interface Order {
 	ticketId: string;
+	name: string;
 	items: OrderItem[];
+	done: boolean;
+	timestamp: number; // nuovo campo
 }
 
 export const DEFAULT_INGREDIENTS: Record<ItemType, BaseIngredient[]> = {

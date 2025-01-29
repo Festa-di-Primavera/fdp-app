@@ -181,7 +181,7 @@
                                     min="1"
                                     max={item.owned_money}
                                     bind:value={debtToClaimMap[item.id]}
-                                    class="z-[1] w-max text-center"
+                                    class="z-10 w-max text-center"
                                     disabled={item.owned_money === 0}
                                 />
                                 <span class="text-nowrap"
