@@ -194,7 +194,7 @@
         try {
             const finalOrder: Order = {
                 ticketId: ticket?.ticketID || "",
-                name: `${ticket?.name} ${ticket?.surname}` ,
+                name: `${ticket?.name} ${ticket?.surname!![0]}.` ,
                 items: orderItems,
                 done: false,
                 timestamp: Date.now() // aggiungiamo il timestamp
