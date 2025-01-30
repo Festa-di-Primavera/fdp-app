@@ -1,6 +1,6 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
-
+    import { sineOut } from 'svelte/easing';
     import {
         Button,
         Card,
@@ -9,6 +9,7 @@
         Label,
         NumberInput,
         Spinner,
+        Progressbar
     } from "flowbite-svelte";
     import { CheckCircle2, XCircle } from "lucide-svelte";
 
@@ -33,13 +34,22 @@
     let numberOfCodes = $state(1250);
     let codes: string[] = [];
 
+    let progress = $state(0);
+    let showProgress = $state(false);
+
     const insertCodes = async () => {
+        progress = 0;
+        showProgress = true;
         codes = [];
         for (let i = startingNumber; i < startingNumber + numberOfCodes; i++) {
             codes.push(
                 prefix + i?.toString().padStart(codeLength, "0") + suffix
             );
         }
+
+        const totalChunks = Math.ceil(codes.length / 50);
+        let completedChunks = 0;
+        let hasError = false;
 
         for (let i = 0; i < codes.length; i += 50) {
             const chunk = codes.slice(i, i + 50);
@@ -52,20 +62,29 @@
             });
 
             if (res.ok) {
-                error = false;
-                color = "green";
+                completedChunks++;
+                progress = (completedChunks / totalChunks) * 100;
             } else {
-                error = true;
-                color = "red";
+                hasError = true;
+                break;
             }
-            message = (await res.json()).message;
-            open = true;
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                open = false;
-                clearTimeout(timeOut);
-            }, 3500);
         }
+
+        // Mostra il toast solo alla fine del processo
+        error = hasError;
+        color = hasError ? "red" : "green";
+        message = hasError ? "Errore durante l'inserimento dei codici" : "Codici inseriti con successo";
+        open = true;
+        
+        // Nascondi la progress bar dopo un breve delay
+        setTimeout(() => {
+            showProgress = false;
+            progress = 0;
+            // Nascondi anche il toast dopo qualche secondo
+            setTimeout(() => {
+                open = false;
+            }, 3500);
+        }, 1000);
     };
 
     let ticketsNumber = $state(1250);
@@ -161,6 +180,17 @@
                         </Label>
                     </div>
                     <div class="flex w-full flex-col gap-3 py-2">
+                        {#if showProgress}
+                            <Progressbar
+                                {progress}
+                                animate
+                                precision={2}
+                                size="h-4"
+                                labelInside
+                                tweenDuration={1500}
+                                easing={sineOut}
+                            />
+                        {/if}
                         <span
                             class="text-sm font-medium text-gray-900 dark:text-gray-300 rtl:text-right"
                         >
