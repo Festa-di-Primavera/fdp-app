@@ -1,7 +1,7 @@
 import { getClientDB } from "$lib/firebase/client";
 import { hasPermission } from "$lib/utils/permissions";
 import { UserPermissions } from "$models/permissions";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { v4 } from "uuid";
 
 export async function POST({ request, locals }) {
@@ -44,4 +44,37 @@ export async function POST({ request, locals }) {
             },
         }
     );
+}
+
+export async function PATCH({ request, locals }) {
+    if (!locals.user) {
+        return new Response(
+            JSON.stringify({ message: "Non sei autenticato" }),
+            { status: 401 }
+        );
+    }
+
+    if (!hasPermission(locals.user.permissions, UserPermissions.CUCINA)) {
+        return new Response(
+            JSON.stringify({ message: "Non hai i permessi necessari" }),
+            { status: 403 }
+        );
+    }
+
+    const { orderId, done } = await request.json();
+    
+    try {
+        const orderRef = doc(getClientDB(), "orders", orderId);
+        await updateDoc(orderRef, { done });
+
+        return new Response(
+            JSON.stringify({ message: "Ordine aggiornato!" }),
+            { status: 200 }
+        );
+    } catch (error) {
+        return new Response(
+            JSON.stringify({ message: "Errore nell'aggiornamento dell'ordine" }),
+            { status: 500 }
+        );
+    }
 }

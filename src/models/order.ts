@@ -22,6 +22,7 @@ export interface OrderItem {
 	glutenFree?: boolean;
 	removedIngredients?: BaseIngredient[];
 	addedSauces?: SauceType[];
+	ready?: boolean;
 }
 
 export interface Order {
