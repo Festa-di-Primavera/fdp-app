@@ -1,8 +1,3 @@
-export enum SauceType {
-	KETCHUP = 'Ketchup',
-	MAYO = 'Maionese',
-}
-
 export enum BaseIngredient {
 	FORMAGGIO = 'Formaggio',
 	INSALATA = 'Insalata',
@@ -12,8 +7,7 @@ export enum BaseIngredient {
 
 export enum ItemType {
 	PANINO = 'Panino',
-	PANINO_ONTO = 'Panino Onto',
-	PATATINE = 'Patatine'
+	PANINO_ONTO = 'Panino Onto'
 }
 
 export interface OrderItem {
@@ -21,7 +15,6 @@ export interface OrderItem {
 	quantity: number;
 	glutenFree?: boolean;
 	removedIngredients?: BaseIngredient[];
-	addedSauces?: SauceType[];
 	ready?: boolean;
 }
 
@@ -36,6 +29,5 @@ export interface Order {
 
 export const DEFAULT_INGREDIENTS: Record<ItemType, BaseIngredient[]> = {
 	[ItemType.PANINO]: [BaseIngredient.FORMAGGIO, BaseIngredient.INSALATA],
-	[ItemType.PANINO_ONTO]: [BaseIngredient.FORMAGGIO, BaseIngredient.INSALATA, BaseIngredient.PEPERONI, BaseIngredient.CIPOLLA],
-	[ItemType.PATATINE]: []
+	[ItemType.PANINO_ONTO]: [BaseIngredient.FORMAGGIO, BaseIngredient.INSALATA, BaseIngredient.PEPERONI, BaseIngredient.CIPOLLA]
 };

@@ -10,27 +10,27 @@
     } from "flowbite-svelte";
     import {
         Check,
+        CheckCircle2,
         Minus,
+        PencilLine,
         Plus,
         Send,
         Ticket as TicketIcon,
         Trash2,
         X,
         XCircle,
-        PencilLine,
-        CheckCircle2,
     } from "lucide-svelte";
 
     import QrReader from "$components/QrReader.svelte";
     import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
     import type { User } from "$lib/auth/user";
+    import { getXnrfCode } from "$lib/utils/tickets";
     import {
         type Order,
         type OrderItem,
         BaseIngredient,
         DEFAULT_INGREDIENTS,
         ItemType,
-        SauceType,
     } from "$models/order";
     import type { Ticket } from "$models/ticket";
     import { user } from "$store/store";
@@ -75,7 +75,7 @@
         let ticketResponse = (await res.json()).ticket;
 
         ticket = {
-            ticketID: code,
+            ticketID: getXnrfCode(code) || "",
             name: ticketResponse.name,
             surname: ticketResponse.surname,
             seller: res.status !== 206 ? ticketResponse.seller : "Non Trovato",
@@ -122,7 +122,6 @@
             type: type as ItemType,
             quantity: 1,
             removedIngredients: [],
-            addedSauces: [],
             glutenFree: false,
         };
         isEditing = false;
@@ -134,9 +133,7 @@
             a.type === b.type &&
             a.glutenFree === b.glutenFree &&
             JSON.stringify(a.removedIngredients?.sort()) ===
-                JSON.stringify(b.removedIngredients?.sort()) &&
-            JSON.stringify(a.addedSauces?.sort()) ===
-                JSON.stringify(b.addedSauces?.sort())
+                JSON.stringify(b.removedIngredients?.sort())
         );
     }
 
@@ -187,17 +184,17 @@
         editingIndex = -1;
     }
 
-    let orderSubmitError: boolean = $state(false);
+    let orderSubmitError: boolean = $state(true );
     let orderFeedbackMessage: string = $state("");
 
     async function submitOrder() {
         try {
             const finalOrder: Order = {
                 ticketId: ticket?.ticketID || "",
-                name: `${ticket?.name} ${ticket?.surname!![0]}.` ,
+                name: `${ticket?.name} ${ticket?.surname!![0]}.`,
                 items: orderItems,
                 done: false,
-                timestamp: Date.now() // aggiungiamo il timestamp
+                timestamp: Date.now(), // aggiungiamo il timestamp
             };
             const response = await fetch("/api/order", {
                 method: "POST",
@@ -226,6 +223,8 @@
         clearTimeout(timeOut);
         timeOut = setTimeout(() => {
             open = false;
+            orderFeedbackMessage = "";
+            orderSubmitError = true;
             clearTimeout(timeOut);
         }, 3500);
     }
@@ -248,9 +247,7 @@
         class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5"
     >
         {#if $user}
-            <h1 class="text-4xl font-bold text-primary-600">
-                Cassa
-            </h1>
+            <h1 class="text-4xl font-bold text-primary-600">Cassa</h1>
             <p class="text-justify dark:text-white">
                 Scansionare il QR e prendere l'ordine del cliente per inviarlo
                 in cucina.
@@ -305,7 +302,7 @@
                                 class="text-black dark:text-white w-full flex justify-between"
                             >
                                 <span>N° biglietto:</span>
-                                <span>{ticket.ticketID}</span>
+                                <span class="font-mono">{ticket.ticketID.split(' ')[0]} <b>{ticket.ticketID.split(' ')[1]}</b> {ticket.ticketID.split(' ').slice(2).join(' ')}</span>
                             </span>
                             <span
                                 class="text-black dark:text-white w-full flex justify-between"
@@ -405,15 +402,6 @@
                                                     )}
                                                 </div>
                                             {/if}
-                                            {#if item.addedSauces?.length}
-                                                <div
-                                                    class="text-sm text-green-600"
-                                                >
-                                                    Con: {item.addedSauces.join(
-                                                        ", "
-                                                    )}
-                                                </div>
-                                            {/if}
                                         </div>
                                     </Card>
                                 {/each}
@@ -465,85 +453,48 @@
         </div>
     </div>
 
-    {#if currentItem.type !== ItemType.PATATINE}
-        <div class="mb-4 flex flex-col">
-            <Label class="flex items-center gap-2 mb-4">
-                <Checkbox bind:checked={currentItem.glutenFree} />
-                <span class="font-semibold text-orange-300">Senza glutine</span>
-            </Label>
-
-            <span class="mb-2 text-red-500 font-bold">Rimuovi ingredienti:</span
-            >
-            {#each DEFAULT_INGREDIENTS[currentItem.type] as ingredient}
-                <div class="flex items-center gap-2 p-1 rounded">
-                    <Label class="flex items-center gap-2">
-                        <Checkbox
-                            checked={currentItem.removedIngredients?.includes(
-                                ingredient
-                            )}
-                            on:change={() => {
-                                if (
-                                    currentItem.removedIngredients?.includes(
-                                        ingredient
-                                    )
-                                ) {
-                                    currentItem.removedIngredients =
-                                        currentItem.removedIngredients.filter(
-                                            (i: BaseIngredient) =>
-                                                i !== ingredient
-                                        );
-                                } else {
-                                    currentItem.removedIngredients = [
-                                        ...(currentItem.removedIngredients ||
-                                            []),
-                                        ingredient,
-                                    ];
-                                }
-                            }}
-                        />
-                        <span
-                            class:line-through={currentItem.removedIngredients?.includes(
-                                ingredient
-                            )}
-                            class:text-red-500={currentItem.removedIngredients?.includes(
-                                ingredient
-                            )}
-                        >
-                            {ingredient}
-                        </span>
-                    </Label>
-                </div>
-            {/each}
-        </div>
-    {/if}
-
     <div class="mb-4 flex flex-col">
-        <span class="mb-2 font-bold text-green-600">Aggiungi salse:</span>
-        {#each Object.values(SauceType) as sauce}
+        <Label class="flex items-center gap-2 mb-4">
+            <Checkbox bind:checked={currentItem.glutenFree} />
+            <span class="font-semibold text-orange-300">Senza glutine</span>
+        </Label>
+
+        <span class="mb-2 text-red-500 font-bold">Rimuovi ingredienti:</span>
+        {#each DEFAULT_INGREDIENTS[currentItem.type] as ingredient}
             <div class="flex items-center gap-2 p-1 rounded">
                 <Label class="flex items-center gap-2">
                     <Checkbox
-                        checked={currentItem.addedSauces?.includes(sauce)}
+                        checked={currentItem.removedIngredients?.includes(
+                            ingredient
+                        )}
                         on:change={() => {
-                            if (currentItem.addedSauces?.includes(sauce)) {
-                                currentItem.addedSauces =
-                                    currentItem.addedSauces.filter(
-                                        (s: SauceType) => s !== sauce
+                            if (
+                                currentItem.removedIngredients?.includes(
+                                    ingredient
+                                )
+                            ) {
+                                currentItem.removedIngredients =
+                                    currentItem.removedIngredients.filter(
+                                        (i: BaseIngredient) => i !== ingredient
                                     );
                             } else {
-                                currentItem.addedSauces = [
-                                    ...(currentItem.addedSauces || []),
-                                    sauce,
+                                currentItem.removedIngredients = [
+                                    ...(currentItem.removedIngredients || []),
+                                    ingredient,
                                 ];
                             }
                         }}
                     />
                     <span
-                        class="capitalize"
-                        class:text-green-500={currentItem.addedSauces?.includes(
-                            sauce
-                        )}>{sauce}</span
+                        class:line-through={currentItem.removedIngredients?.includes(
+                            ingredient
+                        )}
+                        class:text-red-500={currentItem.removedIngredients?.includes(
+                            ingredient
+                        )}
                     >
+                        {ingredient}
+                    </span>
                 </Label>
             </div>
         {/each}

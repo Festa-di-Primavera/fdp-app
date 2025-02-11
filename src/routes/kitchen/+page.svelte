@@ -105,12 +105,26 @@
         orders = [...orders];
     }
 
-    async function toggleItemReady(orderId: string | undefined, itemIndex: number) {
+    async function toggleItemReady(
+        orderId: string | undefined,
+        itemIndex: number
+    ) {
         const order = orders.find((o) => o.id === orderId);
         if (!order) return;
 
+        // Toggle the ready status in the local state
         order.items[itemIndex].ready = !order.items[itemIndex].ready;
         orders = [...orders];
+
+        // Update the ready status in the database
+        await fetch("/api/order", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                orderId,
+                items: order.items,
+            }),
+        });
     }
 
     async function closeOrder(orderId: string | undefined) {
@@ -145,8 +159,8 @@
                     >
                         {order.name}
                     </h2>
-                    <span class="text-sm text-gray-500 dark:text-gray-400">
-                        #{order.ticketId}
+                    <span class="text-lg text-gray-500 dark:text-gray-400">
+                        <span class="font-mono">{order.ticketId.split(' ')[0]} <b>{order.ticketId.split(' ')[1]}</b> {order.ticketId.split(' ').slice(2).join(' ')}</span>
                     </span>
                 </div>
 
@@ -163,39 +177,32 @@
                                         >{item.type}</span
                                     >
                                     <span
-                                        class="text-md font-semibold font-mono dark:text-primary-200"
+                                        class="text-xl font-semibold font-mono text-primary-200"
                                         >x{item.quantity}</span
                                     >
                                 </div>
+                                {#if item.glutenFree}
+                                    <span
+                                        class="text-sm text-orange-500 dark:text-orange-300 font-bold"
+                                        >NO GLUT.</span
+                                    >
+                                {/if}
                                 <button
                                     class="px-2 py-1 text-sm rounded-md font-semibold border-2
-                                    {item.ready ? 'border-primary-400 text-primary-400' : 'border-gray-500 text-gray-500'}"
-                                    onclick={() => toggleItemReady(order.id, itemIndex)}
+                                    {item.ready
+                                        ? 'border-primary-400 text-primary-400'
+                                        : 'border-gray-500 text-gray-500'}"
+                                    onclick={() =>
+                                        toggleItemReady(order.id, itemIndex)}
                                 >
-                                    {item.ready ? '✓ Pronto' : 'Pronto'}
+                                    {item.ready ? "✓ Pronto" : "Pronto"}
                                 </button>
                             </div>
-                            {#if item.glutenFree}
-                                <span
-                                    class="text-sm text-orange-500 dark:text-orange-300 font-bold"
-                                    >(SENZA GLUTINE)</span
-                                >
-                            {/if}
 
                             {#if item.removedIngredients?.length}
                                 <div class="text-sm text-red-500 mt-1">
                                     {#each item.removedIngredients as ingredient}
                                         <div>NO {ingredient}</div>
-                                    {/each}
-                                </div>
-                            {/if}
-
-                            {#if item.addedSauces?.length}
-                                <div
-                                    class="text-sm dark:text-green-400 text-green-500 mt-1"
-                                >
-                                    {#each item.addedSauces as sauce}
-                                        <div>CON {sauce}</div>
                                     {/each}
                                 </div>
                             {/if}

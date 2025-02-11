@@ -61,17 +61,30 @@ export async function PATCH({ request, locals }) {
         );
     }
 
-    const { orderId, done } = await request.json();
+    const { orderId, done, items } = await request.json();
     
     try {
         const orderRef = doc(getClientDB(), "orders", orderId);
-        await updateDoc(orderRef, { done });
+
+        if (typeof done === 'boolean') {
+            // Updating order completion status
+            await updateDoc(orderRef, { done });
+        } else if (items) {
+            // Updating the entire items array
+            await updateDoc(orderRef, { items });
+        } else {
+            return new Response(
+                JSON.stringify({ message: "Parametri non validi" }),
+                { status: 400 }
+            );
+        }
 
         return new Response(
             JSON.stringify({ message: "Ordine aggiornato!" }),
             { status: 200 }
         );
     } catch (error) {
+        console.error('Error updating order:', error);
         return new Response(
             JSON.stringify({ message: "Errore nell'aggiornamento dell'ordine" }),
             { status: 500 }

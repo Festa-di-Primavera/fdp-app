@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { convertCode } from "$lib/utils/tickets";
+    import { getFdPCode } from "$lib/utils/tickets";
     import type { Ticket } from "$models/ticket";
     import { Card } from "flowbite-svelte";
 
@@ -20,8 +20,8 @@
     <span class="text-black dark:text-white w-full flex justify-between">
         <span>N° biglietto:</span>
         <span
-            >{convertCode(ticket?.ticketID) ||
-                convertCode(ticketCode) ||
+            >{getFdPCode(ticket?.ticketID) ||
+                getFdPCode(ticketCode) ||
                 ""}</span
         >
     </span>
