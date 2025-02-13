@@ -1,6 +1,18 @@
 <script lang="ts">
-    import { Button, Input, Modal, Spinner } from "flowbite-svelte";
-    import { CheckCircle2, XCircle } from "lucide-svelte";
+    import { Button, Input, Label, Modal, Spinner, Tooltip } from "flowbite-svelte";
+    import {
+        CheckCircle2,
+        XCircle,
+        Ticket,
+        ScanLine,
+        Info,
+        LayoutDashboard,
+        ChefHat,
+        Coins,
+        Dna,
+        DollarSign,
+        Users,
+    } from "lucide-svelte";
 
     import UsersTable from "$components/UsersTable.svelte";
     import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
@@ -9,6 +21,7 @@
     import { intToBitArray } from "$lib/utils/permissions";
     import { UserPermissions } from "$models/permissions";
     import { user } from "$store/store.js";
+    import { capitalizeFirstLetter } from "$lib/utils/textFormat";
 
     interface Props {
         data: {
@@ -34,9 +47,26 @@
     let timeOut: NodeJS.Timeout;
     let toastIcon = $derived(error ? XCircle : CheckCircle2);
 
+    // association between userpermissions and their respective icons
+    const permissionIcons = {
+        [UserPermissions.INFO_BIGLIETTO]: Info,
+        [UserPermissions.VENDITA]: DollarSign,
+        [UserPermissions.CHECK_IN]: ScanLine,
+        [UserPermissions.CUCINA]: ChefHat,
+        [UserPermissions.CASSA]: Coins,
+        [UserPermissions.DASHBOARD]: LayoutDashboard,
+        [UserPermissions.LISTA_BIGLIETTI]: Ticket,
+        [UserPermissions.UTENTI]: Users,
+        [UserPermissions.GENERAZIONE]: Dna,
+    };
+
+    function getPermissionIcon(permission: UserPermissions) {
+        return permissionIcons[permission];
+    }
+
     // function to handle user delete
     const handleUserDelete = async (user?: User) => {
-		if (!user) return;
+        if (!user) return;
 
         try {
             let res = await fetch(`/api/users/${user.id}`, {
@@ -85,8 +115,8 @@
     let currSelectedUser: User | undefined = $state();
 
     const handleAliasChange = async (user?: User) => {
-		if (!user) return;
-		
+        if (!user) return;
+
         if (alias !== null && alias != "" && alias != user.alias) {
             const res = await fetch(`/api/alias/${user.id}/${alias}`, {
                 method: "PUT",
@@ -135,8 +165,43 @@
         bind:currSelectedUser
         bind:aliasModalOpen
         bind:deleteModalOpen
+        {permissionIcons}
     />
     {#if currSelectedUser !== undefined}
+        {#snippet UserInfo(currSelectedUser: User)}
+            <span class="text-sm">UID: {currSelectedUser.id}</span>
+            <span class="text-sm">Nome: {currSelectedUser.username}</span>
+            <span class="text-sm">E-mail: {currSelectedUser.email}</span>
+            <span class="text-sm flex gap-4 items-center"
+                >Permessi:
+                <div class="flex gap-2">
+                    {#each intToBitArray(currSelectedUser.permissions, Object.keys(UserPermissions).length / 2)
+                        .reverse()
+                        .map((perm, index) => ({ perm, index }))
+                        .filter(({ perm }) => perm) as { index }}
+                        {@const PermissionIcon = getPermissionIcon(
+                            Math.pow(2, index)
+                        )}
+
+                        <div class="flex items-center gap-1">
+                            <PermissionIcon class="w-4 text-primary-300" />
+                            <Tooltip color="primary" border>
+                                {capitalizeFirstLetter(
+                                    getStringFromEnumValue(
+                                        UserPermissions,
+                                        Math.pow(2, index)
+                                    )
+                                        .toLowerCase()
+                                        .replace("_", " ")
+                                )}
+                            </Tooltip>
+                        </div>
+                    {/each}
+                </div>
+            </span>
+            <span class="text-sm">Alias: {currSelectedUser.alias}</span>
+        {/snippet}
+
         <Modal
             title={`Elimina ${currSelectedUser.username}`}
             bind:open={deleteModalOpen}
@@ -147,27 +212,9 @@
                 >?</span
             >
             <div class="flex flex-col gap-2">
-                <span class="text-sm">UID: {currSelectedUser.id}</span>
-                <span class="text-sm">Nome: {currSelectedUser.username}</span>
-                <span class="text-sm">E-mail: {currSelectedUser.email}</span>
-                <span class="text-sm"
-                    >Permessi:
-                    {intToBitArray(
-                        currSelectedUser.permissions,
-                        Object.keys(UserPermissions).length / 2
-                    )
-                        .filter((item) => item)
-                        .map((item, index) =>
-                            getStringFromEnumValue(
-                                UserPermissions,
-                                Math.pow(2, index)
-                            )
-                        )
-                        .join(", ")}
-                </span>
-                <span class="text-sm">Alias: {currSelectedUser.alias}</span>
+                {@render UserInfo(currSelectedUser)}
             </div>
-            <div class="flex flex-col gap-2 mt-4" slot="footer">
+            <div class="flex gap-2 mt-4" slot="footer">
                 <Button
                     class="bg-red-500 dark:bg-red-500"
                     on:click={() => {
@@ -193,28 +240,14 @@
                 >?</span
             >
             <div class="flex flex-col gap-2">
-                <span class="text-sm">UID: {currSelectedUser.id}</span>
-                <span class="text-sm">Nome: {currSelectedUser.username}</span>
-                <span class="text-sm">E-mail: {currSelectedUser.email}</span>
-                <span class="text-sm"
-                    >Permessi:
-                    {intToBitArray(
-                        currSelectedUser.permissions,
-                        Object.keys(UserPermissions).length / 2
-                    )
-                        .filter((item) => item)
-                        .map((item, index) =>
-                            getStringFromEnumValue(
-                                UserPermissions,
-                                Math.pow(2, index)
-                            )
-                        )
-                        .join(", ")}
-                </span>
-                <span class="text-sm">Alias: {currSelectedUser.alias}</span>
+                {@render UserInfo(currSelectedUser)}
             </div>
-            <Input bind:value={alias} class="mt-4" />
-            <div class="flex flex-col gap-2 mt-4" slot="footer">
+
+            <Label class="mt-4">
+                Nuovo alias
+                <Input bind:value={alias} class="mt-2" />
+            </Label>
+            <div class="flex gap-2 mt-4" slot="footer">
                 <Button on:click={() => handleAliasChange(currSelectedUser)}
                     >Aggiorna</Button
                 >
@@ -227,7 +260,7 @@
                 >
                     Annulla
                 </Button>
-			</div>
+            </div>
         </Modal>
     {/if}
 {:else}

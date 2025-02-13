@@ -25,20 +25,10 @@
     import {
         Check,
         CheckCircle2,
-        ChefHat,
-        Coins,
-        Dna,
-        DollarSign,
-        DoorOpen,
         Filter,
-        Info,
-        LayoutDashboard,
         PenBox,
-        ScanLine,
         Search,
-        Ticket,
         Trash2,
-        Users,
         X,
         XCircle,
     } from "lucide-svelte";
@@ -49,6 +39,10 @@
         currSelectedUser?: User;
         aliasModalOpen: boolean;
         deleteModalOpen: boolean;
+        permissionIcons: Record<
+            UserPermissions,
+            typeof Check
+        >;
     }
 
     let {
@@ -56,6 +50,7 @@
         currSelectedUser = $bindable(),
         aliasModalOpen = $bindable(),
         deleteModalOpen = $bindable(),
+        permissionIcons,
     }: Props = $props();
 
     let color: "green" | "red" = $state("green");
@@ -67,19 +62,6 @@
     $effect(() => {
         ToastIcon = error ? XCircle : CheckCircle2;
     });
-
-    // association between userpermissions and their respective icons
-    const permissionIcons = {
-        [UserPermissions.INFO_BIGLIETTO]: Info,
-        [UserPermissions.VENDITA]: DollarSign,
-        [UserPermissions.CHECK_IN]: ScanLine,
-        [UserPermissions.CUCINA]: ChefHat,
-        [UserPermissions.CASSA]: Coins,
-        [UserPermissions.DASHBOARD]: LayoutDashboard,
-        [UserPermissions.LISTA_BIGLIETTI]: Ticket,
-        [UserPermissions.UTENTI]: Users,
-        [UserPermissions.GENERAZIONE]: Dna,
-    };
 
     function getPermissionIcon(permission: UserPermissions) {
         return permissionIcons[permission];
