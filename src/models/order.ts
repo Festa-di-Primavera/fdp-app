@@ -9,7 +9,7 @@ export enum ItemType {
 	// PANINO = 'Panino',
 	// PANINO_ONTO = 'Panino Onto'
 	ONTO = 'ONTO',
-	VEGGY = 'VEGGY',
+	VEGETARIANO = 'VEGETARIANO',
 	BASIC = 'BASIC'
 }
 
@@ -41,6 +41,6 @@ export const DEFAULT_INGREDIENTS: Record<ItemType, BaseIngredient[]> = {
 	// [ItemType.PANINO]: [BaseIngredient.FORMAGGIO, BaseIngredient.INSALATA],
 	// [ItemType.PANINO_ONTO]: [BaseIngredient.FORMAGGIO, BaseIngredient.INSALATA, BaseIngredient.PEPERONI, BaseIngredient.CIPOLLA]
 	[ItemType.ONTO]: [],
-	[ItemType.VEGGY]: [],
+	[ItemType.VEGETARIANO]: [],
 	[ItemType.BASIC]: []
 };

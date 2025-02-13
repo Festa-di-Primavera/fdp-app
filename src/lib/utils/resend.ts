@@ -7,10 +7,11 @@ export async function sendEmail(
     email: string,
     subject: string,
     htmlContent: string,
-    attachments?: { filename: string; content: string | Buffer }[]
+    attachments?: { filename: string; content: string | Buffer }[],
+    senderName?: string
 ): Promise<{ error: boolean; message: string }> {
     const { error } = await resend.emails.send({
-        from: "Festa di Primavera <info@festa-cus.it>",
+        from: `${senderName ?? "Festa di Primavera"} <info@festa-cus.it>`,
         to: email,
         subject: subject,
         html: htmlContent,

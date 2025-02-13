@@ -4,7 +4,6 @@
     import { getEnumValueFromString } from "$lib/utils/enums";
     import { OFFSET } from "$lib/utils/tickets";
 
-    let fileInput: HTMLInputElement;
     let processing = false;
     let results: { success: boolean; message: string }[] = [];
 
@@ -121,7 +120,6 @@
             type="file"
             accept=".csv"
             onchange={handleFileUpload}
-            bind:this={fileInput}
             class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
         />
     </div>
