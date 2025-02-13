@@ -6,13 +6,15 @@ const resend = new Resend(RESEND_API_KEY);
 export async function sendEmail(
     email: string,
     subject: string,
-    htmlContent: string
+    htmlContent: string,
+    attachments?: { filename: string; content: string | Buffer }[]
 ): Promise<{ error: boolean; message: string }> {
     const { error } = await resend.emails.send({
         from: "Festa di Primavera <no-reply@festa-cus.it>",
         to: email,
         subject: subject,
         html: htmlContent,
+        attachments,
     });
 
     if (error) {

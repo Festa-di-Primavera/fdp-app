@@ -94,17 +94,6 @@
         return cardColors[orderColorMap.get(orderKey)!];
     }
 
-    async function markItemReady(
-        orderId: string | undefined,
-        itemIndex: number
-    ) {
-        const order = orders.find((o) => o.id === orderId);
-        if (!order) return;
-
-        order.items[itemIndex].ready = true;
-        orders = [...orders];
-    }
-
     async function toggleItemReady(
         orderId: string | undefined,
         itemIndex: number
@@ -159,8 +148,10 @@
                     >
                         {order.name}
                     </h2>
-                    <span class="text-lg text-gray-500 dark:text-gray-400">
-                        <span class="font-mono">{order.ticketId.split(' ')[0]} <b>{order.ticketId.split(' ')[1]}</b> {order.ticketId.split(' ').slice(2).join(' ')}</span>
+                    <span class="text-lg text-gray-700 dark:text-gray-200">
+                        <span class="font-mono">
+                            XNRF <b>{order.ticketId.slice(4, 9)}</b> /25
+                        </span>
                     </span>
                 </div>
 
@@ -172,18 +163,28 @@
                             <div
                                 class="flex items-baseline gap-2 justify-between"
                             >
-                                <div class="flex items-baseline gap-2">
-                                    <span class="font-medium dark:text-white"
-                                        >{item.type}</span
-                                    >
-                                    <span
-                                        class="text-xl font-semibold font-mono text-primary-200"
-                                        >x{item.quantity}</span
-                                    >
+                                <div class="flex flex-col gap-2">
+                                    <div class="flex items-baseline gap-2">
+                                        <span
+                                            class="font-medium dark:text-white text-gray-700"
+                                            >{item.type}</span
+                                        >
+                                        <span
+                                            class="text-xl font-semibold font-mono text-primary-200"
+                                            >x{item.quantity}</span
+                                        >
+                                    </div>
+
+                                    {#if item.sauce}
+                                        <span
+                                            class="text-md text-green-500 dark:text-green-300 font-bold"
+                                            >{item.sauce}</span
+                                        >
+                                    {/if}
                                 </div>
                                 {#if item.glutenFree}
                                     <span
-                                        class="text-sm text-orange-500 dark:text-orange-300 font-bold"
+                                        class="text-md text-orange-500 dark:text-orange-300 font-bold"
                                         >NO GLUT.</span
                                     >
                                 {/if}

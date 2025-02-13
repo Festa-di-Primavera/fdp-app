@@ -54,30 +54,40 @@ export async function PATCH({ request, locals }) {
         );
     }
 
-    if (!hasPermission(locals.user.permissions, UserPermissions.CUCINA)) {
+    if (!hasPermission(locals.user.permissions, UserPermissions.CUCINA) && 
+        !hasPermission(locals.user.permissions, UserPermissions.CASSA)) {
         return new Response(
             JSON.stringify({ message: "Non hai i permessi necessari" }),
             { status: 403 }
         );
     }
 
-    const { orderId, done, items } = await request.json();
+    const { orderId, done, items, timestamp } = await request.json();
     
     try {
         const orderRef = doc(getClientDB(), "orders", orderId);
+        const updateData: { done?: boolean; items?: any[]; timestamp?: number } = {};
 
         if (typeof done === 'boolean') {
-            // Updating order completion status
-            await updateDoc(orderRef, { done });
-        } else if (items) {
-            // Updating the entire items array
-            await updateDoc(orderRef, { items });
-        } else {
+            updateData.done = done;
+        }
+        
+        if (items) {
+            updateData.items = items;
+        }
+
+        if (timestamp) {
+            updateData.timestamp = timestamp;
+        }
+
+        if (Object.keys(updateData).length === 0) {
             return new Response(
                 JSON.stringify({ message: "Parametri non validi" }),
                 { status: 400 }
             );
         }
+
+        await updateDoc(orderRef, updateData);
 
         return new Response(
             JSON.stringify({ message: "Ordine aggiornato!" }),

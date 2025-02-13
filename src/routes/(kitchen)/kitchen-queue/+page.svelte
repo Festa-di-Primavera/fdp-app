@@ -103,14 +103,9 @@
                                 {order.name}
                             </h2>
                             <span class="text-2xl">
-                                <span class="font-mono"
-                                    >{order.ticketId.split(" ")[0]}
-                                    <b>{order.ticketId.split(" ")[1]}</b>
-                                    {order.ticketId
-                                        .split(" ")
-                                        .slice(2)
-                                        .join(" ")}</span
-                                >
+                                <span class="font-mono">
+                                    XNRF <b>{order.ticketId.slice(4, 9)}</b> /25
+                                </span>
                             </span>
                         </div>
                     </Card>

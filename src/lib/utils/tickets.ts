@@ -1,6 +1,6 @@
 import type { User } from "$lib/auth/user";
 
-const OFFSET = 45150;
+export const OFFSET = 45150;
 
 export function getFdPCode(code: string | undefined): string | null {
     try {
@@ -54,7 +54,7 @@ export function getXnrfCode(code: string | undefined): string | null {
         while (str.length < 5) {
             str = "0" + str;
         }
-        return `XNRF ${str} /25`;
+        return `XNRF${str}/25`;
     }
 
     return null;

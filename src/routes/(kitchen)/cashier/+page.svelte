@@ -6,6 +6,7 @@
         Input,
         Label,
         Modal,
+        Radio,
         Spinner,
     } from "flowbite-svelte";
     import {
@@ -31,6 +32,7 @@
         BaseIngredient,
         DEFAULT_INGREDIENTS,
         ItemType,
+        Sauce,
     } from "$models/order";
     import type { Ticket } from "$models/ticket";
     import { user } from "$store/store";
@@ -108,7 +110,7 @@
     let orderItems: OrderItem[] = $state([]);
     let showModal = $state(false);
     let currentItem: OrderItem = $state({
-        type: ItemType.PANINO,
+        type: ItemType.ONTO,
         quantity: 1,
         removedIngredients: [],
         addedSauces: [],
@@ -184,7 +186,7 @@
         editingIndex = -1;
     }
 
-    let orderSubmitError: boolean = $state(true );
+    let orderSubmitError: boolean = $state(true);
     let orderFeedbackMessage: string = $state("");
 
     async function submitOrder() {
@@ -302,7 +304,9 @@
                                 class="text-black dark:text-white w-full flex justify-between"
                             >
                                 <span>N° biglietto:</span>
-                                <span class="font-mono">{ticket.ticketID.split(' ')[0]} <b>{ticket.ticketID.split(' ')[1]}</b> {ticket.ticketID.split(' ').slice(2).join(' ')}</span>
+                                <span class="font-mono">
+                                    XNRF <b>{ticket.ticketID.slice(4, 9)}</b> /25
+                                </span>
                             </span>
                             <span
                                 class="text-black dark:text-white w-full flex justify-between"
@@ -459,7 +463,10 @@
             <span class="font-semibold text-orange-300">Senza glutine</span>
         </Label>
 
-        <span class="mb-2 text-red-500 font-bold">Rimuovi ingredienti:</span>
+        {#if DEFAULT_INGREDIENTS[currentItem.type].length > 0}
+            <span class="mb-2 text-red-500 font-bold">Rimuovi ingredienti:</span
+            >
+        {/if}
         {#each DEFAULT_INGREDIENTS[currentItem.type] as ingredient}
             <div class="flex items-center gap-2 p-1 rounded">
                 <Label class="flex items-center gap-2">
@@ -494,6 +501,25 @@
                         )}
                     >
                         {ingredient}
+                    </span>
+                </Label>
+            </div>
+        {/each}
+
+        <span class="mb-2 text-green-500 font-bold">Aggiungi salse:</span>
+        {#each Object.values(Sauce) as sauce}
+            <div class="flex items-center gap-2 p-1 rounded">
+                <Label class="flex items-center gap-2">
+                    <Radio
+                        name="sauce"
+                        on:change={() => {
+                            currentItem.sauce = sauce;
+                        }}
+                    />
+                    <span
+                        class:text-green-500={currentItem.sauce === sauce}
+                    >
+                        {sauce}
                     </span>
                 </Label>
             </div>
