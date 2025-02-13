@@ -1,6 +1,6 @@
 <script lang="ts">
     import { ItemType, Sauce, type Order } from "$models/order";
-    import Papa from 'papaparse';
+    import Papa from "papaparse";
     import { getEnumValueFromString } from "$lib/utils/enums";
     import { OFFSET } from "$lib/utils/tickets";
 
@@ -21,68 +21,101 @@
                 for (const row of result.data as string[][]) {
                     if (row.length < 6) continue; // Skip invalid rows
 
-                    const [name, surname, email, orderItem, sauce, glutenFree] = row;
+                    const [name, surname, email, orderItem, sauce, glutenFree] =
+                        row;
                     if (!name || !surname || !orderItem) continue;
 
                     try {
                         const order: Order = {
-                            name: `${name} ${surname.charAt(0)}.`,
-                            items: [{
-                                quantity: 1,
-                                type: getEnumValueFromString(ItemType, orderItem.trim()),
-                                ready: false,
-                                sauce: getEnumValueFromString(Sauce, sauce.trim()) || undefined,
-                                glutenFree: glutenFree.toLowerCase() === 'true'
-                            }],
+                            name: `${name.trim()} ${surname.trim().charAt(0)}.`,
+                            items: [
+                                {
+                                    quantity: 1,
+                                    type: getEnumValueFromString(
+                                        ItemType,
+                                        orderItem.trim()
+                                    ),
+                                    ready: false,
+                                    sauce:
+                                        getEnumValueFromString(
+                                            Sauce,
+                                            sauce.trim().toUpperCase()
+                                        ) || undefined,
+                                    glutenFree:
+                                        glutenFree.toLowerCase() === "true",
+                                },
+                            ],
                             done: true,
                             timestamp: Date.now(),
-                            ticketId: `XNRF${OFFSET + rowIndex}/25`
+                            ticketId: `XNRF${OFFSET + rowIndex}/25`,
                         };
                         rowIndex++;
 
-                        const response = await fetch('/api/order', {
-                            method: 'POST',
+                        const response = await fetch("/api/order", {
+                            method: "POST",
                             body: JSON.stringify(order),
                             headers: {
-                                'Content-Type': 'application/json'
-                            }
+                                "Content-Type": "application/json",
+                            },
                         });
 
                         if (response.ok) {
-                            console.log('Order saved:', order);
-                            results = [{ success: true, message: `Ordine creato per ${order.name}` } ,...results];
+                            console.log("Order saved:", order);
+                            results = [
+                                {
+                                    success: true,
+                                    message: `Ordine creato per ${order.name}`,
+                                },
+                                ...results,
+                            ];
 
-                            const emailResp = fetch('/api/order/don-bosco', {
-                                method: 'POST',
-                                body: JSON.stringify({ name, surname, email, order }),
+                            const emailResp = fetch("/api/order/don-bosco", {
+                                method: "POST",
+                                body: JSON.stringify({
+                                    name: name.trim(),
+                                    surname: surname.trim(),
+                                    email: email.trim(),
+                                    order,
+                                }),
                                 headers: {
-                                    'Content-Type': 'application/json'
-                                }
+                                    "Content-Type": "application/json",
+                                },
                             });
-
                         } else {
                             const error = await response.json();
-                            results = [{ success: false, message: `Errore per ${name}: ${error.message}` } ,...results];
+                            results = [
+                                {
+                                    success: false,
+                                    message: `Errore per ${name}: ${error.message}`,
+                                },
+                                ...results,
+                            ];
                         }
                     } catch (error: any) {
-                        results = [{ success: false, message: `Errore per ${name}: ${error.message}` } ,...results];
+                        results = [
+                            {
+                                success: false,
+                                message: `Errore per ${name}: ${error.message}`,
+                            },
+                            ...results,
+                        ];
                     }
                 }
                 processing = false;
                 // sleep 2 seconds
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                await new Promise((resolve) => setTimeout(resolve, 2000));
             },
             error: (error) => {
-                console.error('Error parsing CSV:', error);
+                console.error("Error parsing CSV:", error);
                 processing = false;
-            }
+            },
         });
     }
 </script>
 
 <div class="container mx-auto p-4">
     <h1 class="text-2xl font-bold mb-4">Carica ordini da CSV</h1>
-    
+
     <div class="mb-4">
         <input
             type="file"
@@ -99,7 +132,11 @@
 
     <div class="mt-4">
         {#each results as result}
-            <div class="p-2 mb-2 rounded {result.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+            <div
+                class="p-2 mb-2 rounded {result.success
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'}"
+            >
                 {result.message}
             </div>
         {/each}

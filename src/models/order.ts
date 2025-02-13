@@ -14,8 +14,8 @@ export enum ItemType {
 }
 
 export enum Sauce {
-	MAIONESE = 'Maionese',
-	KETCHUP = 'Ketchup',
+	MAIONESE = 'MAIONESE',
+	KETCHUP = 'KETCHUP',
 	BBQ = 'BBQ',
 }
 
