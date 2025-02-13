@@ -1,7 +1,7 @@
 import type { User } from "$lib/auth/user";
 import { getClientDB } from "$lib/firebase/client.js";
 import { hasPermission } from "$lib/utils/permissions";
-import { convertCode } from "$lib/utils/tickets";
+import { getFdPCode } from "$lib/utils/tickets";
 import { UserPermissions } from "$models/permissions";
 import type { Ticket } from "$models/ticket";
 import {
@@ -40,7 +40,7 @@ export async function GET({ params, locals }) {
         );
     }
 
-    const code = convertCode(params.ticketID);
+    const code = getFdPCode(params.ticketID);
     if (code === null) {
         return new Response(JSON.stringify({ message: "Codice non valido" }), {
             status: 404,
@@ -103,6 +103,15 @@ export async function GET({ params, locals }) {
         });
     }
 
+    if (!ticketData.checkIn) {
+        return new Response(JSON.stringify({ ticket }), {
+            status: 425, // Too Early instead of 403
+            headers: {
+                "content-type": "application/json",
+            },
+        });
+    }
+
     return new Response(
         JSON.stringify({ ticket, message: "Biglietto validato" }),
         {
@@ -140,7 +149,7 @@ export async function PUT({ params, locals }) {
         );
     }
 
-    const code = convertCode(params.ticketID);
+    const code = getFdPCode(params.ticketID);
 
     if (code === null) {
         return new Response(JSON.stringify({ message: "Codice non valido" }), {
@@ -277,7 +286,7 @@ export async function POST({ params, request, locals }) {
     }
 
     const formData = await request.json();
-    const code = convertCode(params.ticketID);
+    const code = getFdPCode(params.ticketID);
 
     if (code === null) {
         const response = new Response(

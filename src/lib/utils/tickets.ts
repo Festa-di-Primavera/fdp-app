@@ -1,7 +1,8 @@
 import type { User } from "$lib/auth/user";
 
-const OFFSET = -45150;
-export function convertCode(code: string | undefined): string | null {
+export const OFFSET = 45150;
+
+export function getFdPCode(code: string | undefined): string | null {
     try {
         if (code === undefined || code === null) return null;
 
@@ -18,13 +19,42 @@ export function convertCode(code: string | undefined): string | null {
         code = code.trim();
 
         let num = parseInt(code);
-        num += OFFSET;
+        num -= OFFSET;
 
         let str = num.toString();
         while (str.length < 4) {
             str = "0" + str;
         }
         return `FDP25-${str}`;
+    }
+
+    return null;
+}
+
+export function getXnrfCode(code: string | undefined): string | null {
+    try {
+        if (code === undefined || code === null) return null;
+
+        code = decodeURIComponent(code);
+    } catch {
+        return null;
+    }
+
+    if (code.includes("XNRF"))
+        return code;
+
+    if (code.includes("FDP25")) {
+        code = code.replace("FDP25-", "");
+        code = code.trim();
+
+        let num = parseInt(code);
+        num += OFFSET;
+
+        let str = num.toString();
+        while (str.length < 5) {
+            str = "0" + str;
+        }
+        return `XNRF${str}/25`;
     }
 
     return null;

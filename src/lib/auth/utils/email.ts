@@ -10,7 +10,7 @@ import {
 } from "firebase/firestore";
 import { createDate, isWithinExpirationDate, TimeSpan } from "oslo";
 import { alphabet, generateRandomString } from "oslo/crypto";
-import { sendEmail } from "./resend";
+import { sendEmail } from "../../utils/resend";
 
 export function isValidEmail(email: string): boolean {
     return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);

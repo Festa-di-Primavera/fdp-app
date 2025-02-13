@@ -4,7 +4,7 @@
 
     import QrReader from "$components/QrReader.svelte";
     import type { User } from "$lib/auth/user";
-    import { convertCode } from "$lib/utils/tickets";
+    import { getFdPCode } from "$lib/utils/tickets";
     import { user } from "$store/store";
 
     interface Props {
@@ -45,7 +45,7 @@
         if (name !== "" && surname !== "" && ticketCode !== "") {
             name = name.trim().toUpperCase();
             surname = surname.trim().toUpperCase();
-            ticketCode = convertCode(ticketCode?.trim()) ?? "";
+            ticketCode = getFdPCode(ticketCode?.trim()) ?? "";
 
             try {
                 let response;

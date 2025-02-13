@@ -15,7 +15,7 @@ import {
 import { createDate, isWithinExpirationDate } from "oslo";
 import { encodeHex } from "oslo/encoding";
 import type { User } from "../user";
-import { sendEmail } from "./resend";
+import { sendEmail } from "../../utils/resend";
 import { TimeSpan } from "./timespan";
 
 interface PasswordResetToken {

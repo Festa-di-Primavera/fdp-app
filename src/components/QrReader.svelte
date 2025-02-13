@@ -173,7 +173,7 @@
             id="camSelector"
         >
             <CameraIcon
-                class="absolute z-[25] h-6 w-6 text-primary-800 dark:text-primary-300"
+                class="absolute z-10 h-6 w-6 text-primary-800 dark:text-primary-300"
             />
         </Button>
         <!-- svelte-ignore a11y_media_has_caption -->

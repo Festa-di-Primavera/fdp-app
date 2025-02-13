@@ -12,15 +12,19 @@
     } from "flowbite-svelte";
     import {
         AlignJustify,
+        ChefHat,
+        CoinsIcon,
         Dna,
         DollarSign,
         Home,
+        Info,
         LayoutDashboard,
         LogOut,
         NotepadText,
         ScanLine,
         ScrollText,
         Ticket,
+        UserCog,
         Users,
     } from "lucide-svelte";
     import { sineIn } from "svelte/easing";
@@ -54,7 +58,7 @@
         },
         {
             label: "Gestione Utenti",
-            icon: Users,
+            icon: UserCog,
             permission: UserPermissions.UTENTI,
             children: [
                 {
@@ -75,22 +79,29 @@
             ],
         },
         {
-            label: "Dashboard",
-            slug: "/dashboard",
-            permission: UserPermissions.DASHBOARD,
-            icon: LayoutDashboard,
-        },
-        {
             label: "Biglietti",
-            slug: "/tickets",
-            permission: UserPermissions.LISTA_BIGLIETTI,
-            icon: ScrollText,
-        },
-        {
-            label: "Check-in",
-            slug: "/check-in",
-            permission: UserPermissions.CHECK_IN,
-            icon: ScanLine,
+            icon: Ticket,
+            permission: UserPermissions.UTENTI,
+            children: [
+                {
+                    label: "Dashboard",
+                    slug: "/dashboard",
+                    permission: UserPermissions.DASHBOARD,
+                    icon: LayoutDashboard,
+                },
+                {
+                    label: "Lista Biglietti",
+                    slug: "/tickets",
+                    permission: UserPermissions.LISTA_BIGLIETTI,
+                    icon: ScrollText,
+                },
+                {
+                    label: "Genera biglietti",
+                    slug: "/generate",
+                    permission: UserPermissions.GENERAZIONE,
+                    icon: Dna,
+                },
+            ],
         },
         {
             label: "Vendi",
@@ -99,22 +110,45 @@
             icon: DollarSign,
         },
         {
+            label: "Check-in",
+            slug: "/check-in",
+            permission: UserPermissions.CHECK_IN,
+            icon: ScanLine,
+        },
+        {
             label: "Info biglietto",
             slug: "/ticket-info",
             permission: UserPermissions.INFO_BIGLIETTO,
-            icon: Ticket,
+            icon: Info,
         },
         {
-            label: "Genera biglietti",
-            slug: "/generate",
-            permission: UserPermissions.GENERAZIONE,
-            icon: Dna,
+            label: "Cassa",
+            slug: "/cashier",
+            permission: UserPermissions.CASSA,
+            icon: CoinsIcon,
+        },
+        {
+            label: "Cucina",
+            slug: "/kitchen",
+            permission: UserPermissions.CUCINA,
+            icon: ChefHat,
         },
     ];
 
     function filterRoutes(routes: Route[]): Route[] {
         return routes.filter((route) => {
-            return hasPermission($user?.permissions, route.permission);
+            if (!hasPermission($user?.permissions, route.permission)) {
+                return false;
+            }
+            
+            if (route.children) {
+                route.children = route.children.filter((child) => 
+                    hasPermission($user?.permissions, child.permission)
+                );
+                return route.children.length > 0;
+            }
+            
+            return true;
         });
     }
 
@@ -137,7 +171,7 @@
 </script>
 
 <navbar
-    class="sticky top-0 z-[99] flex w-full items-center justify-between bg-gray-100 dark:bg-gray-900"
+    class="sticky top-0 z-40 flex w-full items-center justify-between bg-gray-100 dark:bg-gray-900"
 >
     <a class="my-2 ml-[1%]" href="/">
         <Logo />
@@ -162,7 +196,7 @@
     </div>
 </navbar>
 <Drawer
-    class="z-[100] max-h-screen overflow-y-hidden"
+    class="z-50 max-h-screen overflow-y-hidden"
     placement="right"
     transitionType="fly"
     transitionParams={transitionParamsRight}
