@@ -10,7 +10,7 @@ export async function sendEmail(
     attachments?: { filename: string; content: string | Buffer }[]
 ): Promise<{ error: boolean; message: string }> {
     const { error } = await resend.emails.send({
-        from: "Festa di Primavera <no-reply@festa-cus.it>",
+        from: "Festa di Primavera <info@festa-cus.it>",
         to: email,
         subject: subject,
         html: htmlContent,
