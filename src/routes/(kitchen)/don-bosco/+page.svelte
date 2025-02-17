@@ -68,7 +68,7 @@
                                 ...results,
                             ];
 
-                            const emailResp = fetch("/api/order/don-bosco", {
+                            const emailResp = await fetch("/api/order/don-bosco", {
                                 method: "POST",
                                 body: JSON.stringify({
                                     name: name.trim(),
@@ -80,6 +80,8 @@
                                     "Content-Type": "application/json",
                                 },
                             });
+
+                            console.log("Email sent:", emailResp);
                         } else {
                             const error = await response.json();
                             results = [
@@ -99,10 +101,9 @@
                             ...results,
                         ];
                     }
+                    await new Promise((resolve) => setTimeout(resolve, 2000));
                 }
                 processing = false;
-                // sleep 2 seconds
-                await new Promise((resolve) => setTimeout(resolve, 2000));
             },
             error: (error) => {
                 console.error("Error parsing CSV:", error);

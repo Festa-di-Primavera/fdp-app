@@ -52,7 +52,7 @@
     <title>Coda</title>
 </svelte:head>
 
-<div class="py-4 px-16 w-full overflow-hidden h-full">
+<div class="py-4 px-16 w-full overflow-hidden h-full flex-grow">
     <div class="flex gap-10">
         <!-- Colonna top 5 -->
         <div class="flex flex-col w-1/4">
@@ -80,7 +80,9 @@
                 }
             </style>
 
-            <h1 class="text-3xl h-12 content-center font-bold text-primary-400 mb-6">
+            <h1
+                class="text-3xl h-12 content-center font-bold text-primary-400 mb-6"
+            >
                 IN PREPARAZIONE<span class="animated-dots text-4xl"></span>
             </h1>
             <div class="flex flex-col gap-4">
@@ -113,12 +115,14 @@
             </div>
         </div>
 
-		<!-- Divisore verticale -->
-		<div class="w-1 h-[75vh] bg-primary-400 opacity-20 rounded-full"></div>
+        <!-- Divisore verticale -->
+        <div class="w-1 h-[75vh] bg-primary-400 opacity-20 rounded-full"></div>
 
         <!-- Resto -->
         <div class="flex flex-col w-3/4">
-            <h1 class="text-2xl h-12 content-center font-bold text-primary-400 mb-6">
+            <h1
+                class="text-2xl h-12 content-center font-bold text-primary-400 mb-6"
+            >
                 PROSSIMI
             </h1>
             <div
@@ -133,13 +137,12 @@
                         <div
                             class="absolute aspect-square h-max top-4 left-4 rounded-lg bg-primary-400 bg-opacity-50 text-white text-lg font-semibold font-mono px-2 py-1"
                         >
-                            {i + 1 + TOP}
+                            #{i + 1 + TOP}
                         </div>
                         <div
                             class="flex flex-col gap-2 justify-between items-center text-gray-800 dark:text-gray-300"
                         >
                             <h2 class="text-lg">
-                                <!-- {order.name.split(' ')[0]} -->
                                 {order.name}
                             </h2>
                             <span class="text-lg">
@@ -162,3 +165,10 @@
         </div>
     </div>
 </div>
+
+<style>
+    * {
+        user-select: none;
+        cursor: none;
+    }
+</style>
