@@ -26,6 +26,7 @@ export interface OrderItem {
 	removedIngredients?: BaseIngredient[];
 	sauce?: Sauce;
 	ready?: boolean;
+	notes?: string;	//TODO: Remove
 }
 
 export interface Order {

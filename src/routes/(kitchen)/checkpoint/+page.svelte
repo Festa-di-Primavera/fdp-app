@@ -297,6 +297,14 @@
                                                 Salsa: {item.sauce ||
                                                     "No salsa"}
                                             </div>
+                                            <!-- TODO: remove -->
+                                            {#if item.notes}
+                                                <div
+                                                    class="text-sm text-red-500"
+                                                >
+                                                    Note: {item.notes}
+                                                </div>
+                                            {/if}
                                         </div>
                                     </Card>
                                 {/each}
@@ -335,12 +343,14 @@
             <div class="grid grid-cols-3 gap-2">
                 {#each Object.values(ItemType) as type}
                     <Card
-						
-                        class="w-full"
+                        class="w-full cursor-pointer flex flex-row gap-2 items-center"
                         onclick={() => (currentItem.type = type)}
                     >
+                        {#if currentItem.type === type}
+                            <CheckCircle2 class="w-6 h-6 text-green-500" />
+                        {/if}
                         {type}
-						</Card>
+                    </Card>
                 {/each}
             </div>
         </div>
@@ -397,26 +407,35 @@
 
         <div>
             <span class="font-semibold text-green-500 block mb-2">Salsa:</span>
-			<div class="grid gap-2">
-				<Label class="flex items-center gap-2 p-1 w-max">
-					<Radio
-						name="sauce"
-						checked={!currentItem.sauce}
-						on:change={() => (currentItem.sauce = undefined)}
-					/>
-					<span>No salsa</span>
-				</Label>
-				{#each Object.values(Sauce) as sauce}
-					<Label class="flex items-center gap-2 p-1">
-						<Radio
-							name="sauce"
-							checked={currentItem.sauce === sauce}
-							on:change={() => (currentItem.sauce = sauce)}
-						/>
-						<span>{sauce}</span>
-					</Label>
-				{/each}
-			</div>
+            <div class="grid gap-2">
+                <Label class="flex items-center gap-2 p-1 w-max">
+                    <Radio
+                        name="sauce"
+                        checked={!currentItem.sauce}
+                        on:change={() => (currentItem.sauce = undefined)}
+                    />
+                    <span>No salsa</span>
+                </Label>
+                {#each Object.values(Sauce) as sauce}
+                    <Label class="flex items-center gap-2 p-1">
+                        <Radio
+                            name="sauce"
+                            checked={currentItem.sauce === sauce}
+                            on:change={() => (currentItem.sauce = sauce)}
+                        />
+                        <span>{sauce}</span>
+                    </Label>
+                {/each}
+            </div>
+        </div>
+
+        <div>
+            <span class="font-semibold text-red-500 block mb-2">Note:</span>
+            <Input
+                type="text"
+                bind:value={currentItem.notes}
+                placeholder="Inserisci eventuali note..."
+            />
         </div>
     </div>
 

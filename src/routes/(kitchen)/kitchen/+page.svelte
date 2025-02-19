@@ -207,6 +207,13 @@
                                     {/each}
                                 </div>
                             {/if}
+                            
+                            <!-- TODO: remove -->
+                            {#if item.notes}
+                                <div class="text-sm text-red-500 mt-1">
+                                    {item.notes}
+                                </div>
+                            {/if}
                         </div>
                     {/each}
                 </div>

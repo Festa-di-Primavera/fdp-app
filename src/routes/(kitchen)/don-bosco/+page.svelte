@@ -18,9 +18,10 @@
             complete: async (result) => {
                 let rowIndex = 1;
                 for (const row of result.data as string[][]) {
-                    if (row.length < 6) continue; // Skip invalid rows
+                    // TODO: remove notes
+                    if (row.length < 7) continue; // Skip invalid rows
 
-                    const [name, surname, email, orderItem, sauce, glutenFree] =
+                    const [name, surname, email, orderItem, sauce, glutenFree, notes] =
                         row;
                     if (!name || !surname || !orderItem) continue;
 
@@ -42,6 +43,8 @@
                                         ) || undefined,
                                     glutenFree:
                                         glutenFree.toLowerCase() === "true",
+                                    // TODO: remove notes
+                                    notes: notes.trim() || undefined,
                                 },
                             ],
                             done: true,
@@ -101,7 +104,7 @@
                             ...results,
                         ];
                     }
-                    await new Promise((resolve) => setTimeout(resolve, 2000));
+                    await new Promise((resolve) => setTimeout(resolve, 600));
                 }
                 processing = false;
             },

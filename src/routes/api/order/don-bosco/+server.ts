@@ -52,6 +52,11 @@ export async function POST({ request }) {
                             `<div style="font-size: 15px; color: #4a5568; line-height: 1.5;">
                                 <span style="font-size: 18px;">🥫</span> <strong>Salsa:</strong> ${getStringFromEnumValue(Sauce, castedOrder.items[0].sauce!!)}
                             </div>` : 
+                            '<div style="font-size: 15px; color: #4a5568; line-height: 1.5;"><span style="font-size: 18px;">🥫</span> <strong>Salsa:</strong> Nessuna salsa</div>'}
+                        ${castedOrder.items[0].notes ? 
+                            `<div style="font-size: 15px; color: #4a5568; margin-top: 12px; line-height: 1.5;">
+                                <span style="font-size: 18px;">📝</span> <strong>Note:</strong> ${castedOrder.items[0].notes}
+                            </div>` : 
                             ''}
                     </li>
                 </ul>
