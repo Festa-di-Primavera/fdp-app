@@ -20,13 +20,18 @@ export async function POST({ request }) {
     const body = await request.json();
     const { name, surname, email, order } = body;
 
+    console.log(`[DON-BOSCO] Processing order for ${name} ${surname} (${email})`);
+
     const capName = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
     const capSurname = surname.charAt(0).toUpperCase() + surname.slice(1).toLowerCase();
     let trimmedTicketId = order.ticketId.replace("XNRF", "");
     trimmedTicketId = trimmedTicketId.replace("/25", "");
 
     let castedOrder: Order = order;
+    
+    console.log(`[DON-BOSCO] Generating ticket image for ${capName} ${capSurname}`);
     const qrImage = await generateTicketImage(capName, capSurname, castedOrder.ticketId);
+    console.log(`[DON-BOSCO] QR image generated successfully`);
 
     const htmlContent = `
         <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #2d3748; background-color: #ffffff;">
@@ -74,7 +79,7 @@ export async function POST({ request }) {
         </div>
     `;
 
-    await sendEmail(
+    const emailResult = await sendEmail(
         email,
         "Serata condivisa - Festa di Don Bosco",
         htmlContent,
@@ -82,7 +87,24 @@ export async function POST({ request }) {
         "Festa di Don Bosco"
     );
 
-    return new Response("", {
+    if (emailResult.error) {
+        console.error(`[DON-BOSCO] Failed to send email to ${email}:`, emailResult.message);
+        return new Response(JSON.stringify({ 
+            success: false, 
+            message: emailResult.message 
+        }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+
+    console.log(`[DON-BOSCO] Successfully processed order for ${name} ${surname}`);
+    return new Response(JSON.stringify({ 
+        success: true, 
+        message: "Order processed and email sent successfully",
+        emailId: emailResult.data?.id
+    }), {
         status: 200,
+        headers: { 'Content-Type': 'application/json' }
     });
 }

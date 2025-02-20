@@ -9,25 +9,41 @@ export async function sendEmail(
     htmlContent: string,
     attachments?: { filename: string; content: string | Buffer }[],
     senderName?: string
-): Promise<{ error: boolean; message: string }> {
-    const { error } = await resend.emails.send({
-        from: `${senderName ?? "Festa di Primavera"} <info@festa-cus.it>`,
-        to: email,
-        subject: subject,
-        html: htmlContent,
-        attachments,
-    });
+): Promise<{ error: boolean; message: string; data?: any }> {
+    console.log(`[EMAIL] Attempting to send email to ${email}`);
+    console.log(`[EMAIL] Subject: ${subject}`);
+    console.log(`[EMAIL] Attachments: ${attachments?.length ?? 0}`);
 
-    if (error) {
-        console.error({ error });
+    try {
+        const { data, error } = await resend.emails.send({
+            from: `${senderName ?? "Festa di Primavera"} <info@festa-cus.it>`,
+            to: email,
+            subject: subject,
+            html: htmlContent,
+            attachments,
+        });
+
+        if (error) {
+            console.error(`[EMAIL] Error sending to ${email}:`, error);
+            return {
+                error: true,
+                message: `Failed to send email: ${error.message}`,
+                data: error
+            };
+        }
+
+        console.log(`[EMAIL] Successfully sent to ${email}. ID: ${data?.id}`);
+        return {
+            error: false,
+            message: "Email sent successfully",
+            data
+        };
+    } catch (e) {
+        console.error(`[EMAIL] Exception while sending to ${email}:`, e);
         return {
             error: true,
-            message: "Failed to send email verification code.",
+            message: `Exception while sending email: ${e instanceof Error ? e.message : 'Unknown error'}`,
+            data: e
         };
     }
-
-    return {
-        error: false,
-        message: "Email verification code sent successfully.",
-    };
 }
