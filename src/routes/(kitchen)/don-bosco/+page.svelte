@@ -104,7 +104,7 @@
                             ...results,
                         ];
                     }
-                    await new Promise((resolve) => setTimeout(resolve, 600));
+                    await new Promise((resolve) => setTimeout(resolve, 1600));
                 }
                 processing = false;
             },
