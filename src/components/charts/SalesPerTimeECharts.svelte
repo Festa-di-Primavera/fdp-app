@@ -149,7 +149,7 @@
     });
 </script>
 
-<Card class=" w-full h-96">
+<Card class="h-96 w-full">
     <div class="mb-3 flex justify-between">
         <div class="grid grid-cols-2 gap-4">
             <div>

@@ -81,5 +81,4 @@
     });
 </script>
 
-<!-- restProps is currently broken with typescript -->
 <div bind:this={element} style="width: 100%; height: 100%"></div>
