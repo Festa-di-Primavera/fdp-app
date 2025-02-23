@@ -1,15 +1,32 @@
-<!-- To keep in Svelte 4 (Legacy Mode) until new svelte-echart version (for Svelte 5) -->
 <script lang="ts">
+    import { init } from "$lib/charts/init";
     import { theme } from "$store/store";
     import { Card } from "flowbite-svelte";
     import { onMount } from "svelte";
-    import { Chart, type EChartsOptions } from "svelte-echarts";
+    import { type EChartsOptions } from "svelte-echarts";
+    import ChartComponent from "./ChartComponent.svelte";
 
-    export let checkedTicketsCount: number;
-    export let notCheckedTicketsCount: number;
-    export let notSoldTicketsCount: number;
+    interface Props {
+        checkedTicketsCount: number;
+        notCheckedTicketsCount: number;
+        notSoldTicketsCount: number;
+    }
+    let {
+        checkedTicketsCount,
+        notCheckedTicketsCount,
+        notSoldTicketsCount,
+    }: Props = $props();
 
-    $: options = {
+    let displayChart = $state(false);
+
+    onMount(() => {
+        $theme = localStorage.getItem("color-theme") as "light" | "dark";
+        setTimeout(() => {
+            displayChart = true;
+        }, 300);
+    });
+
+    const options = $derived({
         legend: {
             orient: "horizontal",
             left: 10,
@@ -18,10 +35,10 @@
                 return name;
             },
             textStyle: {
-                color: currentTheme == "dark" ? "white" : "rgb(55 65 81)",
+                color: $theme == "dark" ? "white" : "rgb(55 65 81)",
             },
         },
-        backgroundColor: currentTheme == "dark" ? "rgb(31 41 55)" : "white",
+        backgroundColor: $theme == "dark" ? "rgb(31 41 55)" : "white",
         tooltip: {
             trigger: "item",
             formatter: "{b}: {c}",
@@ -35,7 +52,7 @@
                 label: {
                     show: true,
                     formatter: "{d}%",
-                    color: currentTheme == "dark" ? "white" : "rgb(55 65 81)",
+                    color: $theme == "dark" ? "white" : "rgb(55 65 81)",
                 },
                 labelLine: {
                     show: true,
@@ -52,10 +69,7 @@
                         name: "Validati",
                         label: {
                             show: checkedTicketsCount > 0,
-                            color:
-                                currentTheme == "dark"
-                                    ? "white"
-                                    : "rgb(55 65 81)",
+                            color: $theme == "dark" ? "white" : "rgb(55 65 81)",
                         },
                     },
                     {
@@ -63,10 +77,7 @@
                         name: "Non validati",
                         label: {
                             show: notCheckedTicketsCount > 0,
-                            color:
-                                currentTheme == "dark"
-                                    ? "white"
-                                    : "rgb(55 65 81)",
+                            color: $theme == "dark" ? "white" : "rgb(55 65 81)",
                         },
                     },
                     {
@@ -74,10 +85,7 @@
                         name: "Non venduti",
                         label: {
                             show: notSoldTicketsCount > 0,
-                            color:
-                                currentTheme == "dark"
-                                    ? "white"
-                                    : "rgb(55 65 81)",
+                            color: $theme == "dark" ? "white" : "rgb(55 65 81)",
                         },
                     },
                 ],
@@ -95,7 +103,7 @@
                     name: "graph",
                     iconStyle: {
                         borderColor:
-                            currentTheme == "dark" ? "white" : "rgb(55 65 81)",
+                            $theme == "dark" ? "white" : "rgb(55 65 81)",
                         borderWidth: 1.5,
                     },
                     icon: `path://M 7 10 L 12 15 L 17 10 M 21 15 v 4 a 2 2 0 0 1 -2 2 H 5 a 2 2 0 0 1 -2 -2 v -4 M 12 4 L 12 15`,
@@ -107,21 +115,7 @@
                 },
             },
         },
-    } as EChartsOptions;
-
-    let currentTheme: "dark" | "light";
-    let displayChart = false;
-
-    onMount(() => {
-        $theme = localStorage.getItem("color-theme") as "light" | "dark";
-        setTimeout(() => {
-            displayChart = true;
-        }, 300);
-    });
-
-    theme.subscribe((value) => {
-        currentTheme = value;
-    });
+    } as EChartsOptions);
 </script>
 
 <Card class=" h-96 w-full" padding="md">
@@ -140,7 +134,7 @@
     {#if options !== null}
         <div class="h-full w-full pt-4">
             {#if displayChart}
-                <Chart renderer="svg" bind:options />
+                <ChartComponent {options} {init} />
             {/if}
         </div>
     {/if}

@@ -1,29 +1,33 @@
-<!-- To keep in Svelte 4 (Legacy Mode) until new svelte-echart version (for Svelte 5) -->
 <script lang="ts">
+    import { init } from "$lib/charts/init";
     import type { ChartData } from "$lib/charts/utils";
     import { theme } from "$store/store";
     import { Card } from "flowbite-svelte";
     import { onMount } from "svelte";
-    import { Chart, type EChartsOptions } from "svelte-echarts";
+    import { type EChartsOptions } from "svelte-echarts";
+    import ChartComponent from "./ChartComponent.svelte";
 
-    export let sellHoursStats: ChartData;
+    interface Props {
+        sellHoursStats: ChartData;
+    }
 
-    $: numberOfBars = sellHoursStats.labels.length;
-    $: options = {
+    let { sellHoursStats }: Props = $props();
+
+    const options = $derived({
         grid: {
             containLabel: true,
             left: 10,
             right: 25,
         },
-        backgroundColor: currentTheme == "dark" ? "rgb(31 41 55)" : "white",
+        backgroundColor: $theme == "dark" ? "rgb(31 41 55)" : "white",
         xAxis: {
             data: sellHoursStats.labels,
             axisLabel: {
-                color: currentTheme == "dark" ? "white" : "rgb(55 65 81)",
+                color: $theme == "dark" ? "white" : "rgb(55 65 81)",
             },
             axisLine: {
                 lineStyle: {
-                    color: currentTheme == "dark" ? "white" : "rgb(55 65 81)",
+                    color: $theme == "dark" ? "white" : "rgb(55 65 81)",
                 },
             },
         },
@@ -39,11 +43,11 @@
                 symbolSize: [8, 8],
                 symbolOffset: [0, 8],
                 lineStyle: {
-                    color: currentTheme == "dark" ? "white" : "rgb(55 65 81)",
+                    color: $theme == "dark" ? "white" : "rgb(55 65 81)",
                 },
             },
             axisLabel: {
-                color: currentTheme == "dark" ? "white" : "rgb(55 65 81)",
+                color: $theme == "dark" ? "white" : "rgb(55 65 81)",
             },
             minInterval: 5,
             min: 0,
@@ -92,7 +96,7 @@
                     name: "graph",
                     iconStyle: {
                         borderColor:
-                            currentTheme == "dark" ? "white" : "rgb(55 65 81)",
+                            $theme == "dark" ? "white" : "rgb(55 65 81)",
                         borderWidth: 1.5,
                     },
                     icon: `path://M 7 10 L 12 15 L 17 10 M 21 15 v 4 a 2 2 0 0 1 -2 2 H 5 a 2 2 0 0 1 -2 -2 v -4 M 12 4 L 12 15`,
@@ -104,20 +108,15 @@
                 },
             },
         },
-    } as EChartsOptions;
+    } as EChartsOptions);
 
-    let currentTheme: "dark" | "light";
-    let displayChart = false;
+    let displayChart = $state(false);
 
     onMount(() => {
         $theme = localStorage.getItem("color-theme") as "light" | "dark";
         setTimeout(() => {
             displayChart = true;
         }, 300);
-    });
-
-    theme.subscribe((value) => {
-        currentTheme = value;
     });
 </script>
 
@@ -137,7 +136,7 @@
     {#if options !== null}
         <div class="mt-5 h-full w-full">
             {#if displayChart}
-                <Chart renderer="svg" bind:options />
+                <ChartComponent {options} {init} />
             {/if}
         </div>
     {/if}

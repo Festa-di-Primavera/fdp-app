@@ -1,17 +1,22 @@
-<!-- To keep in Svelte 4 (Legacy Mode) until new svelte-echart version (for Svelte 5) -->
 <script lang="ts">
+    import { init } from "$lib/charts/init";
     import { type ChartData, SalesTimeSlot } from "$lib/charts/utils";
     import { theme } from "$store/store";
     import { Card, Select } from "flowbite-svelte";
     import { onMount } from "svelte";
-    import { Chart, type EChartsOptions } from "svelte-echarts";
+    import { type EChartsOptions } from "svelte-echarts";
+    import ChartComponent from "./ChartComponent.svelte";
 
     const MAX_VISIBLE_BARS = 10;
 
-    export let ticketsData: ChartData;
-    export let timeWindow: number;
+    interface Props {
+        ticketsData: ChartData;
+        timeWindow: number;
+    }
 
-    let selected: SalesTimeSlot = SalesTimeSlot.DAY;
+    let { ticketsData, timeWindow = $bindable() }: Props = $props();
+
+    let selected: SalesTimeSlot = $state(SalesTimeSlot.DAY);
     const timeOptions = [
         { value: SalesTimeSlot.TWELVE_HOURS, name: "12h" },
         { value: SalesTimeSlot.DAY, name: "1 giorno" },
@@ -20,13 +25,14 @@
         { value: SalesTimeSlot.TWO_WEEKS, name: "2 settimane" },
     ];
 
-    $: numberOfBars = ticketsData.labels.length;
-    $: numberOfSales = ticketsData.datasets.reduce(
-        (acc, curr) => acc + curr,
-        0
+    const numberOfBars = $derived(ticketsData.labels.length);
+    const numberOfSales = $derived(
+        ticketsData.datasets.reduce((acc, curr) => acc + curr, 0)
     );
-    $: timeWindow = selected;
-    $: options = {
+    $effect(() => {
+        timeWindow = selected;
+    });
+    const options = $derived({
         parallelAxis: {
             show: false,
         },
@@ -36,16 +42,16 @@
             left: 10,
             right: 25,
         },
-        backgroundColor: currentTheme == "dark" ? "rgb(31 41 55)" : "white",
+        backgroundColor: $theme == "dark" ? "rgb(31 41 55)" : "white",
         xAxis: {
             data: ticketsData.labels,
             axisLabel: {
-                color: currentTheme == "dark" ? "white" : "rgb(55 65 81)",
+                color: $theme == "dark" ? "white" : "rgb(55 65 81)",
             },
             axisLine: {
                 show: true,
                 lineStyle: {
-                    color: currentTheme == "dark" ? "white" : "rgb(55 65 81)",
+                    color: $theme == "dark" ? "white" : "rgb(55 65 81)",
                 },
             },
         },
@@ -62,11 +68,11 @@
                 symbolSize: [8, 8],
                 symbolOffset: [0, 8],
                 lineStyle: {
-                    color: currentTheme == "dark" ? "white" : "rgb(55 65 81)",
+                    color: $theme == "dark" ? "white" : "rgb(55 65 81)",
                 },
             },
             axisLabel: {
-                color: currentTheme == "dark" ? "white" : "rgb(55 65 81)",
+                color: $theme == "dark" ? "white" : "rgb(55 65 81)",
             },
             minInterval: 5,
             min: 0,
@@ -118,7 +124,7 @@
                     name: "graph",
                     iconStyle: {
                         borderColor:
-                            currentTheme == "dark" ? "white" : "rgb(55 65 81)",
+                            $theme == "dark" ? "white" : "rgb(55 65 81)",
                         borderWidth: 1.5,
                     },
                     icon: `path://M 7 10 L 12 15 L 17 10 M 21 15 v 4 a 2 2 0 0 1 -2 2 H 5 a 2 2 0 0 1 -2 -2 v -4 M 12 4 L 12 15`,
@@ -130,14 +136,9 @@
                 },
             },
         },
-    } as EChartsOptions;
+    } as EChartsOptions);
 
-    let displayChart = false;
-    let currentTheme: "light" | "dark";
-
-    theme.subscribe((value) => {
-        currentTheme = value;
-    });
+    let displayChart = $state(false);
 
     onMount(() => {
         $theme = localStorage.getItem("color-theme") as "light" | "dark";
@@ -174,6 +175,6 @@
         </div>
     </div>
     {#if displayChart}
-        <Chart renderer="svg" {options} />
+        <ChartComponent {options} {init} />
     {/if}
 </Card>

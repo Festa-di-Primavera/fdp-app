@@ -190,9 +190,9 @@
                     </div>
 
                     <TicketsECharts
-                        bind:checkedTicketsCount
-                        bind:notCheckedTicketsCount
-                        bind:notSoldTicketsCount
+                        {checkedTicketsCount}
+                        {notCheckedTicketsCount}
+                        {notSoldTicketsCount}
                     />
                     <TicketsPerPersonECharts {sellersStats} />
                     <TicketsPerHourECharts {sellHoursStats} />
