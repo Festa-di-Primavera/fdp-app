@@ -2,7 +2,7 @@ import { getClientDB } from "$lib/firebase/client";
 import { hasPermission } from "$lib/utils/permissions";
 import type { Order } from "$models/order.js";
 import { UserPermissions } from "$models/permissions";
-import { doc, setDoc, updateDoc } from "firebase/firestore";
+import { collection, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { v4 } from "uuid";
 
 export async function POST({ request, locals }) {
@@ -85,7 +85,7 @@ export async function PATCH({ request, locals }) {
     try {
         const orderRef = doc(getClientDB(), "orders", orderId);
         const updateData: {
-            done?: boolean;
+            done?: boolean | null;
             items?: any[];
             timestamp?: number;
         } = {};
@@ -119,6 +119,49 @@ export async function PATCH({ request, locals }) {
         return new Response(
             JSON.stringify({
                 message: "Errore nell'aggiornamento dell'ordine",
+            }),
+            { status: 500 }
+        );
+    }
+}
+
+export async function GET({ locals }) {
+    if (!locals.user) {
+        return new Response(
+            JSON.stringify({ message: "Non sei autenticato" }),
+            { status: 401 }
+        );
+    }
+
+    if (!hasPermission(locals.user.permissions, UserPermissions.CUCINA)) {
+        return new Response(
+            JSON.stringify({ message: "Non hai i permessi necessari" }),
+            { status: 403 }
+        );
+    }
+
+
+    try {
+        const db = getClientDB();
+        const ordersRef = collection(db, "orders");
+        const q = query(ordersRef, where("done", "==", true));
+        const querySnapshot = await getDocs(q);
+
+        const updates = querySnapshot.docs.map(doc => 
+            {console.log(doc.data());
+            updateDoc(doc.ref, { done: null })}
+        );
+
+        await Promise.all(updates);
+
+        return new Response(JSON.stringify({ message: "Ordini marcati come non preparati" }), {
+            status: 200,
+        });
+    } catch (error) {
+        console.error("Error deleting orders:", error);
+        return new Response(
+            JSON.stringify({
+                message: "Errore nell'eliminazione degli ordini",
             }),
             { status: 500 }
         );

@@ -33,7 +33,7 @@ export interface Order {
 	ticketId: string;
 	name: string;
 	items: OrderItem[];
-	done: boolean;
+	done: boolean | null;
 	timestamp: number;
 	id?: string;
 }

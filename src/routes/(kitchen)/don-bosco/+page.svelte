@@ -47,7 +47,7 @@
                                     notes: notes.trim() || undefined,
                                 },
                             ],
-                            done: true,
+                            done: null,
                             timestamp: Date.now(),
                             ticketId: `XNRF${OFFSET + rowIndex}/25`,
                         };

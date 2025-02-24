@@ -22,6 +22,7 @@
         LogOut,
         NotepadText,
         ScanLine,
+        ScanQrCode,
         ScrollText,
         Ticket,
         UserCog,
@@ -132,6 +133,12 @@
             slug: "/kitchen",
             permission: UserPermissions.CUCINA,
             icon: ChefHat,
+        },
+        {
+            label: "Checkpoint Don Bosco",
+            slug: "/checkpoint",
+            permission: UserPermissions.CASSA,
+            icon: ScanQrCode,
         },
     ];
 

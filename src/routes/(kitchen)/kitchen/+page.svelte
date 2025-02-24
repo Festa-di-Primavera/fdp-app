@@ -22,22 +22,45 @@
     if (!$user) $user = data;
 
     let unsubscribe: Unsubscribe = () => {};
-    let orders: Order[] = $state([]);
+    // let orders: Order[] = $state([]);
+
+    let toDoOrders: Order[] = $state([]);
+    let inProgressOrders: Order[] = $state([]);
+    let doneOrders: Order[] = $state([]);
 
     // get orders from firestore
     function getOrders() {
         const q = query(
             collection(getClientDB(), "orders"),
-            where("done", "==", false),
+            // where("done", "==", false),
             orderBy("timestamp", "asc") // ordina per timestamp in ordine crescente
         );
         unsubscribe = onSnapshot(q, (querySnapshot) => {
-            orders = querySnapshot.docs.map((orderDoc) => {
-                return {
+            // orders = querySnapshot.docs.map((orderDoc) => {
+            //     return {
+            //         ...orderDoc.data(),
+            //         id: orderDoc.id,
+            //     };
+            // }) as Order[];
+
+            toDoOrders = [];
+            inProgressOrders = [];
+            doneOrders = [];
+
+            querySnapshot.docs.forEach((orderDoc) => {
+                const order = {
                     ...orderDoc.data(),
                     id: orderDoc.id,
-                };
-            }) as Order[];
+                } as Order;
+
+                if (order.done) {
+                    doneOrders = [...doneOrders, order];
+                } else if (order.done === false) {
+                    inProgressOrders = [...inProgressOrders, order];
+                } else {
+                    toDoOrders = [...toDoOrders, order];
+                }
+            });
         });
     }
 
@@ -98,12 +121,12 @@
         orderId: string | undefined,
         itemIndex: number
     ) {
-        const order = orders.find((o) => o.id === orderId);
+        console.log(orderId, itemIndex);
+        const order = inProgressOrders.find((o) => o.id === orderId);
         if (!order) return;
 
         // Toggle the ready status in the local state
         order.items[itemIndex].ready = !order.items[itemIndex].ready;
-        orders = [...orders];
 
         // Update the ready status in the database
         await fetch("/api/order", {
@@ -133,10 +156,16 @@
 </svelte:head>
 
 <div class="p-4 w-full">
-    <h1 class="text-4xl font-bold text-primary-600 mb-6">Cucina</h1>
+    
+    <div class="flex gap-7 items-center">
+        <h1 class="text-4xl font-bold text-primary-600 mb-6 mr-10">Cucina</h1>
+        <h2 class="text-2xl font-semibold text-primary-600 dark:text-primary-400 mb-4">Preparati: {doneOrders.length}</h2>
+        <h2 class="text-2xl font-semibold text-orange-400 dark:text-orange-300 mb-4">In attesa: {inProgressOrders.length}</h2>
+        <h2 class="text-2xl font-semibold text-red-500 dark:text-red-400 mb-4">Mancanti: {toDoOrders.length}</h2>
+    </div>
 
     <div class="flex flex-wrap justify-around gap-y-10 gap-x-4 after:flex-auto">
-        {#each orders as order}
+        {#each inProgressOrders as order}
             <Card
                 class="w-[22rem] h-max border-t-4 relative"
                 style="border-top-color: {getOrderColor(order)}"

@@ -56,40 +56,16 @@
     <div class="flex gap-10">
         <!-- Colonna top 5 -->
         <div class="flex flex-col w-1/4">
-            <style>
-                @keyframes dots {
-                    0%,
-                    20% {
-                        content: "";
-                    }
-                    40% {
-                        content: " .";
-                    }
-                    60% {
-                        content: " . .";
-                    }
-                    80%,
-                    100% {
-                        content: " . . .";
-                    }
-                }
-
-                .animated-dots::after {
-                    content: "";
-                    animation: dots 2.5s infinite;
-                }
-            </style>
-
             <h1
                 class="text-3xl h-12 content-center font-bold text-primary-400 mb-6"
             >
-                IN PREPARAZIONE<span class="animated-dots text-4xl"></span>
+                IN PREPARAZIONE
             </h1>
             <div class="flex flex-col gap-4">
                 {#each top as order, i (i)}
                     <Card
                         class="w-full border-t-4 relative"
-                        style="border-top-color: #CD42D3"
+                        style="border-top-color: #007a22"
                     >
                         <!-- segnalino posizione -->
                         <div
@@ -131,7 +107,7 @@
                 {#each rest as order, i (i)}
                     <Card
                         class="w-60 h-max border-t-4 relative"
-                        style="border-top-color: #CD42D388;"
+                        style="border-top-color: #007a2288;"
                     >
                         <!-- segnalino posizione -->
                         <div
