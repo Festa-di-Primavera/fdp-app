@@ -16,7 +16,7 @@
 
         Papa.parse(file, {
             complete: async (result) => {
-                let rowIndex = 1;
+                let rowIndex = 96;
                 for (const row of result.data as string[][]) {
                     // TODO: remove notes
                     if (row.length < 7) continue; // Skip invalid rows
@@ -53,6 +53,7 @@
                         };
                         rowIndex++;
 
+                        console.log("Saving order to database:", order);
                         const response = await fetch("/api/order", {
                             method: "POST",
                             body: JSON.stringify(order),
@@ -60,6 +61,7 @@
                                 "Content-Type": "application/json",
                             },
                         });
+                        console.log("Database response:", await response.clone().json());
 
                         if (response.ok) {
                             console.log("Order saved:", order);

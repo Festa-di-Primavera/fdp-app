@@ -37,6 +37,11 @@ export async function POST({ request }) {
         <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #2d3748; background-color: #ffffff;">
             <h2 style="color: #3182ce; margin-bottom: 28px; font-size: 24px; font-weight: 600;">Conferma Prenotazione - Festa di Don Bosco</h2>
             <p style="font-size: 16px; line-height: 1.6;">Ciao ${capName} ${capSurname},</p>
+            
+            <div style="font-size: 16px; line-height: 1.6; margin-bottom: 20px; padding: 16px; background-color: #fff5f5; border-radius: 8px; color: #c53030;">
+                <strong>Nota:</strong> Se hai già ricevuto un'email precedente, puoi eliminarla. Ci scusiamo per il disagio. Questa è l'email corretta con i tuoi dati.
+            </div>
+
             <p style="font-size: 16px; line-height: 1.6;">ti confermiamo la tua prenotazione per la serata condivisa della <b>Festa di Don Bosco.</b></p>
             
             <div style="background-color: #f7fafc; padding: 24px; border-radius: 16px; margin: 28px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">

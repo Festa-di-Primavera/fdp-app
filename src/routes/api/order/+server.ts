@@ -1,5 +1,6 @@
 import { getClientDB } from "$lib/firebase/client";
 import { hasPermission } from "$lib/utils/permissions";
+import type { Order } from "$models/order.js";
 import { UserPermissions } from "$models/permissions";
 import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { v4 } from "uuid";
@@ -29,9 +30,24 @@ export async function POST({ request, locals }) {
         );
     }
 
-    const order = await request.json();
+    const order = await request.json() as Order;
 
-    await setDoc(doc(getClientDB(), "orders", v4()), order);
+    await setDoc(doc(getClientDB(), "orders", v4()), order)
+        .then(() => {
+            console.log("Document successfully written for ", order.name);
+        })
+        .catch((error) => {
+            console.error("Error adding document: ", error);
+            return new Response(
+                JSON.stringify({ message: "Errore nell'invio dell'ordine" }),
+                {
+                    status: 500,
+                    headers: {
+                        "Content-Type": "text/plain",
+                    },
+                }
+            );
+        });
 
     return new Response(
         JSON.stringify({
@@ -54,8 +70,10 @@ export async function PATCH({ request, locals }) {
         );
     }
 
-    if (!hasPermission(locals.user.permissions, UserPermissions.CUCINA) && 
-        !hasPermission(locals.user.permissions, UserPermissions.CASSA)) {
+    if (
+        !hasPermission(locals.user.permissions, UserPermissions.CUCINA) &&
+        !hasPermission(locals.user.permissions, UserPermissions.CASSA)
+    ) {
         return new Response(
             JSON.stringify({ message: "Non hai i permessi necessari" }),
             { status: 403 }
@@ -63,15 +81,19 @@ export async function PATCH({ request, locals }) {
     }
 
     const { orderId, done, items, timestamp } = await request.json();
-    
+
     try {
         const orderRef = doc(getClientDB(), "orders", orderId);
-        const updateData: { done?: boolean; items?: any[]; timestamp?: number } = {};
+        const updateData: {
+            done?: boolean;
+            items?: any[];
+            timestamp?: number;
+        } = {};
 
-        if (typeof done === 'boolean') {
+        if (typeof done === "boolean") {
             updateData.done = done;
         }
-        
+
         if (items) {
             updateData.items = items;
         }
@@ -89,14 +111,15 @@ export async function PATCH({ request, locals }) {
 
         await updateDoc(orderRef, updateData);
 
-        return new Response(
-            JSON.stringify({ message: "Ordine aggiornato!" }),
-            { status: 200 }
-        );
+        return new Response(JSON.stringify({ message: "Ordine aggiornato!" }), {
+            status: 200,
+        });
     } catch (error) {
-        console.error('Error updating order:', error);
+        console.error("Error updating order:", error);
         return new Response(
-            JSON.stringify({ message: "Errore nell'aggiornamento dell'ordine" }),
+            JSON.stringify({
+                message: "Errore nell'aggiornamento dell'ordine",
+            }),
             { status: 500 }
         );
     }
