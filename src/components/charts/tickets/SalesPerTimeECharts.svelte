@@ -1,13 +1,13 @@
 <script lang="ts">
     import { init } from "$lib/charts/init";
-    import { type ChartData, CheckInTimeSlot } from "$lib/charts/utils";
+    import { type ChartData, SalesTimeSlot } from "$lib/charts/utils";
     import { theme } from "$store/store";
     import { Card, Select } from "flowbite-svelte";
     import { onMount } from "svelte";
     import { type EChartsOptions } from "svelte-echarts";
-    import ChartComponent from "./ChartComponent.svelte";
+    import ChartComponent from "../ChartComponent.svelte";
 
-    const MAX_VISIBLE_BARS = 16;
+    const MAX_VISIBLE_BARS = 10;
 
     interface Props {
         ticketsData: ChartData;
@@ -16,24 +16,28 @@
 
     let { ticketsData, timeWindow = $bindable() }: Props = $props();
 
-    let selected: CheckInTimeSlot = $state(CheckInTimeSlot.HOUR);
+    let selected: SalesTimeSlot = $state(SalesTimeSlot.DAY);
     const timeOptions = [
-        { value: CheckInTimeSlot.FIFTEEN_MINUTES, name: "15 min " },
-        { value: CheckInTimeSlot.HALF_HOUR, name: "30 min" },
-        { value: CheckInTimeSlot.HOUR, name: "1 ora" },
-        { value: CheckInTimeSlot.TWO_HOURS, name: "2 ore" },
+        { value: SalesTimeSlot.TWELVE_HOURS, name: "12h" },
+        { value: SalesTimeSlot.DAY, name: "1 giorno" },
+        { value: SalesTimeSlot.TWO_DAYS, name: "2 giorni" },
+        { value: SalesTimeSlot.WEEK, name: "1 settimana" },
+        { value: SalesTimeSlot.TWO_WEEKS, name: "2 settimane" },
     ];
 
     const numberOfBars = $derived(ticketsData.labels.length);
     const numberOfSales = $derived(
         ticketsData.datasets.reduce((acc, curr) => acc + curr, 0)
     );
-
     $effect(() => {
         timeWindow = selected;
     });
     const options = $derived({
+        parallelAxis: {
+            show: false,
+        },
         grid: {
+            show: false,
             containLabel: true,
             left: 10,
             right: 25,
@@ -42,19 +46,20 @@
         xAxis: {
             data: ticketsData.labels,
             axisLabel: {
-                formatter: (value: string) => {
-                    // replace , with \n
-                    return value.replace(/,/g, "\n");
-                },
                 color: $theme == "dark" ? "white" : "rgb(55 65 81)",
             },
             axisLine: {
+                show: true,
                 lineStyle: {
                     color: $theme == "dark" ? "white" : "rgb(55 65 81)",
                 },
             },
         },
         yAxis: {
+            splitLine: {
+                show: true,
+                interval: 3,
+            },
             show: true,
             offset: 5,
             axisLine: {
@@ -87,7 +92,7 @@
                 labelLine: {
                     show: true,
                 },
-                name: "Biglietti Validati",
+                name: "Biglietti Venduti",
                 color: "#008b27",
             },
         ],
@@ -151,7 +156,7 @@
                 <h5
                     class="mb-2 inline-flex items-center font-normal leading-none text-gray-500 dark:text-gray-400"
                 >
-                    Check-in
+                    Vendite
                 </h5>
                 <p
                     class="text-2xl font-bold leading-none text-gray-900 dark:text-white"

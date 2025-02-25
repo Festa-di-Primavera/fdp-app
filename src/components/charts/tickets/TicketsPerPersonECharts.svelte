@@ -5,15 +5,31 @@
     import { Card } from "flowbite-svelte";
     import { onMount } from "svelte";
     import { type EChartsOptions } from "svelte-echarts";
-    import ChartComponent from "./ChartComponent.svelte";
+    import ChartComponent from "../ChartComponent.svelte";
 
     interface Props {
-        sellHoursStats: ChartData;
+        sellersStats: ChartData;
     }
+    let { sellersStats }: Props = $props();
 
-    let { sellHoursStats }: Props = $props();
+    const MAX_VISIBLE_BARS = 4;
 
-    const options = $derived({
+    const numberOfBars = $derived(sellersStats.labels.length);
+
+    let displayChart = $state(false);
+
+    onMount(() => {
+        $theme = localStorage.getItem("color-theme") as "light" | "dark";
+        setTimeout(() => {
+            displayChart = true;
+        }, 300);
+    });
+
+    theme.subscribe((value) => {
+        $theme = value;
+    });
+
+    const options: EChartsOptions = $derived({
         grid: {
             containLabel: true,
             left: 10,
@@ -21,8 +37,10 @@
         },
         backgroundColor: $theme == "dark" ? "rgb(31 41 55)" : "white",
         xAxis: {
-            data: sellHoursStats.labels,
+            data: sellersStats.labels,
             axisLabel: {
+                interval: 0,
+                overflow: "truncate",
                 color: $theme == "dark" ? "white" : "rgb(55 65 81)",
             },
             axisLine: {
@@ -36,6 +54,7 @@
             offset: 5,
             splitLine: {
                 show: true,
+                interval: 3,
             },
             axisLine: {
                 show: true,
@@ -51,7 +70,7 @@
             },
             minInterval: 5,
             min: 0,
-            max: Math.ceil((Math.max(...sellHoursStats.datasets) + 1) / 5) * 5,
+            max: Math.ceil((Math.max(...sellersStats.datasets) + 1) / 5) * 5,
         },
         tooltip: {
             trigger: "item",
@@ -63,8 +82,8 @@
         series: [
             {
                 type: "bar",
-                barWidth: "80%",
-                data: sellHoursStats.datasets,
+                barWidth: "60%",
+                data: sellersStats.datasets,
                 labelLine: {
                     show: true,
                 },
@@ -78,7 +97,10 @@
                 type: "inside",
                 xAxisIndex: 0,
                 start: 0,
-                end: 100,
+                end:
+                    numberOfBars > MAX_VISIBLE_BARS
+                        ? 100 / (numberOfBars / MAX_VISIBLE_BARS)
+                        : 100,
                 zoomOnMouseWheel: true,
                 moveOnMouseMove: true,
                 moveOnMouseWheel: false,
@@ -109,15 +131,6 @@
             },
         },
     } as EChartsOptions);
-
-    let displayChart = $state(false);
-
-    onMount(() => {
-        $theme = localStorage.getItem("color-theme") as "light" | "dark";
-        setTimeout(() => {
-            displayChart = true;
-        }, 300);
-    });
 </script>
 
 <Card class="h-96 w-full">
@@ -127,7 +140,7 @@
                 <h5
                     class="me-1 text-xl font-bold leading-none text-gray-900 dark:text-white"
                 >
-                    Vendite per Fascia Oraria
+                    Biglietti venduti a persona
                 </h5>
             </div>
         </div>

@@ -1,3 +1,4 @@
+import type { ItemType, Order } from "$models/order";
 import type { Ticket } from "$models/ticket";
 
 export interface ChartData {
@@ -243,6 +244,29 @@ export function computeCheckInPerTime(
         } else {
             datasets.push(0);
         }
+    }
+
+    return { labels, datasets };
+}
+
+export function computeOrdersStats(orders: Order[]): ChartData {
+    const itemsStats: Map<ItemType, number> = new Map();
+
+    for (const order of orders) {
+        for (const item of order.items) {
+            itemsStats.set(
+                item.type,
+                (itemsStats.get(item.type) || 0) + item.quantity
+            );
+        }
+    }
+
+    const labels: string[] = [];
+    const datasets: number[] = [];
+
+    for (const [type, quantity] of itemsStats) {
+        labels.push(type);
+        datasets.push(quantity);
     }
 
     return { labels, datasets };

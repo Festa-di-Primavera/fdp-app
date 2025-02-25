@@ -14,6 +14,7 @@
     import {
         CheckInTimeSlot,
         computeCheckInPerTime,
+        computeOrdersStats,
         computeSalesPerHour,
         computeSalesPerTime,
         computeSellersStats,
@@ -24,12 +25,14 @@
 
     import { goto } from "$app/navigation";
     import ExportToCsv from "$components/ExportToCSV.svelte";
-    import CheckInPerTimeECharts from "$components/charts/CheckInPerTimeECharts.svelte";
-    import SalesPerTimeECharts from "$components/charts/SalesPerTimeECharts.svelte";
-    import TicketsECharts from "$components/charts/TicketsECharts.svelte";
-    import TicketsPerHourECharts from "$components/charts/TicketsPerHourECharts.svelte";
-    import TicketsPerPersonECharts from "$components/charts/TicketsPerPersonECharts.svelte";
+    import CheckInPerTimeECharts from "$components/charts/tickets/CheckInPerTimeECharts.svelte";
+    import SalesPerTimeECharts from "$components/charts/tickets/SalesPerTimeECharts.svelte";
+    import TicketsECharts from "$components/charts/tickets/TicketsECharts.svelte";
+    import TicketsPerHourECharts from "$components/charts/tickets/TicketsPerHourECharts.svelte";
+    import TicketsPerPersonECharts from "$components/charts/tickets/TicketsPerPersonECharts.svelte";
+    import OrdersECharts from "$components/charts/orders/OrdersECharts.svelte";
     import type { User } from "$lib/auth/user";
+    import type { Order } from "$models/order";
     import {
         collection,
         onSnapshot,
@@ -45,6 +48,7 @@
     if (data.user) $user = data.user;
 
     let tickets: Ticket[] = $state([]);
+    let orders: Order[] = $state([]);
     let unsubscribe: Unsubscribe = () => {};
 
     // cards and pie chart data
@@ -81,6 +85,8 @@
         computeCheckInPerTime(tickets, timeWindowCheckInPerTime)
     );
 
+    const ordersStats = $derived(computeOrdersStats(orders));
+
     let open: boolean = $state(true);
     let value: string = $state("");
     let validate = $derived(value !== "Festa di Primavera");
@@ -113,6 +119,19 @@
         });
     }
 
+    // get orders from firestore
+    function getOrders() {
+        const q = query(collection(getClientDB(), "orders"));
+        unsubscribe = onSnapshot(q, (querySnapshot) => {
+            orders = querySnapshot.docs.map((orderDoc) => {
+                return {
+                    id: orderDoc.id,
+                    ...orderDoc.data(),
+                } as Order;
+            });
+        });
+    }
+
     onDestroy(() => {
         unsubscribe();
     });
@@ -137,75 +156,73 @@
                     </p>
                 </div>
 
-                <div
-                    class="m-auto grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
-                >
+                <div class="flex flex-col gap-4">
                     <div
-                        class="grid h-full w-full max-w-sm grid-flow-row-dense grid-cols-2 gap-2"
+                        class="m-auto grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
                     >
-                        <Card
-                            class="col-span-2 flex h-full w-full max-w-md flex-col items-center justify-center gap-5 pt-6"
+                        <div
+                            class="grid h-full w-full max-w-sm grid-flow-row-dense grid-cols-2 gap-2"
                         >
-                            <h1
-                                class="text-center text-5xl font-bold text-primary-600"
+                            <Card
+                                class="col-span-2 flex h-full w-full max-w-md flex-col items-center justify-center gap-5 pt-6"
                             >
-                                {checkedTicketsCount !== undefined
-                                    ? checkedTicketsCount
-                                    : "--"}
-                            </h1>
-                            <p class="text-center dark:text-white">
-                                Biglietti validati
-                            </p>
-                        </Card>
-
-                        <Card
-                            class="flex aspect-square h-full w-full flex-col items-center justify-center gap-5 pt-6"
-                        >
-                            <h1
-                                class="text-center text-5xl font-bold text-primary-600"
+                                <h1
+                                    class="text-center text-5xl font-bold text-primary-600"
+                                >
+                                    {checkedTicketsCount !== undefined
+                                        ? checkedTicketsCount
+                                        : "--"}
+                                </h1>
+                                <p class="text-center dark:text-white">
+                                    Biglietti validati
+                                </p>
+                            </Card>
+                            <Card
+                                class="flex aspect-square h-full w-full flex-col items-center justify-center gap-5 pt-6"
                             >
-                                {notCheckedTicketsCount !== undefined
-                                    ? notCheckedTicketsCount
-                                    : "--"}
-                            </h1>
-                            <p class="text-center dark:text-white">
-                                Biglietti venduti non validati
-                            </p>
-                        </Card>
-
-                        <Card
-                            class="flex aspect-square h-full w-full flex-col items-center justify-center gap-5 pt-6"
-                        >
-                            <h1
-                                class="text-center text-5xl font-bold text-primary-600"
+                                <h1
+                                    class="text-center text-5xl font-bold text-primary-600"
+                                >
+                                    {notCheckedTicketsCount !== undefined
+                                        ? notCheckedTicketsCount
+                                        : "--"}
+                                </h1>
+                                <p class="text-center dark:text-white">
+                                    Biglietti venduti non validati
+                                </p>
+                            </Card>
+                            <Card
+                                class="flex aspect-square h-full w-full flex-col items-center justify-center gap-5 pt-6"
                             >
-                                {notSoldTicketsCount !== undefined
-                                    ? notSoldTicketsCount
-                                    : "--"}
-                            </h1>
-                            <p class="text-center dark:text-white">
-                                Biglietti non venduti
-                            </p>
-                        </Card>
+                                <h1
+                                    class="text-center text-5xl font-bold text-primary-600"
+                                >
+                                    {notSoldTicketsCount !== undefined
+                                        ? notSoldTicketsCount
+                                        : "--"}
+                                </h1>
+                                <p class="text-center dark:text-white">
+                                    Biglietti non venduti
+                                </p>
+                            </Card>
+                        </div>
+                        <TicketsECharts
+                            {checkedTicketsCount}
+                            {notCheckedTicketsCount}
+                            {notSoldTicketsCount}
+                        />
+                        <TicketsPerPersonECharts {sellersStats} />
+                        <TicketsPerHourECharts {sellHoursStats} />
+                        <SalesPerTimeECharts
+                            ticketsData={salesPerTime}
+                            bind:timeWindow={timeWindowSalesPerTime}
+                        />
+                        <CheckInPerTimeECharts
+                            ticketsData={checkInPerTime}
+                            bind:timeWindow={timeWindowCheckInPerTime}
+                        />
+                        <OrdersECharts {ordersStats} />
                     </div>
-
-                    <TicketsECharts
-                        {checkedTicketsCount}
-                        {notCheckedTicketsCount}
-                        {notSoldTicketsCount}
-                    />
-                    <TicketsPerPersonECharts {sellersStats} />
-                    <TicketsPerHourECharts {sellHoursStats} />
-
-                    <SalesPerTimeECharts
-                        ticketsData={salesPerTime}
-                        bind:timeWindow={timeWindowSalesPerTime}
-                    />
-
-                    <CheckInPerTimeECharts
-                        ticketsData={checkInPerTime}
-                        bind:timeWindow={timeWindowCheckInPerTime}
-                    />
                 </div>
                 <ExportToCsv bind:tickets />
             {/if}
@@ -248,6 +265,7 @@
             on:click={() => {
                 if (value === "Festa di Primavera") {
                     getTickets();
+                    getOrders();
                     open = false;
                 }
             }}>Conferma</Button

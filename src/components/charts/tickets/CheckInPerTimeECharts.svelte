@@ -1,35 +1,38 @@
 <script lang="ts">
     import { init } from "$lib/charts/init";
-    import type { ChartData } from "$lib/charts/utils";
+    import { type ChartData, CheckInTimeSlot } from "$lib/charts/utils";
     import { theme } from "$store/store";
-    import { Card } from "flowbite-svelte";
+    import { Card, Select } from "flowbite-svelte";
     import { onMount } from "svelte";
     import { type EChartsOptions } from "svelte-echarts";
-    import ChartComponent from "./ChartComponent.svelte";
+    import ChartComponent from "../ChartComponent.svelte";
+
+    const MAX_VISIBLE_BARS = 16;
 
     interface Props {
-        sellersStats: ChartData;
+        ticketsData: ChartData;
+        timeWindow: number;
     }
-    let { sellersStats }: Props = $props();
 
-    const MAX_VISIBLE_BARS = 4;
+    let { ticketsData, timeWindow = $bindable() }: Props = $props();
 
-    const numberOfBars = $derived(sellersStats.labels.length);
+    let selected: CheckInTimeSlot = $state(CheckInTimeSlot.HOUR);
+    const timeOptions = [
+        { value: CheckInTimeSlot.FIFTEEN_MINUTES, name: "15 min " },
+        { value: CheckInTimeSlot.HALF_HOUR, name: "30 min" },
+        { value: CheckInTimeSlot.HOUR, name: "1 ora" },
+        { value: CheckInTimeSlot.TWO_HOURS, name: "2 ore" },
+    ];
 
-    let displayChart = $state(false);
+    const numberOfBars = $derived(ticketsData.labels.length);
+    const numberOfSales = $derived(
+        ticketsData.datasets.reduce((acc, curr) => acc + curr, 0)
+    );
 
-    onMount(() => {
-        $theme = localStorage.getItem("color-theme") as "light" | "dark";
-        setTimeout(() => {
-            displayChart = true;
-        }, 300);
+    $effect(() => {
+        timeWindow = selected;
     });
-
-    theme.subscribe((value) => {
-        $theme = value;
-    });
-
-    const options: EChartsOptions = $derived({
+    const options = $derived({
         grid: {
             containLabel: true,
             left: 10,
@@ -37,10 +40,12 @@
         },
         backgroundColor: $theme == "dark" ? "rgb(31 41 55)" : "white",
         xAxis: {
-            data: sellersStats.labels,
+            data: ticketsData.labels,
             axisLabel: {
-                interval: 0,
-                overflow: "truncate",
+                formatter: (value: string) => {
+                    // replace , with \n
+                    return value.replace(/,/g, "\n");
+                },
                 color: $theme == "dark" ? "white" : "rgb(55 65 81)",
             },
             axisLine: {
@@ -52,10 +57,6 @@
         yAxis: {
             show: true,
             offset: 5,
-            splitLine: {
-                show: true,
-                interval: 3,
-            },
             axisLine: {
                 show: true,
                 symbol: ["none", "arrow"],
@@ -70,7 +71,7 @@
             },
             minInterval: 5,
             min: 0,
-            max: Math.ceil((Math.max(...sellersStats.datasets) + 1) / 5) * 5,
+            max: Math.ceil((Math.max(...ticketsData.datasets) + 1) / 5) * 5,
         },
         tooltip: {
             trigger: "item",
@@ -82,12 +83,11 @@
         series: [
             {
                 type: "bar",
-                barWidth: "60%",
-                data: sellersStats.datasets,
+                data: ticketsData.datasets,
                 labelLine: {
                     show: true,
                 },
-                name: "Biglietti Venduti",
+                name: "Biglietti Validati",
                 color: "#008b27",
             },
         ],
@@ -115,6 +115,7 @@
                 saveAsImage: {
                     show: true,
                     type: "png",
+
                     name: "graph",
                     iconStyle: {
                         borderColor:
@@ -131,26 +132,44 @@
             },
         },
     } as EChartsOptions);
+
+    let displayChart = $state(false);
+
+    onMount(() => {
+        $theme = localStorage.getItem("color-theme") as "light" | "dark";
+        // wait 100ms before displaying the chart
+        setTimeout(() => {
+            displayChart = true;
+        }, 300);
+    });
 </script>
 
 <Card class="h-96 w-full">
-    <div class="flex w-full items-start justify-between">
-        <div class="flex-col items-center">
-            <div class="mb-1 flex items-center">
+    <div class="mb-3 flex justify-between">
+        <div class="grid grid-cols-2 gap-4">
+            <div>
                 <h5
-                    class="me-1 text-xl font-bold leading-none text-gray-900 dark:text-white"
+                    class="mb-2 inline-flex items-center font-normal leading-none text-gray-500 dark:text-gray-400"
                 >
-                    Biglietti venduti a persona
+                    Check-in
                 </h5>
+                <p
+                    class="text-2xl font-bold leading-none text-gray-900 dark:text-white"
+                >
+                    {numberOfSales}
+                </p>
             </div>
         </div>
-    </div>
-
-    {#if options !== null}
-        <div class="mt-5 h-full w-full">
-            {#if displayChart}
-                <ChartComponent {options} {init} />
-            {/if}
+        <div>
+            <Select
+                class="mt-2"
+                items={timeOptions}
+                bind:value={selected}
+                placeholder="Scegli un'opzione"
+            />
         </div>
+    </div>
+    {#if displayChart}
+        <ChartComponent {options} {init} />
     {/if}
 </Card>

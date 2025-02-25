@@ -1,21 +1,16 @@
 <script lang="ts">
     import { init } from "$lib/charts/init";
+    import type { ChartData } from "$lib/charts/utils";
     import { theme } from "$store/store";
     import { Card } from "flowbite-svelte";
     import { onMount } from "svelte";
     import { type EChartsOptions } from "svelte-echarts";
-    import ChartComponent from "./ChartComponent.svelte";
+    import ChartComponent from "../ChartComponent.svelte";
 
     interface Props {
-        checkedTicketsCount: number;
-        notCheckedTicketsCount: number;
-        notSoldTicketsCount: number;
+        ordersStats: ChartData;
     }
-    let {
-        checkedTicketsCount,
-        notCheckedTicketsCount,
-        notSoldTicketsCount,
-    }: Props = $props();
+    let { ordersStats }: Props = $props();
 
     let displayChart = $state(false);
 
@@ -30,7 +25,7 @@
         legend: {
             orient: "horizontal",
             left: 10,
-            data: ["Validati", "Non validati", "Non venduti"],
+            data: ordersStats.labels,
             formatter: (name: string) => {
                 return name;
             },
@@ -45,7 +40,7 @@
         },
         series: [
             {
-                color: ["#4CAF50", "#FFC107", "#F44336"],
+                color: ["#FF6B6B", "#4ECDC4", "#45B7D1"],
                 type: "pie",
                 radius: "60%",
                 avoidLabelOverlap: false,
@@ -63,32 +58,14 @@
                 labelLayout: {
                     moveOverlap: "shiftY",
                 },
-                data: [
-                    {
-                        value: checkedTicketsCount,
-                        name: "Validati",
-                        label: {
-                            show: checkedTicketsCount > 0,
-                            color: $theme == "dark" ? "white" : "rgb(55 65 81)",
-                        },
+                data: ordersStats.labels.map((label, index) => ({
+                    value: ordersStats.datasets[index],
+                    name: label,
+                    label: {
+                        show: ordersStats.datasets[index] > 0,
+                        color: $theme == "dark" ? "white" : "rgb(55 65 81)",
                     },
-                    {
-                        value: notCheckedTicketsCount,
-                        name: "Non validati",
-                        label: {
-                            show: notCheckedTicketsCount > 0,
-                            color: $theme == "dark" ? "white" : "rgb(55 65 81)",
-                        },
-                    },
-                    {
-                        value: notSoldTicketsCount,
-                        name: "Non venduti",
-                        label: {
-                            show: notSoldTicketsCount > 0,
-                            color: $theme == "dark" ? "white" : "rgb(55 65 81)",
-                        },
-                    },
-                ],
+                })),
             },
         ],
         toolbox: {
@@ -118,14 +95,14 @@
     } as EChartsOptions);
 </script>
 
-<Card class=" h-96 w-full" padding="md">
+<Card class="h-96 w-full" padding="md">
     <div class="flex w-full items-start justify-between">
         <div class="flex-col items-center">
             <div class="mb-1 flex items-center">
                 <h5
                     class="me-1 text-xl font-bold leading-none text-gray-900 dark:text-white"
                 >
-                    Biglietti
+                    Ordini per tipo
                 </h5>
             </div>
         </div>

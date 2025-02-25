@@ -1,67 +1,42 @@
 <script lang="ts">
     import { init } from "$lib/charts/init";
-    import { type ChartData, SalesTimeSlot } from "$lib/charts/utils";
+    import type { ChartData } from "$lib/charts/utils";
     import { theme } from "$store/store";
-    import { Card, Select } from "flowbite-svelte";
+    import { Card } from "flowbite-svelte";
     import { onMount } from "svelte";
     import { type EChartsOptions } from "svelte-echarts";
-    import ChartComponent from "./ChartComponent.svelte";
-
-    const MAX_VISIBLE_BARS = 10;
+    import ChartComponent from "../ChartComponent.svelte";
 
     interface Props {
-        ticketsData: ChartData;
-        timeWindow: number;
+        sellHoursStats: ChartData;
     }
 
-    let { ticketsData, timeWindow = $bindable() }: Props = $props();
+    let { sellHoursStats }: Props = $props();
 
-    let selected: SalesTimeSlot = $state(SalesTimeSlot.DAY);
-    const timeOptions = [
-        { value: SalesTimeSlot.TWELVE_HOURS, name: "12h" },
-        { value: SalesTimeSlot.DAY, name: "1 giorno" },
-        { value: SalesTimeSlot.TWO_DAYS, name: "2 giorni" },
-        { value: SalesTimeSlot.WEEK, name: "1 settimana" },
-        { value: SalesTimeSlot.TWO_WEEKS, name: "2 settimane" },
-    ];
-
-    const numberOfBars = $derived(ticketsData.labels.length);
-    const numberOfSales = $derived(
-        ticketsData.datasets.reduce((acc, curr) => acc + curr, 0)
-    );
-    $effect(() => {
-        timeWindow = selected;
-    });
     const options = $derived({
-        parallelAxis: {
-            show: false,
-        },
         grid: {
-            show: false,
             containLabel: true,
             left: 10,
             right: 25,
         },
         backgroundColor: $theme == "dark" ? "rgb(31 41 55)" : "white",
         xAxis: {
-            data: ticketsData.labels,
+            data: sellHoursStats.labels,
             axisLabel: {
                 color: $theme == "dark" ? "white" : "rgb(55 65 81)",
             },
             axisLine: {
-                show: true,
                 lineStyle: {
                     color: $theme == "dark" ? "white" : "rgb(55 65 81)",
                 },
             },
         },
         yAxis: {
-            splitLine: {
-                show: true,
-                interval: 3,
-            },
             show: true,
             offset: 5,
+            splitLine: {
+                show: true,
+            },
             axisLine: {
                 show: true,
                 symbol: ["none", "arrow"],
@@ -76,7 +51,7 @@
             },
             minInterval: 5,
             min: 0,
-            max: Math.ceil((Math.max(...ticketsData.datasets) + 1) / 5) * 5,
+            max: Math.ceil((Math.max(...sellHoursStats.datasets) + 1) / 5) * 5,
         },
         tooltip: {
             trigger: "item",
@@ -88,7 +63,8 @@
         series: [
             {
                 type: "bar",
-                data: ticketsData.datasets,
+                barWidth: "80%",
+                data: sellHoursStats.datasets,
                 labelLine: {
                     show: true,
                 },
@@ -102,10 +78,7 @@
                 type: "inside",
                 xAxisIndex: 0,
                 start: 0,
-                end:
-                    numberOfBars > MAX_VISIBLE_BARS
-                        ? 100 / (numberOfBars / MAX_VISIBLE_BARS)
-                        : 100,
+                end: 100,
                 zoomOnMouseWheel: true,
                 moveOnMouseMove: true,
                 moveOnMouseWheel: false,
@@ -120,7 +93,6 @@
                 saveAsImage: {
                     show: true,
                     type: "png",
-
                     name: "graph",
                     iconStyle: {
                         borderColor:
@@ -142,7 +114,6 @@
 
     onMount(() => {
         $theme = localStorage.getItem("color-theme") as "light" | "dark";
-        // wait 100ms before displaying the chart
         setTimeout(() => {
             displayChart = true;
         }, 300);
@@ -150,31 +121,23 @@
 </script>
 
 <Card class="h-96 w-full">
-    <div class="mb-3 flex justify-between">
-        <div class="grid grid-cols-2 gap-4">
-            <div>
+    <div class="flex w-full items-start justify-between">
+        <div class="flex-col items-center">
+            <div class="mb-1 flex items-center">
                 <h5
-                    class="mb-2 inline-flex items-center font-normal leading-none text-gray-500 dark:text-gray-400"
+                    class="me-1 text-xl font-bold leading-none text-gray-900 dark:text-white"
                 >
-                    Vendite
+                    Vendite per Fascia Oraria
                 </h5>
-                <p
-                    class="text-2xl font-bold leading-none text-gray-900 dark:text-white"
-                >
-                    {numberOfSales}
-                </p>
             </div>
         </div>
-        <div>
-            <Select
-                class="mt-2"
-                items={timeOptions}
-                bind:value={selected}
-                placeholder="Scegli un'opzione"
-            />
-        </div>
     </div>
-    {#if displayChart}
-        <ChartComponent {options} {init} />
+
+    {#if options !== null}
+        <div class="mt-5 h-full w-full">
+            {#if displayChart}
+                <ChartComponent {options} {init} />
+            {/if}
+        </div>
     {/if}
 </Card>
