@@ -1,5 +1,5 @@
 import { RESEND_API_KEY } from "$env/static/private";
-import { Resend } from "resend";
+import { Resend, type Attachment } from "resend";
 
 const resend = new Resend(RESEND_API_KEY);
 
@@ -7,12 +7,14 @@ export async function sendEmail(
     email: string,
     subject: string,
     htmlContent: string,
-    attachments?: { filename: string; content: string | Buffer }[],
+    attachments?: Attachment[],
     senderName?: string
 ): Promise<{ error: boolean; message: string; data?: any }> {
     console.log(`[EMAIL] Attempting to send email to ${email}`);
     console.log(`[EMAIL] Subject: ${subject}`);
     console.log(`[EMAIL] Attachments: ${attachments?.length ?? 0}`);
+
+    console.log(attachments)
 
     try {
         const { data, error } = await resend.emails.send({
@@ -20,7 +22,7 @@ export async function sendEmail(
             to: email,
             subject: subject,
             html: htmlContent,
-            attachments,
+            attachments: attachments
         });
 
         if (error) {

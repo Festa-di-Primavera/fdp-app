@@ -16,7 +16,7 @@
 
         Papa.parse(file, {
             complete: async (result) => {
-                let rowIndex = 96;
+                let rowIndex = 176;
                 for (const row of result.data as string[][]) {
                     // TODO: remove notes
                     if (row.length < 7) continue; // Skip invalid rows
