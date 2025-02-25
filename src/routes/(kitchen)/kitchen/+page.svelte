@@ -74,14 +74,12 @@
 
     // Array di colori per le card
     const cardColors = [
-        "rgb(239 68 68)", // red
-        "rgb(34 197 94)", // green
-        "rgb(59 130 246)", // blue
-        "rgb(168 85 247)", // purple
-        "rgb(234 179 8)", // yellow
-        "rgb(249 115 22)", // orange
-        "rgb(236 72 153)", // pink
-        "rgb(20 184 166)", // teal
+        "rgb(255, 105, 180)", // pink
+        "rgb(30, 144, 255)",  // dodger blue
+        "rgb(50, 205, 50)",   // lime green
+        "rgb(255, 140, 0)",   // dark orange
+        "rgb(255, 215, 0)",   // gold
+        "rgb(0, 206, 209)",   // dark turquoise
     ];
 
     // Set per tenere traccia dei colori usati (più efficiente della ricerca in array)
@@ -156,12 +154,22 @@
 </svelte:head>
 
 <div class="p-4 w-full">
-    
-    <div class="flex gap-7 items-center">
-        <h1 class="text-4xl font-bold text-primary-600 mb-6 mr-10">Cucina</h1>
-        <h2 class="text-2xl font-semibold text-primary-600 dark:text-primary-400 mb-4">Preparati: {doneOrders.length}</h2>
-        <h2 class="text-2xl font-semibold text-orange-400 dark:text-orange-300 mb-4">In attesa: {inProgressOrders.length}</h2>
-        <h2 class="text-2xl font-semibold text-red-500 dark:text-red-400 mb-4">Mancanti: {toDoOrders.length}</h2>
+    <div class="flex flex-col sm:flex-row sm:gap-7 sm:items-center">
+        <h1 class="text-4xl font-bold text-primary-600 mb-4 sm:mb-6 sm:mr-10">Cucina</h1>
+        <div class="grid grid-cols-3 gap-2 sm:flex sm:gap-7 mb-6">
+            <div class="flex flex-col items-center">
+                <span class="text-md text-primary-600 dark:text-primary-400">Preparati</span>
+                <span class="text-2xl font-semibold text-primary-600 dark:text-primary-400">{doneOrders.length}</span>
+            </div>
+            <div class="flex flex-col items-center">
+                <span class="text-md text-orange-400 dark:text-orange-300">In attesa</span>
+                <span class="text-2xl font-semibold text-orange-400 dark:text-orange-300">{inProgressOrders.length}</span>
+            </div>
+            <div class="flex flex-col items-center">
+                <span class="text-md text-red-500 dark:text-red-400">Mancanti</span>
+                <span class="text-2xl font-semibold text-red-500 dark:text-red-400">{toDoOrders.length}</span>
+            </div>
+        </div>
     </div>
 
     <div class="flex flex-wrap justify-around gap-y-10 gap-x-4 after:flex-auto">
