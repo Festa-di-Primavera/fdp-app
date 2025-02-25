@@ -122,12 +122,12 @@
             permission: UserPermissions.INFO_BIGLIETTO,
             icon: Info,
         },
-        {
-            label: "Cassa",
-            slug: "/cashier",
-            permission: UserPermissions.CASSA,
-            icon: CoinsIcon,
-        },
+        // {
+        //     label: "Cassa",
+        //     slug: "/cashier",
+        //     permission: UserPermissions.CASSA,
+        //     icon: CoinsIcon,
+        // },
         {
             label: "Cucina",
             slug: "/kitchen",
