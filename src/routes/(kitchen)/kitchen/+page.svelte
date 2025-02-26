@@ -50,7 +50,6 @@
             querySnapshot.docs.forEach((orderDoc) => {
                 const order = {
                     ...orderDoc.data(),
-                    id: orderDoc.id,
                 } as Order;
 
                 if (order.done) {
@@ -119,8 +118,7 @@
         orderId: string | undefined,
         itemIndex: number
     ) {
-        console.log(orderId, itemIndex);
-        const order = inProgressOrders.find((o) => o.id === orderId);
+        const order = inProgressOrders.find((o) => o.ticketId === orderId);
         if (!order) return;
 
         // Toggle the ready status in the local state
@@ -183,7 +181,7 @@
                         class="text-md font-semibold"
                         style="color: {getOrderColor(order)}"
                     >
-                        {order.name}
+                        {order.name} {order.surname[0]}.
                     </h2>
                     <span class="text-lg text-gray-700 dark:text-gray-200">
                         <span class="font-mono">
@@ -231,7 +229,7 @@
                                         ? 'border-primary-400 text-primary-400'
                                         : 'border-gray-500 text-gray-500'}"
                                     onclick={() =>
-                                        toggleItemReady(order.id, itemIndex)}
+                                        toggleItemReady(order.ticketId, itemIndex)}
                                 >
                                     {item.ready ? "✓ Pronto" : "Pronto"}
                                 </button>
@@ -244,8 +242,6 @@
                                     {/each}
                                 </div>
                             {/if}
-                            
-                            <!-- TODO: remove -->
                             {#if item.notes}
                                 <div class="text-sm text-red-500 mt-1">
                                     {item.notes}
@@ -257,13 +253,14 @@
 
                 {#if order.items.every((item) => item.ready === true)}
                     <div class="mt-2 flex justify-end">
-                        <Button size="sm" onclick={() => closeOrder(order.id)}>
+                        <Button size="sm" onclick={() => closeOrder(order.ticketId)}>
                             Chiudi Ordine
                         </Button>
                     </div>
                 {/if}
             </Card>
         {/each}
+        <!-- Spaziatura per mantenere la griglia ordinata -->
         {#each Array(10).fill(null) as _}
             <div class="w-[22rem] h-0"></div>
         {/each}

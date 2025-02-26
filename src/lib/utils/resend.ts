@@ -10,19 +10,18 @@ export async function sendEmail(
     attachments?: Attachment[],
     senderName?: string
 ): Promise<{ error: boolean; message: string; data?: any }> {
-    console.log(`[EMAIL] Attempting to send email to ${email}`);
-    console.log(`[EMAIL] Subject: ${subject}`);
-    console.log(`[EMAIL] Attachments: ${attachments?.length ?? 0}`);
-
-    console.log(attachments)
-
     try {
+        const mappedAttachments = attachments?.map(att => ({
+            ...att,
+            content: att.content instanceof Buffer ? att.content.toString('base64') : att.content
+        }));
+
         const { data, error } = await resend.emails.send({
             from: `${senderName ?? "Festa di Primavera"} <info@festa-cus.it>`,
             to: email,
             subject: subject,
             html: htmlContent,
-            attachments: attachments
+            attachments: mappedAttachments
         });
 
         if (error) {

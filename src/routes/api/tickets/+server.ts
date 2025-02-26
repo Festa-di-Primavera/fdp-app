@@ -63,7 +63,7 @@ export async function GET({ locals }) {
 
     const tickets: Ticket[] = qSnapTickets.docs.map((ticketDoc) => {
         return {
-            ticketID: ticketDoc.id,
+            ticketId: ticketDoc.id,
             name: ticketDoc.data().name,
             surname: ticketDoc.data().surname,
             seller:
@@ -155,7 +155,7 @@ export async function PUT({ request, locals }) {
     const body: {
         attribute: string;
         toChange: "name" | "surname";
-        ticketID: string;
+        ticketId: string;
     } = await request.json();
 
     let attrs;
@@ -172,7 +172,7 @@ export async function PUT({ request, locals }) {
     }
 
     const ticketsCollection = collection(getClientDB(), "tickets");
-    await updateDoc(doc(ticketsCollection, body.ticketID), attrs);
+    await updateDoc(doc(ticketsCollection, body.ticketId), attrs);
 
     return new Response("", {
         status: 200,

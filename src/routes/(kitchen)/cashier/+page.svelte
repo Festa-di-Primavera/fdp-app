@@ -77,7 +77,7 @@
         let ticketResponse = (await res.json()).ticket;
 
         ticket = {
-            ticketID: getXnrfCode(code) || "",
+            ticketId: getXnrfCode(code) || "",
             name: ticketResponse.name,
             surname: ticketResponse.surname,
             seller: res.status !== 206 ? ticketResponse.seller : "Non Trovato",
@@ -192,8 +192,9 @@
     async function submitOrder() {
         try {
             const finalOrder: Order = {
-                ticketId: ticket?.ticketID || "",
-                name: `${ticket?.name} ${ticket?.surname!![0]}.`,
+                ticketId: ticket?.ticketId || "",
+                name: `${ticket?.name}`,
+                surname: ticket?.surname || "",
                 items: orderItems,
                 done: false,
                 timestamp: Date.now(), // aggiungiamo il timestamp
@@ -305,7 +306,7 @@
                             >
                                 <span>N° biglietto:</span>
                                 <span class="font-mono">
-                                    XNRF <b>{ticket.ticketID.slice(4, 9)}</b> /25
+                                    XNRF <b>{ticket.ticketId.slice(4, 9)}</b> /25
                                 </span>
                             </span>
                             <span

@@ -1,5 +1,5 @@
 export type Ticket = {
-    ticketID: string;
+    ticketId: string;
     name: string | null;
     surname: string | null;
     seller: string | null;

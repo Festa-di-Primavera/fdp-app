@@ -40,7 +40,7 @@ export async function GET({ params, locals }) {
         );
     }
 
-    const code = getFdPCode(params.ticketID);
+    const code = getFdPCode(params.ticketId);
     if (code === null) {
         return new Response(JSON.stringify({ message: "Codice non valido" }), {
             status: 404,
@@ -69,7 +69,7 @@ export async function GET({ params, locals }) {
 
     if (ticketData?.seller === null) {
         ticket = {
-            ticketID: ticketDoc.id,
+            ticketId: ticketDoc.id,
             name: ticketData?.name,
             surname: ticketData?.surname,
             seller: null,
@@ -84,7 +84,7 @@ export async function GET({ params, locals }) {
         const sellerName = seller?.alias;
 
         ticket = {
-            ticketID: ticketDoc.id,
+            ticketId: ticketDoc.id,
             name: ticketData.name,
             surname: ticketData.surname,
             seller: sellerName ?? null,
@@ -149,7 +149,7 @@ export async function PUT({ params, locals }) {
         );
     }
 
-    const code = getFdPCode(params.ticketID);
+    const code = getFdPCode(params.ticketId);
 
     if (code === null) {
         return new Response(JSON.stringify({ message: "Codice non valido" }), {
@@ -184,7 +184,7 @@ export async function PUT({ params, locals }) {
 
     if (ticketData?.seller === null) {
         ticket = {
-            ticketID: ticketDoc.id,
+            ticketId: ticketDoc.id,
             name: ticketData?.name,
             surname: ticketData?.surname,
             seller: null,
@@ -199,7 +199,7 @@ export async function PUT({ params, locals }) {
         const sellerName = seller?.alias;
 
         ticket = {
-            ticketID: ticketDoc.id,
+            ticketId: ticketDoc.id,
             name: ticketData.name,
             surname: ticketData.surname,
             seller: sellerName ?? null,
@@ -286,7 +286,7 @@ export async function POST({ params, request, locals }) {
     }
 
     const formData = await request.json();
-    const code = getFdPCode(params.ticketID);
+    const code = getFdPCode(params.ticketId);
 
     if (code === null) {
         const response = new Response(

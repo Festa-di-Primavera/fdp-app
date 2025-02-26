@@ -108,7 +108,7 @@
                 }
 
                 return {
-                    ticketID: ticketDoc.id,
+                    ticketId: ticketDoc.id,
                     name: ticketDoc.data().name,
                     surname: ticketDoc.data().surname,
                     seller: currSeller,
@@ -125,7 +125,6 @@
         unsubscribe = onSnapshot(q, (querySnapshot) => {
             orders = querySnapshot.docs.map((orderDoc) => {
                 return {
-                    id: orderDoc.id,
                     ...orderDoc.data(),
                 } as Order;
             });

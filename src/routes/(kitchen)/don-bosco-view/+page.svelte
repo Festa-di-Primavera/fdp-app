@@ -38,7 +38,7 @@
         unsubscribe = onSnapshot(q, (querySnapshot) => {
             orders = querySnapshot.docs.map((doc) => ({
                 ...doc.data(),
-                id: doc.id,
+                ticketId: doc.id,
             })) as Order[];
         });
     }
@@ -62,7 +62,7 @@
                 body: JSON.stringify({
                     name: order.name.split(" ")[0],
                     surname: order.name.split(" ")[1].replace(".", ""),
-                    email: "isaia.tonini@gmail.com",
+                    email: "mattiavanzo@diocesitn.it",
                     order: order,
                 }),
             });
@@ -106,9 +106,6 @@
                                 {getStringFromEnumValue(ItemType, item.type)}
                                 {#if item.sauce}
                                     - {getStringFromEnumValue(Sauce, item.sauce)}
-                                {/if}
-                                {#if item.notes}
-                                    - Note: {item.notes}
                                 {/if}
                                 {#if item.glutenFree}
                                     - SENZA GLUTINE

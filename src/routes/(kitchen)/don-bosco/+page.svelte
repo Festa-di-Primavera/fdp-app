@@ -18,7 +18,6 @@
             complete: async (result) => {
                 let rowIndex = 176;
                 for (const row of result.data as string[][]) {
-                    // TODO: remove notes
                     if (row.length < 7) continue; // Skip invalid rows
 
                     const [name, surname, email, orderItem, sauce, glutenFree, notes] =
@@ -27,7 +26,9 @@
 
                     try {
                         const order: Order = {
-                            name: `${name.trim()} ${surname.trim().charAt(0)}.`,
+                            name: `${name.trim()}`,
+                            surname: surname.trim(),
+                            email: email.trim(),
                             items: [
                                 {
                                     quantity: 1,
@@ -43,7 +44,6 @@
                                         ) || undefined,
                                     glutenFree:
                                         glutenFree.toLowerCase() === "true",
-                                    // TODO: remove notes
                                     notes: notes.trim() || undefined,
                                 },
                             ],
@@ -53,7 +53,6 @@
                         };
                         rowIndex++;
 
-                        console.log("Saving order to database:", order);
                         const response = await fetch("/api/order", {
                             method: "POST",
                             body: JSON.stringify(order),
@@ -61,7 +60,6 @@
                                 "Content-Type": "application/json",
                             },
                         });
-                        console.log("Database response:", await response.clone().json());
 
                         if (response.ok) {
                             console.log("Order saved:", order);

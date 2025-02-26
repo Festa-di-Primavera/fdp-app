@@ -5,8 +5,6 @@ import { ItemType, Sauce, type Order } from "$models/order";
 
 function getIngredientsList(type: ItemType): string {
     switch(type) {
-        case ItemType.VEGETARIANO:
-            return "Pane, formaggio, peperoni, cipolla, insalata";
         case ItemType.ONTO:
             return "Pane, hamburger, cipolla, peperoni, insalata";
         case ItemType.BASIC:
@@ -20,18 +18,13 @@ export async function POST({ request }) {
     const body = await request.json();
     const { name, surname, email, order } = body;
 
-    console.log(`[DON-BOSCO] Processing order for ${name} ${surname} (${email})`);
-
     const capName = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
     const capSurname = surname.charAt(0).toUpperCase() + surname.slice(1).toLowerCase();
     let trimmedTicketId = order.ticketId.replace("XNRF", "");
     trimmedTicketId = trimmedTicketId.replace("/25", "");
 
     let castedOrder: Order = order;
-    
-    console.log(`[DON-BOSCO] Generating ticket image for ${capName} ${capSurname}`);
     const qrImage = await generateTicketImage(capName, capSurname, castedOrder.ticketId);
-    console.log(`[DON-BOSCO] QR image generated successfully`);
 
     const htmlContent = `
         <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #2d3748; background-color: #ffffff;">

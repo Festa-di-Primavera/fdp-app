@@ -13,7 +13,7 @@
         const rows = [
             ["TicketID", "Name", "Surname", "CheckIn", "SoldAt", "Seller"],
             ...tickets.map((ticket) => [
-                ticket.ticketID,
+                ticket.ticketId,
                 ticket.name,
                 ticket.surname,
                 ticket.checkIn

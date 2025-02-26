@@ -48,7 +48,7 @@
             }, 3500);
 
             ticket = {
-                ticketID: code,
+                ticketId: code,
                 name: "",
                 surname: "",
                 seller: "",
@@ -61,7 +61,7 @@
         let tick = (await res.json()).ticket;
 
         ticket = {
-            ticketID: code,
+            ticketId: code,
             name: tick.name,
             surname: tick.surname,
             seller: res.status !== 206 ? tick.seller : "Non Trovato",
@@ -72,7 +72,7 @@
 
     const reset = () => {
         ticket = {
-            ticketID: "",
+            ticketId: "",
             name: "",
             surname: "",
             seller: "",

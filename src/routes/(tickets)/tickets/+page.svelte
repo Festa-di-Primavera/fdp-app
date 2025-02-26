@@ -47,7 +47,7 @@
                     data.sellers.get(currentTicket.seller) || "Anonimo";
 
                 return {
-                    ticketID: ticketDoc.id,
+                    ticketId: ticketDoc.id,
                     name: currentTicket.name,
                     surname: currentTicket.surname,
                     seller: sellerName,
@@ -77,7 +77,7 @@
     const filters = $state({
         name: "",
         surname: "",
-        ticketID: "",
+        ticketId: "",
         seller: "",
     });
 
@@ -85,7 +85,7 @@
 
     $effect(() => {
         filteredItems = tickets?.filter((item: Ticket) => {
-            // filter by name, surname, ticketID, seller if the value is not empty
+            // filter by name, surname, ticketId, seller if the value is not empty
             return (
                 (item.name
                     ?.toLowerCase()
@@ -95,10 +95,10 @@
                     ?.toLowerCase()
                     .includes(filters.surname.toLowerCase()) ||
                     filters.surname === "") &&
-                (item.ticketID
+                (item.ticketId
                     ?.toLowerCase()
-                    .includes(filters.ticketID.toLowerCase()) ||
-                    filters.ticketID === "") &&
+                    .includes(filters.ticketId.toLowerCase()) ||
+                    filters.ticketId === "") &&
                 (item.seller
                     ?.toLowerCase()
                     .includes(filters.seller.toLowerCase()) ||
@@ -130,7 +130,7 @@
                 body: JSON.stringify({
                     attribute,
                     toChange: currAttr,
-                    ticketID: currSelectedTicket.ticketID,
+                    ticketId: currSelectedTicket.ticketId,
                 }),
             });
             if (response.ok) {
@@ -176,7 +176,7 @@
         <Label>
             Codice Biglietto
             <Input
-                bind:value={filters.ticketID}
+                bind:value={filters.ticketId}
                 placeholder="FDP25-0000"
                 class="mt-1 w-full"
             />
@@ -224,7 +224,7 @@
                         <TableBodyCell
                             tdClass="px-6 py-4 whitespace-nowrap font-medium flex items-center gap-4"
                         >
-                            <span class="mr-4">{item.ticketID}</span>
+                            <span class="mr-4">{item.ticketId}</span>
                         </TableBodyCell>
                         <TableBodyCell>
                             {#if item.name}
@@ -316,7 +316,7 @@
         <b>{currSelectedTicket?.name} {currSelectedTicket?.surname}</b>?</span
     >
     <div class="flex flex-col gap-2">
-        <span class="text-sm">Biglietto: {currSelectedTicket?.ticketID}</span>
+        <span class="text-sm">Biglietto: {currSelectedTicket?.ticketId}</span>
         <span class="text-sm">Nome: {currSelectedTicket?.name}</span>
         <span class="text-sm">Cognome: {currSelectedTicket?.surname}</span>
         <span class="text-sm">Venditore: {currSelectedTicket?.seller}</span>

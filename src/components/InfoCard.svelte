@@ -20,7 +20,7 @@
     <span class="text-black dark:text-white w-full flex justify-between">
         <span>N° biglietto:</span>
         <span
-            >{getFdPCode(ticket?.ticketID) ||
+            >{getFdPCode(ticket?.ticketId) ||
                 getFdPCode(ticketCode) ||
                 ""}</span
         >

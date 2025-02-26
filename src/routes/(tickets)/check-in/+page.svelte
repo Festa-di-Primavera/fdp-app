@@ -67,7 +67,7 @@
 
         if (response.status == 404) {
             ticket = {
-                ticketID: code,
+                ticketId: code,
                 name: "",
                 surname: "",
                 seller: "",
@@ -84,7 +84,7 @@
 
         if (response.status == 402) {
             ticket = {
-                ticketID: code,
+                ticketId: code,
                 name: tick.name,
                 surname: tick.surname,
                 seller: tick.seller,
@@ -99,7 +99,7 @@
 
         if (response.status === 409) {
             ticket = {
-                ticketID: code,
+                ticketId: code,
                 name: tick.name,
                 surname: tick.surname,
                 seller: tick.seller,
@@ -114,7 +114,7 @@
 
         try {
             ticket = {
-                ticketID: code,
+                ticketId: code,
                 name: tick.name,
                 surname: tick.surname,
                 seller: response.status !== 206 ? tick.seller : "Non Trovato",
@@ -161,7 +161,7 @@
 
     const reset = () => {
         ticket = {
-            ticketID: "",
+            ticketId: "",
             name: "",
             surname: "",
             seller: "",

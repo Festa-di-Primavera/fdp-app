@@ -33,7 +33,6 @@
             orders = querySnapshot.docs.map((orderDoc) => {
                 return {
                     ...orderDoc.data(),
-                    id: orderDoc.id,
                 };
             }) as Order[];
         });
@@ -77,8 +76,7 @@
                             class="flex flex-col gap-2 justify-between items-center text-gray-800 dark:text-gray-300"
                         >
                             <h2 class="text-xl">
-                                <!-- {order.name.split(' ')[0]} -->
-                                {order.name}
+                                {order.name} {order.surname[0]}.
                             </h2>
                             <span class="text-2xl">
                                 <span class="font-mono">
@@ -119,7 +117,7 @@
                             class="flex flex-col gap-2 justify-between items-center text-gray-800 dark:text-gray-300"
                         >
                             <h2 class="text-lg">
-                                {order.name}
+                                {order.name} {order.surname[0]}.
                             </h2>
                             <span class="text-lg">
                                 <span class="font-mono"
