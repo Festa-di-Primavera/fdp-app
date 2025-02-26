@@ -12,6 +12,7 @@ import {
     getFirestore,
     query,
     setDoc,
+    Timestamp,
     updateDoc,
     where,
     writeBatch,
@@ -160,7 +161,7 @@ export async function createSession(
 export async function invalidateExpiredSessions(): Promise<void> {
     const q = query(
         sessionCollection,
-        where("expiresAt", "<=", new Date(Date.now()))
+        where("expiresAt", "<=", Timestamp.now())
     );
     const querySnapshot = await getDocs(q);
     const batch = writeBatch(getFirestore());
