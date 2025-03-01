@@ -122,24 +122,24 @@
             permission: UserPermissions.INFO_BIGLIETTO,
             icon: Info,
         },
-        // {
-        //     label: "Cassa",
-        //     slug: "/cashier",
-        //     permission: UserPermissions.CASSA,
-        //     icon: CoinsIcon,
-        // },
+        {
+            label: "Cassa",
+            slug: "/cashier",
+            permission: UserPermissions.CASSA,
+            icon: CoinsIcon,
+        },
         {
             label: "Cucina",
             slug: "/kitchen",
             permission: UserPermissions.CUCINA,
             icon: ChefHat,
         },
-        {
-            label: "Checkpoint Don Bosco",
-            slug: "/checkpoint",
-            permission: UserPermissions.CASSA,
-            icon: ScanQrCode,
-        },
+        // {
+        //     label: "Checkpoint Don Bosco",
+        //     slug: "/checkpoint",
+        //     permission: UserPermissions.CASSA,
+        //     icon: ScanQrCode,
+        // },
     ];
 
     function filterRoutes(routes: Route[]): Route[] {
