@@ -1,12 +1,14 @@
 export enum BaseIngredient {
 	INSALATA = 'Insalata',
+	FORMAGGIO = 'Formaggio',
 	PEPERONI = 'Peperoni',
 	CIPOLLA = 'Cipolla'
 }
 
 export enum ItemType {
+	BASIC = 'BASIC',
 	ONTO = 'ONTO',
-	BASIC = 'BASIC'
+	VEGETARIANO = 'VEGETARIANO',
 }
 
 export enum Sauce {
@@ -31,11 +33,14 @@ export interface Order {
 	surname: string;
 	items: OrderItem[];
 	done: boolean | null;
-	timestamp: number;
+	creationDate: Date;
+	closeDate?: Date;
 	email?: string;
+	firebaseId?: string;
 }
 
 export const DEFAULT_INGREDIENTS: Record<ItemType, BaseIngredient[]> = {
-	[ItemType.BASIC]: [BaseIngredient.INSALATA],
-	[ItemType.ONTO]: [BaseIngredient.INSALATA, BaseIngredient.PEPERONI, BaseIngredient.CIPOLLA],
+	[ItemType.BASIC]: [BaseIngredient.INSALATA, BaseIngredient.FORMAGGIO],
+	[ItemType.ONTO]: [BaseIngredient.INSALATA, BaseIngredient.FORMAGGIO, BaseIngredient.PEPERONI, BaseIngredient.CIPOLLA],
+	[ItemType.VEGETARIANO]: [BaseIngredient.INSALATA, BaseIngredient.FORMAGGIO, BaseIngredient.PEPERONI, BaseIngredient.CIPOLLA],
 };

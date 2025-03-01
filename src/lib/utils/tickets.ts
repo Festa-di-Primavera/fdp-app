@@ -41,7 +41,7 @@ export function getXnrfCode(code: string | undefined): string | null {
     }
 
     if (code.includes("XNRF"))
-        return code;
+        return code.replace("XNRF", "").replace("/25", "").trim();
 
     if (code.includes("FDP25")) {
         code = code.replace("FDP25-", "");
@@ -54,7 +54,7 @@ export function getXnrfCode(code: string | undefined): string | null {
         while (str.length < 5) {
             str = "0" + str;
         }
-        return `XNRF${str}/25`;
+        return str;
     }
 
     return null;

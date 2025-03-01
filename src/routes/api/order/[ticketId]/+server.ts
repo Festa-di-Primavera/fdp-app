@@ -1,5 +1,6 @@
 import { getClientDB } from "$lib/firebase/client";
 import { hasPermission } from "$lib/utils/permissions";
+import type { Order } from "$models/order.js";
 import { UserPermissions } from "$models/permissions";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
@@ -46,13 +47,16 @@ export async function GET({ locals, params }) {
         });
     }
 
-    let order = {
+    let order: Order = {
         ticketId: orderDoc.data().ticketId,
         name: orderDoc.data().name,
+        surname: orderDoc.data().surname,
+        email: orderDoc.data().email,
         items: orderDoc.data().items,
         done: orderDoc.data().done,
-        timestamp: orderDoc.data().timestamp,
-        id: orderDoc.id,
+        creationDate: orderDoc.data().creationDate,
+        closeDate: orderDoc.data().closeDate,
+        firebaseId: orderDoc.id,
     };
 
     return new Response(JSON.stringify({ order }), {

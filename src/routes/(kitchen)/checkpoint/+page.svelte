@@ -2,12 +2,12 @@
     import {
         Button,
         Card,
+        Checkbox,
         Input,
         Label,
-        Spinner,
         Modal,
-        Checkbox,
         Radio,
+        Spinner,
     } from "flowbite-svelte";
     import {
         Check,
@@ -15,11 +15,8 @@
         PencilLine,
         Send,
         Ticket as TicketIcon,
-        Trash2,
         X,
         XCircle,
-        Plus,
-        Minus,
     } from "lucide-svelte";
 
     import QrReader from "$components/QrReader.svelte";
@@ -27,14 +24,12 @@
     import type { User } from "$lib/auth/user";
     import { getXnrfCode } from "$lib/utils/tickets";
     import {
-        type Order,
-        ItemType,
-        BaseIngredient,
         DEFAULT_INGREDIENTS,
+        ItemType,
         Sauce,
+        type Order,
         type OrderItem,
     } from "$models/order";
-    import type { Ticket } from "$models/ticket";
     import { user } from "$store/store";
 
     interface Props {
@@ -72,13 +67,9 @@
         );
         ticketCodeInput = "";
 
+        const responseBody = await res.json();
         if (res.status == 404 || res.status == 403 || res.status == 401) {
-            errorMessage =
-                res.status === 401
-                    ? "Non autorizzato"
-                    : res.status === 403
-                      ? "Non hai i permessi per effettuare questa operazione"
-                      : "Ordine non trovato";
+            errorMessage = responseBody.message;
             open = true;
 
             clearTimeout(timeOut);
@@ -89,8 +80,7 @@
             return;
         }
 
-        const data = await res.json();
-        order = data.order as Order;
+        order = responseBody.order as Order;
         orderItems = order.items;
         isOrderModified = false;
     }
@@ -145,7 +135,7 @@
                 body: JSON.stringify({
                     orderId: order!!.ticketId,
                     done: false,
-                    timestamp: Date.now(),
+                    creationDate: new Date(Date.now()),
                     ...(isOrderModified && { items: orderItems }),
                 }),
             });
@@ -154,7 +144,7 @@
                 throw new Error("Errore durante l'invio dell'ordine");
             }
 
-            orderFeedbackMessage = "Ordine inviato con successo";
+            orderFeedbackMessage = (await response.json()).message;
             orderSubmitError = false;
             reset();
         } catch (error) {
@@ -297,7 +287,6 @@
                                                 Salsa: {item.sauce ||
                                                     "No salsa"}
                                             </div>
-                                            <!-- TODO: remove -->
                                             {#if item.notes}
                                                 <div
                                                     class="text-sm text-red-500"

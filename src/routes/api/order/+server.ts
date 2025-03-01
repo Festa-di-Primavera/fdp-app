@@ -2,8 +2,7 @@ import { getClientDB } from "$lib/firebase/client";
 import { hasPermission } from "$lib/utils/permissions";
 import type { Order } from "$models/order.js";
 import { UserPermissions } from "$models/permissions";
-import { collection, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
-import { v4 } from "uuid";
+import { doc, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 
 export async function POST({ request, locals }) {
     if (!locals.user) {
@@ -30,9 +29,22 @@ export async function POST({ request, locals }) {
         );
     }
 
-    const order = await request.json() as Order;
+    const order = (await request.json()) as Order;
 
-    await setDoc(doc(getClientDB(), "orders", v4()), order)
+    // string of timestamp as HH:MM
+    const timestamp = new Date(order.creationDate).toLocaleTimeString("it-IT", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+    });
+
+    await setDoc(
+        doc(getClientDB(), "orders", `${order.ticketId}-${timestamp}`),
+        {
+            ...order,
+            creationDate: Timestamp.fromDate(new Date(order.creationDate)),
+        }
+    )
         .then(() => {
             console.log("Document successfully written for ", order.name);
         })
@@ -80,14 +92,16 @@ export async function PATCH({ request, locals }) {
         );
     }
 
-    const { orderId, done, items, timestamp } = await request.json();
+    const { orderId, done, items, creationDate, closeDate } =
+        await request.json();
 
     try {
         const orderRef = doc(getClientDB(), "orders", orderId);
         const updateData: {
             done?: boolean | null;
             items?: any[];
-            timestamp?: number;
+            creationDate?: Timestamp;
+            closeDate?: Timestamp;
         } = {};
 
         if (typeof done === "boolean") {
@@ -98,8 +112,14 @@ export async function PATCH({ request, locals }) {
             updateData.items = items;
         }
 
-        if (timestamp) {
-            updateData.timestamp = timestamp;
+        if (creationDate) {
+            updateData.creationDate = Timestamp.fromDate(
+                new Date(creationDate)
+            );
+        }
+
+        if (closeDate) {
+            updateData.closeDate = Timestamp.fromDate(new Date(closeDate));
         }
 
         if (Object.keys(updateData).length === 0) {

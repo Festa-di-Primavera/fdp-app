@@ -4,6 +4,14 @@
     import type { Order } from "$models/order";
     import { ItemType, Sauce } from "$models/order";
     import {
+        collection,
+        onSnapshot,
+        orderBy,
+        query,
+        where,
+        type Unsubscribe,
+    } from "firebase/firestore";
+    import {
         Button,
         Table,
         TableBody,
@@ -12,14 +20,6 @@
         TableHead,
         TableHeadCell,
     } from "flowbite-svelte";
-    import {
-        collection,
-        onSnapshot,
-        orderBy,
-        query,
-        where,
-        type Unsubscribe,
-    } from "firebase/firestore";
     import { Mail } from "lucide-svelte";
     import { onDestroy, onMount } from "svelte";
 
@@ -97,7 +97,7 @@
                 <TableBodyRow>
                     <TableBodyCell>{order.ticketId}</TableBodyCell>
                     <TableBodyCell
-                        >{order.timestamp.toLocaleString()}</TableBodyCell
+                        >{order.creationDate.toLocaleString()}</TableBodyCell
                     >
                     <TableBodyCell>{order.name}</TableBodyCell>
                     <TableBodyCell>
@@ -105,7 +105,10 @@
                             <p class="mb-1">
                                 {getStringFromEnumValue(ItemType, item.type)}
                                 {#if item.sauce}
-                                    - {getStringFromEnumValue(Sauce, item.sauce)}
+                                    - {getStringFromEnumValue(
+                                        Sauce,
+                                        item.sauce
+                                    )}
                                 {/if}
                                 {#if item.glutenFree}
                                     - SENZA GLUTINE
@@ -117,7 +120,7 @@
                         <Button
                             size="xs"
                             disabled={loading}
-                            on:click={() => resendEmail(order)}
+                            onclick={() => resendEmail(order)}
                         >
                             <Mail class="w-4 h-4 mr-2" />
                             Reinvia Email

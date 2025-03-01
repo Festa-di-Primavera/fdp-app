@@ -197,7 +197,7 @@
                 surname: ticket?.surname || "",
                 items: orderItems,
                 done: false,
-                timestamp: Date.now(), // aggiungiamo il timestamp
+                creationDate: new Date(Date.now())
             };
             const response = await fetch("/api/order", {
                 method: "POST",
@@ -211,7 +211,7 @@
                 throw new Error("Errore durante l'invio dell'ordine");
             }
 
-            orderFeedbackMessage = "Ordine inviato con successo";
+            orderFeedbackMessage = (await response.json()).message;
             orderSubmitError = false;
             // clear order on success
             orderItems = [];
@@ -306,7 +306,7 @@
                             >
                                 <span>N° biglietto:</span>
                                 <span class="font-mono">
-                                    XNRF <b>{ticket.ticketId.slice(4, 9)}</b> /25
+                                    <b>{ticket.ticketId}</b>
                                 </span>
                             </span>
                             <span
@@ -475,7 +475,7 @@
                         checked={currentItem.removedIngredients?.includes(
                             ingredient
                         )}
-                        on:change={() => {
+                        onchange={() => {
                             if (
                                 currentItem.removedIngredients?.includes(
                                     ingredient
@@ -513,13 +513,11 @@
                 <Label class="flex items-center gap-2">
                     <Radio
                         name="sauce"
-                        on:change={() => {
+                        onchange={() => {
                             currentItem.sauce = sauce;
                         }}
                     />
-                    <span
-                        class:text-green-500={currentItem.sauce === sauce}
-                    >
+                    <span class:text-green-500={currentItem.sauce === sauce}>
                         {sauce}
                     </span>
                 </Label>

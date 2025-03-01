@@ -5,11 +5,11 @@
     import { user } from "$store/store";
     import {
         collection,
+        limit,
         onSnapshot,
         orderBy,
         query,
-        where,
-        type Unsubscribe,
+        type Unsubscribe
     } from "firebase/firestore";
     import { Button, Card } from "flowbite-svelte";
     import { onDestroy, onMount } from "svelte";
@@ -22,8 +22,7 @@
     if (!$user) $user = data;
 
     let unsubscribe: Unsubscribe = () => {};
-    // let orders: Order[] = $state([]);
-
+    
     let toDoOrders: Order[] = $state([]);
     let inProgressOrders: Order[] = $state([]);
     let doneOrders: Order[] = $state([]);
@@ -32,23 +31,17 @@
     function getOrders() {
         const q = query(
             collection(getClientDB(), "orders"),
-            // where("done", "==", false),
-            orderBy("timestamp", "asc") // ordina per timestamp in ordine crescente
+            orderBy("creationDate", "asc"),
+            limit(30)
         );
         unsubscribe = onSnapshot(q, (querySnapshot) => {
-            // orders = querySnapshot.docs.map((orderDoc) => {
-            //     return {
-            //         ...orderDoc.data(),
-            //         id: orderDoc.id,
-            //     };
-            // }) as Order[];
-
             toDoOrders = [];
             inProgressOrders = [];
             doneOrders = [];
 
             querySnapshot.docs.forEach((orderDoc) => {
                 const order = {
+                    firebaseId: orderDoc.id,
                     ...orderDoc.data(),
                 } as Order;
 
@@ -105,7 +98,7 @@
     const orderColorMap = new Map<string, number>();
 
     function getOrderColor(order: Order): string {
-        const orderKey = `${order.timestamp}_${order.ticketId}`;
+        const orderKey = `${order.creationDate}_${order.ticketId}`;
 
         if (!orderColorMap.has(orderKey)) {
             orderColorMap.set(orderKey, getNextAvailableColorIndex());
@@ -115,21 +108,18 @@
     }
 
     async function toggleItemReady(
-        orderId: string | undefined,
+        order: Order,
         itemIndex: number
-    ) {
-        const order = inProgressOrders.find((o) => o.ticketId === orderId);
-        if (!order) return;
-
+    ) {        
         // Toggle the ready status in the local state
         order.items[itemIndex].ready = !order.items[itemIndex].ready;
-
+        
         // Update the ready status in the database
         await fetch("/api/order", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                orderId,
+                orderId: order.firebaseId,
                 items: order.items,
             }),
         });
@@ -141,6 +131,7 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 orderId,
+                closeDate: new Date(),
                 done: true,
             }),
         });
@@ -185,7 +176,7 @@
                     </h2>
                     <span class="text-lg text-gray-700 dark:text-gray-200">
                         <span class="font-mono">
-                            XNRF <b>{order.ticketId.slice(4, 9)}</b> /25
+                            <b>{order.ticketId}</b>
                         </span>
                     </span>
                 </div>
@@ -229,7 +220,7 @@
                                         ? 'border-primary-400 text-primary-400'
                                         : 'border-gray-500 text-gray-500'}"
                                     onclick={() =>
-                                        toggleItemReady(order.ticketId, itemIndex)}
+                                        toggleItemReady(order, itemIndex)}
                                 >
                                     {item.ready ? "✓ Pronto" : "Pronto"}
                                 </button>
@@ -253,7 +244,7 @@
 
                 {#if order.items.every((item) => item.ready === true)}
                     <div class="mt-2 flex justify-end">
-                        <Button size="sm" onclick={() => closeOrder(order.ticketId)}>
+                        <Button size="sm" onclick={() => closeOrder(order.firebaseId)}>
                             Chiudi Ordine
                         </Button>
                     </div>
