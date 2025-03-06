@@ -1,7 +1,7 @@
-import { getClientDB } from "$lib/firebase/client";
+import { BLOCKS } from "$lib/firebase/collections.js";
 import { hasPermission } from "$lib/utils/permissions";
 import { UserPermissions } from "$models/permissions";
-import { collection, doc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 
 export async function PUT({ params, locals }) {
     if (!locals.user) {
@@ -33,8 +33,7 @@ export async function PUT({ params, locals }) {
             : decodeURIComponent(params.userID);
     const blockN = decodeURIComponent(params.blockN);
 
-    const blocksCollection = collection(getClientDB(), "blocks");
-    const blockDoc = doc(blocksCollection, blockN);
+    const blockDoc = doc(BLOCKS, blockN);
     await setDoc(
         blockDoc,
         userID

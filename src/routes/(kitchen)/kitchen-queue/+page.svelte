@@ -1,8 +1,7 @@
 <script lang="ts">
-    import { getClientDB } from "$lib/firebase/client";
+    import { ORDERS } from "$lib/firebase/collections";
     import type { Order } from "$models/order";
     import {
-        collection,
         limit,
         onSnapshot,
         orderBy,
@@ -24,7 +23,7 @@
     // get orders from firestore
     function getOrders() {
         const q = query(
-            collection(getClientDB(), "orders"),
+            ORDERS,
             where("done", "==", false),
             orderBy("creationDate", "asc"),
             limit(30)

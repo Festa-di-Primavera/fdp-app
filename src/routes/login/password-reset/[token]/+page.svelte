@@ -86,7 +86,7 @@
                     autocomplete="off"
                     type={pwVisible ? "text" : "password"}
                     bind:value={newPassword}
-                    on:blur={() => {
+                    onblur={() => {
                         lessThanEightChars = newPassword.length < 8;
                         noUpperCase = !/[A-Z]/.test(newPassword);
                         noNumber = !/[0-9]/.test(newPassword);
@@ -95,7 +95,7 @@
                                 newPassword
                             );
                     }}
-                    class="mt-2"
+                    class="mt-2 dark:bg-neutral-700 dark:border-neutral-500"
                 >
                     <PasswordEye bind:pwVisible slot="right" />
                 </Input>
@@ -145,9 +145,9 @@
                     type={pwVisible ? "text" : "password"}
                     color={!validatorError ? "base" : "red"}
                     bind:value={repeatPassword}
-                    on:blur={() =>
+                    onblur={() =>
                         (validatorError = !(newPassword === repeatPassword))}
-                    class="mt-2"
+                    class="mt-2 dark:bg-neutral-700 dark:border-neutral-500"
                 >
                     <PasswordEye bind:pwVisible slot="right" />
                 </Input>

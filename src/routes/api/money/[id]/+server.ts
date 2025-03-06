@@ -1,8 +1,8 @@
 import type { User } from "$lib/auth/user";
-import { getClientDB } from "$lib/firebase/client";
-import { hasPermission } from "$lib/utils/permissions.js";
+import { USERS } from "$lib/firebase/collections";
+import { hasPermission } from "$lib/utils/permissions";
 import { UserPermissions } from "$models/permissions";
-import { collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 export async function POST({ request, params, locals }) {
     if (!locals.user) {
@@ -31,8 +31,7 @@ export async function POST({ request, params, locals }) {
 
     const amountToSubtract = (await request.json()).money;
 
-    const usersCollection = collection(getClientDB(), "users");
-    const userDoc = doc(usersCollection, params.id);
+    const userDoc = doc(USERS, params.id);
     const user = (await getDoc(userDoc)).data() as User;
 
     const amount = user.owned_money;

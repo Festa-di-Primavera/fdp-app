@@ -123,7 +123,7 @@
             <form
                 use:enhance
                 method="post"
-                action="?/resend"
+                action="?/resendEmail"
                 class="dark:text-white text-justify"
             >
                 Se non hai ricevuto il codice, <button
@@ -140,7 +140,7 @@
                         on:paste={onPaste}
                         bind:value={code[index]}
                         maxlength={1}
-                        class="w-12 aspect-square text-center rounded-md border-2 border-muted"
+                        class="w-12 aspect-square text-center rounded-md border-2 border-muted dark:bg-neutral-700 dark:border-neutral-500"
                         pattern="[0-9A-Z]"
                         id="code{index}"
                         name="code{index}"
@@ -153,7 +153,7 @@
             <form
                 use:enhance
                 method="post"
-                action="?/verify"
+                action="?/verifyCode"
                 class="w-full flex flex-col items-center"
             >
                 <input type="hidden" name="code" value={code.join("")} />

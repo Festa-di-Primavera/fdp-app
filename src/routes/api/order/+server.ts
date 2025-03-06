@@ -1,4 +1,4 @@
-import { getClientDB } from "$lib/firebase/client";
+import { ORDERS } from "$lib/firebase/collections.js";
 import { hasPermission } from "$lib/utils/permissions";
 import type { Order } from "$models/order.js";
 import { UserPermissions } from "$models/permissions";
@@ -38,13 +38,10 @@ export async function POST({ request, locals }) {
         second: "2-digit",
     });
 
-    await setDoc(
-        doc(getClientDB(), "orders", `${order.ticketId}-${timestamp}`),
-        {
-            ...order,
-            creationDate: Timestamp.fromDate(new Date(order.creationDate)),
-        }
-    )
+    await setDoc(doc(ORDERS, `${order.ticketId}-${timestamp}`), {
+        ...order,
+        creationDate: Timestamp.fromDate(new Date(order.creationDate)),
+    })
         .then(() => {
             console.log("Document successfully written for ", order.name);
         })
@@ -96,7 +93,7 @@ export async function PATCH({ request, locals }) {
         await request.json();
 
     try {
-        const orderRef = doc(getClientDB(), "orders", orderId);
+        const orderRef = doc(ORDERS, orderId);
         const updateData: {
             done?: boolean | null;
             items?: any[];

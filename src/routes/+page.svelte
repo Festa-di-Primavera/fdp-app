@@ -1,13 +1,9 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import { enhance } from "$app/forms";
-    import { goto } from "$app/navigation";
     import type { User } from "$lib/auth/user";
     import { user } from "$store/store";
     import { Button } from "flowbite-svelte";
     import { AlertCircle, LogOut, XCircle } from "lucide-svelte";
-    import { onMount } from "svelte";
     import FeedbackToast from "../components/feedbacks/FeedbackToast.svelte";
 
     let { data } = $props();
@@ -18,21 +14,7 @@
     let error: boolean = $state(false);
     let color: "red" | "yellow" = $derived(error ? "red" : "yellow");
 
-    
     let ToastIcon = $derived(error ? AlertCircle : XCircle);
-
-    onMount(async () => {
-        if (window.location.search.split("?")[1] == "checkInExpired") {
-            feedbackToastMessage = "Non è possibile fare check-in";
-            error = false;
-            feedbackToastOpen = true;
-            goto(window.location.pathname);
-            const timeOut = setTimeout(() => {
-                feedbackToastOpen = false;
-                clearTimeout(timeOut);
-            }, 4000);
-        }
-    });
 </script>
 
 <svelte:head>
@@ -52,7 +34,8 @@
                 destra
             </p>
             <form
-                method="post"
+                method="POST"
+                action="?/logout"
                 use:enhance
                 class="mt-5 flex flex-col items-center gap-8 text-center"
             >

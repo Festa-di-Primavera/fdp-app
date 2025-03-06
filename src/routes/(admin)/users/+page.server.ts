@@ -1,9 +1,9 @@
 import type { User } from "$lib/auth/user";
-import { getClientDB } from "$lib/firebase/client";
+import { USERS } from "$lib/firebase/collections";
 import { hasPermission } from "$lib/utils/permissions";
 import { UserPermissions } from "$models/permissions";
 import { redirect } from "@sveltejs/kit";
-import { collection, getDocs } from "firebase/firestore";
+import { getDocs } from "firebase/firestore";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -15,10 +15,7 @@ export const load: PageServerLoad = async ({ locals }) => {
         redirect(302, "/");
     }
 
-    const db = getClientDB();
-
-    const usersCollection = collection(db, "users");
-    const qSnap = await getDocs(usersCollection);
+    const qSnap = await getDocs(USERS);
     const usersList: User[] = qSnap.docs.map((doc) => doc.data() as User);
 
     return {

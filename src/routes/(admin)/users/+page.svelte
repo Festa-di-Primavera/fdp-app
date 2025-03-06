@@ -1,17 +1,24 @@
 <script lang="ts">
-    import { Button, Input, Label, Modal, Spinner, Tooltip } from "flowbite-svelte";
+    import {
+        Button,
+        Input,
+        Label,
+        Modal,
+        Spinner,
+        Tooltip,
+    } from "flowbite-svelte";
     import {
         CheckCircle2,
-        XCircle,
-        Ticket,
-        ScanLine,
-        Info,
-        LayoutDashboard,
         ChefHat,
         Coins,
         Dna,
         DollarSign,
+        Info,
+        LayoutDashboard,
+        ScanLine,
+        Ticket,
         Users,
+        XCircle,
     } from "lucide-svelte";
 
     import UsersTable from "$components/UsersTable.svelte";
@@ -19,9 +26,9 @@
     import type { User } from "$lib/auth/user";
     import { getStringFromEnumValue } from "$lib/utils/enums";
     import { intToBitArray } from "$lib/utils/permissions";
+    import { capitalizeFirstLetter } from "$lib/utils/textFormat";
     import { UserPermissions } from "$models/permissions";
     import { user } from "$store/store.js";
-    import { capitalizeFirstLetter } from "$lib/utils/textFormat";
 
     interface Props {
         data: {
@@ -185,7 +192,11 @@
 
                         <div class="flex items-center gap-1">
                             <PermissionIcon class="w-4 text-primary-300" />
-                            <Tooltip color="primary" border>
+                            <Tooltip
+                                color="gray"
+                                class="dark:bg-neutral-800 dark:border-neutral-500"
+                                border
+                            >
                                 {capitalizeFirstLetter(
                                     getStringFromEnumValue(
                                         UserPermissions,
@@ -205,7 +216,9 @@
         <Modal
             title={`Elimina ${currSelectedUser.username}`}
             bind:open={deleteModalOpen}
-            class="z-50"
+            class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
+            classHeader="dark:bg-neutral-800 dark:text-neutral-300"
+            classFooter="dark:bg-neutral-800 dark:text-neutral-300"
         >
             <span class="text-md"
                 >Vuoi eliminare l'utente <b>{currSelectedUser.username}</b
@@ -226,6 +239,7 @@
                 </Button>
                 <Button
                     color="alternative"
+                    class="dark:text-neutral-400 dark:border-neutral-400 dark:hover:bg-neutral-700 dark:hover:border-neutral-300"
                     on:click={() => (deleteModalOpen = false)}>Annulla</Button
                 >
             </div>
@@ -233,7 +247,9 @@
         <Modal
             bind:open={aliasModalOpen}
             title={`Aggiorna l'alias di ${currSelectedUser.username}`}
-            class="z-50"
+            class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
+            classHeader="dark:bg-neutral-800 dark:text-neutral-300"
+            classFooter="dark:bg-neutral-800 dark:text-neutral-300"
         >
             <span class="text-md"
                 >Vuoi aggiornare l'alias di <b>{currSelectedUser.username}</b
@@ -245,7 +261,7 @@
 
             <Label class="mt-4">
                 Nuovo alias
-                <Input bind:value={alias} class="mt-2" />
+                <Input bind:value={alias} class="mt-2 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400" />
             </Label>
             <div class="flex gap-2 mt-4" slot="footer">
                 <Button on:click={() => handleAliasChange(currSelectedUser)}
@@ -253,6 +269,7 @@
                 >
                 <Button
                     color="alternative"
+                    class="dark:text-neutral-400 dark:border-neutral-400 dark:hover:bg-neutral-700 dark:hover:border-neutral-300"
                     on:click={() => {
                         alias = "";
                         aliasModalOpen = false;

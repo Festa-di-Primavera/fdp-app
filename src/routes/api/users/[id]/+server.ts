@@ -1,7 +1,7 @@
-import { getClientDB } from "$lib/firebase/client";
+import { USERS } from "$lib/firebase/collections.js";
 import { hasPermission } from "$lib/utils/permissions";
 import { UserPermissions } from "$models/permissions";
-import { collection, deleteDoc, doc, getDoc } from "firebase/firestore";
+import { deleteDoc, doc, getDoc } from "firebase/firestore";
 
 export async function DELETE({ params, locals }) {
     if (!locals.user) {
@@ -30,8 +30,7 @@ export async function DELETE({ params, locals }) {
 
     try {
         const { id } = params;
-        const usersCollection = collection(getClientDB(), "users");
-        const userDoc = doc(usersCollection, id);
+        const userDoc = doc(USERS, id);
 
         const user = await getDoc(userDoc);
         if (!user.exists()) {

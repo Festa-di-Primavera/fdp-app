@@ -39,10 +39,7 @@
         currSelectedUser?: User;
         aliasModalOpen: boolean;
         deleteModalOpen: boolean;
-        permissionIcons: Record<
-            UserPermissions,
-            typeof Check
-        >;
+        permissionIcons: Record<UserPermissions, typeof Check>;
     }
 
     let {
@@ -59,6 +56,7 @@
     let feedbackToastOpen: boolean = $state(false);
     let timeOut: NodeJS.Timeout;
     let ToastIcon = $state(XCircle);
+
     $effect(() => {
         ToastIcon = error ? XCircle : CheckCircle2;
     });
@@ -167,18 +165,23 @@
 
 {#if $user}
     <div class="mx-5 mt-5">
-        <Input placeholder={`Cerca per ${filter}`} bind:value={searchTerm}>
+        <Input
+            class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+            placeholder={`Cerca per ${filter}`}
+            bind:value={searchTerm}
+        >
             <Search slot="left" />
             <button slot="right">
                 <Filter />
                 <Popover
                     placement="bottom-end"
-                    class="z-50 p-0"
+                    class="z-50 p-0 mt-2 dark:bg-neutral-800 dark:border-neutral-500 dark:divide-neutral-500 dark:text-neutral-300"
                     defaultClass="pt-2"
+                    arrow={false}
                 >
                     Filtra per
                     <ul
-                        class="w-48 divide-y divide-gray-200 dark:divide-gray-600"
+                        class="w-48 divide-y divide-gray-200 dark:divide-neutral-600"
                     >
                         <li>
                             <Radio class="p-3" bind:group={filter} value="nome"
@@ -186,7 +189,7 @@
                             >
                         </li>
                         <li>
-                            <Radio class="p-3" bind:group={filter} value="email"
+                            <Radio class="p-3 checked:bg-red-500" bind:group={filter} value="email"
                                 >E-Mail</Radio
                             >
                         </li>
@@ -203,9 +206,9 @@
     <div class="mx-5 mt-5">
         <Table
             divClass="tableDiv relative overflow-x-auto overflow-y-visible pb-40"
-            class="relative overflow-visible overflow-x-auto rounded-md shadow-md sm:rounded-lg"
+            class="relative overflow-visible overflow-x-auto rounded-md shadow-md sm:rounded-lg "
         >
-            <TableHead>
+            <TableHead class="dark:bg-neutral-600 dark:text-neutral-300">
                 <TableHeadCell class="cursor-pointer select-none">
                     <div class="flex gap-1">Nome</div>
                 </TableHeadCell>
@@ -222,7 +225,9 @@
             </TableHead>
             <TableBody tableBodyClass="divide-y">
                 {#each filteredItems || [] as item}
-                    <TableBodyRow class="w-full">
+                    <TableBodyRow
+                        class="w-full dark:bg-neutral-700 dark:border-neutral-500"
+                    >
                         <TableBodyCell>
                             <span class="flex items-center gap-4 font-medium">
                                 {#if item.avatar_url}
@@ -252,7 +257,12 @@
                                         alt="Google"
                                         src="/google.svg"
                                     />
-                                    <Tooltip>Google</Tooltip>
+                                    <Tooltip
+                                        color="gray"
+                                        border
+                                        class="dark:bg-neutral-800 dark:border-neutral-500"
+                                        >Google</Tooltip
+                                    >
                                 {:else}
                                     {@const EmailVerified = item.email_verified
                                         ? Check
@@ -264,6 +274,9 @@
                                         class="w-5"
                                     />
                                     <Tooltip
+                                        color="gray"
+                                        border
+                                        class="dark:bg-neutral-800 dark:border-neutral-500"
                                         >{(item.email_verified ? "" : "Non ") +
                                             "Verificata"}</Tooltip
                                     >
@@ -286,9 +299,15 @@
                                             )}
                                     >
                                         <PermissionIcon
-                                            class={`w-4 ${perm ? "text-primary-300" : "text-slate-500"}`}
+                                            class={`w-4 ${perm ? "text-primary-400" : "text-neutral-400 opacity-65"}`}
                                         />
-                                        <Tooltip color="primary" border>
+                                        <Tooltip
+                                            color={perm ? "primary" : "gray"}
+                                            border
+                                            class="dark:bg-neutral-800 {perm
+                                                ? ''
+                                                : 'dark:border-neutral-500'}"
+                                        >
                                             {capitalizeFirstLetter(
                                                 getStringFromEnumValue(
                                                     UserPermissions,

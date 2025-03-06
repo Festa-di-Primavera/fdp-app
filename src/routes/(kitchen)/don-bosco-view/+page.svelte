@@ -1,10 +1,9 @@
 <script lang="ts">
-    import { getClientDB } from "$lib/firebase/client";
+    import { ORDERS } from "$lib/firebase/collections";
     import { getStringFromEnumValue } from "$lib/utils/enums";
     import type { Order } from "$models/order";
     import { ItemType, Sauce } from "$models/order";
     import {
-        collection,
         onSnapshot,
         orderBy,
         query,
@@ -29,7 +28,7 @@
 
     function getOrders() {
         const q = query(
-            collection(getClientDB(), "orders"),
+            ORDERS,
             where("ticketId", ">=", "XNRF"),
             where("ticketId", "<=", "XNRF\uf8ff"),
             orderBy("ticketId", "asc")

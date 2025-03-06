@@ -1,9 +1,9 @@
 import { getClientDB } from "$lib/firebase/client";
+import { PASSWORD_RESET_TOKENS, USERS } from "$lib/firebase/collections";
 import { hash, verify } from "@node-rs/argon2";
 import { sha256 } from "@oslojs/crypto/sha2";
 import { encodeBase32LowerCaseNoPadding } from "@oslojs/encoding";
 import {
-    collection,
     doc,
     getDoc,
     getDocs,
@@ -14,8 +14,8 @@ import {
 } from "firebase/firestore";
 import { createDate, isWithinExpirationDate } from "oslo";
 import { encodeHex } from "oslo/encoding";
-import type { User } from "../user";
 import { sendEmail } from "../../utils/resend";
+import type { User } from "../user";
 import { TimeSpan } from "./timespan";
 
 interface PasswordResetToken {
@@ -52,14 +52,10 @@ export const generatePasswordResetToken = async (userId: string) => {
     const tokenHash = encodeHex(sha256(new TextEncoder().encode(tokenId)));
 
     const db = getClientDB();
-    const passwordResetTokensCollection = collection(
-        db,
-        "password_reset_tokens"
-    );
 
     await runTransaction(db, async (trx) => {
-        trx.delete(doc(passwordResetTokensCollection, userId));
-        trx.set(doc(passwordResetTokensCollection, userId), {
+        trx.delete(doc(PASSWORD_RESET_TOKENS, userId));
+        trx.set(doc(PASSWORD_RESET_TOKENS, userId), {
             token_hash: tokenHash,
             user_id: userId,
             expires_at: createDate(new TimeSpan(15, "m")), // 15 minutes
@@ -71,12 +67,8 @@ export const generatePasswordResetToken = async (userId: string) => {
 
 /// Verify the token and return the user id
 export const verifyPasswordResetToken = async (tokenId: string) => {
-    const passwordResetTokensCollection = collection(
-        getClientDB(),
-        "password_reset_tokens"
-    );
     const passwordResetQuery = query(
-        passwordResetTokensCollection,
+        PASSWORD_RESET_TOKENS,
         where(
             "token_hash",
             "==",
@@ -136,8 +128,7 @@ export const isSameAsOldPassword = async (
     userId: string,
     newPassword: string
 ) => {
-    const usersCollection = collection(getClientDB(), "users");
-    const userDoc = (await getDoc(doc(usersCollection, userId))).data() as User;
+    const userDoc = (await getDoc(doc(USERS, userId))).data() as User;
 
     // If user doesn't exist, return false
     if (!userDoc) {

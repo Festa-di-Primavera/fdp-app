@@ -4,7 +4,10 @@
 import { invalidateExpiredSessions } from "$lib/auth/session.js";
 import { getClientDB } from "$lib/firebase/client";
 import {
-    collection,
+    EMAIL_VERIFICATION_CODES,
+    PASSWORD_RESET_TOKENS,
+} from "$lib/firebase/collections.js";
+import {
     getDocs,
     query,
     Timestamp,
@@ -30,12 +33,8 @@ export async function GET({ request }) {
     invalidateExpiredSessions();
 
     // Eliminazione token di reset password scaduti
-    const passwordTokensCollection = collection(
-        getClientDB(),
-        "password_reset_tokens"
-    );
     const passwordTokensQuery = query(
-        passwordTokensCollection,
+        PASSWORD_RESET_TOKENS,
         where("expires_at", "<=", Timestamp.fromDate(new Date()))
     );
     const passwordTokensSnapshot = await getDocs(passwordTokensQuery);
@@ -44,12 +43,8 @@ export async function GET({ request }) {
     await pwTokBatch.commit();
 
     // Eliminazione codici di verifica scaduti
-    const emailVerificationCodesCollection = collection(
-        getClientDB(),
-        "email_verification_codes"
-    );
     const emailVerificationCodesQuery = query(
-        emailVerificationCodesCollection,
+        EMAIL_VERIFICATION_CODES,
         where("expires_at", "<=", Timestamp.fromDate(new Date()))
     );
     const emailVerificationCodesSnapshot = await getDocs(

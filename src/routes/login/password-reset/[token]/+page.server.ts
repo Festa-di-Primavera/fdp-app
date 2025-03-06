@@ -4,13 +4,18 @@ import {
     verifyPasswordResetToken,
 } from "$lib/auth/utils/password";
 import { getClientDB } from "$lib/firebase/client";
+import { PASSWORD_RESET_TOKENS, USERS } from "$lib/firebase/collections";
 import { hash } from "@node-rs/argon2";
 import { fail, redirect } from "@sveltejs/kit";
-import { collection, doc, runTransaction } from "firebase/firestore";
+import { doc, runTransaction } from "firebase/firestore";
 import type { PageServerLoad } from "../$types";
 
 export const load: PageServerLoad = async ({ params }) => {
-    const passwordResetToken = params.token;
+    interface Params {
+        token: string;
+    }
+
+    const passwordResetToken = (params as Params).token;
 
     if (!passwordResetToken) {
         fail(400, {
@@ -87,16 +92,9 @@ export const actions = {
             });
             await invalidateUserSessions(userId);
 
-            const db = getClientDB();
-            const passwordResetTokensCollection = collection(
-                db,
-                "password_reset_tokens"
-            );
-            const userCollection = collection(db, "users");
-
-            await runTransaction(db, async (trx) => {
-                trx.delete(doc(passwordResetTokensCollection, userId));
-                trx.update(doc(userCollection, userId), {
+            await runTransaction(getClientDB(), async (trx) => {
+                trx.delete(doc(PASSWORD_RESET_TOKENS, userId));
+                trx.update(doc(USERS, userId), {
                     password_hash: passwordHash,
                 });
             });

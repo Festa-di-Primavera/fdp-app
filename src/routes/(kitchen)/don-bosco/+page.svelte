@@ -74,7 +74,7 @@
                                 },
                             ],
                             done: null,
-                            creationDate: new Date(Date.now()),
+                            timestamp: Date.now(),
                             ticketId: `XNRF${OFFSET + rowIndex}/25`,
                         };
                         rowIndex++;

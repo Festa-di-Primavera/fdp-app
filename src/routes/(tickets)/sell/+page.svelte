@@ -119,7 +119,7 @@
             >
                 Nome Ospite <span class="text-primary-700">*</span>
                 <Input
-                    class="mt-1"
+                    class="mt-1 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
                     bind:value={name}
                     autocomplete="off"
                     on:keypress={onKeyDown}
@@ -130,7 +130,7 @@
             >
                 Cognome Ospite <span class="text-primary-700">*</span>
                 <Input
-                    class="mt-1"
+                    class="mt-1 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
                     bind:value={surname}
                     autocomplete="off"
                     on:keypress={onKeyDown}
@@ -141,7 +141,7 @@
             >
                 Codice Biglietto <span class="text-primary-700">*</span>
                 <Input
-                    class="mt-1"
+                    class="mt-1 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
                     bind:value={ticketCode}
                     autocomplete="off"
                     on:keypress={onKeyDown}
@@ -178,6 +178,9 @@
     bind:open={modalOpen}
     onclose={closeModal}
     size="xs"
+    class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
+    classHeader="dark:bg-neutral-800 dark:text-neutral-300"
+    classFooter="dark:bg-neutral-800 dark:text-neutral-300"
     outsideclose
     autoclose
 >
@@ -189,7 +192,7 @@
         {error ? "Errore" : "Successo"}
     </span>
     <div class="flex flex-col gap-5">
-        <span class="text-xl font-medium text-gray-500">{modalMessage}</span>
+        <span class="text-xl font-medium text-neutral-400">{modalMessage}</span>
         {#if !error}
             <div class="flex flex-col">
                 <span class="mb-3">Codice: {ticketCode || ""}</span>

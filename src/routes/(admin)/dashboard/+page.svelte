@@ -9,8 +9,6 @@
     } from "flowbite-svelte";
     import { onDestroy } from "svelte";
 
-    import { getClientDB } from "$lib/firebase/client";
-
     import {
         CheckInTimeSlot,
         computeCheckInPerTime,
@@ -25,20 +23,16 @@
 
     import { goto } from "$app/navigation";
     import ExportToCsv from "$components/ExportToCSV.svelte";
+    import OrdersECharts from "$components/charts/orders/OrdersECharts.svelte";
     import CheckInPerTimeECharts from "$components/charts/tickets/CheckInPerTimeECharts.svelte";
     import SalesPerTimeECharts from "$components/charts/tickets/SalesPerTimeECharts.svelte";
     import TicketsECharts from "$components/charts/tickets/TicketsECharts.svelte";
     import TicketsPerHourECharts from "$components/charts/tickets/TicketsPerHourECharts.svelte";
     import TicketsPerPersonECharts from "$components/charts/tickets/TicketsPerPersonECharts.svelte";
-    import OrdersECharts from "$components/charts/orders/OrdersECharts.svelte";
     import type { User } from "$lib/auth/user";
+    import { ORDERS, TICKETS } from "$lib/firebase/collections";
     import type { Order } from "$models/order";
-    import {
-        collection,
-        onSnapshot,
-        query,
-        type Unsubscribe,
-    } from "firebase/firestore";
+    import { onSnapshot, query, type Unsubscribe } from "firebase/firestore";
 
     interface Props {
         data: { sellers: User[]; user: User };
@@ -89,11 +83,13 @@
 
     let open: boolean = $state(true);
     let value: string = $state("");
-    let validate = $derived(value !== "Festa di Primavera");
+    let disabled = $derived(
+        value.trim() !== "Festa di Primavera" && value.trim() !== "fdp"
+    );
 
     // get tickets from firestore
     function getTickets() {
-        const q = query(collection(getClientDB(), "tickets"));
+        const q = query(TICKETS);
         unsubscribe = onSnapshot(q, (querySnapshot) => {
             tickets = querySnapshot.docs.map((ticketDoc) => {
                 let currSeller: string | null;
@@ -121,7 +117,7 @@
 
     // get orders from firestore
     function getOrders() {
-        const q = query(collection(getClientDB(), "orders"));
+        const q = query(ORDERS);
         unsubscribe = onSnapshot(q, (querySnapshot) => {
             orders = querySnapshot.docs.map((orderDoc) => {
                 return {
@@ -238,7 +234,13 @@
     </div>
 </section>
 
-<Modal bind:open dismissable={false}>
+<Modal
+    bind:open
+    dismissable={false}
+    class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
+    classHeader="dark:bg-neutral-800 dark:text-neutral-300"
+    classFooter="dark:bg-neutral-800 dark:text-neutral-300"
+>
     <div slot="header" class="flex items-center justify-between">
         <h1 class="text-2xl text-primary-300">Conferma visita</h1>
     </div>
@@ -254,12 +256,16 @@
         </p>
         <Label class="mt-7 flex flex-col gap-1">
             Codice di conferma
-            <Input placeholder="Festa di Primavera" bind:value />
+            <Input
+                placeholder="Festa di Primavera"
+                bind:value
+                class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+            />
         </Label>
     </div>
     <div slot="footer" class="flex gap-3">
         <Button
-            disabled={validate}
+            {disabled}
             color="primary"
             on:click={() => {
                 if (value === "Festa di Primavera") {
@@ -269,6 +275,10 @@
                 }
             }}>Conferma</Button
         >
-        <Button color="alternative" on:click={() => goto("/")}>Annulla</Button>
+        <Button
+            color="alternative"
+            class="dark:text-neutral-400 dark:border-neutral-400 dark:hover:bg-neutral-700 dark:hover:border-neutral-300"
+            on:click={() => goto("/")}>Annulla</Button
+        >
     </div>
 </Modal>

@@ -1,3 +1,4 @@
+import { SESSIONS, USERS } from "$lib/firebase/collections";
 import { sha256 } from "@oslojs/crypto/sha2";
 import {
     encodeBase32LowerCaseNoPadding,
@@ -17,7 +18,6 @@ import {
     where,
     writeBatch,
 } from "firebase/firestore";
-import { sessionCollection, userCollection } from "./database";
 import type { User } from "./user";
 import { TimeSpan } from "./utils/timespan";
 
@@ -40,13 +40,13 @@ export async function validateSessionToken(
         sha256(new TextEncoder().encode(token))
     );
 
-    const sessionDocRef = doc(sessionCollection, sessionId);
+    const sessionDocRef = doc(SESSIONS, sessionId);
     const sessionSnapshot = await getDoc(sessionDocRef);
 
     if (!sessionSnapshot.exists()) return { user: null, session: null };
     const sessionDoc = sessionSnapshot.data();
 
-    const userDocRef = doc(userCollection, sessionDoc.userId);
+    const userDocRef = doc(USERS, sessionDoc.userId);
     const userSnapshot = await getDoc(userDocRef);
 
     if (!userSnapshot.exists()) return { user: null, session: null };
@@ -92,12 +92,12 @@ export async function validateSessionToken(
 }
 
 export async function invalidateSession(sessionId: string): Promise<void> {
-    const sessionDocRef = doc(sessionCollection, sessionId);
+    const sessionDocRef = doc(SESSIONS, sessionId);
     await deleteDoc(sessionDocRef);
 }
 
 export async function invalidateUserSessions(userId: string): Promise<void> {
-    const q = query(sessionCollection, where("userId", "==", userId));
+    const q = query(SESSIONS, where("userId", "==", userId));
     const querySnapshot = await getDocs(q);
     const batch = writeBatch(getFirestore());
     querySnapshot.forEach((doc) => batch.delete(doc.ref));
@@ -148,7 +148,7 @@ export async function createSession(
         expiresAt: new Date(Date.now() + SESSION_EXPIRES_IN.milliseconds()),
     };
 
-    const sessionDoc = doc(sessionCollection, session.id);
+    const sessionDoc = doc(SESSIONS, session.id);
     await setDoc(sessionDoc, {
         id: session.id,
         userId: session.userId,
@@ -159,10 +159,7 @@ export async function createSession(
 }
 
 export async function invalidateExpiredSessions(): Promise<void> {
-    const q = query(
-        sessionCollection,
-        where("expiresAt", "<=", Timestamp.now())
-    );
+    const q = query(SESSIONS, where("expiresAt", "<=", Timestamp.now()));
     const querySnapshot = await getDocs(q);
     const batch = writeBatch(getFirestore());
     querySnapshot.forEach((doc) => batch.delete(doc.ref));

@@ -10,13 +10,13 @@
     }
 
     let {
-        ticketCode = $bindable(),
-        ticket = $bindable(),
-        color = $bindable(""),
+        ticketCode,
+        ticket,
+        color,
     }: Props = $props();
 </script>
 
-<Card class="w-full flex flex-col text-lg p-3" id="ticketInfos">
+<Card class="w-full flex flex-col text-lg p-3 dark:bg-neutral-700 dark:border-neutral-500" id="ticketInfos">
     <span class="text-black dark:text-white w-full flex justify-between">
         <span>N° biglietto:</span>
         <span
@@ -27,7 +27,7 @@
     </span>
     <span class="text-black dark:text-white w-full flex justify-between">
         <span>Nominativo:</span>
-        <span>{(ticket?.name || "") + " " + (ticket?.surname || "")}</span>
+        <span class="text-right">{(ticket?.name || "") + " " + (ticket?.surname || "")}</span>
     </span>
     <span class="text-black dark:text-white w-full flex justify-between">
         <span>Venditore:</span>

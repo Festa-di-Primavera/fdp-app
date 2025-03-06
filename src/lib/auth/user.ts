@@ -1,6 +1,6 @@
+import { USERS } from "$lib/firebase/collections";
 import { doc, setDoc } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
-import { userCollection } from "./database";
 import { hashPassword } from "./utils/password";
 
 export interface GoogleUser {
@@ -51,7 +51,7 @@ export async function createUser(
         total_from_sales: 0,
     };
 
-    await setDoc(doc(userCollection, userId), user);
+    await setDoc(doc(USERS, userId), user);
 
     return user;
 }
@@ -77,7 +77,7 @@ export async function createUserWithGoogle(
         owned_money: 0,
     };
 
-    await setDoc(doc(userCollection, userId), user);
+    await setDoc(doc(USERS, userId), user);
 
     return user;
 }

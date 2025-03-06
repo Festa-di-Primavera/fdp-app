@@ -9,17 +9,10 @@ import {
     type GoogleUser,
     type User,
 } from "$lib/auth/user";
-import { getClientDB } from "$lib/firebase/client";
+import { USERS } from "$lib/firebase/collections";
 import type { RequestEvent } from "@sveltejs/kit";
 import { OAuth2RequestError } from "arctic";
-import {
-    collection,
-    doc,
-    getDocs,
-    query,
-    updateDoc,
-    where,
-} from "firebase/firestore";
+import { doc, getDocs, query, updateDoc, where } from "firebase/firestore";
 
 export async function GET(event: RequestEvent): Promise<Response> {
     const code = event.url.searchParams.get("code");
@@ -55,7 +48,7 @@ export async function GET(event: RequestEvent): Promise<Response> {
 
         const googleUser: GoogleUser = await googleUserResponse.json();
 
-        const usersCollection = collection(getClientDB(), "users");
+        const usersCollection = USERS;
 
         const googleQuery = query(
             usersCollection,
