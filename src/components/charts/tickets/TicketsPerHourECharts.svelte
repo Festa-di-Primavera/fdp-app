@@ -19,7 +19,7 @@
             left: 10,
             right: 25,
         },
-        backgroundColor: $theme == "dark" ? "rgb(31 41 55)" : "white",
+        backgroundColor: $theme == "dark" ? "#414041" : "white",
         xAxis: {
             data: sellHoursStats.labels,
             axisLabel: {
@@ -120,7 +120,7 @@
     });
 </script>
 
-<Card class="h-96 w-full">
+<Card class="h-96 w-full dark:bg-neutral-700 dark:border-neutral-500">
     <div class="flex w-full items-start justify-between">
         <div class="flex-col items-center">
             <div class="mb-1 flex items-center">

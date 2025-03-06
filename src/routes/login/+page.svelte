@@ -190,7 +190,7 @@
                         type={pwVisible ? "text" : "password"}
                         color={!validatorError ? "base" : "red"}
                         bind:value={repeatPassword}
-                        on:blur={() =>
+                        onblur={() =>
                             (validatorError = !(password === repeatPassword))}
                         class="mt-2 dark:bg-neutral-700 dark:border-neutral-500"
                     >

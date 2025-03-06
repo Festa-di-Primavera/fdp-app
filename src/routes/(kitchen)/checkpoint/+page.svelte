@@ -422,6 +422,7 @@
             <span class="font-semibold text-red-500 block mb-2">Note:</span>
             <Input
                 type="text"
+                class="dark:bg-neutral-700 dark:border-neutral-500"
                 bind:value={currentItem.notes}
                 placeholder="Inserisci eventuali note..."
             />

@@ -159,7 +159,7 @@
                             class="grid h-full w-full max-w-sm grid-flow-row-dense grid-cols-2 gap-2"
                         >
                             <Card
-                                class="col-span-2 flex h-full w-full max-w-md flex-col items-center justify-center gap-5 pt-6"
+                                class="col-span-2 flex h-full w-full max-w-md flex-col items-center justify-center gap-5 pt-6 dark:bg-neutral-700 dark:border-neutral-500"
                             >
                                 <h1
                                     class="text-center text-5xl font-bold text-primary-600"
@@ -173,7 +173,7 @@
                                 </p>
                             </Card>
                             <Card
-                                class="flex aspect-square h-full w-full flex-col items-center justify-center gap-5 pt-6"
+                                class="flex aspect-square h-full w-full flex-col items-center justify-center gap-5 pt-6 dark:bg-neutral-700 dark:border-neutral-500"
                             >
                                 <h1
                                     class="text-center text-5xl font-bold text-primary-600"
@@ -187,7 +187,7 @@
                                 </p>
                             </Card>
                             <Card
-                                class="flex aspect-square h-full w-full flex-col items-center justify-center gap-5 pt-6"
+                                class="flex aspect-square h-full w-full flex-col items-center justify-center gap-5 pt-6 dark:bg-neutral-700 dark:border-neutral-500"
                             >
                                 <h1
                                     class="text-center text-5xl font-bold text-primary-600"
