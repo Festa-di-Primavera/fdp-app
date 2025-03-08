@@ -18,8 +18,8 @@ import {
     where,
     writeBatch,
 } from "firebase/firestore";
+import { TimeSpan } from "../../models/timespan";
 import type { User } from "./user";
-import { TimeSpan } from "./utils/timespan";
 
 type SessionValidationResult =
     | { session: Session; user: User }

@@ -14,9 +14,10 @@ import {
 } from "firebase/firestore";
 import { createDate, isWithinExpirationDate } from "oslo";
 import { encodeHex } from "oslo/encoding";
+import { TimeSpan } from "../../../models/timespan";
 import { sendEmail } from "../../utils/resend";
 import type { User } from "../user";
-import { TimeSpan } from "./timespan";
+import { passwordResetTemplate } from "../email-templates/password_reset";
 
 interface PasswordResetToken {
     user_id: string;
@@ -107,20 +108,11 @@ export const sendPasswordResetEmail = async (
     email: string,
     resetToken: string
 ) => {
-    const htmlContent = `
-		<div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-			<h1>Richiesta di reset password</h1>
-			<p>Abbiamo ricevuto una richiesta di reset della tua password. Se non hai fatto tu questa richiesta, ignora questa email. Altrimenti, puoi resettare la tua password usando il link qui sotto.</p>
-
-			<p>
-			<a href="https://festa-cus.it/login/password-reset/${resetToken}" style="color: #337ab7; text-decoration: none;">Resetta la tua password</a>
-			</p>
-
-			<p>Se hai bisogno di aiuto o hai domande, contatta il nostro team di supporto. Siamo qui per aiutarti!</p>
-		</div>
-	`;
-
-    return await sendEmail(email, "Richiesta di Reset Password", htmlContent);
+    return await sendEmail(
+        email,
+        "Richiesta di Reset Password",
+        passwordResetTemplate(resetToken)
+    );
 };
 
 /// Check if the new password is the same as the old password
