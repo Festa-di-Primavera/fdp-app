@@ -11,18 +11,14 @@ import {
     isValidEmail,
     sendVerificationCode,
 } from "$lib/auth/utils/email";
-import { getClientDB } from "$lib/firebase/client";
+import {
+    EMAIL_VERIFICATION_CODES,
+    PASSWORD_RESET_TOKENS,
+    USERS,
+} from "$lib/firebase/collections";
 import { verify } from "@node-rs/argon2";
 import { fail, redirect, type Actions } from "@sveltejs/kit";
-import {
-    collection,
-    deleteDoc,
-    doc,
-    getDocs,
-    or,
-    query,
-    where,
-} from "firebase/firestore";
+import { deleteDoc, doc, getDocs, or, query, where } from "firebase/firestore";
 import type { PageServerLoad } from "../$types";
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -66,9 +62,8 @@ export const actions: Actions = {
         }
 
         // Check if email or username already exists
-        const usersCollection = collection(getClientDB(), "users");
         const userQuery = query(
-            usersCollection,
+            USERS,
             or(where("email", "==", email), where("username", "==", username))
         );
         const existingUsers = (await getDocs(userQuery)).docs;
@@ -114,9 +109,8 @@ export const actions: Actions = {
         const isUsername = (email as string)?.includes("@") ? false : true;
         const password = formData.get("password");
 
-        const usersCollection = collection(getClientDB(), "users");
         const q = query(
-            usersCollection,
+            USERS,
             where(isUsername ? "username" : "email", "==", email as string)
         );
         const existingUser = (await getDocs(q)).docs[0]?.data();
@@ -171,20 +165,11 @@ export const actions: Actions = {
 
         const userId = event.locals.user.id;
 
-        const usersCollection = collection(getClientDB(), "users");
-        await deleteDoc(doc(usersCollection, userId));
+        await deleteDoc(doc(USERS, userId));
 
-        const emailCodesCollection = collection(
-            getClientDB(),
-            "email_verification_codes"
-        );
-        await deleteDoc(doc(emailCodesCollection, userId));
+        await deleteDoc(doc(EMAIL_VERIFICATION_CODES, userId));
 
-        const passwordTokensCollection = collection(
-            getClientDB(),
-            "password_reset_tokens"
-        );
-        await deleteDoc(doc(passwordTokensCollection, userId));
+        await deleteDoc(doc(PASSWORD_RESET_TOKENS, userId));
 
         await invalidateUserSessions(userId);
         deleteSessionTokenCookie(event);

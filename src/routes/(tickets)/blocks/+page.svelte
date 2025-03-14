@@ -105,16 +105,20 @@
 
 {#if $user}
     <div class="mx-5 mt-5">
-        <Input placeholder="Cerca per codice" bind:value={searchTerm}>
+        <Input
+            class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+            placeholder="Cerca per codice"
+            bind:value={searchTerm}
+        >
             <Search slot="left" />
         </Input>
     </div>
     <div class="m-5">
         <Table
-            divClass="tableDiv relative overflow-x-auto overflow-y-visible"
-            class="relative overflow-visible overflow-x-auto rounded-md shadow-md sm:rounded-lg"
+            divClass="tableDiv relative overflow-visible"
+            class="relative overflow-x-visible overflow-y-auto rounded-md shadow-md sm:rounded-lg"
         >
-            <TableHead>
+            <TableHead class="dark:bg-neutral-600 dark:text-neutral-300">
                 <TableHeadCell class="cursor-pointer select-none"
                     >Codice Primo Biglietto</TableHeadCell
                 >
@@ -133,7 +137,9 @@
             </TableHead>
             <TableBody tableBodyClass="divide-y">
                 {#each blocks as block, index}
-                    <TableBodyRow class="w-full">
+                    <TableBodyRow
+                        class="w-full dark:bg-neutral-700 dark:border-neutral-500"
+                    >
                         <TableBodyCell>
                             <span class="flex items-center gap-4 font-medium">
                                 <span class="mr-4">{block.id}</span>
@@ -172,7 +178,6 @@
                                     {#if block.assigned_by?.avatar_url}
                                         <img
                                             loading="lazy"
-                                            onerror={() => console.log("error")}
                                             src={block.assigned_by?.avatar_url}
                                             alt={block.assigned_by?.alias[0]}
                                             class="h-7 w-7 rounded-full"
@@ -222,11 +227,13 @@
                                     </Button>
                                     <Dropdown
                                         placement="bottom-end"
+                                        border
+                                        classContainer="dark:bg-neutral-800 dark:border-neutral-600"
                                         triggeredBy="#assign-{index}"
                                     >
                                         {#each data.sellers as seller}
                                             <DropdownItem
-                                                class="flex items-center justify-start gap-2"
+                                                class="flex items-center justify-start gap-2 dark:hover:bg-neutral-700"
                                                 on:click={() =>
                                                     addBlock(block.id, seller)}
                                             >
@@ -262,7 +269,9 @@
                                     </Button>
                                     <Dropdown
                                         placement="bottom-end"
+                                        border
                                         triggeredBy="#edit-assign-{index}"
+                                        classContainer="dark:bg-neutral-800 dark:border-neutral-600"
                                     >
                                         {#each data.sellers as seller}
                                             <DropdownItem

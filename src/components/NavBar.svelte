@@ -147,14 +147,14 @@
             if (!hasPermission($user?.permissions, route.permission)) {
                 return false;
             }
-            
+
             if (route.children) {
-                route.children = route.children.filter((child) => 
+                route.children = route.children.filter((child) =>
                     hasPermission($user?.permissions, child.permission)
                 );
                 return route.children.length > 0;
             }
-            
+
             return true;
         });
     }
@@ -178,7 +178,7 @@
 </script>
 
 <navbar
-    class="sticky top-0 z-40 flex w-full items-center justify-between bg-gray-100 dark:bg-gray-900"
+    class="sticky top-0 z-40 flex w-full items-center justify-between bg-gray-100 dark:bg-neutral-900"
 >
     <a class="my-2 ml-[1%]" href="/">
         <Logo />
@@ -203,7 +203,7 @@
     </div>
 </navbar>
 <Drawer
-    class="z-50 max-h-screen overflow-y-hidden"
+    class="z-50 max-h-screen overflow-y-hidden dark:bg-neutral-800"
     placement="right"
     transitionType="fly"
     transitionParams={transitionParamsRight}
@@ -213,7 +213,7 @@
     <div class="flex h-full w-full flex-col">
         <div class="flex items-center">
             <h4
-                class=" mb-4 items-center text-2xl font-semibold text-gray-500 dark:text-gray-400"
+                class=" mb-4 items-center text-2xl font-semibold text-gray-500 dark:text-neutral-400"
             >
                 Menu
             </h4>
@@ -232,6 +232,7 @@
                         <Accordion flush>
                             <AccordionItem
                                 borderBottomClass=""
+                                class="dark:text-neutral-400"
                                 paddingFlush="p-0 justify-start"
                                 open={route.children.some(
                                     (child) => child.slug === page.url.pathname
@@ -248,7 +249,7 @@
                                     {#each route.children as childRoute}
                                         <a
                                             onclick={() => (hidden = true)}
-                                            class={`${childRoute.slug == page.url.pathname ? "text-primary-500" : "text-gray-500 dark:text-gray-400"}`}
+                                            class={`${childRoute.slug == page.url.pathname ? "text-primary-500" : "text-gray-500 dark:text-neutral-400"}`}
                                             href={childRoute.slug}
                                         >
                                             <span
@@ -265,7 +266,7 @@
                     {:else}
                         <a
                             onclick={() => (hidden = true)}
-                            class={`${route.slug == page.url.pathname ? "text-primary-500" : "text-gray-500 dark:text-gray-400"}`}
+                            class={`${route.slug == page.url.pathname ? "text-primary-500" : "text-gray-500 dark:text-neutral-400"}`}
                             href={route.slug}
                         >
                             <span
@@ -282,7 +283,7 @@
             <!-- Div in fondo -->
             {#if $user !== null}
                 <div
-                    class="text-md mx-auto flex w-full items-center justify-between self-baseline rounded-lg bg-gray-100 p-3 dark:bg-gray-600 dark:text-white"
+                    class="text-md mx-auto flex w-full items-center justify-between self-baseline rounded-lg bg-gray-100 p-3 dark:bg-neutral-600 dark:text-white"
                 >
                     <button
                         id="account"
@@ -306,8 +307,12 @@
                             >{$user?.username || "Non registrato"}</span
                         >
                     </button>
-                    <Dropdown placement="top" triggeredBy="#account">
-                        <DropdownItem>
+                    <Dropdown
+                        placement="top"
+                        triggeredBy="#account"
+                        classContainer="divide-y z-50 dark:bg-neutral-700"
+                    >
+                        <DropdownItem defaultClass="rounded-md font-medium py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-neutral-600">
                             <button
                                 class="text-red-400"
                                 onclick={() => {
@@ -318,7 +323,7 @@
                         </DropdownItem>
                     </Dropdown>
 
-                    <form use:enhance method="post" action="/">
+                    <form use:enhance method="POST" action="/?/logout">
                         <button type="submit">
                             <LogOut class="text-gray-500 dark:text-white" />
                         </button>
@@ -334,7 +339,9 @@
     bind:open={deleteModalOpen}
     onclose={() => (deleteModalOpen = false)}
     size="sm"
-    class="z-50"
+    class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
+    classHeader="dark:bg-neutral-800 dark:text-neutral-300"
+    classFooter="dark:bg-neutral-800 dark:text-neutral-300"
 >
     <form
         action="/login?/delete"
@@ -355,6 +362,7 @@
         <Button
             type="reset"
             color="alternative"
+            class="dark:text-neutral-400 dark:border-neutral-400 dark:hover:bg-neutral-700 dark:hover:border-neutral-300"
             on:click={() => (deleteModalOpen = false)}>No</Button
         >
     </form>

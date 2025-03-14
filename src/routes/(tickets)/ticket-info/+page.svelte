@@ -123,7 +123,7 @@
                     Codice Biglietto <span class="text-primary-700">*</span>
                     <Input
                         required
-                        class="mt-1"
+                        class="mt-1 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
                         bind:value={ticketCodeInput}
                         name="code"
                         autocomplete="off"
@@ -155,7 +155,7 @@
                     <QrReader bind:codeResult={ticketCode} />
                 </div>
 
-                <InfoCard bind:ticketCode bind:ticket />
+                <InfoCard {ticketCode} {ticket} />
 
                 <FeedbackToast
                     bind:open

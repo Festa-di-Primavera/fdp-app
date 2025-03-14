@@ -222,7 +222,7 @@
                     Codice Biglietto <span class="text-primary-700">*</span>
                     <Input
                         required
-                        class="mt-1"
+                        class="mt-1 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
                         bind:value={ticketCodeInput}
                         name="code"
                         autocomplete="off"
@@ -254,7 +254,7 @@
                     <QrReader bind:codeResult={ticketCode} />
                 </div>
 
-                <InfoCard bind:ticketCode bind:ticket bind:color />
+                <InfoCard {ticketCode} {ticket} {color} />
 
                 <FeedbackToast
                     bind:open={feedbackToastOpen}
@@ -264,8 +264,11 @@
                 />
                 <Modal
                     bind:open={errorsModalOpen}
-                    on:close={closeErrorsModal}
+                    onclose={closeErrorsModal}
                     size="xs"
+                    class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
+                    classHeader="dark:bg-neutral-800 dark:text-neutral-300"
+                    classFooter="dark:bg-neutral-800 dark:text-neutral-300"
                     dismissable={false}
                 >
                     {@const SvelteComponent =

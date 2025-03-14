@@ -1,16 +1,11 @@
 <script lang="ts">
     import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
     import type { User } from "$lib/auth/user";
-    import { getClientDB } from "$lib/firebase/client";
+    import { TICKETS } from "$lib/firebase/collections";
     import { formatDate } from "$lib/utils/textFormat";
     import type { Ticket } from "$models/ticket";
     import { user } from "$store/store";
-    import {
-        collection,
-        onSnapshot,
-        query,
-        type Unsubscribe,
-    } from "firebase/firestore";
+    import { onSnapshot, query, type Unsubscribe } from "firebase/firestore";
     import {
         Button,
         Hr,
@@ -39,7 +34,7 @@
     let unsubscribe: Unsubscribe = () => {};
 
     function getTickets() {
-        const q = query(collection(getClientDB(), "tickets"));
+        const q = query(TICKETS);
         unsubscribe = onSnapshot(q, (querySnapshot) => {
             tickets = querySnapshot.docs.map((ticketDoc) => {
                 const currentTicket = ticketDoc.data();
@@ -162,7 +157,7 @@
             <Input
                 bind:value={filters.name}
                 placeholder="Mario"
-                class="mt-1 w-full"
+                class="mt-1 w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
             />
         </Label>
         <Label>
@@ -170,7 +165,7 @@
             <Input
                 bind:value={filters.surname}
                 placeholder="Rossi"
-                class="mt-1 w-full"
+                class="mt-1 w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
             />
         </Label>
         <Label>
@@ -178,7 +173,7 @@
             <Input
                 bind:value={filters.ticketId}
                 placeholder="FDP25-0000"
-                class="mt-1 w-full"
+                class="mt-1 w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
             />
         </Label>
         <Label>
@@ -186,19 +181,18 @@
             <Input
                 bind:value={filters.seller}
                 placeholder="Marek"
-                class="mt-1 w-full"
+                class="mt-1 w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
             />
         </Label>
     </div>
 
-    <Hr class="mx-5 mt-5" />
+    <Hr classHr="mx-5 mt-5 dark:bg-neutral-500" />
     <div class="mx-5">
         <Table
-            hoverable={true}
             divClass="tableDiv relative overflow-x-auto overflow-y-visible pb-40"
             class="relative overflow-visible overflow-x-auto rounded-md shadow-md sm:rounded-lg"
         >
-            <TableHead>
+            <TableHead class="dark:bg-neutral-600 dark:text-neutral-300">
                 <TableHeadCell class="cursor-pointer select-none">
                     <div class="flex gap-1">Codice</div>
                 </TableHeadCell>
@@ -220,7 +214,9 @@
             </TableHead>
             <TableBody tableBodyClass="divide-y">
                 {#each filteredItems || [] as item}
-                    <TableBodyRow>
+                    <TableBodyRow
+                        class="w-full dark:bg-neutral-700 dark:border-neutral-500"
+                    >
                         <TableBodyCell
                             tdClass="px-6 py-4 whitespace-nowrap font-medium flex items-center gap-4"
                         >
@@ -309,7 +305,9 @@
     outsideclose
     bind:open={attrModalOpen}
     title={`Cambia il ${currAttr == "name" ? "nome" : "cognome"} di ${currSelectedTicket?.name} ${currSelectedTicket?.surname}`}
-    class="z-50"
+    class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
+    classHeader="dark:bg-neutral-800 dark:text-neutral-300"
+    classFooter="dark:bg-neutral-800 dark:text-neutral-300"
 >
     <span class="text-md"
         >Vuoi aggiornare il {currAttr == "name" ? "nome" : "cognome"} di
@@ -323,13 +321,14 @@
     </div>
     <Input
         bind:value={attribute}
-        class="mt-4"
+        class="mt-4 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
         placeholder={currSelectedTicket!![currAttr!!]}
     />
     <div slot="footer" class="flex gap-2">
         <Button on:click={() => handleAttrModify()}>Aggiorna</Button>
         <Button
             color="alternative"
+            class="dark:text-neutral-400 dark:border-neutral-400 dark:hover:bg-neutral-700 dark:hover:border-neutral-300"
             on:click={() => {
                 attribute = "";
                 attrModalOpen = false;

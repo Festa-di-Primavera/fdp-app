@@ -1,11 +1,10 @@
 import type { User } from "$lib/auth/user";
-import { getClientDB } from "$lib/firebase/client.js";
+import { TICKETS, USERS } from "$lib/firebase/collections.js";
 import { hasPermission } from "$lib/utils/permissions";
 import { UserPermissions } from "$models/permissions";
 import type { Ticket } from "$models/ticket";
 import { json } from "@sveltejs/kit";
 import {
-    collection,
     doc,
     getDocs,
     query,
@@ -41,14 +40,12 @@ export async function GET({ locals }) {
         );
     }
 
-    const ticketsCollection = collection(getClientDB(), "tickets");
-    const qTickets = query(ticketsCollection);
+    const qTickets = query(TICKETS);
     const qSnapTickets = await getDocs(qTickets);
 
     //get sellers
-    const usersCollection = collection(getClientDB(), "users");
     const qUsers = query(
-        usersCollection,
+        USERS,
         where("permissions", ">=", UserPermissions.VENDITA)
     );
     const qSnapUsers = await getDocs(qUsers);
@@ -110,7 +107,7 @@ export async function POST({ request, locals }) {
 
     const body = await request.json();
     for (const code of body.codes) {
-        const ticketRef = doc(getClientDB(), "tickets", code);
+        const ticketRef = doc(TICKETS, code);
         await setDoc(ticketRef, {
             name: null,
             surname: null,
@@ -120,8 +117,8 @@ export async function POST({ request, locals }) {
         });
     }
 
-    return json({
-        status: 200, // TODO: check if all tickets were added
+    return new Response(null, {
+        status: 204,
     });
 }
 
@@ -171,8 +168,7 @@ export async function PUT({ request, locals }) {
         attrs = {};
     }
 
-    const ticketsCollection = collection(getClientDB(), "tickets");
-    await updateDoc(doc(ticketsCollection, body.ticketId), attrs);
+    await updateDoc(doc(TICKETS, body.ticketId), attrs);
 
     return new Response("", {
         status: 200,

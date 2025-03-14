@@ -1,4 +1,4 @@
-import { getClientDB } from "$lib/firebase/client.js";
+import { TICKETS } from "$lib/firebase/collections";
 import { hasPermission } from "$lib/utils/permissions";
 import { UserPermissions } from "$models/permissions";
 import { fail, redirect } from "@sveltejs/kit";
@@ -37,7 +37,7 @@ export const actions = {
         const ticketsCodes = fileContent.toLocaleString().trim().split("\r\n");
 
         for (const code of ticketsCodes) {
-            const ticketRef = doc(getClientDB(), "tickets", code);
+            const ticketRef = doc(TICKETS, code);
             await setDoc(ticketRef, {
                 name: null,
                 surname: null,

@@ -35,13 +35,13 @@
         <form
             use:enhance
             method="post"
-            action="?/resetPassword"
+            action="?/passwordResetRequest"
             class="w-full flex flex-col items-center"
         >
             <Label class="w-full">
                 Email
                 <Input
-                    class="mt-2"
+                    class="mt-2 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
                     name="email"
                     autocomplete="off"
                     placeholder="example@email.com"

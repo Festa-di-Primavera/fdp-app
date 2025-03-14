@@ -84,21 +84,14 @@
     });
 
     let disableButton = $state(false);
-    // let x = (option === 'login' && (email === '' || password === '')) || (option === 'register' && (username === ''));
-    // (option === 'login' && (email === '' || password === '')) ||
-    // (option === 'register' &&
-    // 	(username === '' || email === '' || password === '' || repeatPassword === '')) ||
-    // validatorError ||
-    // usernameValidator ||
-    // (option === 'register' && (lessThanEightChars || noUpperCase || noNumber || noSpecialChar));
     let ToastIcon = $state(XCircle);
 </script>
 
 <section
     class="flex w-full flex-grow flex-col items-center justify-start px-5 py-10 text-xl text-black dark:text-white"
 >
-    <Card class="flex w-full max-w-96 flex-col items-center justify-center">
-        <div class="mb-5 flex w-full justify-around">
+    <Card class="flex w-full max-w-96 flex-col items-center justify-center dark:bg-neutral-900 dark:border-neutral-700 dark:divide-neutral-500">
+        <div class="mb-5 flex w-full justify-around dark:text-neutral-400">
             <button
                 onclick={() => (option = "login")}
                 class="w-[40%] border-b-2 {option == 'login'
@@ -113,7 +106,7 @@
             >
         </div>
 
-        <Card padding="none" class="mb-5 w-60">
+        <Card padding="none" class="mb-5 w-60 dark:bg-neutral-800 dark:text-neutral-400">
             <a
                 class="flex items-center justify-center gap-2 px-4 py-2"
                 href="/api/auth/google"
@@ -123,7 +116,7 @@
                 <span>Login con Google</span>
             </a>
         </Card>
-        <div class="mb-5 w-full border-[1px]"></div>
+        <div class="mb-5 w-full border-b-2"></div>
         <form
             class="flex w-full flex-col gap-3"
             method="post"
@@ -141,7 +134,7 @@
             {#if option === "register"}
                 <Label>
                     Nome utente
-                    <Input name="username" bind:value={username} class="mt-2" />
+                    <Input name="username" bind:value={username} class="mt-2 dark:bg-neutral-700 dark:border-neutral-500" />
 
                     {#if usernameValidator}
                         <Helper
@@ -157,7 +150,7 @@
 
             <Label>
                 Email {#if option === "login"}o nome utente{/if}
-                <Input name="email" bind:value={email} required class="mt-2" />
+                <Input name="email" bind:value={email} required class="mt-2 dark:bg-neutral-700 dark:border-neutral-500" />
             </Label>
 
             <Label>
@@ -167,7 +160,7 @@
                     name="password"
                     type={pwVisible ? "text" : "password"}
                     bind:value={password}
-                    on:blur={() => {
+                    onblur={() => {
                         lessThanEightChars = password.length < 8;
                         noUpperCase = !/[A-Z]/.test(password);
                         noNumber = !/[0-9]/.test(password);
@@ -176,7 +169,7 @@
                                 password
                             );
                     }}
-                    class="mt-2"
+                    class="mt-2 dark:bg-neutral-700 dark:border-neutral-500"
                 >
                     <PasswordEye bind:pwVisible slot="right" />
                 </Input>
@@ -197,9 +190,9 @@
                         type={pwVisible ? "text" : "password"}
                         color={!validatorError ? "base" : "red"}
                         bind:value={repeatPassword}
-                        on:blur={() =>
+                        onblur={() =>
                             (validatorError = !(password === repeatPassword))}
-                        class="mt-2"
+                        class="mt-2 dark:bg-neutral-700 dark:border-neutral-500"
                     >
                         <PasswordEye bind:pwVisible slot="right" />
                     </Input>
@@ -216,7 +209,7 @@
             {/if}
 
             <a
-                class="mt-1 w-max self-end p-0 text-sm hover:text-primary-500"
+                class="mt-1 w-max self-end p-0 text-sm hover:text-primary-500 dark:text-neutral-300"
                 href="/login/password-reset">Password dimenticata?</a
             >
             <Button
@@ -229,6 +222,7 @@
         </form>
     </Card>
 </section>
+
 <FeedbackToast
     bind:open={feedbackToastOpen}
     bind:color

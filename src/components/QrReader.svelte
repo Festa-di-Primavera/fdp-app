@@ -9,6 +9,7 @@
     import QrScanner from "qr-scanner";
     import { onDestroy, onMount } from "svelte";
     import FeedbackToast from "./feedbacks/FeedbackToast.svelte";
+    
     interface Props {
         codeResult: string;
     }
@@ -165,7 +166,7 @@
 
 <div class="flex w-full flex-col items-center gap-3">
     <div
-        class="relative aspect-square w-[80%] rounded-xl border-4 border-primary-600 bg-gray-400 dark:bg-gray-600 md:max-w-96"
+        class="relative aspect-square w-[80%] rounded-xl border-4 border-primary-600 bg-gray-400 dark:bg-neutral-600 md:max-w-96"
         id="videocontainer"
     >
         <Button
@@ -185,11 +186,11 @@
         {#if opened}
             <button
                 type="button"
-                class="absolute right-2 top-2 z-10 flex items-center gap-1 rounded-md bg-slate-400 bg-opacity-40 p-1 text-primary-400 dark:text-primary-900"
+                class="absolute right-2 top-2 z-10 flex items-center gap-1 rounded-md bg-neutral-400 bg-opacity-40 p-1 text-primary-400 dark:text-primary-900"
                 onclick={closeScanner}
             >
                 Chiudi
-                <X class="h-5 w-5 text-primary-400 dark:text-primary-900" />
+                <X class="size-5" />
             </button>
         {/if}
     </div>

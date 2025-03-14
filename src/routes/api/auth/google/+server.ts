@@ -1,5 +1,5 @@
 // routes/login/google/+server.ts
-import { google } from "$lib/auth/google";
+import { GOOGLE_OAUTH_CLIENT } from "$lib/auth/google";
 import { redirect } from "@sveltejs/kit";
 import { generateCodeVerifier, generateState } from "arctic";
 
@@ -8,7 +8,7 @@ import type { RequestEvent } from "@sveltejs/kit";
 export async function GET(event: RequestEvent): Promise<Response> {
     const state = generateState();
     const codeVerifier = generateCodeVerifier();
-    const url = await google.createAuthorizationURL(state, codeVerifier, [
+    const url = await GOOGLE_OAUTH_CLIENT.createAuthorizationURL(state, codeVerifier, [
         "openid",
         "profile",
         "email",

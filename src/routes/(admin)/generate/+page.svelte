@@ -1,6 +1,5 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
-    import { sineOut } from 'svelte/easing';
     import {
         Button,
         Card,
@@ -8,10 +7,11 @@
         Input,
         Label,
         NumberInput,
+        Progressbar,
         Spinner,
-        Progressbar
     } from "flowbite-svelte";
     import { CheckCircle2, XCircle } from "lucide-svelte";
+    import { sineOut } from "svelte/easing";
 
     import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
     import type { User } from "$lib/auth/user";
@@ -73,9 +73,11 @@
         // Mostra il toast solo alla fine del processo
         error = hasError;
         color = hasError ? "red" : "green";
-        message = hasError ? "Errore durante l'inserimento dei codici" : "Codici inseriti con successo";
+        message = hasError
+            ? "Errore durante l'inserimento dei codici"
+            : "Codici inseriti con successo";
         open = true;
-        
+
         // Nascondi la progress bar dopo un breve delay
         setTimeout(() => {
             showProgress = false;
@@ -132,7 +134,7 @@
     <section
         class="flex h-full w-full flex-grow flex-wrap items-start justify-center gap-4 py-6 px-6"
     >
-        <Card padding="md">
+        <Card padding="md" class="dark:bg-neutral-900 dark:border-neutral-600">
             <div
                 class="flex w-full max-w-96 flex-grow flex-col items-start gap-2"
             >
@@ -148,7 +150,7 @@
                         <Label class="flex flex-col items-start py-4">
                             Prefisso:
                             <Input
-                                class="mt-2 text-center"
+                                class="mt-2 text-center dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
                                 bind:value={prefix}
                                 placeholder={"FDP" +
                                     (
@@ -160,7 +162,7 @@
                         <Label class="flex flex-col items-start py-4">
                             Suffisso:
                             <Input
-                                class="mt-2 text-center"
+                                class="mt-2 text-center dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
                                 bind:value={suffix}
                             />
                         </Label>
@@ -168,15 +170,24 @@
                     <div class="flex gap-8">
                         <Label class="flex flex-col items-start gap-4 py-4">
                             N° cifre del codice:
-                            <NumberInput bind:value={codeLength} class="" />
+                            <NumberInput
+                                bind:value={codeLength}
+                                class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+                            />
                         </Label>
                         <Label class="flex flex-col items-start gap-4 py-4">
                             Quantità di codici:
-                            <NumberInput bind:value={numberOfCodes} class="" />
+                            <NumberInput
+                                bind:value={numberOfCodes}
+                                class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+                            />
                         </Label>
                         <Label class="flex flex-col items-start gap-4 py-4">
                             Numero di partenza:
-                            <NumberInput bind:value={startingNumber} class="" />
+                            <NumberInput
+                                bind:value={startingNumber}
+                                class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+                            />
                         </Label>
                     </div>
                     <div class="flex w-full flex-col gap-3 py-2">
@@ -229,7 +240,7 @@
                 </main>
             </div>
         </Card>
-        <Card>
+        <Card class="dark:bg-neutral-900 dark:border-neutral-600">
             <div
                 class="flex w-full max-w-96 flex-grow flex-col items-start gap-2"
             >
@@ -248,14 +259,15 @@
                 >
                     <Fileupload
                         name="fileToUpload"
-                        class="mt-4 w-full"
+                        size="sm"
+                        class="mt-4 p-0 w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400 [&::file-selector-button]:!bg-neutral-600 [&::file-selector-button]:!hover:bg-neutral-700"
                         accept=".csv"
                     />
                     <Button type="submit">Inserisci Codici da file</Button>
                 </form>
             </div>
         </Card>
-        <Card padding="md">
+        <Card padding="md" class="dark:bg-neutral-900 dark:border-neutral-600">
             <div
                 class="flex w-full max-w-96 flex-grow flex-col items-start gap-2"
             >
@@ -273,18 +285,24 @@
                     <div class="flex gap-8">
                         <Label class="flex flex-col items-start gap-4 py-4">
                             N° biglietti già inseriti:
-                            <NumberInput bind:value={ticketsNumber} class="" />
+                            <NumberInput
+                                bind:value={ticketsNumber}
+                                class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+                            />
                         </Label>
                         <Label class="flex flex-col items-start gap-4 py-4">
                             N° biglietti per blocco:
                             <NumberInput
                                 bind:value={ticketsPerBlock}
-                                class=""
+                                class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
                             />
                         </Label>
                         <Label class="flex flex-col items-start gap-4 py-4">
                             Codice di partenza:
-                            <NumberInput bind:value={startCode} class="" />
+                            <NumberInput
+                                bind:value={startCode}
+                                class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+                            />
                         </Label>
                     </div>
                     <div class="flex w-full flex-col gap-3 py-2">

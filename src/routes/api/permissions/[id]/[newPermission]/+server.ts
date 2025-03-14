@@ -1,4 +1,3 @@
-import { getClientDB } from "$lib/firebase/client";
 import {
     addPermission,
     hasPermission,
@@ -6,8 +5,9 @@ import {
 } from "$lib/utils/permissions";
 
 import type { User } from "$lib/auth/user";
+import { USERS } from "$lib/firebase/collections.js";
 import { UserPermissions } from "$models/permissions";
-import { collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 export async function PUT({ params, locals, request }) {
     if (!locals.user) {
@@ -37,8 +37,7 @@ export async function PUT({ params, locals, request }) {
     const add = (await request.json()).add;
 
     try {
-        const usersCollection = collection(getClientDB(), "users");
-        const userDoc = doc(usersCollection, params.id);
+        const userDoc = doc(USERS, params.id);
         const currentUser = (await getDoc(userDoc)).data() as User;
         const permission = parseInt(params.newPermission, 10);
 

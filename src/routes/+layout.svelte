@@ -17,7 +17,7 @@
     });
 </script>
 
-<div class="min-h-[100svh] dark:bg-gray-800 flex flex-col">
+<div class="min-h-[100svh] dark:bg-neutral-800 dark:text-neutral-400 flex flex-col">
     <NavBar />
     {@render children?.()}
 </div>

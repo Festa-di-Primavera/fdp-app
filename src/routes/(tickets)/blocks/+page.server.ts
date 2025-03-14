@@ -1,10 +1,10 @@
 import type { User } from "$lib/auth/user";
-import { getClientDB } from "$lib/firebase/client";
+import { BLOCKS, USERS } from "$lib/firebase/collections";
 import { hasPermission } from "$lib/utils/permissions";
 import type { Block } from "$lib/utils/tickets";
 import { UserPermissions } from "$models/permissions";
 import { redirect } from "@sveltejs/kit";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { getDocs, query, where } from "firebase/firestore";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -16,9 +16,8 @@ export const load: PageServerLoad = async ({ locals }) => {
         redirect(302, "/");
     }
 
-    const usersCollection = collection(getClientDB(), "users");
     const qUsers = query(
-        usersCollection,
+        USERS,
         where("permissions", ">=", UserPermissions.VENDITA)
     );
 
@@ -29,8 +28,7 @@ export const load: PageServerLoad = async ({ locals }) => {
         hasPermission(user.permissions, UserPermissions.VENDITA)
     );
 
-    const blocksCollection = collection(getClientDB(), "blocks");
-    const blocks = await getDocs(blocksCollection);
+    const blocks = await getDocs(BLOCKS);
     const blockList = blocks.docs.map((blockDoc) => {
         const data = blockDoc.data();
         return {

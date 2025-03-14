@@ -1,17 +1,10 @@
 import type { User } from "$lib/auth/user";
-import { getClientDB } from "$lib/firebase/client.js";
+import { TICKETS, USERS } from "$lib/firebase/collections.js";
 import { hasPermission } from "$lib/utils/permissions";
 import { getFdPCode } from "$lib/utils/tickets";
 import { UserPermissions } from "$models/permissions";
 import type { Ticket } from "$models/ticket";
-import {
-    collection,
-    doc,
-    getDoc,
-    setDoc,
-    Timestamp,
-    updateDoc,
-} from "firebase/firestore";
+import { doc, getDoc, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 
 export async function GET({ params, locals }) {
     if (!locals.user) {
@@ -50,7 +43,7 @@ export async function GET({ params, locals }) {
         });
     }
 
-    const ticketDoc = await getDoc(doc(getClientDB(), "tickets", code));
+    const ticketDoc = await getDoc(doc(TICKETS, code));
 
     if (!ticketDoc.exists()) {
         return new Response(
@@ -78,8 +71,7 @@ export async function GET({ params, locals }) {
         };
     } else {
         //* GET DEL NOME DEL VENDITORE
-        const usersCollection = collection(getClientDB(), "users");
-        const qUser = doc(usersCollection, ticketData.seller);
+        const qUser = doc(USERS, ticketData.seller);
         const seller = (await getDoc(qUser)).data() as User;
         const sellerName = seller?.alias;
 
@@ -161,7 +153,7 @@ export async function PUT({ params, locals }) {
         });
     }
 
-    const ticketDocRef = doc(getClientDB(), "tickets", code);
+    const ticketDocRef = doc(TICKETS, code);
 
     const ticketDoc = await getDoc(ticketDocRef);
 
@@ -193,8 +185,7 @@ export async function PUT({ params, locals }) {
         };
     } else {
         //* GET DEL NOME DEL VENDITORE
-        const usersCollection = collection(getClientDB(), "users");
-        const qUser = doc(usersCollection, ticketData.seller);
+        const qUser = doc(USERS, ticketData.seller);
         const seller = (await getDoc(qUser)).data() as User;
         const sellerName = seller?.alias;
 
@@ -238,7 +229,7 @@ export async function PUT({ params, locals }) {
 
     //* BIGLIETTO NON ANCORA VALIDATO
     const currentTimestamp = Timestamp.fromDate(new Date());
-    await updateDoc(doc(getClientDB(), "tickets", code), {
+    await updateDoc(doc(TICKETS, code), {
         checkIn: currentTimestamp,
     });
 
@@ -307,7 +298,7 @@ export async function POST({ params, request, locals }) {
     const seller = formData.seller;
     const soldAt = Timestamp.fromDate(new Date());
 
-    const ticket = await getDoc(doc(getClientDB(), "tickets", code));
+    const ticket = await getDoc(doc(TICKETS, code));
 
     if (!ticket.exists()) {
         const response = new Response(
@@ -338,7 +329,7 @@ export async function POST({ params, request, locals }) {
     }
 
     try {
-        await setDoc(doc(getClientDB(), "tickets", `${code}`), {
+        await setDoc(doc(TICKETS, `${code}`), {
             name: name,
             surname: surname,
             checkIn: null,
@@ -347,8 +338,7 @@ export async function POST({ params, request, locals }) {
         });
 
         //* AGGIORNAMENTO SOLDI DEL VENDITORE
-        const usersCollection = collection(getClientDB(), "users");
-        const userDoc = doc(usersCollection, seller);
+        const userDoc = doc(USERS, seller);
         const user = (await getDoc(userDoc)).data() as User;
         const userMoney = user.owned_money + 10;
         const totMoney = user.total_from_sales + 10;

@@ -184,7 +184,7 @@
                         Codice Biglietto <span class="text-primary-700">*</span>
                         <Input
                             required
-                            class="mt-1"
+                            class="mt-1 dark:bg-neutral-700 dark:border-neutral-500"
                             bind:value={ticketCodeInput}
                             name="code"
                             autocomplete="off"
@@ -422,6 +422,7 @@
             <span class="font-semibold text-red-500 block mb-2">Note:</span>
             <Input
                 type="text"
+                class="dark:bg-neutral-700 dark:border-neutral-500"
                 bind:value={currentItem.notes}
                 placeholder="Inserisci eventuali note..."
             />

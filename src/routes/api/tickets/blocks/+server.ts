@@ -1,8 +1,8 @@
 import { getClientDB } from "$lib/firebase/client.js";
+import { BLOCKS, TICKETS } from "$lib/firebase/collections.js";
 import { hasPermission } from "$lib/utils/permissions";
 import { UserPermissions } from "$models/permissions";
 import {
-    collection,
     doc,
     getCountFromServer,
     getDocs,
@@ -52,12 +52,7 @@ export async function POST({ locals, request }) {
     }
 
     try {
-        const dataBase = getClientDB();
-        const ticketsCollection = collection(dataBase, "tickets");
-
-        const ticketsCount = (
-            await getCountFromServer(ticketsCollection)
-        ).data().count;
+        const ticketsCount = (await getCountFromServer(TICKETS)).data().count;
         if (ticketsCount != body.ticketsNumber) {
             return new Response(
                 JSON.stringify({
@@ -76,9 +71,9 @@ export async function POST({ locals, request }) {
         const blocksToGenerate = body.ticketsNumber / body.ticketsPerBlock;
 
         // Cancella i blocchi esistenti prima di crearne di nuovi
-        const existingBlocksQuery = query(collection(dataBase, "blocks"));
+        const existingBlocksQuery = query(BLOCKS);
         const existingBlocksSnapshot = await getDocs(existingBlocksQuery);
-        const batch = writeBatch(dataBase);
+        const batch = writeBatch(getClientDB());
         existingBlocksSnapshot.forEach((doc) => batch.delete(doc.ref));
         await batch.commit();
 
@@ -88,7 +83,7 @@ export async function POST({ locals, request }) {
             const matrix = START + i * body.ticketsPerBlock;
             const blockId = "XNRF " + matrix.toString().padStart(5, "0");
             // Inserisci il nuovo blocco nella collezione "blocks"
-            await setDoc(doc(collection(dataBase, "blocks"), blockId), {
+            await setDoc(doc(BLOCKS, blockId), {
                 assigned_at: null,
                 assigned_by: null,
                 assigned_to: null,

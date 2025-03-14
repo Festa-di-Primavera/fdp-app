@@ -38,7 +38,7 @@
             left: 10,
             right: 25,
         },
-        backgroundColor: $theme == "dark" ? "rgb(31 41 55)" : "white",
+        backgroundColor: $theme == "dark" ? "#414041" : "white",
         xAxis: {
             data: ticketsData.labels,
             axisLabel: {
@@ -144,7 +144,7 @@
     });
 </script>
 
-<Card class="h-96 w-full">
+<Card class="h-96 w-full dark:bg-neutral-700 dark:border-neutral-500">
     <div class="mb-3 flex justify-between">
         <div class="grid grid-cols-2 gap-4">
             <div>
@@ -162,7 +162,7 @@
         </div>
         <div>
             <Select
-                class="mt-2"
+                class="mt-2 dark:bg-neutral-800 dark:border-neutral-500 dark:text-neutral-300"
                 items={timeOptions}
                 bind:value={selected}
                 placeholder="Scegli un'opzione"

@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-    resend: async ({ locals }) => {
+    resendEmail: async ({ locals }) => {
         if (!locals.user) return redirect(302, "/login");
 
         // Send verification email
@@ -25,7 +25,7 @@ export const actions: Actions = {
         );
         await sendVerificationCode(locals.user?.email, verificationCode);
     },
-    verify: async ({ request, locals }) => {
+    verifyCode: async ({ request, locals }) => {
         if (!locals.user) return redirect(302, "/login");
 
         const formData = await request.formData();

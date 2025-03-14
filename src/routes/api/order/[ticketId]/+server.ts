@@ -1,8 +1,8 @@
-import { getClientDB } from "$lib/firebase/client";
+import { ORDERS } from "$lib/firebase/collections.js";
 import { hasPermission } from "$lib/utils/permissions";
 import type { Order } from "$models/order.js";
 import { UserPermissions } from "$models/permissions";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { getDocs, query, where } from "firebase/firestore";
 
 export async function GET({ locals, params }) {
     if (!locals.user) {
@@ -31,7 +31,7 @@ export async function GET({ locals, params }) {
 
     const ticketId = decodeURIComponent(params.ticketId);
     const q = query(
-        collection(getClientDB(), "orders"),
+        ORDERS,
         where("ticketId", "==", ticketId),
         where("done", "==", null)
     );

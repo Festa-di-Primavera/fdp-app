@@ -1,9 +1,9 @@
 import { getClientDB } from "$lib/firebase/client";
+import { PASSWORD_RESET_TOKENS, USERS } from "$lib/firebase/collections";
 import { hash, verify } from "@node-rs/argon2";
 import { sha256 } from "@oslojs/crypto/sha2";
 import { encodeBase32LowerCaseNoPadding } from "@oslojs/encoding";
 import {
-    collection,
     doc,
     getDoc,
     getDocs,
@@ -14,9 +14,10 @@ import {
 } from "firebase/firestore";
 import { createDate, isWithinExpirationDate } from "oslo";
 import { encodeHex } from "oslo/encoding";
-import type { User } from "../user";
+import { TimeSpan } from "../../../models/timespan";
 import { sendEmail } from "../../utils/resend";
-import { TimeSpan } from "./timespan";
+import type { User } from "../user";
+import { passwordResetTemplate } from "../email-templates/password_reset";
 
 interface PasswordResetToken {
     user_id: string;
@@ -52,14 +53,10 @@ export const generatePasswordResetToken = async (userId: string) => {
     const tokenHash = encodeHex(sha256(new TextEncoder().encode(tokenId)));
 
     const db = getClientDB();
-    const passwordResetTokensCollection = collection(
-        db,
-        "password_reset_tokens"
-    );
 
     await runTransaction(db, async (trx) => {
-        trx.delete(doc(passwordResetTokensCollection, userId));
-        trx.set(doc(passwordResetTokensCollection, userId), {
+        trx.delete(doc(PASSWORD_RESET_TOKENS, userId));
+        trx.set(doc(PASSWORD_RESET_TOKENS, userId), {
             token_hash: tokenHash,
             user_id: userId,
             expires_at: createDate(new TimeSpan(15, "m")), // 15 minutes
@@ -71,12 +68,8 @@ export const generatePasswordResetToken = async (userId: string) => {
 
 /// Verify the token and return the user id
 export const verifyPasswordResetToken = async (tokenId: string) => {
-    const passwordResetTokensCollection = collection(
-        getClientDB(),
-        "password_reset_tokens"
-    );
     const passwordResetQuery = query(
-        passwordResetTokensCollection,
+        PASSWORD_RESET_TOKENS,
         where(
             "token_hash",
             "==",
@@ -115,20 +108,11 @@ export const sendPasswordResetEmail = async (
     email: string,
     resetToken: string
 ) => {
-    const htmlContent = `
-		<div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-			<h1>Richiesta di reset password</h1>
-			<p>Abbiamo ricevuto una richiesta di reset della tua password. Se non hai fatto tu questa richiesta, ignora questa email. Altrimenti, puoi resettare la tua password usando il link qui sotto.</p>
-
-			<p>
-			<a href="https://festa-cus.it/login/password-reset/${resetToken}" style="color: #337ab7; text-decoration: none;">Resetta la tua password</a>
-			</p>
-
-			<p>Se hai bisogno di aiuto o hai domande, contatta il nostro team di supporto. Siamo qui per aiutarti!</p>
-		</div>
-	`;
-
-    return await sendEmail(email, "Richiesta di Reset Password", htmlContent);
+    return await sendEmail(
+        email,
+        "Richiesta di Reset Password",
+        passwordResetTemplate(resetToken)
+    );
 };
 
 /// Check if the new password is the same as the old password
@@ -136,8 +120,7 @@ export const isSameAsOldPassword = async (
     userId: string,
     newPassword: string
 ) => {
-    const usersCollection = collection(getClientDB(), "users");
-    const userDoc = (await getDoc(doc(usersCollection, userId))).data() as User;
+    const userDoc = (await getDoc(doc(USERS, userId))).data() as User;
 
     // If user doesn't exist, return false
     if (!userDoc) {

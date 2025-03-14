@@ -1,15 +1,8 @@
 import type { User } from "$lib/auth/user";
-import { getClientDB } from "$lib/firebase/client";
+import { USERS } from "$lib/firebase/collections.js";
 import { hasPermission } from "$lib/utils/permissions.js";
 import { UserPermissions } from "$models/permissions";
-import {
-    collection,
-    doc,
-    getDocs,
-    query,
-    updateDoc,
-    where,
-} from "firebase/firestore";
+import { doc, getDocs, query, updateDoc, where } from "firebase/firestore";
 
 export async function PUT({ params, locals }) {
     if (!locals.user) {
@@ -36,8 +29,7 @@ export async function PUT({ params, locals }) {
         );
     }
 
-    const usersCollection = collection(getClientDB(), "users");
-    const qUser = query(usersCollection, where("alias", "==", params.alias));
+    const qUser = query(USERS, where("alias", "==", params.alias));
     const userDocs = (await getDocs(qUser)).docs.map(
         (doc) => doc.data() as User
     );
@@ -61,7 +53,7 @@ export async function PUT({ params, locals }) {
     const userID = params.id;
 
     try {
-        const userDoc = doc(usersCollection, userID);
+        const userDoc = doc(USERS, userID);
 
         await updateDoc(userDoc, { alias: params.alias });
 

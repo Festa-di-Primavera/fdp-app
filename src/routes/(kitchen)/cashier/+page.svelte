@@ -36,6 +36,8 @@
     } from "$models/order";
     import type { Ticket } from "$models/ticket";
     import { user } from "$store/store";
+    import OrderModal from "$components/food/cashier/OrderModal.svelte";
+    import OrderCard from "$components/food/kitchen/OrderCard.svelte";
 
     interface Props {
         data: User;
@@ -263,7 +265,7 @@
                         Codice Biglietto <span class="text-primary-700">*</span>
                         <Input
                             required
-                            class="mt-1"
+                            class="mt-1 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
                             bind:value={ticketCodeInput}
                             name="code"
                             autocomplete="off"
@@ -298,7 +300,7 @@
                 {:else}
                     <div class="flex flex-col gap-5">
                         <Card
-                            class="w-full flex flex-col text-lg p-3"
+                            class="w-full flex flex-col text-lg p-3 dark:bg-neutral-700 dark:border-neutral-500"
                             id="ticketInfos"
                         >
                             <span
@@ -313,7 +315,7 @@
                                 class="text-black dark:text-white w-full flex justify-between"
                             >
                                 <span>Nominativo:</span>
-                                <span
+                                <span class="text-right"
                                     >{(ticket?.name || "") +
                                         " " +
                                         (ticket?.surname || "")}</span
@@ -343,7 +345,7 @@
                                     onclick={() => openOrderModal(type)}
                                     class="flex-grow"
                                 >
-                                    <Card class="w-full" padding="sm"
+                                    <Card class="w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-200" padding="sm"
                                         >{type}</Card
                                     >
                                 </button>
@@ -357,7 +359,7 @@
                                     Ordine corrente:
                                 </h3>
                                 {#each [...orderItems].reverse() as item, i}
-                                    <Card padding="sm" class="relative">
+                                    <Card padding="sm" class="relative dark:bg-neutral-700 dark:border-neutral-500">
                                         <div
                                             class="absolute right-2 top-2 flex gap-2"
                                         >
@@ -435,102 +437,4 @@
     </div>
 </section>
 
-<Modal bind:open={showModal} size="md" class="z-50">
-    <h2 class="text-xl font-bold" slot="header">
-        Personalizza {currentItem.type}
-    </h2>
-    <div class="flex gap-3 mb-4 items-center">
-        Quantità
-        <div class="flex items-center gap-3">
-            <button onclick={() => adjustQuantity(false)}>
-                <Minus class="w-5 h-5" />
-            </button>
-            <Input
-                bind:value={currentItem.quantity}
-                class="w-12 text-center"
-                type="number"
-                min="1"
-                max="100"
-            />
-            <button onclick={() => adjustQuantity(true)}>
-                <Plus class="w-5 h-5" />
-            </button>
-        </div>
-    </div>
-
-    <div class="mb-4 flex flex-col">
-        <Label class="flex items-center gap-2 mb-4">
-            <Checkbox bind:checked={currentItem.glutenFree} />
-            <span class="font-semibold text-orange-300">Senza glutine</span>
-        </Label>
-
-        {#if DEFAULT_INGREDIENTS[currentItem.type].length > 0}
-            <span class="mb-2 text-red-500 font-bold">Rimuovi ingredienti:</span
-            >
-        {/if}
-        {#each DEFAULT_INGREDIENTS[currentItem.type] as ingredient}
-            <div class="flex items-center gap-2 p-1 rounded">
-                <Label class="flex items-center gap-2">
-                    <Checkbox
-                        checked={currentItem.removedIngredients?.includes(
-                            ingredient
-                        )}
-                        onchange={() => {
-                            if (
-                                currentItem.removedIngredients?.includes(
-                                    ingredient
-                                )
-                            ) {
-                                currentItem.removedIngredients =
-                                    currentItem.removedIngredients.filter(
-                                        (i: BaseIngredient) => i !== ingredient
-                                    );
-                            } else {
-                                currentItem.removedIngredients = [
-                                    ...(currentItem.removedIngredients || []),
-                                    ingredient,
-                                ];
-                            }
-                        }}
-                    />
-                    <span
-                        class:line-through={currentItem.removedIngredients?.includes(
-                            ingredient
-                        )}
-                        class:text-red-500={currentItem.removedIngredients?.includes(
-                            ingredient
-                        )}
-                    >
-                        {ingredient}
-                    </span>
-                </Label>
-            </div>
-        {/each}
-
-        <span class="mb-2 text-green-500 font-bold">Aggiungi salse:</span>
-        {#each Object.values(Sauce) as sauce}
-            <div class="flex items-center gap-2 p-1 rounded">
-                <Label class="flex items-center gap-2">
-                    <Radio
-                        name="sauce"
-                        onchange={() => {
-                            currentItem.sauce = sauce;
-                        }}
-                    />
-                    <span class:text-green-500={currentItem.sauce === sauce}>
-                        {sauce}
-                    </span>
-                </Label>
-            </div>
-        {/each}
-    </div>
-
-    <div class="flex justify-end gap-3">
-        <Button color="alternative" onclick={() => (showModal = false)}
-            >Annulla</Button
-        >
-        <Button color="primary" onclick={addToOrder}>
-            {isEditing ? "Modifica" : "Aggiungi"}
-        </Button>
-    </div>
-</Modal>
+<OrderModal bind:showModal bind:currentItem bind:isEditing {addToOrder} {adjustQuantity}/>

@@ -15,22 +15,28 @@
     } from "flowbite-svelte";
     import { CheckCircle2, XCircle } from "lucide-svelte";
 
-    export let data: {
-        user: User;
-        sellers: User[];
-    };
+    interface Props {
+        data: {
+            user: User;
+            sellers: User[];
+        };
+    }
+
+    let { data }: Props = $props();
 
     if (!$user) $user = data.user;
 
     // changes toast variables
-    let changeToastOpen: boolean = false;
-    let color: "green" | "red" = "green";
-    let message: string = "";
-    let error: boolean = false;
+    let changeToastOpen: boolean = $state(false);
+    let color: "green" | "red" = $state("green");
+    let message: string = $state("");
+    let error: boolean = $state(false);
     let timeOut: NodeJS.Timeout;
-    $: toastIcon = error ? XCircle : CheckCircle2;
+    const ToastIcon = $derived(error ? XCircle : CheckCircle2);
 
-    const debtToClaimMap: { [key: string]: number } = {};
+    let sellers: User[] = $state(data.sellers);
+    const debtToClaimMap: { [key: string]: number } = $state({});
+
     const claimMoney = async (selectedUser: User) => {
         const debtToClaim = debtToClaimMap[selectedUser.id];
         if (
@@ -46,7 +52,12 @@
                 changeToastOpen = false;
                 clearTimeout(timeOut);
             }, 3500);
-            message = "Importo non valido";
+            message =
+                debtToClaim <= 0
+                    ? "L'importo deve essere positivo"
+                    : debtToClaim > selectedUser.owned_money
+                      ? "L'importo è troppo alto"
+                      : "Errore";
             return;
         }
 
@@ -58,12 +69,13 @@
             });
 
             if (resp.ok) {
-                data.sellers = data.sellers.map((item: User) => {
+                sellers = sellers.map((item: User) => {
                     if (item.id === selectedUser.id) {
                         item.owned_money -= debtToClaim;
                     }
                     return item;
                 });
+                sellers = [...sellers];
                 error = false;
                 color = "green";
             } else {
@@ -104,10 +116,10 @@
             divClass="tableDiv relative overflow-x-auto overflow-y-visible"
             class="relative overflow-visible overflow-x-auto rounded-md shadow-md sm:rounded-lg"
         >
-            <TableHead>
+            <TableHead class="dark:bg-neutral-600 dark:text-neutral-300">
                 <TableHeadCell class="max-w-5 text-nowrap p-0"></TableHeadCell>
                 <TableHeadCell
-                    class="sticky left-0 h-full cursor-pointer select-none text-nowrap bg-gray-50 dark:bg-gray-700"
+                    class="sticky left-0 h-full cursor-pointer select-none text-nowrap dark:bg-neutral-600 dark:text-neutral-300"
                     >Venditore</TableHeadCell
                 >
                 <TableHeadCell
@@ -119,13 +131,16 @@
                     >Da riscuotere</TableHeadCell
                 >
                 <TableHeadCell
-                    class="cursor-pointer select-none text-nowrap text-center"
+                    class="cursor-pointer select-none text-nowrap text-left"
                     >Salda debito</TableHeadCell
                 >
+                <TableHeadCell />
             </TableHead>
             <TableBody tableBodyClass="divide-y">
-                {#each data.sellers || [] as item, index}
-                    <TableBodyRow class="w-full">
+                {#each sellers || [] as item, index}
+                    <TableBodyRow
+                        class="w-full dark:bg-neutral-700 dark:border-neutral-500"
+                    >
                         <TableBodyCell class="bg-inherit p-0 pl-5">
                             {#if index < 3}
                                 <!-- Classifica -->
@@ -175,25 +190,26 @@
                         </TableBodyCell>
                         <TableBodyCell class="text-center">
                             <div
-                                class="flex w-full items-center justify-center gap-4"
+                                class="flex w-full items-center justify-left gap-4"
                             >
                                 <NumberInput
                                     min="1"
                                     max={item.owned_money}
                                     bind:value={debtToClaimMap[item.id]}
-                                    class="z-10 w-max text-center"
+                                    class="z-10 w-max text-center dark:bg-neutral-800 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400 dark:disabled:bg-neutral-500 dark:disabled:border-neutral-300"
                                     disabled={item.owned_money === 0}
                                 />
                                 <span class="text-nowrap"
                                     >su € {item.owned_money}</span
                                 >
-                                <Button
-                                    class="ml-2"
-                                    on:click={() => claimMoney(item)}
-                                    disabled={item.owned_money === 0}
-                                    >Salda</Button
-                                >
                             </div>
+                        </TableBodyCell>
+                        <TableBodyCell>
+                            <Button
+                                class="ml-2"
+                                onclick={() => claimMoney(item)}
+                                disabled={item.owned_money === 0}>Salda</Button
+                            >
                         </TableBodyCell>
                     </TableBodyRow>
                 {/each}
@@ -210,9 +226,4 @@
     </div>
 {/if}
 
-<FeedbackToast
-    bind:open={changeToastOpen}
-    bind:color
-    bind:ToastIcon={toastIcon}
-    bind:message
-/>
+<FeedbackToast bind:open={changeToastOpen} {color} {ToastIcon} {message} />
