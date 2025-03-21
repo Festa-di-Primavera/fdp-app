@@ -10,7 +10,7 @@ export function verificationCodeTemplate(code: string) {
 		<body style="font-family: Arial, sans-serif; margin: 0; padding: 0; color: #333;">
 			<div style="background-color: #ffffff; margin: 50px auto; padding: 20px; max-width: 600px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
 				<div style="text-align: center; background-color: #008b27; padding: 20px 0; border-radius: 10px 10px 0 0;">
-					<img src="https://i.ibb.co/8D5qFGBw/logo.png" alt="email-logo" border="0" height="75rem"></a>
+					<img src="https://i.ibb.co/8D5qFGBw/logo.png" alt="email-logo" border="0" height="75rem">
 				</div>
 				<div style="padding: 30px; text-align: center;">
 					<h2 style="font-size: 24px; color: #333; margin-bottom: 20px;">Benvenuto nell'app della Festa di Primavera!</h2>

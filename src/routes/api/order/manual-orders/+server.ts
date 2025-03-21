@@ -1,10 +1,10 @@
+import { ID_ENCRYPTION_KEY } from "$env/static/private";
+import { ORDERS } from "$lib/firebase/collections";
 import { getStringFromEnumValue } from "$lib/utils/enums";
 import { sendEmail } from "$lib/utils/resend";
 import { ItemType, type Order } from "$models/order";
-import { ID_ENCRYPTION_KEY } from "$env/static/private";
 import CryptoJS from "crypto-js";
 import { doc, Timestamp, updateDoc } from "firebase/firestore";
-import { ORDERS } from "$lib/firebase/collections";
 
 function getIngredientsList(type: ItemType): string {
     switch (type) {
@@ -29,11 +29,69 @@ export async function POST({ request }) {
 
     let castedOrder: Order = order;
 
-    const encryptedOrderId = CryptoJS.AES.encrypt(orderId, ID_ENCRYPTION_KEY).toString();
+    const encryptedOrderId = CryptoJS.AES.encrypt(
+        orderId,
+        ID_ENCRYPTION_KEY
+    ).toString();
 
-    const personalURL = `https://festa-cus.it/order/${encodeURIComponent(encryptedOrderId)}`;
+    const personalURL = `https://festa-cus.it/order/${encodeURIComponent(
+        encryptedOrderId
+    )}`;
 
     const htmlContent = `
+        <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto; padding: 16px; color: #2d3748; background-color: #ffffff;">
+            <div style="text-align: center; background-color: #008b27; background-opacity: 50%; padding: 10px 0; border-radius: 10px;">
+                <img src="https://i.postimg.cc/KcsnWRPH/logo.png" alt="fdp-logo" border="0" height="80rem">
+            </div>
+            <p style="font-size: 16px; line-height: 1.5;">Ciao ${capName} ${capSurname}</p>
+            <p style="font-size: 16px; line-height: 1.5;"><b>In fondo</b> alla mail trovi il pulsante per attivare l'ordine ↓</p>
+
+            <div style="background-color: #f0f7f0; padding: 16px; border-radius: 12px; margin: 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <h3 style="margin: 0 0 16px 0; color: #006b1f; font-size: 18px;">Riepilogo Ordine</h3>
+                <div style="padding: 16px; background-color: white; border-radius: 12px; border: 1px solid #c8e6c9;">
+                    <div style="margin-bottom: 12px;">
+                        <span style="font-size: 15px; margin-right: 8px;">🍔</span>
+                        <strong style="font-size: 16px; color: #2d3748; display: inline-block;">Panino ${getStringFromEnumValue(
+                            ItemType,
+                            castedOrder.items[0].type
+                        )}</strong>
+                    </div>
+                    ${
+                        castedOrder.items[0].glutenFree
+                            ? '<div style="margin: 8px 0;"><span style="background-color: #c6f6d5; color: #276749; padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: 500;">SENZA GLUTINE</span></div>'
+                            : ""
+                    }
+                    <div style="font-size: 14px; color: #4a5568; margin: 8px 0;">
+                        <strong>Ingredienti:</strong> ${getIngredientsList(
+                            castedOrder.items[0].type
+                        )}
+                    </div>
+                    ${
+                        castedOrder.items[0].removedIngredients?.length
+                            ? `<div style="font-size: 14px; color: #f56565; margin: 8px 0;">
+                                <strong>Rimozioni:</strong> ${castedOrder.items[0].removedIngredients.join(
+                                    ", "
+                                )}
+                            </div>`
+                            : ""
+                    }
+                </div>
+            </div>
+
+            <div style="font-size: 14px; background-color: rgba(220, 38, 38, 0.1); padding: 12px; border-radius: 8px; margin-top: 16px; color: #dc2626;">
+                <strong>Nota:</strong> Clicca il pulsante sotto quando sei pronto per mangiare, segui le istruzioni e mettiti in fila.
+            </div>
+            
+            <div style="text-align: center; margin: 24px 0;">
+                <a href="${personalURL}" style="display: block; width: max-content; margin: 0 auto; background-color: #008b27; color: white; padding: 12px 20px; border-radius: 6px; text-decoration: none; font-weight: 500; font-size: 16px;">Vai all'ordine</a>
+            </div>
+
+
+            <p style="font-size: 14px; margin-top: 20px;">A presto!😉<br>Lo staff della Festa di Primavera</p>
+        </div>
+    `;
+
+    /* const htmlContent = `
 		<div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #2d3748; background-color: #ffffff;">
 			<h2 style="color: #3182ce; margin-bottom: 28px; font-size: 24px; font-weight: 600;">Ordine Panino - Festa di Primavera</h2>
 			<p style="font-size: 16px; line-height: 1.6;">Ciao ${capName} ${capSurname},</p>
@@ -92,7 +150,7 @@ export async function POST({ request }) {
 			<p style="font-size: 16px; line-height: 1.6; margin-top: 28px;">A presto!😉</p>
 			<p style="font-size: 16px; line-height: 1.6;">Lo staff della Festa di Primavera</p>
 		</div>
-	`;
+	`; */
 
     const emailResult = await sendEmail(
         email,
