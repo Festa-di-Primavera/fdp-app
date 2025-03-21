@@ -15,14 +15,14 @@
 
     async function sendToKitchen() {
         if (!order || order.done !== null) return;
-        
+
         // Show confirmation modal instead of immediately sending
         showConfirmModal = true;
     }
-    
+
     async function confirmSendToKitchen() {
         showConfirmModal = false;
-        
+
         if (!order || order.done !== null) return;
 
         loading = true;
@@ -179,11 +179,15 @@
                 {loading ? "Invio in corso..." : "Invia ordine alla cucina"}
             </Button>
         {:else if order.done === false}
-            <div class="flex self-center justify-center text-md w-max dark:bg-opacity-50 bg-opacity-50 bg-orange-400 text-orange-700 dark:bg-orange-700 dark:text-orange-300 p-2 rounded-lg">
-                Ordine inviato alla cucina                
+            <div
+                class="flex self-center justify-center text-md w-max dark:bg-opacity-50 bg-opacity-50 bg-orange-400 text-orange-700 dark:bg-orange-700 dark:text-orange-300 p-2 rounded-lg"
+            >
+                Ordine inviato alla cucina
             </div>
         {:else}
-            <div class="flex self-center justify-center text-md w-max dark:bg-opacity-50 bg-opacity-50 bg-red-400 text-red-700 dark:bg-red-700 dark:text-red-300 p-2 rounded-lg">
+            <div
+                class="flex self-center justify-center text-md w-max dark:bg-opacity-50 bg-opacity-50 bg-red-400 text-red-700 dark:bg-red-700 dark:text-red-300 p-2 rounded-lg"
+            >
                 Ordine già consegnato
             </div>
         {/if}
@@ -198,14 +202,14 @@
     classHeader="dark:bg-neutral-800 dark:text-neutral-300"
     classFooter="dark:bg-neutral-800 dark:text-neutral-300"
 >
-    <h2 class="text-xl font-bold" slot="header">
-        Conferma invio ordine
-    </h2>
-    
+    <h2 class="text-xl font-bold" slot="header">Conferma invio ordine</h2>
+
     <div class="mb-4">
         <p>Sei sicuro di voler inviare questo ordine alla cucina?</p>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-            Una volta inviato, l'ordine sarà visibile alla cucina e non potrà essere annullato.
+        <p class="text-sm text-gray-800 dark:text-white mt-2">
+            Una volta inviato, l'ordine sarà visibile alla cucina e non potrà
+            essere annullato.<br /><br />
+            <span class="font-semibold">Mettiti in coda appena clicchi su <i>"Conferma"</i></span>
         </p>
     </div>
 
@@ -213,13 +217,10 @@
         <Button
             color="alternative"
             class="dark:text-neutral-400 dark:border-neutral-400 dark:hover:bg-neutral-700 dark:hover:border-neutral-300"
-            onclick={() => (showConfirmModal = false)}>
+            onclick={() => (showConfirmModal = false)}
+        >
             Annulla
         </Button>
-        <Button 
-            color="primary" 
-            onclick={confirmSendToKitchen}>
-            Conferma
-        </Button>
+        <Button color="primary" onclick={confirmSendToKitchen}>Conferma</Button>
     </div>
 </Modal>

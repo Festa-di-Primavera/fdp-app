@@ -4,7 +4,7 @@ import type { Order } from "$models/order";
 import { error } from "@sveltejs/kit";
 import CryptoJS from "crypto-js";
 import { doc, getDoc, Timestamp } from "firebase/firestore";
-import type { PageServerLoad } from "../$types";
+import type { PageServerLoad } from "./$types";
 
 interface Params {
     orderId: string;
