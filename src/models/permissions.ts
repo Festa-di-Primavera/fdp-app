@@ -4,11 +4,12 @@
     /sell           
     /check-in       
     /kitchen        
-    /cashier        
-    /dashboard      
-    /tickets        
-    /users          
-    /generate       
+    /cashier    /checkpoint
+    /dashboard
+    /tickets    /blocks
+    /users      /earnings
+    /generate
+    /csv-orders
 */
 
 export enum UserPermissions {
@@ -21,4 +22,5 @@ export enum UserPermissions {
     LISTA_BIGLIETTI = 1 << 6, // 64
     UTENTI          = 1 << 7, // 128
     GENERAZIONE     = 1 << 8, // 256
+    ORDINI          = 1 << 9, // 512
 }

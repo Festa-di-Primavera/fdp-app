@@ -209,16 +209,16 @@
             class="relative overflow-visible overflow-x-auto rounded-md shadow-md sm:rounded-lg "
         >
             <TableHead class="dark:bg-neutral-600 dark:text-neutral-300">
-                <TableHeadCell class="cursor-pointer select-none">
+                <TableHeadCell class="select-none">
                     <div class="flex gap-1">Nome</div>
                 </TableHeadCell>
-                <TableHeadCell class="cursor-pointer select-none">
+                <TableHeadCell class="select-none">
                     <div class="flex gap-1">Email</div>
                 </TableHeadCell>
-                <TableHeadCell class="cursor-pointer select-none">
+                <TableHeadCell class="select-none">
                     <div class="flex gap-1">Permessi</div>
                 </TableHeadCell>
-                <TableHeadCell class="cursor-pointer select-none">
+                <TableHeadCell class="select-none">
                     <div class="flex justify-center gap-1">Alias</div>
                 </TableHeadCell>
                 <TableHeadCell class="text-center">Elimina</TableHeadCell>
@@ -242,7 +242,7 @@
                                         class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary-700 to-primary-400 font-mono text-white"
                                     >
                                         <span
-                                            >{item.username[0].toUpperCase()}</span
+                                            >{item.username[0]?.toUpperCase()}</span
                                         >
                                     </div>
                                 {/if}

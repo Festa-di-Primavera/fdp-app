@@ -18,6 +18,7 @@
         ScanLine,
         Ticket,
         Users,
+        Utensils,
         XCircle,
     } from "lucide-svelte";
 
@@ -65,6 +66,7 @@
         [UserPermissions.LISTA_BIGLIETTI]: Ticket,
         [UserPermissions.UTENTI]: Users,
         [UserPermissions.GENERAZIONE]: Dna,
+        [UserPermissions.ORDINI]: Utensils
     };
 
     function getPermissionIcon(permission: UserPermissions) {

@@ -74,7 +74,7 @@
                                 },
                             ],
                             done: null,
-                            timestamp: Date.now(),
+                            creationDate: new Date(Date.now()),
                             ticketId: `XNRF${OFFSET + rowIndex}/25`,
                         };
                         rowIndex++;
@@ -151,7 +151,7 @@
 </script>
 
 <div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4">Carica ordini da CSV</h1>
+    <h1 class="text-2xl font-bold mb-4 text-primary-500">Carica ordini da CSV</h1>
 
     <div class="mb-4 flex- col">
         <Label>

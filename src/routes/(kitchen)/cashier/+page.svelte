@@ -1,20 +1,9 @@
 <script lang="ts">
-    import {
-        Button,
-        Card,
-        Checkbox,
-        Input,
-        Label,
-        Modal,
-        Radio,
-        Spinner,
-    } from "flowbite-svelte";
+    import { Button, Card, Input, Label, Spinner } from "flowbite-svelte";
     import {
         Check,
         CheckCircle2,
-        Minus,
         PencilLine,
-        Plus,
         Send,
         Ticket as TicketIcon,
         Trash2,
@@ -24,20 +13,12 @@
 
     import QrReader from "$components/QrReader.svelte";
     import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
+    import OrderModal from "$components/food/cashier/OrderModal.svelte";
     import type { User } from "$lib/auth/user";
     import { getXnrfCode } from "$lib/utils/tickets";
-    import {
-        type Order,
-        type OrderItem,
-        BaseIngredient,
-        DEFAULT_INGREDIENTS,
-        ItemType,
-        Sauce,
-    } from "$models/order";
+    import { type Order, type OrderItem, ItemType } from "$models/order";
     import type { Ticket } from "$models/ticket";
     import { user } from "$store/store";
-    import OrderModal from "$components/food/cashier/OrderModal.svelte";
-    import OrderCard from "$components/food/kitchen/OrderCard.svelte";
 
     interface Props {
         data: User;
@@ -199,7 +180,7 @@
                 surname: ticket?.surname || "",
                 items: orderItems,
                 done: false,
-                creationDate: new Date(Date.now())
+                creationDate: new Date(Date.now()),
             };
             const response = await fetch("/api/order", {
                 method: "POST",
@@ -345,8 +326,9 @@
                                     onclick={() => openOrderModal(type)}
                                     class="flex-grow"
                                 >
-                                    <Card class="w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-200" padding="sm"
-                                        >{type}</Card
+                                    <Card
+                                        class="w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-200"
+                                        padding="sm">{type}</Card
                                     >
                                 </button>
                             {/each}
@@ -359,7 +341,10 @@
                                     Ordine corrente:
                                 </h3>
                                 {#each [...orderItems].reverse() as item, i}
-                                    <Card padding="sm" class="relative dark:bg-neutral-700 dark:border-neutral-500">
+                                    <Card
+                                        padding="sm"
+                                        class="relative dark:bg-neutral-700 dark:border-neutral-500"
+                                    >
                                         <div
                                             class="absolute right-2 top-2 flex gap-2"
                                         >
@@ -437,4 +422,11 @@
     </div>
 </section>
 
-<OrderModal bind:showModal bind:currentItem bind:isEditing {addToOrder} {adjustQuantity}/>
+<OrderModal
+    bind:showModal
+    bind:currentItem
+    bind:isEditing
+    hasSauce={false}
+    {addToOrder}
+    {adjustQuantity}
+/>

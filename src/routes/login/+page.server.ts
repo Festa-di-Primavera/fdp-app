@@ -45,19 +45,19 @@ export const actions: Actions = {
         ) {
             return fail(400, {
                 error: true,
-                message: "Invalid password",
+                message: "Password non valida",
             });
         }
         if (password !== passwordRepeat) {
             return fail(400, {
                 error: true,
-                message: "Passwords do not match",
+                message: "Le password non corrispondono",
             });
         }
         if (typeof email !== "string" || !isValidEmail(email)) {
             return fail(400, {
                 error: true,
-                message: "Invalid email",
+                message: "Email non valida",
             });
         }
 
@@ -126,7 +126,7 @@ export const actions: Actions = {
             return fail(400, {
                 error: true,
                 message:
-                    "Utente registrato con Google\nRegistrati con email e password oppure accedi con Google",
+                    "Utente registrato con Google.\nL'accesso con email e password è disabilitato",
             });
         }
 

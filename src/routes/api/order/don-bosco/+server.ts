@@ -4,13 +4,15 @@ import { generateTicketImage } from "$lib/utils/imageGenerator";
 import { ItemType, Sauce, type Order } from "$models/order";
 
 function getIngredientsList(type: ItemType): string {
-    switch(type) {
+    switch (type) {
         case ItemType.ONTO:
-            return "Pane, hamburger, cipolla, peperoni, insalata";
+            return "Pane, hamburger, formaggio, cipolla, peperoni, insalata";
+        case ItemType.VEGETARIANO:
+            return "Pane, formaggio, cipolla, peperoni, insalata";
         case ItemType.BASIC:
-            return "Pane, hamburger";
+            return "Pane, hamburger, formaggio";
         default:
-            return "";
+            return "ERRORE NEL RECUPERO DEGLI INGREDIENTI";
     }
 }
 
@@ -19,12 +21,17 @@ export async function POST({ request }) {
     const { name, surname, email, order } = body;
 
     const capName = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
-    const capSurname = surname.charAt(0).toUpperCase() + surname.slice(1).toLowerCase();
+    const capSurname =
+        surname.charAt(0).toUpperCase() + surname.slice(1).toLowerCase();
     let trimmedTicketId = order.ticketId.replace("XNRF", "");
     trimmedTicketId = trimmedTicketId.replace("/25", "");
 
     let castedOrder: Order = order;
-    const qrImage = await generateTicketImage(capName, capSurname, castedOrder.ticketId);
+    const qrImage = await generateTicketImage(
+        capName,
+        capSurname,
+        castedOrder.ticketId
+    );
 
     const htmlContent = `
         <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #2d3748; background-color: #ffffff;">
@@ -43,24 +50,38 @@ export async function POST({ request }) {
                     <li style="padding: 20px; background-color: white; border-radius: 12px; border: 1px solid #e2e8f0; transition: all 0.2s;">
                         <div style="display: flex; margin-bottom: 12px; align-items: center;">
                             <span style="font-size: 15px; margin-right: 12px;">🍔</span>
-                            <strong style="font-size: 18px; color: #2d3748; height: max-content;">Panino ${getStringFromEnumValue(ItemType, castedOrder.items[0].type)}</strong>
-                            ${castedOrder.items[0].glutenFree ? 
-                                '<span style="background-color: #c6f6d5; color: #276749; padding: 6px 12px; border-radius: 6px; font-size: 14px; margin-left: 12px; font-weight: 500;">SENZA GLUTINE</span>' : 
-                                ''}
+                            <strong style="font-size: 18px; color: #2d3748; height: max-content;">Panino ${getStringFromEnumValue(
+                                ItemType,
+                                castedOrder.items[0].type
+                            )}</strong>
+                            ${
+                                castedOrder.items[0].glutenFree
+                                    ? '<span style="background-color: #c6f6d5; color: #276749; padding: 6px 12px; border-radius: 6px; font-size: 14px; margin-left: 12px; font-weight: 500;">SENZA GLUTINE</span>'
+                                    : ""
+                            }
                         </div>
                         <div style="font-size: 15px; color: #4a5568; margin: 12px 0; line-height: 1.5;">
-                            <strong>Ingredienti:</strong> ${getIngredientsList(castedOrder.items[0].type)}
+                            <strong>Ingredienti:</strong> ${getIngredientsList(
+                                castedOrder.items[0].type
+                            )}
                         </div>
-                        ${castedOrder.items[0].sauce ? 
-                            `<div style="font-size: 15px; color: #4a5568; line-height: 1.5;">
-                                <span style="font-size: 18px;">🥫</span> <strong>Salsa:</strong> ${getStringFromEnumValue(Sauce, castedOrder.items[0].sauce!!)}
-                            </div>` : 
-                            '<div style="font-size: 15px; color: #4a5568; line-height: 1.5;"><span style="font-size: 18px;">🥫</span> <strong>Salsa:</strong> Nessuna salsa</div>'}
-                        ${castedOrder.items[0].notes ? 
-                            `<div style="font-size: 15px; color: #4a5568; margin-top: 12px; line-height: 1.5;">
+                        ${
+                            castedOrder.items[0].sauce
+                                ? `<div style="font-size: 15px; color: #4a5568; line-height: 1.5;">
+                                <span style="font-size: 18px;">🥫</span> <strong>Salsa:</strong> ${getStringFromEnumValue(
+                                    Sauce,
+                                    castedOrder.items[0].sauce!!
+                                )}
+                            </div>`
+                                : '<div style="font-size: 15px; color: #4a5568; line-height: 1.5;"><span style="font-size: 18px;">🥫</span> <strong>Salsa:</strong> Nessuna salsa</div>'
+                        }
+                        ${
+                            castedOrder.items[0].notes
+                                ? `<div style="font-size: 15px; color: #4a5568; margin-top: 12px; line-height: 1.5;">
                                 <span style="font-size: 18px;">📝</span> <strong>Note:</strong> ${castedOrder.items[0].notes}
-                            </div>` : 
-                            ''}
+                            </div>`
+                                : ""
+                        }
                     </li>
                 </ul>
             </div>
@@ -81,28 +102,46 @@ export async function POST({ request }) {
         email,
         "Serata condivisa - Festa di Don Bosco",
         htmlContent,
-        [{ filename: `${capName}_${capSurname}_${trimmedTicketId}.png`, content: qrImage }],
-        "Festa di Don Bosco"
+        {
+            attachments: [
+                {
+                    filename: `${capName}_${capSurname}_${trimmedTicketId}.png`,
+                    content: qrImage,
+                },
+            ],
+            senderName: "Festa di Don Bosco",
+        }
     );
 
     if (emailResult.error) {
-        console.error(`[DON-BOSCO] Failed to send email to ${email}:`, emailResult.message);
-        return new Response(JSON.stringify({ 
-            success: false, 
-            message: emailResult.message 
-        }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' }
-        });
+        console.error(
+            `[DON-BOSCO] Failed to send email to ${email}:`,
+            emailResult.message
+        );
+        return new Response(
+            JSON.stringify({
+                success: false,
+                message: emailResult.message,
+            }),
+            {
+                status: 500,
+                headers: { "Content-Type": "application/json" },
+            }
+        );
     }
 
-    console.log(`[DON-BOSCO] Successfully processed order for ${name} ${surname}`);
-    return new Response(JSON.stringify({ 
-        success: true, 
-        message: "Order processed and email sent successfully",
-        emailId: emailResult.data?.id
-    }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-    });
+    console.log(
+        `[DON-BOSCO] Successfully processed order for ${name} ${surname}`
+    );
+    return new Response(
+        JSON.stringify({
+            success: true,
+            message: "Order processed and email sent successfully",
+            emailId: emailResult.data?.id,
+        }),
+        {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+        }
+    );
 }

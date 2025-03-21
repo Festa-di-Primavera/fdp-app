@@ -133,10 +133,10 @@
                 >
             </div>
             <!-- ORDINI ANCORA DA SCANNERIZZARE -->
-            <!-- <div class="flex flex-col items-center">
-                <span class="text-md text-red-500 dark:text-red-400">Mancanti</span>
+            <div class="flex flex-col items-center">
+                <span class="text-md text-red-500 dark:text-red-400">Mancanti <i>(STAFF)</i></span>
                 <span class="text-2xl font-semibold text-red-500 dark:text-red-400">{toDoOrders.length}</span>
-            </div> -->
+            </div>
         </div>
     </div>
 

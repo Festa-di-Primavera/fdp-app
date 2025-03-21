@@ -134,7 +134,7 @@
             {#if option === "register"}
                 <Label>
                     Nome utente
-                    <Input name="username" bind:value={username} class="mt-2 dark:bg-neutral-700 dark:border-neutral-500" />
+                    <Input name="username" bind:value={username} required class="mt-2 dark:bg-neutral-700 dark:border-neutral-500" />
 
                     {#if usernameValidator}
                         <Helper
@@ -159,6 +159,7 @@
                     id="password"
                     name="password"
                     type={pwVisible ? "text" : "password"}
+                    required
                     bind:value={password}
                     onblur={() => {
                         lessThanEightChars = password.length < 8;
@@ -190,6 +191,7 @@
                         type={pwVisible ? "text" : "password"}
                         color={!validatorError ? "base" : "red"}
                         bind:value={repeatPassword}
+                        required
                         onblur={() =>
                             (validatorError = !(password === repeatPassword))}
                         class="mt-2 dark:bg-neutral-700 dark:border-neutral-500"

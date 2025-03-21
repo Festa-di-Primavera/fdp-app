@@ -7,17 +7,16 @@ export async function sendEmail(
     email: string,
     subject: string,
     htmlContent: string,
-    attachments?: Attachment[],
-    senderName?: string
+    options?: { senderName?: string; attachments?: Attachment[] },
 ): Promise<{ error: boolean; message: string; data?: any }> {
     try {
-        const mappedAttachments = attachments?.map(att => ({
+        const mappedAttachments = options?.attachments?.map(att => ({
             ...att,
             content: att.content instanceof Buffer ? att.content.toString('base64') : att.content
         }));
 
         const { data, error } = await resend.emails.send({
-            from: `${senderName ?? "Festa di Primavera"} <info@festa-cus.it>`,
+            from: `${options?.senderName ?? "Festa di Primavera"} <info@festa-cus.it>`,
             to: email,
             subject: subject,
             html: htmlContent,

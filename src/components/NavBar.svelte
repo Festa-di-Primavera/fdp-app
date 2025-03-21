@@ -13,9 +13,11 @@
     import {
         AlignJustify,
         ChefHat,
+        CloudUpload,
         CoinsIcon,
         Dna,
         DollarSign,
+        HandPlatter,
         Home,
         Info,
         LayoutDashboard,
@@ -27,6 +29,8 @@
         Ticket,
         UserCog,
         Users,
+        Utensils,
+        UtensilsCrossed,
     } from "lucide-svelte";
     import { sineIn } from "svelte/easing";
     import Logo from "./Logo.svelte";
@@ -74,7 +78,7 @@
                 },
                 {
                     label: "Incassi",
-                    slug: "/earns",
+                    slug: "/earnings",
                     icon: DollarSign,
                 },
             ],
@@ -134,12 +138,31 @@
             permission: UserPermissions.CUCINA,
             icon: ChefHat,
         },
-        // {
-        //     label: "Checkpoint Don Bosco",
-        //     slug: "/checkpoint",
-        //     permission: UserPermissions.CASSA,
-        //     icon: ScanQrCode,
-        // },
+        {
+            label: "Ordini Manuali",
+            icon: UtensilsCrossed,
+            permission: UserPermissions.ORDINI,
+            children: [
+                {
+                    label: "Carica Ordini",
+                    slug: "/csv-orders",
+                    permission: UserPermissions.ORDINI,
+                    icon: CloudUpload,
+                },
+                {
+                    label: "Ordini Manuali",
+                    slug: "/manual-orders",
+                    permission: UserPermissions.ORDINI,
+                    icon: HandPlatter,
+                },
+                {
+                    label: "Checkpoint",
+                    slug: "/checkpoint",
+                    permission: UserPermissions.ORDINI,
+                    icon: ScanQrCode,
+                },
+            ],
+        },
     ];
 
     function filterRoutes(routes: Route[]): Route[] {
@@ -300,7 +323,7 @@
                             <div
                                 class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary-700 to-primary-400 font-mono text-white"
                             >
-                                <span>{$user?.username[0].toUpperCase()}</span>
+                                <span>{$user?.username[0]?.toUpperCase()}</span>
                             </div>
                         {/if}
                         <span class="overflow-x-hidden overflow-ellipsis"
@@ -312,7 +335,9 @@
                         triggeredBy="#account"
                         classContainer="divide-y z-50 dark:bg-neutral-700"
                     >
-                        <DropdownItem defaultClass="rounded-md font-medium py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-neutral-600">
+                        <DropdownItem
+                            defaultClass="rounded-md font-medium py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-neutral-600"
+                        >
                             <button
                                 class="text-red-400"
                                 onclick={() => {

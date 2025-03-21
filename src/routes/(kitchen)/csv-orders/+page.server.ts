@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
     if (!locals.user.email_verified) redirect(302, "/login/verify-email");
 
-    if (!hasPermission(locals.user.permissions, UserPermissions.GENERAZIONE))
+    if (!hasPermission(locals.user.permissions, UserPermissions.ORDINI))
         redirect(302, "/");
 
     return locals.user;

@@ -154,7 +154,7 @@
                                 >
                             {/if}
                         </TableBodyCell>
-                        <TableBodyCell class="sticky left-0 z-10 bg-inherit">
+                        <TableBodyCell>
                             <span
                                 class="flex items-center gap-0 overflow-hidden font-medium md:gap-4 md:overflow-visible"
                             >

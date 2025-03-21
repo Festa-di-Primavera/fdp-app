@@ -31,12 +31,16 @@ export async function POST({ request, locals }) {
 
     const order = (await request.json()) as Order;
 
-    // string of timestamp as HH:MM
-    const timestamp = new Date(order.creationDate).toLocaleTimeString("it-IT", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-    });
+    const timestamp = new Date(order.creationDate)
+        .toLocaleTimeString("it-IT", {
+            day: "2-digit",
+            month: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+        })
+        .replace(/\//g, "-")
+        .replace(" ", "");
 
     await setDoc(doc(ORDERS, `${order.ticketId}-${timestamp}`), {
         ...order,
@@ -61,9 +65,10 @@ export async function POST({ request, locals }) {
     return new Response(
         JSON.stringify({
             message: "Ordine inviato!",
+            orderId: `${order.ticketId}-${timestamp}`,
         }),
         {
-            status: 200,
+            status: 201,
             headers: {
                 "Content-Type": "text/plain",
             },
