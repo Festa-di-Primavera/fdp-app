@@ -29,8 +29,8 @@
         Ticket,
         UserCog,
         Users,
-        Utensils,
         UtensilsCrossed,
+        View,
     } from "lucide-svelte";
     import { sineIn } from "svelte/easing";
     import Logo from "./Logo.svelte";
@@ -154,6 +154,12 @@
                     slug: "/manual-orders",
                     permission: UserPermissions.ORDINI,
                     icon: HandPlatter,
+                },
+                {
+                    label: "Vedi Ordini",
+                    slug: "/orders-view",
+                    permission: UserPermissions.CUCINA,
+                    icon: View,
                 },
                 {
                     label: "Checkpoint",

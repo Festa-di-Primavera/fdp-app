@@ -112,7 +112,9 @@
         return { isValid: true, message: "" };
     }
 
+    let disableSend: boolean = $state(false);
     async function submitOrder() {
+        disableSend = true;
         const validation = validateOrder();
         if (!validation.isValid) {
             orderFeedbackMessage = validation.message;
@@ -186,6 +188,7 @@
             orderSubmitError = true;
         }
         open = true;
+        disableSend = false;
         clearTimeout(timeOut);
         timeOut = setTimeout(() => {
             open = false;
@@ -272,7 +275,8 @@
                     disabled={!order.name ||
                         !order.surname ||
                         !order.email ||
-                        orderItems.length === 0}
+                        orderItems.length === 0
+                        || disableSend}
                 >
                     <Send class="w-4 h-4" />
                     Invia ordine

@@ -7,7 +7,7 @@
         onSnapshot,
         orderBy,
         query,
-        where,
+        Timestamp,
         type Unsubscribe,
     } from "firebase/firestore";
     import {
@@ -27,17 +27,13 @@
     let loading = $state(false);
 
     function getOrders() {
-        const q = query(
-            ORDERS,
-            where("ticketId", ">=", "XNRF"),
-            where("ticketId", "<=", "XNRF\uf8ff"),
-            orderBy("ticketId", "asc")
-        );
+        const q = query(ORDERS, orderBy("ticketId", "asc"));
 
         unsubscribe = onSnapshot(q, (querySnapshot) => {
             orders = querySnapshot.docs.map((doc) => ({
                 ...doc.data(),
                 ticketId: doc.id,
+                creationDate: (doc.data().creationDate as Timestamp).toDate(),
             })) as Order[];
         });
     }
@@ -53,15 +49,16 @@
     async function resendEmail(order: Order) {
         loading = true;
         try {
-            const response = await fetch("/api/order/don-bosco", {
+            const response = await fetch("/api/order/manual-orders", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    name: order.name.split(" ")[0],
-                    surname: order.name.split(" ")[1].replace(".", ""),
-                    email: "mattiavanzo@diocesitn.it",
+                    orderId: order.ticketId,
+                    name: order.name,
+                    surname: order.surname,
+                    email: order.email,
                     order: order,
                 }),
             });
@@ -99,6 +96,7 @@
                         >{order.creationDate.toLocaleString()}</TableBodyCell
                     >
                     <TableBodyCell>{order.name}</TableBodyCell>
+                    <TableBodyCell>{order.surname}</TableBodyCell>
                     <TableBodyCell>
                         {#each order.items as item}
                             <p class="mb-1">
