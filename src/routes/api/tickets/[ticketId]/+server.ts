@@ -20,7 +20,8 @@ export async function GET({ params, locals }) {
     }
 
     if (
-        !hasPermission(locals.user.permissions, UserPermissions.INFO_BIGLIETTO)
+        !hasPermission(locals.user.permissions, UserPermissions.INFO_BIGLIETTO) &&
+        !hasPermission(locals.user.permissions, UserPermissions.CASSA)
     ) {
         return new Response(
             JSON.stringify({ message: "Non hai i permessi necessari" }),
