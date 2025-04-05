@@ -375,13 +375,13 @@
                                                     class="font-medium text-lg"
                                                     >{item.type}</span
                                                 >
-                                                <span class="text-gray-600"
+                                                <span class="text-primary-400"
                                                     >x{item.quantity}</span
                                                 >
                                                 {#if item.glutenFree}
                                                     <span
-                                                        class="text-sm text-orange-300"
-                                                        >(Senza glutine)</span
+                                                        class="text-sm text-orange-300 font-bold"
+                                                        >No glutine</span
                                                     >
                                                 {/if}
                                             </div>

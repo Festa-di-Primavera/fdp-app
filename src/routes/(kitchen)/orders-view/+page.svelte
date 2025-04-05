@@ -27,7 +27,7 @@
     let loading = $state(false);
 
     function getOrders() {
-        const q = query(ORDERS, orderBy("ticketId", "asc"));
+        const q = query(ORDERS, orderBy("creationDate", "asc"));
 
         unsubscribe = onSnapshot(q, (querySnapshot) => {
             orders = querySnapshot.docs.map((doc) => ({
@@ -77,26 +77,37 @@
     }
 </script>
 
-<div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4">Ordini Don Bosco {orders.length}</h1>
+<svelte:head>
+    <title>Visualizza Ordini</title>
+</svelte:head>
 
-    <Table striped={true}>
-        <TableHead>
+<div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-4 text-primary-600">
+        Ordini: {orders.length}
+    </h1>
+
+    <Table class="w-full">
+        <TableHead class="dark:bg-neutral-600 dark:text-neutral-300">
             <TableHeadCell>Ticket ID</TableHeadCell>
             <TableHeadCell>Data</TableHeadCell>
             <TableHeadCell>Nome</TableHeadCell>
+            <TableHeadCell>Cognome</TableHeadCell>
+            <TableHeadCell>Email</TableHeadCell>
             <TableHeadCell>Dettagli</TableHeadCell>
             <TableHeadCell>Azioni</TableHeadCell>
         </TableHead>
         <TableBody>
             {#each orders as order}
-                <TableBodyRow>
+                <TableBodyRow
+                    class="w-full dark:bg-neutral-700 dark:border-neutral-500"
+                >
                     <TableBodyCell>{order.ticketId}</TableBodyCell>
                     <TableBodyCell
                         >{order.creationDate.toLocaleString()}</TableBodyCell
                     >
                     <TableBodyCell>{order.name}</TableBodyCell>
                     <TableBodyCell>{order.surname}</TableBodyCell>
+                    <TableBodyCell>{order.email || "NON STAFF"}</TableBodyCell>
                     <TableBodyCell>
                         {#each order.items as item}
                             <p class="mb-1">
@@ -114,14 +125,16 @@
                         {/each}
                     </TableBodyCell>
                     <TableBodyCell>
-                        <Button
-                            size="xs"
-                            disabled={loading}
-                            onclick={() => resendEmail(order)}
-                        >
-                            <Mail class="w-4 h-4 mr-2" />
-                            Reinvia Email
-                        </Button>
+                        {#if order.email}
+                            <Button
+                                size="xs"
+                                disabled={loading}
+                                onclick={() => resendEmail(order)}
+                            >
+                                <Mail class="w-4 h-4 mr-2" />
+                                Reinvia Email
+                            </Button>
+                        {/if}
                     </TableBodyCell>
                 </TableBodyRow>
             {/each}

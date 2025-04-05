@@ -5,7 +5,6 @@
     import { type Order } from "$models/order";
     import { user } from "$store/store";
     import {
-        limit,
         onSnapshot,
         orderBy,
         query,
@@ -28,27 +27,52 @@
 
     // get orders from firestore
     function getOrders() {
-        const q = query(ORDERS, orderBy("creationDate", "asc"), limit(30));
+        const q = query(ORDERS, orderBy("creationDate", "asc"));
         unsubscribe = onSnapshot(q, (querySnapshot) => {
-            toDoOrders = [];
-            inProgressOrders = [];
-            doneOrders = [];
-
-            querySnapshot.docs.forEach((orderDoc) => {
+            // Elabora solo i documenti modificati
+            querySnapshot.docChanges().forEach((change) => {
                 const order = {
-                    firebaseId: orderDoc.id,
-                    ...orderDoc.data(),
+                    firebaseId: change.doc.id,
+                    ...change.doc.data(),
                 } as Order;
 
-                if (order.done) {
-                    doneOrders = [...doneOrders, order];
-                } else if (order.done === false) {
-                    inProgressOrders = [...inProgressOrders, order];
-                } else {
-                    toDoOrders = [...toDoOrders, order];
+                if (change.type === "added") {
+                    addOrderToCorrectArray(order);
+                } else if (change.type === "modified") {
+                    updateOrderInCorrectArray(order);
+                } else if (change.type === "removed") {
+                    removeOrderFromArrays(order.firebaseId);
                 }
             });
         });
+    }
+
+    function addOrderToCorrectArray(order: Order) {
+        if (order.done === true) {
+            doneOrders = [...doneOrders, order]
+        } else if (order.done === false) {
+            inProgressOrders = [...inProgressOrders, order].sort((a, b) =>
+                a.creationDate < b.creationDate ? -1 : 1
+            );
+        } else {
+            toDoOrders = [...toDoOrders, order]
+        }
+    }
+
+    function updateOrderInCorrectArray(order: Order) {
+        // Rimuovi l'ordine da tutti gli array
+        removeOrderFromArrays(order.firebaseId);
+
+        // Aggiungi l'ordine all'array corretto
+        addOrderToCorrectArray(order);
+    }
+
+    function removeOrderFromArrays(orderId?: string) {
+        doneOrders = doneOrders.filter((o) => o.firebaseId !== orderId);
+        inProgressOrders = inProgressOrders.filter(
+            (o) => o.firebaseId !== orderId
+        );
+        toDoOrders = toDoOrders.filter((o) => o.firebaseId !== orderId);
     }
 
     onMount(() => {
@@ -134,8 +158,13 @@
             </div>
             <!-- ORDINI ANCORA DA SCANNERIZZARE -->
             <div class="flex flex-col items-center">
-                <span class="text-md text-red-500 dark:text-red-400">Mancanti <i>(STAFF)</i></span>
-                <span class="text-2xl font-semibold text-red-500 dark:text-red-400">{toDoOrders.length}</span>
+                <span class="text-md text-red-500 dark:text-red-400"
+                    >Mancanti <i>(STAFF)</i></span
+                >
+                <span
+                    class="text-2xl font-semibold text-red-500 dark:text-red-400"
+                    >{toDoOrders.length}</span
+                >
             </div>
         </div>
     </div>

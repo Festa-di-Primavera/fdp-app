@@ -81,11 +81,11 @@
 
     const ordersStats = $derived(computeOrdersStats(orders));
 
+    const allowedPassphrases = ["Festa di Primavera", "fdp"];
+
     let open: boolean = $state(true);
     let value: string = $state("");
-    let disabled = $derived(
-        value.trim() !== "Festa di Primavera" && value.trim() !== "fdp"
-    );
+    let disabled = $derived(!allowedPassphrases.includes(value.trim()));
 
     // get tickets from firestore
     function getTickets() {
@@ -268,7 +268,7 @@
             {disabled}
             color="primary"
             on:click={() => {
-                if (value === "Festa di Primavera") {
+                if (allowedPassphrases.includes(value.trim())) {
                     getTickets();
                     getOrders();
                     open = false;

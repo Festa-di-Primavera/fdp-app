@@ -6,6 +6,7 @@
         type OrderItem,
     } from "$models/order";
     import { Badge, Button, Card, Modal } from "flowbite-svelte";
+    import { AlertTriangle } from "lucide-svelte";
 
     let { data } = $props();
     let order: Order | null = $state(data.order);
@@ -36,6 +37,7 @@
                 body: JSON.stringify({
                     orderId: order.firebaseId,
                     done: false,
+                    creationDate: new Date(),
                 }),
             });
 
@@ -197,19 +199,28 @@
 <!-- Confirmation Modal -->
 <Modal
     bind:open={showConfirmModal}
+    dismissable={false}
     size="md"
     class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
     classHeader="dark:bg-neutral-800 dark:text-neutral-300"
     classFooter="dark:bg-neutral-800 dark:text-neutral-300"
 >
-    <h2 class="text-xl font-bold" slot="header">Conferma invio ordine</h2>
+    <h2 class="text-xl font-bold flex gap-3 items-center" slot="header">
+        <AlertTriangle class="size-6 text-red-500" />
+        Conferma invio ordine
+        <AlertTriangle class="size-6 text-red-500" />
+    </h2>
 
     <div class="mb-4">
         <p>Sei sicuro di voler inviare questo ordine alla cucina?</p>
         <p class="text-sm text-gray-800 dark:text-white mt-2">
             Una volta inviato, l'ordine sarà visibile alla cucina e non potrà
-            essere annullato.<br /><br />
-            <span class="font-semibold">Mettiti in coda appena clicchi su <i>"Conferma"</i></span>
+            essere annullato⚠️<br /><br />
+            <span class="font-semibold"
+                >Mettiti in coda appena clicchi su <i class="text-primary-500"
+                    >"Conferma"</i
+                ></span
+            >
         </p>
     </div>
 

@@ -62,12 +62,12 @@
             <div class="flex flex-col gap-10">
                 {#each top as order, i (i)}
                     <Card
-                        class="w-full border-t-4 relative"
+                        class="w-full border-t-4 relative dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-200"
                         style="border-top-color: #007a22"
                     >
                         <!-- segnalino posizione -->
                         <div
-                            class="absolute flex items-center justify-center h-max top-4 left-4 rounded-lg bg-primary-400 text-slate-800 text-2xl font-semibold font-mono px-2 py-1"
+                            class="absolute flex items-center justify-center h-max top-4 left-4 rounded-lg bg-primary-400 dark:text-neutral-700 text-2xl font-semibold font-mono px-2 py-1"
                         >
                             #{i + 1}
                         </div>
@@ -104,13 +104,13 @@
             >
                 {#each rest as order, i (i)}
                     <Card
-                        class="w-60 h-max border-t-4 relative"
+                        class="w-60 h-max border-t-4 relative dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-200"
                         style="border-top-color: #007a2288;"
                         padding="sm"
                     >
                         <div class="py-2">
                             <div
-                                class="absolute flex gap-2 items-center top-4 left-4 text-slate-900"
+                                class="absolute flex gap-2 items-center top-4 left-4 text-neutral-900"
                             >
                                 <span
                                     class="flex items-center justify-center rounded-lg bg-primary-400 bg-opacity-50 text-lg font-semibold font-mono px-2 py-1"
