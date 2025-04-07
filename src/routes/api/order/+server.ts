@@ -1,5 +1,5 @@
 import { ORDERS } from "$lib/firebase/collections.js";
-import { hasPermission } from "$lib/utils/permissions";
+import { hasAnyPermissions } from "$lib/utils/permissions";
 import type { Order } from "$models/order.js";
 import { UserPermissions } from "$models/permissions";
 import { doc, setDoc, Timestamp, updateDoc } from "firebase/firestore";
@@ -17,7 +17,7 @@ export async function POST({ request, locals }) {
         );
     }
 
-    if (!hasPermission(locals.user.permissions, UserPermissions.CUCINA)) {
+    if (!hasAnyPermissions(locals.user.permissions, [UserPermissions.CUCINA, UserPermissions.CASSA, UserPermissions.ORDINI])) {
         return new Response(
             JSON.stringify({ message: "Non hai i permessi necessari" }),
             {
@@ -85,8 +85,7 @@ export async function PATCH({ request, locals }) {
     }
 
     if (
-        !hasPermission(locals.user.permissions, UserPermissions.CUCINA) &&
-        !hasPermission(locals.user.permissions, UserPermissions.CASSA)
+        !hasAnyPermissions(locals.user.permissions, [UserPermissions.CUCINA, UserPermissions.CASSA])
     ) {
         return new Response(
             JSON.stringify({ message: "Non hai i permessi necessari" }),

@@ -1,5 +1,5 @@
 import { TICKETS } from "$lib/firebase/collections";
-import { hasPermission } from "$lib/utils/permissions";
+import { hasAnyPermissions } from "$lib/utils/permissions";
 import { UserPermissions } from "$models/permissions";
 import { fail, redirect } from "@sveltejs/kit";
 import { doc, setDoc } from "firebase/firestore";
@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
     if (!locals.user.email_verified) redirect(302, "/login/verify-email");
 
-    if (!hasPermission(locals.user.permissions, UserPermissions.GENERAZIONE))
+    if (!hasAnyPermissions(locals.user.permissions, UserPermissions.GENERAZIONE))
         redirect(302, "/");
 
     return locals.user;

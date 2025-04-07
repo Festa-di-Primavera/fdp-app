@@ -1,6 +1,6 @@
 import {
     addPermission,
-    hasPermission,
+    hasAnyPermissions,
     removePermission,
 } from "$lib/utils/permissions";
 
@@ -22,7 +22,7 @@ export async function PUT({ params, locals, request }) {
         );
     }
 
-    if (!hasPermission(locals.user.permissions, UserPermissions.UTENTI)) {
+    if (!hasAnyPermissions(locals.user.permissions, UserPermissions.UTENTI)) {
         return new Response(
             JSON.stringify({ message: "Non hai i permessi necessari" }),
             {

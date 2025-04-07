@@ -1,6 +1,6 @@
 import { getClientDB } from "$lib/firebase/client.js";
 import { BLOCKS, TICKETS } from "$lib/firebase/collections.js";
-import { hasPermission } from "$lib/utils/permissions";
+import { hasAnyPermissions } from "$lib/utils/permissions";
 import { UserPermissions } from "$models/permissions";
 import {
     doc,
@@ -25,7 +25,7 @@ export async function POST({ locals, request }) {
         );
     }
 
-    if (!hasPermission(locals.user.permissions, UserPermissions.GENERAZIONE)) {
+    if (!hasAnyPermissions(locals.user.permissions, UserPermissions.GENERAZIONE)) {
         return new Response(
             JSON.stringify({ message: "Non hai i permessi necessari" }),
             {

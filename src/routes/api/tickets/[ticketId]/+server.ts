@@ -1,6 +1,6 @@
 import type { User } from "$lib/auth/user";
 import { TICKETS, USERS } from "$lib/firebase/collections.js";
-import { hasPermission } from "$lib/utils/permissions";
+import { hasAnyPermissions } from "$lib/utils/permissions";
 import { getFdPCode } from "$lib/utils/tickets";
 import { UserPermissions } from "$models/permissions";
 import type { Ticket } from "$models/ticket";
@@ -20,8 +20,10 @@ export async function GET({ params, locals }) {
     }
 
     if (
-        !hasPermission(locals.user.permissions, UserPermissions.INFO_BIGLIETTO) &&
-        !hasPermission(locals.user.permissions, UserPermissions.CASSA)
+        !hasAnyPermissions(locals.user.permissions, [
+            UserPermissions.INFO_BIGLIETTO,
+            UserPermissions.CASSA,
+        ])
     ) {
         return new Response(
             JSON.stringify({ message: "Non hai i permessi necessari" }),
@@ -130,7 +132,7 @@ export async function PUT({ params, locals }) {
         );
     }
 
-    if (!hasPermission(locals.user.permissions, UserPermissions.CHECK_IN)) {
+    if (!hasAnyPermissions(locals.user.permissions, UserPermissions.CHECK_IN)) {
         return new Response(
             JSON.stringify({ message: "Non hai i permessi necessari" }),
             {
@@ -265,7 +267,7 @@ export async function POST({ params, request, locals }) {
         );
     }
 
-    if (!hasPermission(locals.user.permissions, UserPermissions.VENDITA)) {
+    if (!hasAnyPermissions(locals.user.permissions, UserPermissions.VENDITA)) {
         return new Response(
             JSON.stringify({ message: "Non hai i permessi necessari" }),
             {

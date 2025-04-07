@@ -37,14 +37,14 @@
 
     import { enhance } from "$app/forms";
     import { page } from "$app/state";
-    import { hasPermission } from "$lib/utils/permissions";
+    import { hasAnyPermissions } from "$lib/utils/permissions";
     import { UserPermissions } from "$models/permissions";
     import { theme, user } from "$store/store";
 
     interface Route {
         label: string;
         slug?: string;
-        permission?: number;
+        permission?: number | number[];
         icon: any;
         children?: Route[];
     }
@@ -86,7 +86,7 @@
         {
             label: "Biglietti",
             icon: Ticket,
-            permission: UserPermissions.UTENTI,
+            permission: [UserPermissions.DASHBOARD, UserPermissions.LISTA_BIGLIETTI, UserPermissions.GENERAZIONE],
             children: [
                 {
                     label: "Dashboard",
@@ -141,7 +141,7 @@
         {
             label: "Ordini Manuali",
             icon: UtensilsCrossed,
-            permission: UserPermissions.ORDINI,
+            permission: [UserPermissions.ORDINI, UserPermissions.CASSA, UserPermissions.CUCINA],
             children: [
                 {
                     label: "Carica Ordini",
@@ -152,7 +152,7 @@
                 {
                     label: "Ordini Manuali",
                     slug: "/manual-orders",
-                    permission: UserPermissions.ORDINI,
+                    permission: [UserPermissions.ORDINI, UserPermissions.CASSA],
                     icon: HandPlatter,
                 },
                 {
@@ -173,13 +173,13 @@
 
     function filterRoutes(routes: Route[]): Route[] {
         return routes.filter((route) => {
-            if (!hasPermission($user?.permissions, route.permission)) {
+            if (!hasAnyPermissions($user?.permissions, route.permission)) {
                 return false;
             }
 
             if (route.children) {
                 route.children = route.children.filter((child) =>
-                    hasPermission($user?.permissions, child.permission)
+                    hasAnyPermissions($user?.permissions, child.permission)
                 );
                 return route.children.length > 0;
             }

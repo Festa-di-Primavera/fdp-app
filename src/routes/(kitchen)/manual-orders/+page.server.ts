@@ -1,10 +1,17 @@
-import { hasPermission } from "$lib/utils/permissions";
+import { hasAnyPermissions } from "$lib/utils/permissions";
 import { UserPermissions } from "$models/permissions";
 import { redirect, error } from "@sveltejs/kit";
 import type { PageServerLoad } from "../../$types";
 import type { Order } from "$models/order";
 
 export const load: PageServerLoad = async ({ locals }) => {
+    if (!locals.user) redirect(302, "/login");
+
+    if (!locals.user.email_verified) redirect(302, "/login/verify-email");
+
+    if (!hasAnyPermissions(locals.user.permissions, [UserPermissions.ORDINI, UserPermissions.CASSA]))
+        redirect(302, "/");
+
     return locals.user;
 };
 
@@ -14,7 +21,9 @@ export const actions = {
 
         if (!locals.user.email_verified) redirect(302, "/login/verify-email");
 
-        if (!hasPermission(locals.user.permissions, UserPermissions.ORDINI))
+        if (
+            !hasAnyPermissions(locals.user.permissions, [UserPermissions.ORDINI, UserPermissions.CASSA])
+        )
             redirect(302, "/");
 
         let body: Order;
@@ -25,7 +34,13 @@ export const actions = {
         }
 
         // Validate required fields
-        if (!body.name || !body.surname || !body.email || !body.items || body.items.length === 0) {
+        if (
+            !body.name ||
+            !body.surname ||
+            !body.email ||
+            !body.items ||
+            body.items.length === 0
+        ) {
             throw error(400, "Missing required fields");
         }
 

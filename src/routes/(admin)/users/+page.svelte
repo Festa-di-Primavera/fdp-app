@@ -66,7 +66,7 @@
         [UserPermissions.LISTA_BIGLIETTI]: Ticket,
         [UserPermissions.UTENTI]: Users,
         [UserPermissions.GENERAZIONE]: Dna,
-        [UserPermissions.ORDINI]: Utensils
+        [UserPermissions.ORDINI]: Utensils,
     };
 
     function getPermissionIcon(permission: UserPermissions) {
@@ -263,7 +263,10 @@
 
             <Label class="mt-4">
                 Nuovo alias
-                <Input bind:value={alias} class="mt-2 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400" />
+                <Input
+                    bind:value={alias}
+                    class="mt-2 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+                />
             </Label>
             <div class="flex gap-2 mt-4" slot="footer">
                 <Button on:click={() => handleAliasChange(currSelectedUser)}

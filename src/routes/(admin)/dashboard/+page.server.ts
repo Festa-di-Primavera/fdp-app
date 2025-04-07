@@ -1,6 +1,6 @@
 import type { User } from "$lib/auth/user";
 import { USERS } from "$lib/firebase/collections";
-import { hasPermission } from "$lib/utils/permissions";
+import { hasAnyPermissions } from "$lib/utils/permissions";
 import { UserPermissions } from "$models/permissions";
 import { redirect } from "@sveltejs/kit";
 import { getDocs, query, where } from "firebase/firestore";
@@ -11,7 +11,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
     if (!locals.user.email_verified) redirect(302, "/login/verify-email");
 
-    if (!hasPermission(locals.user.permissions, UserPermissions.DASHBOARD))
+    if (!hasAnyPermissions(locals.user.permissions, UserPermissions.DASHBOARD))
         redirect(302, "/");
 
     const qUsers = query(
@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ locals }) => {
             return userDoc.data();
         }) as User[]
     ).filter((user) =>
-        hasPermission(user.permissions, UserPermissions.VENDITA)
+        hasAnyPermissions(user.permissions, UserPermissions.VENDITA)
     );
 
     return {

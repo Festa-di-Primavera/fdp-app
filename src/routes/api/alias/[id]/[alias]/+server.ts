@@ -1,6 +1,6 @@
 import type { User } from "$lib/auth/user";
 import { USERS } from "$lib/firebase/collections.js";
-import { hasPermission } from "$lib/utils/permissions.js";
+import { hasAnyPermissions } from "$lib/utils/permissions.js";
 import { UserPermissions } from "$models/permissions";
 import { doc, getDocs, query, updateDoc, where } from "firebase/firestore";
 
@@ -17,7 +17,7 @@ export async function PUT({ params, locals }) {
         );
     }
 
-    if (!hasPermission(locals.user.permissions, UserPermissions.UTENTI)) {
+    if (!hasAnyPermissions(locals.user.permissions, UserPermissions.UTENTI)) {
         return new Response(
             JSON.stringify({ message: "Non hai i permessi necessari" }),
             {

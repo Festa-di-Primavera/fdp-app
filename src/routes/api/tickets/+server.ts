@@ -1,6 +1,6 @@
 import type { User } from "$lib/auth/user";
 import { TICKETS, USERS } from "$lib/firebase/collections.js";
-import { hasPermission } from "$lib/utils/permissions";
+import { hasAnyPermissions } from "$lib/utils/permissions";
 import { UserPermissions } from "$models/permissions";
 import type { Ticket } from "$models/ticket";
 import { json } from "@sveltejs/kit";
@@ -27,7 +27,7 @@ export async function GET({ locals }) {
     }
 
     if (
-        !hasPermission(locals.user.permissions, UserPermissions.LISTA_BIGLIETTI)
+        !hasAnyPermissions(locals.user.permissions, UserPermissions.LISTA_BIGLIETTI)
     ) {
         return new Response(
             JSON.stringify({ message: "Non hai i permessi necessari" }),
@@ -55,7 +55,7 @@ export async function GET({ locals }) {
             return userDoc.data();
         }) as User[]
     ).filter((user) =>
-        hasPermission(user.permissions, UserPermissions.VENDITA)
+        hasAnyPermissions(user.permissions, UserPermissions.VENDITA)
     );
 
     const tickets: Ticket[] = qSnapTickets.docs.map((ticketDoc) => {
@@ -93,7 +93,7 @@ export async function POST({ request, locals }) {
         );
     }
 
-    if (!hasPermission(locals.user.permissions, UserPermissions.GENERAZIONE)) {
+    if (!hasAnyPermissions(locals.user.permissions, UserPermissions.GENERAZIONE)) {
         return new Response(
             JSON.stringify({ message: "Non hai i permessi necessari" }),
             {
@@ -136,7 +136,7 @@ export async function PUT({ request, locals }) {
     }
 
     if (
-        !hasPermission(locals.user.permissions, UserPermissions.LISTA_BIGLIETTI)
+        !hasAnyPermissions(locals.user.permissions, UserPermissions.LISTA_BIGLIETTI)
     ) {
         return new Response(
             JSON.stringify({ message: "Non hai i permessi necessari" }),

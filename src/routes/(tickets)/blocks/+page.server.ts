@@ -1,6 +1,6 @@
 import type { User } from "$lib/auth/user";
 import { BLOCKS, USERS } from "$lib/firebase/collections";
-import { hasPermission } from "$lib/utils/permissions";
+import { hasAnyPermissions } from "$lib/utils/permissions";
 import type { Block } from "$lib/utils/tickets";
 import { UserPermissions } from "$models/permissions";
 import { redirect } from "@sveltejs/kit";
@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
     if (!locals.user.email_verified) redirect(302, "/login/verify-email");
 
-    if (!hasPermission(locals.user.permissions, UserPermissions.UTENTI)) {
+    if (!hasAnyPermissions(locals.user.permissions, UserPermissions.UTENTI)) {
         redirect(302, "/");
     }
 
@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ locals }) => {
         return userDoc.data();
     }) as User[];
     const sellers = users.filter((user) =>
-        hasPermission(user.permissions, UserPermissions.VENDITA)
+        hasAnyPermissions(user.permissions, UserPermissions.VENDITA)
     );
 
     const blocks = await getDocs(BLOCKS);

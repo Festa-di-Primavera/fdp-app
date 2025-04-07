@@ -12,13 +12,17 @@ export function removePermission(
     return currentPermissions & ~permission;
 }
 
-export function hasPermission(
+export function hasAnyPermissions(
     currentPermissions?: number,
-    permission?: number
+    permission?: number | number[]
 ): boolean {
     if (!currentPermissions) return false;
 
     if (!permission) return true;
+
+    if (Array.isArray(permission)) {
+        return permission.some((p) => (currentPermissions & p) === p);
+    }
 
     return (currentPermissions & permission) === permission;
 }
