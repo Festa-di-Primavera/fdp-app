@@ -124,7 +124,7 @@
                         {/if}
                     </div>
                     <button
-                        class="px-2 py-1 text-sm rounded-md font-semibold border-2
+                        class="px-2 py-1 text-sm rounded-md font-semibold border-2 text-nowrap
                                     {item.ready
                             ? 'border-primary-400 text-primary-400'
                             : 'border-gray-500 text-gray-500 dark:border-neutral-400 dark:text-neutral-400'}"
