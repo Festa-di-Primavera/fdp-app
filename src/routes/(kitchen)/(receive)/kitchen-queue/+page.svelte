@@ -62,12 +62,12 @@
             <div class="flex flex-col gap-10">
                 {#each top as order, i (i)}
                     <Card
-                        class="w-full border-t-4 relative dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-200"
-                        style="border-top-color: #007a22"
+                        class="w-full border-l-4 relative dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-200"
+                        style="border-left-color: #007a22"
                     >
                         <!-- segnalino posizione -->
                         <div
-                            class="absolute flex items-center justify-center h-max top-4 left-4 rounded-lg bg-primary-400 dark:text-neutral-700 text-2xl font-semibold font-mono px-2 py-1"
+                            class="number-badge absolute flex items-center justify-center h-max top-4 left-4 text-2xl font-normal font-mono px-2 py-1"
                         >
                             #{i + 1}
                         </div>
@@ -90,7 +90,7 @@
         </div>
 
         <!-- Divisore verticale -->
-        <div class="w-1 h-[75vh] bg-primary-400 opacity-20 rounded-full"></div>
+        <div class="w-1 h-[75vh] rounded-full bg-gradient-to-b from-primary-500 to-primary-800"></div>
 
         <!-- Resto -->
         <div class="flex flex-col w-3/4">
@@ -104,8 +104,8 @@
             >
                 {#each rest as order, i (i)}
                     <Card
-                        class="w-60 h-max border-t-4 relative dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-200"
-                        style="border-top-color: #007a2288;"
+                        class="w-60 h-max border-l-4 relative dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-200"
+                        style="border-left-color: #007a2288;"
                         padding="sm"
                     >
                         <div class="py-2">
@@ -113,7 +113,7 @@
                                 class="absolute flex gap-2 items-center top-4 left-4 text-neutral-900"
                             >
                                 <span
-                                    class="flex items-center justify-center rounded-lg bg-primary-400 bg-opacity-50 text-lg font-semibold font-mono px-2 py-1"
+                                    class="number-badge-small flex items-center justify-center text-lg font-normal font-mono px-2 py-1"
                                 >
                                     #{i + 1 + TOP}
                                 </span>
@@ -125,7 +125,7 @@
                                     <b>{order.ticketId}</b>
                                 </span>
                                 <h2
-                                    class="text-lg w-full text-center whitespace-nowrap overflow-hidden"
+                                    class="text-lg w-full text-center "
                                 >
                                     {order.name}
                                     {order.surname[0]}.
@@ -146,5 +146,21 @@
     * {
         user-select: none;
         cursor: none;
+    }
+    
+    .number-badge {
+        background: linear-gradient(135deg, #007a22, #56b071);
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        z-index: 10;
+    }
+    
+    .number-badge-small {
+        background: linear-gradient(135deg, rgba(0,122,34,0.8), rgba(86,176,113,0.8));
+        color: white;
+        border-radius: 6px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        z-index: 10;
     }
 </style>

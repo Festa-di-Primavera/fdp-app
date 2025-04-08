@@ -1,8 +1,6 @@
 <script lang="ts">
-    import type { User } from "$lib/auth/user";
     import { ORDERS } from "$lib/firebase/collections";
     import { type Order, ItemType } from "$models/order";
-    import { user } from "$store/store";
     import {
         type Unsubscribe,
         onSnapshot,
@@ -18,13 +16,6 @@
         WheatOff,
     } from "lucide-svelte";
     import { onDestroy, onMount } from "svelte";
-
-    interface Props {
-        data: User;
-    }
-
-    let { data }: Props = $props();
-    if (!$user) $user = data;
 
     let unsubscribe: Unsubscribe = () => {};
     let unsubscribeCompleted: Unsubscribe = () => {}; // New unsubscribe for completed orders
@@ -201,7 +192,7 @@
     <title>Statistiche Cucina</title>
 </svelte:head>
 
-<div class="p-4 w-full flex flex-col">
+<div class="px-4 w-full flex flex-col">
     <!-- Card con statistiche di consumo -->
     <div
         class="flex-grow flex flex-wrap gap-10 justify-evenly items-center my-16"

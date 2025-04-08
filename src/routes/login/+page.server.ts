@@ -19,7 +19,7 @@ import {
 import { verify } from "@node-rs/argon2";
 import { fail, redirect, type Actions } from "@sveltejs/kit";
 import { deleteDoc, doc, getDocs, or, query, where } from "firebase/firestore";
-import type { PageServerLoad } from "../$types";
+import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ locals }) => {
     if (locals.user) {

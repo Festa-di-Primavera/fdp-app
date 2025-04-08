@@ -8,7 +8,7 @@ import { PASSWORD_RESET_TOKENS, USERS } from "$lib/firebase/collections";
 import { hash } from "@node-rs/argon2";
 import { fail, redirect } from "@sveltejs/kit";
 import { doc, runTransaction } from "firebase/firestore";
-import type { PageServerLoad } from "../$types";
+import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ params }) => {
     interface Params {

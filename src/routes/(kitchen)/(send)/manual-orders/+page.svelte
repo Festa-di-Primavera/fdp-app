@@ -167,8 +167,6 @@
                 },
             });
 
-            console.log("Email sent:", emailResp);
-
             orderFeedbackMessage = orderResp.message;
             orderSubmitError = false;
             // clear order on success

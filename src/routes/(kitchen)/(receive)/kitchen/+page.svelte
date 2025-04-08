@@ -25,11 +25,9 @@
     let inProgressOrders: Order[] = $state([]);
     let doneOrders: Order[] = $state([]);
 
-    // get orders from firestore
     function getOrders() {
         const q = query(ORDERS, orderBy("creationDate", "asc"));
         unsubscribe = onSnapshot(q, (querySnapshot) => {
-            // Elabora solo i documenti modificati
             querySnapshot.docChanges().forEach((change) => {
                 const order = {
                     firebaseId: change.doc.id,
@@ -60,10 +58,8 @@
     }
 
     function updateOrderInCorrectArray(order: Order) {
-        // Rimuovi l'ordine da tutti gli array
         removeOrderFromArrays(order.firebaseId);
 
-        // Aggiungi l'ordine all'array corretto
         addOrderToCorrectArray(order);
     }
 
@@ -83,25 +79,21 @@
         unsubscribe();
     });
 
-    // Array di colori per le card
     const cardColors = [
-        "rgb(255, 105, 180)", // pink
-        "rgb(30, 144, 200)", // dodger blue
-        "rgb(34, 139, 34)", // forest green
-        "rgb(255, 127, 80)", // coral/light red-orange
-        "rgb(218, 165, 32)", // goldenrod
+        "rgb(255, 105, 180)",
+        "rgb(30, 144, 200)",
+        "rgb(34, 139, 34)",
+        "rgb(255, 127, 80)",
     ];
 
     // Set per tenere traccia dei colori usati (più efficiente della ricerca in array)
     const usedColors = new Set<number>();
 
     function getNextAvailableColorIndex(): number {
-        // Se tutti i colori sono stati usati, resetta il set
         if (usedColors.size === cardColors.length) {
             usedColors.clear();
         }
 
-        // Trova il primo colore non utilizzato
         for (let i = 0; i < cardColors.length; i++) {
             if (!usedColors.has(i)) {
                 usedColors.add(i);
@@ -109,10 +101,9 @@
             }
         }
 
-        return 0; // fallback
+        return 0;
     }
 
-    // Mappa per memorizzare i colori assegnati a ciascun ordine
     const orderColorMap = new Map<string, number>();
 
     function getOrderColor(order: Order): string {
@@ -156,7 +147,7 @@
                     >{inProgressOrders.length}</span
                 >
             </div>
-            <!-- ORDINI ANCORA DA SCANNERIZZARE -->
+            <!-- ORDINI ANCORA DA SCANNERIZZARE/INVIARE TRAMITE IL LINK -->
             <div class="flex flex-col items-center">
                 <span class="text-md text-red-500 dark:text-red-400"
                     >Mancanti <i>(STAFF)</i></span

@@ -387,7 +387,7 @@
                                             </div>
                                             {#if item.removedIngredients?.length}
                                                 <div
-                                                    class="text-sm text-red-500"
+                                                    class="text-sm text-red-500 dark:text-red-400"
                                                 >
                                                     Senza: {item.removedIngredients.join(
                                                         ", "

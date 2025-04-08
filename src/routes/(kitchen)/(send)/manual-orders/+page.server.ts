@@ -1,7 +1,7 @@
 import { hasAnyPermissions } from "$lib/utils/permissions";
 import { UserPermissions } from "$models/permissions";
 import { redirect, error } from "@sveltejs/kit";
-import type { PageServerLoad } from "../../$types";
+import type { PageServerLoad } from "./$types";
 import type { Order } from "$models/order";
 
 export const load: PageServerLoad = async ({ locals }) => {

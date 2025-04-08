@@ -88,7 +88,6 @@
                         });
 
                         if (response.ok) {
-                            console.log("Order saved:", order);
                             results = [
                                 {
                                     success: true,
@@ -112,8 +111,6 @@
                                     },
                                 }
                             );
-
-                            console.log("Email sent:", emailResp);
                         } else {
                             const error = await response.json();
                             results = [

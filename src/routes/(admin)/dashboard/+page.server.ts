@@ -4,7 +4,7 @@ import { hasAnyPermissions } from "$lib/utils/permissions";
 import { UserPermissions } from "$models/permissions";
 import { redirect } from "@sveltejs/kit";
 import { getDocs, query, where } from "firebase/firestore";
-import type { PageServerLoad } from "../../$types";
+import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ locals }) => {
     if (!locals.user) redirect(302, "/login");
