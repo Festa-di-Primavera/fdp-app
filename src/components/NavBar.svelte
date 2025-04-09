@@ -152,7 +152,7 @@
                 {
                     label: "Ordini Manuali",
                     slug: "/manual-orders",
-                    permission: [UserPermissions.ORDINI, UserPermissions.CASSA],
+                    permission: UserPermissions.ORDINI,
                     icon: HandPlatter,
                 },
                 {
