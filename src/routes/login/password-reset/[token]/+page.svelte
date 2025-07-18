@@ -97,7 +97,9 @@
                     }}
                     class="mt-2 dark:bg-neutral-700 dark:border-neutral-500"
                 >
-                    <PasswordEye bind:pwVisible slot="right" />
+                    {#snippet right()}
+                        <PasswordEye bind:pwVisible />
+                    {/snippet}
                 </Input>
                 {#if lessThanEightChars}
                     <Helper class="mt-1 flex items-center gap-1" color="gray">
@@ -143,13 +145,15 @@
                     name="password_repeat"
                     autocomplete="off"
                     type={pwVisible ? "text" : "password"}
-                    color={!validatorError ? "base" : "red"}
+                    color={!validatorError ? "default" : "red"}
                     bind:value={repeatPassword}
                     onblur={() =>
                         (validatorError = !(newPassword === repeatPassword))}
                     class="mt-2 dark:bg-neutral-700 dark:border-neutral-500"
                 >
-                    <PasswordEye bind:pwVisible slot="right" />
+                    {#snippet right()}
+                        <PasswordEye bind:pwVisible />
+                    {/snippet}
                 </Input>
                 {#if validatorError}
                     <Helper class="mt-1 flex items-center gap-1" color="gray">

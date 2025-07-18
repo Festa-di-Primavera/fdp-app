@@ -186,7 +186,7 @@
         </Label>
     </div>
 
-    <Hr classHr="mx-5 mt-5 dark:bg-neutral-500" />
+    <Hr class="mx-5 mt-5 dark:bg-neutral-500" />
     <div class="mx-5">
         <Table
             divClass="tableDiv relative overflow-x-auto overflow-y-visible pb-40"
@@ -212,13 +212,13 @@
                     <div class="flex gap-1">Check-in</div>
                 </TableHeadCell>
             </TableHead>
-            <TableBody tableBodyClass="divide-y">
+            <TableBody class="divide-y">
                 {#each filteredItems || [] as item}
                     <TableBodyRow
                         class="w-full dark:bg-neutral-700 dark:border-neutral-500"
                     >
                         <TableBodyCell
-                            tdClass="px-6 py-4 whitespace-nowrap font-medium flex items-center gap-4"
+                            class="px-6 py-4 whitespace-nowrap font-medium flex items-center gap-4"
                         >
                             <span class="mr-4">{item.ticketId}</span>
                         </TableBodyCell>
@@ -306,8 +306,8 @@
     bind:open={attrModalOpen}
     title={`Cambia il ${currAttr == "name" ? "nome" : "cognome"} di ${currSelectedTicket?.name} ${currSelectedTicket?.surname}`}
     class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
-    classHeader="dark:bg-neutral-800 dark:text-neutral-300"
-    classFooter="dark:bg-neutral-800 dark:text-neutral-300"
+    headerClass="dark:bg-neutral-800 dark:text-neutral-300"
+    footerClass="dark:bg-neutral-800 dark:text-neutral-300"
 >
     <span class="text-md"
         >Vuoi aggiornare il {currAttr == "name" ? "nome" : "cognome"} di
@@ -324,17 +324,19 @@
         class="mt-4 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
         placeholder={currSelectedTicket!![currAttr!!]}
     />
-    <div slot="footer" class="flex gap-2">
-        <Button on:click={() => handleAttrModify()}>Aggiorna</Button>
-        <Button
-            color="alternative"
-            class="dark:text-neutral-400 dark:border-neutral-400 dark:hover:bg-neutral-700 dark:hover:border-neutral-300"
-            on:click={() => {
-                attribute = "";
-                attrModalOpen = false;
-            }}
-        >
-            Annulla
-        </Button>
-    </div>
+    {#snippet footer()}
+        <div class="flex gap-2">
+            <Button onclick={() => handleAttrModify()}>Aggiorna</Button>
+            <Button
+                color="alternative"
+                class="dark:text-neutral-400 dark:border-neutral-400 dark:hover:bg-neutral-700 dark:hover:border-neutral-300"
+                onclick={() => {
+                    attribute = "";
+                    attrModalOpen = false;
+                }}
+            >
+                Annulla
+            </Button>
+        </div>
+    {/snippet}
 </Modal>

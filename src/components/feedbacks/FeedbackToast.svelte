@@ -15,7 +15,7 @@
         color = $bindable(),
         onclose = () => {},
     }: Props = $props();
-    
+
     let textColorClass = $derived(
         color === "green"
             ? "text-green-400"
@@ -26,16 +26,18 @@
 </script>
 
 <Toast
-    on:close={() => {
+    onclose={() => {
         onclose();
         open = false;
     }}
     bind:toastStatus={open}
     {color}
-    class="fixed left-0 right-0 top-20 z-50 mx-auto mb-5 mt-10 w-max rounded-lg"
-    divClass="w-full max-w-xs p-2 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-stone-700 gap-3"
+    
+    class="fixed left-0 right-0 top-20 z-50 mx-auto mb-5 mt-10 w-max rounded-lg dark:bg-stone-700"
+    contentClass="w-full max-w-xs p-2 text-gray-500 gap-3"
 >
-    <ToastIcon slot="icon" class="h-6 w-6 {textColorClass}"></ToastIcon>
-
+    {#snippet icon()}
+        <ToastIcon class="h-6 w-6 {textColorClass}"></ToastIcon>
+    {/snippet}
     <span class="{textColorClass} font-semibold">{message}</span>
 </Toast>

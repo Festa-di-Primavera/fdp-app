@@ -1,11 +1,14 @@
 <script lang="ts">
-    import { init } from "$lib/charts/init";
     import type { ChartData } from "$lib/charts/utils";
     import { theme } from "$store/store";
+    import type { EChartsOption } from "echarts";
+    import { PieChart } from "echarts/charts";
+    import { GridComponent, TitleComponent } from "echarts/components";
+    import { init, use } from "echarts/core";
+    import { SVGRenderer } from "echarts/renderers";
     import { Card } from "flowbite-svelte";
     import { onMount } from "svelte";
-    import { type EChartsOptions } from "svelte-echarts";
-    import ChartComponent from "../ChartComponent.svelte";
+    import { Chart } from "svelte-echarts";
 
     interface Props {
         ordersStats: ChartData;
@@ -21,7 +24,8 @@
         }, 300);
     });
 
-    const options = $derived({
+    use([PieChart, GridComponent, SVGRenderer, TitleComponent]);
+    const options: EChartsOption = $derived({
         legend: {
             orient: "horizontal",
             left: 10,
@@ -92,13 +96,10 @@
                 },
             },
         },
-    } as EChartsOptions);
+    });
 </script>
 
-<Card
-    class="h-96 w-full dark:bg-neutral-700 dark:border-neutral-500"
-    padding="md"
->
+<Card class="h-96 w-full dark:bg-neutral-700 dark:border-neutral-500 p-5">
     <div class="flex w-full items-start justify-between">
         <div class="flex-col items-center">
             <div class="mb-1 flex items-center">
@@ -114,7 +115,8 @@
     {#if options !== null}
         <div class="h-full w-full pt-4">
             {#if displayChart}
-                <ChartComponent {options} {init} />
+                <!-- <ChartComponent {options} {init} /> -->
+                <Chart {init} {options} />
             {/if}
         </div>
     {/if}

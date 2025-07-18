@@ -1,11 +1,14 @@
 <script lang="ts">
-    import { init } from "$lib/charts/init";
     import type { ChartData } from "$lib/charts/utils";
     import { theme } from "$store/store";
+    import type { EChartsOption } from "echarts";
+    import { BarChart } from "echarts/charts";
+    import { GridComponent, TitleComponent } from "echarts/components";
+    import { init, use } from "echarts/core";
+    import { SVGRenderer } from "echarts/renderers";
     import { Card } from "flowbite-svelte";
     import { onMount } from "svelte";
-    import { type EChartsOptions } from "svelte-echarts";
-    import ChartComponent from "../ChartComponent.svelte";
+    import { Chart } from "svelte-echarts";
 
     interface Props {
         sellHoursStats: ChartData;
@@ -13,7 +16,8 @@
 
     let { sellHoursStats }: Props = $props();
 
-    const options = $derived({
+    use([BarChart, SVGRenderer, TitleComponent, GridComponent]);
+    const options: EChartsOption = $derived({
         grid: {
             containLabel: true,
             left: 10,
@@ -108,7 +112,7 @@
                 },
             },
         },
-    } as EChartsOptions);
+    });
 
     let displayChart = $state(false);
 
@@ -120,7 +124,7 @@
     });
 </script>
 
-<Card class="h-96 w-full dark:bg-neutral-700 dark:border-neutral-500">
+<Card class="h-96 w-full dark:bg-neutral-700 dark:border-neutral-500 p-5">
     <div class="flex w-full items-start justify-between">
         <div class="flex-col items-center">
             <div class="mb-1 flex items-center">
@@ -136,7 +140,7 @@
     {#if options !== null}
         <div class="mt-5 h-full w-full">
             {#if displayChart}
-                <ChartComponent {options} {init} />
+                <Chart {options} {init} />
             {/if}
         </div>
     {/if}

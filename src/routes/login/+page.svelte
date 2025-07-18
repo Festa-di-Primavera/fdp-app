@@ -83,14 +83,15 @@
         }
     });
 
-    let disableButton = $state(false);
     let ToastIcon = $state(XCircle);
 </script>
 
 <section
     class="flex w-full flex-grow flex-col items-center justify-start px-5 py-10 text-xl text-black dark:text-white"
 >
-    <Card class="flex w-full max-w-96 flex-col items-center justify-center dark:bg-neutral-900 dark:border-neutral-700 dark:divide-neutral-500">
+    <Card
+        class="flex w-full max-w-96 flex-col items-center justify-center dark:bg-neutral-900 dark:border-neutral-700 dark:divide-neutral-500 p-8"
+    >
         <div class="mb-5 flex w-full justify-around dark:text-neutral-400">
             <button
                 onclick={() => (option = "login")}
@@ -106,7 +107,7 @@
             >
         </div>
 
-        <Card padding="none" class="mb-5 w-60 dark:bg-neutral-800 dark:text-neutral-400">
+        <Card class="mb-5 w-60 dark:bg-neutral-800 dark:text-neutral-400 p-0">
             <a
                 class="flex items-center justify-center gap-2 px-4 py-2"
                 href="/api/auth/google"
@@ -134,7 +135,12 @@
             {#if option === "register"}
                 <Label>
                     Nome utente
-                    <Input name="username" bind:value={username} required class="mt-2 dark:bg-neutral-700 dark:border-neutral-500" />
+                    <Input
+                        name="username"
+                        bind:value={username}
+                        required
+                        class="mt-2 dark:bg-neutral-700 dark:border-neutral-500"
+                    />
 
                     {#if usernameValidator}
                         <Helper
@@ -150,7 +156,12 @@
 
             <Label>
                 Email {#if option === "login"}o nome utente{/if}
-                <Input name="email" bind:value={email} required class="mt-2 dark:bg-neutral-700 dark:border-neutral-500" />
+                <Input
+                    name="email"
+                    bind:value={email}
+                    required
+                    class="mt-2 dark:bg-neutral-700 dark:border-neutral-500"
+                />
             </Label>
 
             <Label>
@@ -172,7 +183,9 @@
                     }}
                     class="mt-2 dark:bg-neutral-700 dark:border-neutral-500"
                 >
-                    <PasswordEye bind:pwVisible slot="right" />
+                    {#snippet right()}
+                        <PasswordEye bind:pwVisible />
+                    {/snippet}
                 </Input>
                 <InputErrors
                     bind:lessThanEightChars
@@ -189,14 +202,16 @@
                     <Input
                         name="password_repeat"
                         type={pwVisible ? "text" : "password"}
-                        color={!validatorError ? "base" : "red"}
+                        color={!validatorError ? "default" : "red"}
                         bind:value={repeatPassword}
                         required
                         onblur={() =>
                             (validatorError = !(password === repeatPassword))}
                         class="mt-2 dark:bg-neutral-700 dark:border-neutral-500"
                     >
-                        <PasswordEye bind:pwVisible slot="right" />
+                        {#snippet right()}
+                            <PasswordEye bind:pwVisible />
+                        {/snippet}
                     </Input>
                     {#if validatorError}
                         <Helper
@@ -217,7 +232,6 @@
             <Button
                 class="mt-3 w-full"
                 type="submit"
-                bind:disabled={disableButton}
             >
                 {option === "login" ? "Accedi" : "Registrati"}
             </Button>

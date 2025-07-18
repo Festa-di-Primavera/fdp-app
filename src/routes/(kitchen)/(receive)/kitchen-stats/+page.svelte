@@ -198,8 +198,7 @@
         class="flex-grow flex flex-wrap gap-10 justify-evenly items-center my-16"
     >
         <Card
-            padding="lg"
-            class="w-96 dark:bg-neutral-700 dark:border-neutral-500"
+            class="w-96 dark:bg-neutral-700 dark:border-neutral-500 p-14"
         >
             <div class="flex flex-col items-center justify-center gap-3">
                 <Beef class="w-10 h-10 text-red-500" />
@@ -212,8 +211,7 @@
             </div>
         </Card>
         <Card
-            padding="lg"
-            class="w-96 dark:bg-neutral-700 dark:border-neutral-500"
+            class="w-96 dark:bg-neutral-700 dark:border-neutral-500 p-14"
         >
             <div class="flex flex-col items-center justify-center gap-3">
                 <Sandwich class="w-10 h-10 text-primary-500" />
@@ -233,8 +231,7 @@
     <div class="flex-grow flex flex-wrap gap-10 justify-evenly items-center">
         <!-- Non-vegetarian Card Group -->
         <Card
-            padding="xl"
-            class="w-96 h-[500px] flex flex-col items-center justify-center py-8 dark:bg-neutral-700 dark:border-neutral-500"
+            class="w-96 h-[500px] flex flex-col items-center justify-center py-8 dark:bg-neutral-700 dark:border-neutral-500 p-16"
         >
             <div class="flex flex-col items-center justify-center gap-6">
                 <UtensilsCrossed class="w-14 h-14 text-violet-500" />
@@ -250,8 +247,7 @@
                 <!-- Subcategories in separate cards -->
                 <div class="flex gap-6 mt-6 w-full">
                     <Card
-                        padding="lg"
-                        class="flex-1 dark:bg-neutral-600 dark:border-neutral-500"
+                        class="flex-1 dark:bg-neutral-600 dark:border-neutral-500 p-14"
                     >
                         <div class="flex flex-col items-center gap-4">
                             <span
@@ -268,8 +264,7 @@
                     </Card>
 
                     <Card
-                        padding="lg"
-                        class="flex-1 dark:bg-neutral-600 dark:border-neutral-500"
+                        class="flex-1 dark:bg-neutral-600 dark:border-neutral-500 p-14"
                     >
                         <div class="flex flex-col items-center gap-4">
                             <span
@@ -290,8 +285,7 @@
 
         <!-- Vegetarian Card -->
         <Card
-            padding="xl"
-            class="w-96 h-[500px] flex flex-col items-center justify-center py-8 dark:bg-neutral-700 dark:border-neutral-500"
+            class="w-96 h-[500px] flex flex-col items-center justify-center py-8 dark:bg-neutral-700 dark:border-neutral-500 p-16"
         >
             <div class="flex flex-col items-center justify-center gap-6">
                 <Leaf class="w-14 h-14 text-green-500" />
@@ -308,8 +302,7 @@
 
         <!-- Gluten-free Card -->
         <Card
-            padding="xl"
-            class="w-96 h-[500px] flex flex-col items-center justify-center py-8 dark:bg-neutral-700 dark:border-neutral-500"
+            class="w-96 h-[500px] flex flex-col items-center justify-center py-8 dark:bg-neutral-700 dark:border-neutral-500 p-16"
         >
             <div class="flex flex-col items-center justify-center gap-6">
                 <WheatOff class="w-14 h-14 text-amber-500" />

@@ -31,7 +31,7 @@
 </script>
 
 <section class="flex h-full w-full flex-grow flex-col items-center py-8">
-    <Card padding="xl" class="max-w-lg w-full dark:bg-neutral-700 dark:border-neutral-500">
+    <Card class="max-w-lg w-full dark:bg-neutral-700 dark:border-neutral-500 p-16">
         <div class="text-center mb-6">
             <h1 class="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
                 {getErrorMessage(status)}

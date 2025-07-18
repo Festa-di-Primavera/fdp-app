@@ -212,31 +212,29 @@
     <div
         class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5"
     >
-        {#if $user}
-            <h1 class="text-4xl font-bold text-primary-600">Check-in</h1>
-            <p class="text-justify dark:text-white">
-                Scansionare il QR e verificare la validità del biglietto
-            </p>
-            <div class="w-full">
-                <Label class="text-md font-medium text-black dark:text-white">
-                    Codice Biglietto <span class="text-primary-700">*</span>
-                    <Input
-                        required
-                        class="mt-1 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
-                        bind:value={ticketCodeInput}
-                        name="code"
-                        autocomplete="off"
-                        on:keypress={onKeyDown}
-                    >
+        <h1 class="text-4xl font-bold text-primary-600">Check-in</h1>
+        <p class="text-justify dark:text-white">
+            Scansionare il QR e verificare la validità del biglietto
+        </p>
+        <div class="w-full">
+            <Label class="text-md font-medium text-black dark:text-white">
+                Codice Biglietto <span class="text-primary-700">*</span>
+                <Input
+                    required
+                    class="mt-1 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+                    bind:value={ticketCodeInput}
+                    name="code"
+                    autocomplete="off"
+                    onkeypress={onKeyDown}
+                >
+                    {#snippet left()}
                         <TicketIcon
-                            slot="left"
                             class="h-6 w-6 text-primary-600 dark:text-white"
                         />
+                    {/snippet}
 
-                        <div
-                            slot="right"
-                            class="flex h-full items-center gap-2"
-                        >
+                    {#snippet right()}
+                        <div class="flex h-full items-center gap-2">
                             {#if ticketCodeInput !== ""}
                                 <button
                                     onclick={() => checkTicket(ticketCodeInput)}
@@ -248,59 +246,49 @@
                                 </button>
                             {/if}
                         </div>
-                    </Input>
-                </Label>
-                <div class="my-6 flex w-full items-center justify-center">
-                    <QrReader bind:codeResult={ticketCode} />
-                </div>
-
-                <InfoCard {ticketCode} {ticket} {color} />
-
-                <FeedbackToast
-                    bind:open={feedbackToastOpen}
-                    bind:color
-                    bind:message={feedbackMessage}
-                    {ToastIcon}
-                />
-                <Modal
-                    bind:open={errorsModalOpen}
-                    onclose={closeErrorsModal}
-                    size="xs"
-                    class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
-                    classHeader="dark:bg-neutral-800 dark:text-neutral-300"
-                    classFooter="dark:bg-neutral-800 dark:text-neutral-300"
-                    dismissable={false}
-                >
-                    {@const SvelteComponent =
-                        ticketStatus === "notFound" ||
-                        ticketStatus === "notSold"
-                            ? XCircle
-                            : ticketStatus === "alreadyChecked"
-                              ? AlertCircle
-                              : CheckCircle2}
-                    <span
-                        class="my-5 justify-center text-3xl font-semibold text-{color}-500 flex items-center gap-2"
-                    >
-                        <SvelteComponent class="h-6 w-6  text-{color}-400" />
-                        {feedbackMessage}
-                    </span>
-
-                    <Button
-                        slot="footer"
-                        class="w-full"
-                        on:click={closeErrorsModal}>Chiudi</Button
-                    >
-                </Modal>
+                    {/snippet}
+                </Input>
+            </Label>
+            <div class="my-6 flex w-full items-center justify-center">
+                <QrReader bind:codeResult={ticketCode} />
             </div>
-        {:else}
-            <div
-                class="mt-10 flex w-full flex-grow flex-col items-center justify-center gap-5"
+
+            <InfoCard {ticketCode} {ticket} {color} />
+
+            <FeedbackToast
+                bind:open={feedbackToastOpen}
+                bind:color
+                bind:message={feedbackMessage}
+                {ToastIcon}
+            />
+            <Modal
+                bind:open={errorsModalOpen}
+                onclose={closeErrorsModal}
+                size="xs"
+                class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
+                headerClass="dark:bg-neutral-800 dark:text-neutral-300"
+                footerClass="dark:bg-neutral-800 dark:text-neutral-300"
+                dismissable={false}
             >
-                <Spinner size="sm" class="max-w-12 self-center" />
-                <span class="text-2xl font-semibold text-primary-600"
-                    >Attendere...</span
+                {@const SvelteComponent =
+                    ticketStatus === "notFound" || ticketStatus === "notSold"
+                        ? XCircle
+                        : ticketStatus === "alreadyChecked"
+                          ? AlertCircle
+                          : CheckCircle2}
+                <span
+                    class="my-5 justify-center text-3xl font-semibold text-{color}-500 flex items-center gap-2"
                 >
-            </div>
-        {/if}
+                    <SvelteComponent class="h-6 w-6  text-{color}-400" />
+                    {feedbackMessage}
+                </span>
+
+                {#snippet footer()}
+                    <Button class="w-full" onclick={closeErrorsModal}
+                        >Chiudi</Button
+                    >
+                {/snippet}
+            </Modal>
+        </div>
     </div>
 </section>

@@ -18,9 +18,8 @@
 
     let { data, form }: Props = $props();
 
-    if (!$user)
-		$user = data;
-	
+    if (!$user) $user = data;
+
     $effect(() => {
         if (form && form.error) {
             color = "red";
@@ -113,62 +112,51 @@
     <div
         class="w-full px-5 pt-5 flex flex-col gap-4 items-start max-w-96 pb-12 flex-grow"
     >
-        {#if $user}
-            <h1 class="text-primary-600 font-bold text-4xl">Verifica Email</h1>
-            <p class="dark:text-white text-justify">
-                Inserisci il codice di verifica ricevuto all'email <b
-                    class="text-primary-300">{$user.email}</b
-                > per verificare il tuo account
-            </p>
-            <form
-                use:enhance
-                method="post"
-                action="?/resendEmail"
-                class="dark:text-white text-justify"
-            >
-                Se non hai ricevuto il codice, <button
-                    class="text-primary-600 font-semibold">clicca qui</button
-                > per richiederne un altro
-            </form>
-            <Label
-                class="text-black dark:text-white font-medium text-md flex justify-between w-full"
-            >
-                {#each code as _, index}
-                    <Input
-                        on:input={(e) => onInput(e, index)}
-                        on:keydown={(e) => onKeyDown(e, index)}
-                        on:paste={onPaste}
-                        bind:value={code[index]}
-                        maxlength={1}
-                        class="w-12 aspect-square text-center rounded-md border-2 border-muted dark:bg-neutral-700 dark:border-neutral-500"
-                        pattern="[0-9A-Z]"
-                        id="code{index}"
-                        name="code{index}"
-                        autocomplete="off"
-                        style="caret-color: transparent;"
-                    />
-                {/each}
-            </Label>
+        <h1 class="text-primary-600 font-bold text-4xl">Verifica Email</h1>
+        <p class="dark:text-white text-justify">
+            Inserisci il codice di verifica ricevuto all'email <b
+                class="text-primary-300">{$user.email}</b
+            > per verificare il tuo account
+        </p>
+        <form
+            use:enhance
+            method="post"
+            action="?/resendEmail"
+            class="dark:text-white text-justify"
+        >
+            Se non hai ricevuto il codice, <button
+                class="text-primary-600 font-semibold">clicca qui</button
+            > per richiederne un altro
+        </form>
+        <Label
+            class="text-black dark:text-white font-medium text-md flex justify-between w-full"
+        >
+            {#each code as _, index}
+                <Input
+                    oninput={(e) => onInput(e, index)}
+                    onkeydown={(e) => onKeyDown(e, index)}
+                    onpaste={onPaste}
+                    bind:value={code[index]}
+                    maxlength={1}
+                    class="w-12 aspect-square text-center rounded-md border-2 border-muted dark:bg-neutral-700 dark:border-neutral-500"
+                    pattern="[0-9A-Z]"
+                    id="code{index}"
+                    name="code{index}"
+                    autocomplete="off"
+                    style="caret-color: transparent;"
+                />
+            {/each}
+        </Label>
 
-            <form
-                use:enhance
-                method="post"
-                action="?/verifyCode"
-                class="w-full flex flex-col items-center"
-            >
-                <input type="hidden" name="code" value={code.join("")} />
-                <Button type="submit" class="mt-5 w-[90%]">Verifica</Button>
-            </form>
-        {:else}
-            <div
-                class="w-full flex flex-col flex-grow gap-5 items-center justify-center mt-10"
-            >
-                <Spinner size="sm" class="max-w-12 self-center" />
-                <span class="text-primary-600 font-semibold text-2xl"
-                    >Attendere...</span
-                >
-            </div>
-        {/if}
+        <form
+            use:enhance
+            method="post"
+            action="?/verifyCode"
+            class="w-full flex flex-col items-center"
+        >
+            <input type="hidden" name="code" value={code.join("")} />
+            <Button type="submit" class="mt-5 w-[90%]">Verifica</Button>
+        </form>
     </div>
 </section>
 

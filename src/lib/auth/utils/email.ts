@@ -7,14 +7,24 @@ import {
     Timestamp,
     updateDoc,
 } from "firebase/firestore";
-import { createDate, isWithinExpirationDate, TimeSpan } from "oslo";
-import { alphabet, generateRandomString } from "oslo/crypto";
+import { generateRandomString } from "@oslojs/crypto/random"
+import type { RandomReader } from "@oslojs/crypto/random";
+
 import { sendEmail } from "../../utils/resend";
 import { verificationCodeTemplate } from "../email-templates/verification_code";
+import { createDate } from "./timespan";
+import { isWithinExpirationDate, TimeSpan } from "$models/timespan";
 
 export function isValidEmail(email: string): boolean {
     return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
 }
+
+const random: RandomReader = {
+	read(bytes) {
+		crypto.getRandomValues(bytes);
+	}
+};
+const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 /// Generate a random 6-digit code and store it in the database
 export async function generateEmailVerificationCode(
@@ -23,7 +33,7 @@ export async function generateEmailVerificationCode(
 ): Promise<string> {
     await deleteDoc(doc(EMAIL_VERIFICATION_CODES, userId));
 
-    const code = generateRandomString(6, alphabet("0-9", "A-Z"));
+    const code = generateRandomString(random, alphabet, 6);
     await setDoc(doc(EMAIL_VERIFICATION_CODES, userId), {
         email,
         code,

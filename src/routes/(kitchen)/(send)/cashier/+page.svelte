@@ -232,35 +232,31 @@
     <div
         class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5"
     >
-        {#if $user}
-            <h1 class="text-4xl font-bold text-primary-600">Cassa</h1>
-            <p class="text-justify dark:text-white">
-                Scansionare il QR e prendere l'ordine del cliente per inviarlo
-                in cucina.
-            </p>
-            <div class="w-full">
-                {#if !ticket}
-                    <Label
-                        class="text-md font-medium text-black dark:text-white"
+        <h1 class="text-4xl font-bold text-primary-600">Cassa</h1>
+        <p class="text-justify dark:text-white">
+            Scansionare il QR e prendere l'ordine del cliente per inviarlo in
+            cucina.
+        </p>
+        <div class="w-full">
+            {#if !ticket}
+                <Label class="text-md font-medium text-black dark:text-white">
+                    Codice Biglietto <span class="text-primary-700">*</span>
+                    <Input
+                        required
+                        class="mt-1 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+                        bind:value={ticketCodeInput}
+                        name="code"
+                        autocomplete="off"
+                        onkeypress={onKeyDown}
                     >
-                        Codice Biglietto <span class="text-primary-700">*</span>
-                        <Input
-                            required
-                            class="mt-1 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
-                            bind:value={ticketCodeInput}
-                            name="code"
-                            autocomplete="off"
-                            onkeypress={onKeyDown}
-                        >
+                        {#snippet left()}
                             <TicketIcon
                                 class="h-6 w-6 text-primary-600 dark:text-white"
-                                slot="left"
                             />
+                        {/snippet}
 
-                            <div
-                                class="flex h-full items-center gap-2"
-                                slot="right"
-                            >
+                        {#snippet right()}}
+                            <div class="flex h-full items-center gap-2">
                                 {#if ticketCodeInput !== ""}
                                     <button
                                         onclick={() =>
@@ -273,152 +269,138 @@
                                     </button>
                                 {/if}
                             </div>
-                        </Input>
-                    </Label>
-                    <div class="my-6 flex w-full items-center justify-center">
-                        <QrReader bind:codeResult={ticketCode} />
-                    </div>
-                {:else}
-                    <div class="flex flex-col gap-5">
-                        <Card
-                            class="w-full flex flex-col text-lg p-3 dark:bg-neutral-700 dark:border-neutral-500"
-                            id="ticketInfos"
+                        {/snippet}
+                    </Input>
+                </Label>
+                <div class="my-6 flex w-full items-center justify-center">
+                    <QrReader bind:codeResult={ticketCode} />
+                </div>
+            {:else}
+                <div class="flex flex-col gap-5">
+                    <Card
+                        class="w-full flex flex-col text-lg p-3 dark:bg-neutral-700 dark:border-neutral-500"
+                        id="ticketInfos"
+                    >
+                        <span
+                            class="text-black dark:text-white w-full flex justify-between"
                         >
-                            <span
-                                class="text-black dark:text-white w-full flex justify-between"
-                            >
-                                <span>N° biglietto:</span>
-                                <span class="font-mono">
-                                    <b>{ticket.ticketId}</b>
-                                </span>
+                            <span>N° biglietto:</span>
+                            <span class="font-mono">
+                                <b>{ticket.ticketId}</b>
                             </span>
-                            <span
-                                class="text-black dark:text-white w-full flex justify-between"
+                        </span>
+                        <span
+                            class="text-black dark:text-white w-full flex justify-between"
+                        >
+                            <span>Nominativo:</span>
+                            <span class="text-right"
+                                >{(ticket?.name || "") +
+                                    " " +
+                                    (ticket?.surname || "")}</span
                             >
-                                <span>Nominativo:</span>
-                                <span class="text-right"
-                                    >{(ticket?.name || "") +
-                                        " " +
-                                        (ticket?.surname || "")}</span
+                        </span>
+                        <div class="flex justify-between mt-3">
+                            <button
+                                class="text-sm text-primary-400 hover:text-primary-500"
+                                onclick={reset}
+                            >
+                                Modifica codice
+                            </button>
+                            {#if orderItems.length > 0}
+                                <Button
+                                    class="text-sm flex items-center gap-2"
+                                    onclick={submitOrder}
                                 >
-                            </span>
-                            <div class="flex justify-between mt-3">
-                                <button
-                                    class="text-sm text-primary-400 hover:text-primary-500"
-                                    onclick={reset}
-                                >
-                                    Modifica codice
-                                </button>
-                                {#if orderItems.length > 0}
-                                    <Button
-                                        class="text-sm flex items-center gap-2"
-                                        onclick={submitOrder}
-                                    >
-                                        <Send class="w-4 h-4" />
-                                        Invia ordine
-                                    </Button>
-                                {/if}
-                            </div>
-                        </Card>
-                        <div class="flex gap-3 justify-around flex-wrap">
-                            {#each Object.values(ItemType) as type}
-                                <button
-                                    onclick={() => openOrderModal(type)}
-                                    class="flex-grow"
-                                >
-                                    <Card
-                                        class="w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-200"
-                                        padding="sm">{type}</Card
-                                    >
-                                </button>
-                            {/each}
+                                    <Send class="w-4 h-4" />
+                                    Invia ordine
+                                </Button>
+                            {/if}
                         </div>
-                        {#if orderItems.length > 0}
-                            <div class="mt-4 flex flex-col gap-3">
-                                <h3
-                                    class="text-lg font-semibold dark:text-white"
+                    </Card>
+                    <div class="flex gap-3 justify-around flex-wrap">
+                        {#each Object.values(ItemType) as type}
+                            <button
+                                onclick={() => openOrderModal(type)}
+                                class="flex-grow"
+                            >
+                                <Card
+                                    class="w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-200 p-5"
+                                    >{type}</Card
                                 >
-                                    Ordine corrente:
-                                </h3>
-                                {#each [...orderItems].reverse() as item, i}
-                                    <Card
-                                        padding="sm"
-                                        class="relative dark:bg-neutral-700 dark:border-neutral-500"
+                            </button>
+                        {/each}
+                    </div>
+                    {#if orderItems.length > 0}
+                        <div class="mt-4 flex flex-col gap-3">
+                            <h3 class="text-lg font-semibold dark:text-white">
+                                Ordine corrente:
+                            </h3>
+                            {#each [...orderItems].reverse() as item, i}
+                                <Card
+                                    class="relative dark:bg-neutral-700 dark:border-neutral-500 p-5"
+                                >
+                                    <div
+                                        class="absolute right-2 top-2 flex gap-2"
                                     >
-                                        <div
-                                            class="absolute right-2 top-2 flex gap-2"
+                                        <button
+                                            class="p-1 hover:bg-blue-100 rounded-full transition-colors"
+                                            onclick={() => editOrder(i)}
                                         >
-                                            <button
-                                                class="p-1 hover:bg-blue-100 rounded-full transition-colors"
-                                                onclick={() => editOrder(i)}
+                                            <PencilLine
+                                                class="w-5 h-5 text-blue-500"
+                                            />
+                                        </button>
+                                        <button
+                                            class="p-1 hover:bg-red-100 rounded-full transition-colors"
+                                            onclick={() => removeFromOrder(i)}
+                                        >
+                                            <Trash2
+                                                class="w-5 h-5 text-red-500"
+                                            />
+                                        </button>
+                                    </div>
+                                    <div class="pr-20">
+                                        <!-- Increased right padding to accommodate both buttons -->
+                                        <div
+                                            class="flex items-baseline gap-2 mb-1"
+                                        >
+                                            <span class="font-medium text-lg"
+                                                >{item.type}</span
                                             >
-                                                <PencilLine
-                                                    class="w-5 h-5 text-blue-500"
-                                                />
-                                            </button>
-                                            <button
-                                                class="p-1 hover:bg-red-100 rounded-full transition-colors"
-                                                onclick={() =>
-                                                    removeFromOrder(i)}
+                                            <span class="text-primary-400"
+                                                >x{item.quantity}</span
                                             >
-                                                <Trash2
-                                                    class="w-5 h-5 text-red-500"
-                                                />
-                                            </button>
-                                        </div>
-                                        <div class="pr-20">
-                                            <!-- Increased right padding to accommodate both buttons -->
-                                            <div
-                                                class="flex items-baseline gap-2 mb-1"
-                                            >
+                                            {#if item.glutenFree}
                                                 <span
-                                                    class="font-medium text-lg"
-                                                    >{item.type}</span
+                                                    class="text-sm text-orange-300 font-bold"
+                                                    >No glutine</span
                                                 >
-                                                <span class="text-primary-400"
-                                                    >x{item.quantity}</span
-                                                >
-                                                {#if item.glutenFree}
-                                                    <span
-                                                        class="text-sm text-orange-300 font-bold"
-                                                        >No glutine</span
-                                                    >
-                                                {/if}
-                                            </div>
-                                            {#if item.removedIngredients?.length}
-                                                <div
-                                                    class="text-sm text-red-500 dark:text-red-400"
-                                                >
-                                                    Senza: {item.removedIngredients.join(
-                                                        ", "
-                                                    )}
-                                                </div>
                                             {/if}
                                         </div>
-                                    </Card>
-                                {/each}
-                            </div>
-                        {/if}
-                    </div>
-                {/if}
+                                        {#if item.removedIngredients?.length}
+                                            <div
+                                                class="text-sm text-red-500 dark:text-red-400"
+                                            >
+                                                Senza: {item.removedIngredients.join(
+                                                    ", "
+                                                )}
+                                            </div>
+                                        {/if}
+                                    </div>
+                                </Card>
+                            {/each}
+                        </div>
+                    {/if}
+                </div>
+            {/if}
 
-                <FeedbackToast
-                    bind:open
-                    color={orderSubmitError ? "red" : "green"}
-                    ToastIcon={orderSubmitError ? XCircle : CheckCircle2}
-                    message={orderFeedbackMessage || errorMessage}
-                />
-            </div>
-        {:else}
-            <div
-                class="mt-10 flex w-full flex-grow flex-col items-center justify-center gap-5"
-            >
-                <Spinner size="sm" class="max-w-12 self-center" />
-                <span class="text-2xl font-semibold text-primary-600"
-                    >Attendere...</span
-                >
-            </div>
-        {/if}
+            <FeedbackToast
+                bind:open
+                color={orderSubmitError ? "red" : "green"}
+                ToastIcon={orderSubmitError ? XCircle : CheckCircle2}
+                message={orderFeedbackMessage || errorMessage}
+            />
+        </div>
     </div>
 </section>
 

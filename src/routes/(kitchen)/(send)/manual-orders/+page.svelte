@@ -261,8 +261,8 @@
                             class="flex-grow"
                         >
                             <Card
-                                class="w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors"
-                                padding="sm">{type}</Card
+                                class="w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors p-5"
+                                >{type}</Card
                             >
                         </button>
                     {/each}
@@ -273,8 +273,8 @@
                     disabled={!order.name ||
                         !order.surname ||
                         !order.email ||
-                        orderItems.length === 0
-                        || disableSend}
+                        orderItems.length === 0 ||
+                        disableSend}
                 >
                     <Send class="w-4 h-4" />
                     Invia ordine
@@ -286,8 +286,7 @@
                         </h3>
                         {#each [...orderItems].reverse() as item, i}
                             <Card
-                                padding="sm"
-                                class="relative dark:bg-neutral-700 dark:border-neutral-500"
+                                class="relative dark:bg-neutral-700 dark:border-neutral-500 p-5"
                             >
                                 <div class="absolute right-2 top-2 flex gap-2">
                                     <button
@@ -347,7 +346,7 @@
             <div
                 class="mt-10 flex w-full flex-grow flex-col items-center justify-center gap-5"
             >
-                <Spinner size="sm" class="max-w-12 self-center" />
+                <Spinner class="max-w-12 self-center p-5" />
                 <span class="text-2xl font-semibold text-primary-600"
                     >Attendere...</span
                 >

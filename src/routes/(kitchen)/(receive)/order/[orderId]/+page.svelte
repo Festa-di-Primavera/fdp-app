@@ -69,14 +69,13 @@
 
 <section class="flex h-full w-full flex-grow flex-col items-center py-8 px-4">
     <Card
-        padding="xl"
-        class="w-full dark:text-white dark:bg-neutral-700 dark:border-neutral-500"
+        class="w-full dark:text-white dark:bg-neutral-700 dark:border-neutral-500 p-16"
     >
         <h1 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
             Riepilogo Ordine
         </h1>
 
-        <Card class="mb-4 dark:text-white dark:bg-neutral-600" border={false}>
+        <Card class="mb-4 dark:text-white dark:bg-neutral-600">
             <h2
                 class="text-xl font-semibold mb-2 text-gray-900 dark:text-white"
             >
@@ -98,7 +97,7 @@
         </Card>
 
         <!-- Order items -->
-        <Card class="mb-4 dark:text-white dark:bg-neutral-600" border={false}>
+        <Card class="mb-4 dark:text-white dark:bg-neutral-600">
             <h2
                 class="text-xl font-semibold mb-2 text-gray-900 dark:text-white"
             >
@@ -202,14 +201,16 @@
     dismissable={false}
     size="md"
     class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
-    classHeader="dark:bg-neutral-800 dark:text-neutral-300"
-    classFooter="dark:bg-neutral-800 dark:text-neutral-300"
+    headerClass="dark:bg-neutral-800 dark:text-neutral-300"
+    footerClass="dark:bg-neutral-800 dark:text-neutral-300"
 >
-    <h2 class="text-xl font-bold flex gap-3 items-center" slot="header">
-        <AlertTriangle class="size-6 text-red-500" />
-        Conferma invio ordine
-        <AlertTriangle class="size-6 text-red-500" />
-    </h2>
+    {#snippet header()}
+        <h2 class="text-xl font-bold flex gap-3 items-center">
+            <AlertTriangle class="size-6 text-red-500" />
+            Conferma invio ordine
+            <AlertTriangle class="size-6 text-red-500" />
+        </h2>
+    {/snippet}
 
     <div class="mb-4">
         <p>Sei sicuro di voler inviare questo ordine alla cucina?</p>

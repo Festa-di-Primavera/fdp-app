@@ -2,9 +2,9 @@
     import { enhance } from "$app/forms";
     import type { User } from "$lib/auth/user";
     import { user } from "$store/store";
-    import { Button } from "flowbite-svelte";
     import { AlertCircle, LogOut, XCircle } from "lucide-svelte";
     import FeedbackToast from "../components/feedbacks/FeedbackToast.svelte";
+    import { Button } from "$lib/components/ui/button/index";
 
     let { data } = $props();
     $user = data as User;
@@ -22,11 +22,11 @@
 </svelte:head>
 
 <section
-    class="flex w-full flex-grow flex-col items-center justify-start px-5 py-10 text-xl text-black dark:text-white"
+    class="flex w-full flex-grow flex-col items-center justify-start px-5 py-10 text-xl"
 >
     <div class="flex flex-col items-center">
         <div class="flex flex-col items-center gap-4 text-center">
-            <h1 class="text-3xl font-semibold text-primary-600">Home</h1>
+            <h1 class="text-3xl font-semibold text-chart-2">Home</h1>
             <p class="text-center text-2xl">Ciao <b>{data?.username}</b>!</p>
             <p class="text-center">Questa è solo la home page!</p>
             <p class="flex items-end">
@@ -41,8 +41,7 @@
             >
                 Se invece vuoi uscire dall'applicazione, clicca qui sotto
                 <Button
-                    type="submit"
-                    color="red"
+                    variant="destructive"
                     class="flex items-center justify-center gap-2"
                 >
                     Esci dall'app

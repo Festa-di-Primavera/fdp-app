@@ -112,32 +112,30 @@
     <div
         class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5"
     >
-        {#if $user}
-            <h1 class="text-4xl font-bold text-primary-600">Info biglietto</h1>
-            <p class="text-justify dark:text-white">
-                Scansionare il QR per ottenere informazioni sul biglietto senza
-                influenzare i check-in e le vendite
-            </p>
-            <div class="w-full">
-                <Label class="text-md font-medium text-black dark:text-white">
-                    Codice Biglietto <span class="text-primary-700">*</span>
-                    <Input
-                        required
-                        class="mt-1 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
-                        bind:value={ticketCodeInput}
-                        name="code"
-                        autocomplete="off"
-                        on:keypress={onKeyDown}
-                    >
+        <h1 class="text-4xl font-bold text-primary-600">Info biglietto</h1>
+        <p class="text-justify dark:text-white">
+            Scansionare il QR per ottenere informazioni sul biglietto senza
+            influenzare i check-in e le vendite
+        </p>
+        <div class="w-full">
+            <Label class="text-md font-medium text-black dark:text-white">
+                Codice Biglietto <span class="text-primary-700">*</span>
+                <Input
+                    required
+                    class="mt-1 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+                    bind:value={ticketCodeInput}
+                    name="code"
+                    autocomplete="off"
+                    onkeypress={onKeyDown}
+                >
+                    {#snippet left()}
                         <TicketIcon
                             class="h-6 w-6 text-primary-600 dark:text-white"
-                            slot="left"
                         />
+                    {/snippet}
 
-                        <div
-                            class="flex h-full items-center gap-2"
-                            slot="right"
-                        >
+                    {#snippet right()}
+                        <div class="flex h-full items-center gap-2">
                             {#if ticketCodeInput !== ""}
                                 <button
                                     onclick={() => getTicket(ticketCodeInput)}
@@ -149,30 +147,21 @@
                                 </button>
                             {/if}
                         </div>
-                    </Input>
-                </Label>
-                <div class="my-6 flex w-full items-center justify-center">
-                    <QrReader bind:codeResult={ticketCode} />
-                </div>
-
-                <InfoCard {ticketCode} {ticket} />
-
-                <FeedbackToast
-                    bind:open
-                    color="red"
-                    ToastIcon={XCircle}
-                    message="Codice biglietto errato"
-                />
+                    {/snippet}
+                </Input>
+            </Label>
+            <div class="my-6 flex w-full items-center justify-center">
+                <QrReader bind:codeResult={ticketCode} />
             </div>
-        {:else}
-            <div
-                class="mt-10 flex w-full flex-grow flex-col items-center justify-center gap-5"
-            >
-                <Spinner size="sm" class="max-w-12 self-center" />
-                <span class="text-2xl font-semibold text-primary-600"
-                    >Attendere...</span
-                >
-            </div>
-        {/if}
+
+            <InfoCard {ticketCode} {ticket} />
+
+            <FeedbackToast
+                bind:open
+                color="red"
+                ToastIcon={XCircle}
+                message="Codice biglietto errato"
+            />
+        </div>
     </div>
 </section>

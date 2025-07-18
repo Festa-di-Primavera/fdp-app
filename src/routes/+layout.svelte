@@ -1,7 +1,7 @@
 <script lang="ts">
     import { theme } from "$store/store";
     import { onMount } from "svelte";
-    import "../app.pcss";
+    import "../app-ui.css";
     import NavBar from "../components/NavBar.svelte";
     import type { LayoutProps } from "./$types";
     import { page } from "$app/state";
@@ -21,7 +21,7 @@
 </script>
 
 <div
-    class="min-h-[100svh] dark:bg-neutral-800 dark:text-neutral-400 flex flex-col"
+    class="min-h-[100svh] flex flex-col"
 >
     {#if !noNavbarRoutes.includes(page.route.id!!)}
         <NavBar />

@@ -40,12 +40,14 @@
     bind:open={showModal}
     size="md"
     class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
-    classHeader="dark:bg-neutral-800 dark:text-neutral-300"
-    classFooter="dark:bg-neutral-800 dark:text-neutral-300"
+    headerClass="dark:bg-neutral-800 dark:text-neutral-300"
+    footerClass="dark:bg-neutral-800 dark:text-neutral-300"
 >
-    <h2 class="text-xl font-bold" slot="header">
-        Personalizza {currentItem.type}
-    </h2>
+    {#snippet header()}
+        <h2 class="text-xl font-bold">
+            Personalizza {currentItem.type}
+        </h2>
+    {/snippet}
     {#if hasQty}
         <div class="flex gap-3 mb-4 items-center">
             Quantità
@@ -127,7 +129,9 @@
                                 currentItem.sauce = sauce;
                             }}
                         />
-                        <span class:text-green-500={currentItem.sauce === sauce}>
+                        <span
+                            class:text-green-500={currentItem.sauce === sauce}
+                        >
                             {sauce}
                         </span>
                     </Label>

@@ -25,7 +25,7 @@
     import {
         Check,
         CheckCircle2,
-        Filter,
+        ListFilter,
         PenBox,
         Search,
         Trash2,
@@ -166,41 +166,51 @@
 {#if $user}
     <div class="mx-5 mt-5">
         <Input
-            class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+            class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400 ps-10"
             placeholder={`Cerca per ${filter}`}
             bind:value={searchTerm}
         >
-            <Search slot="left" />
-            <button slot="right">
-                <Filter />
-                <Popover
-                    placement="bottom-end"
-                    class="z-50 p-0 mt-2 dark:bg-neutral-800 dark:border-neutral-500 dark:divide-neutral-500 dark:text-neutral-300"
-                    defaultClass="pt-2"
-                    arrow={false}
-                >
-                    Filtra per
-                    <ul
-                        class="w-48 divide-y divide-gray-200 dark:divide-neutral-600"
+            {#snippet left()}
+                <Search />
+            {/snippet}
+            {#snippet right()}
+                <button>
+                    <ListFilter />
+                    <Popover
+                        placement="bottom-end"
+                        class="z-50 p-0 mt-2 dark:bg-neutral-800 dark:border-neutral-500 dark:divide-neutral-500 dark:text-neutral-300"
+                        defaultClass="pt-2"
+                        arrow={false}
                     >
-                        <li>
-                            <Radio class="p-3" bind:group={filter} value="nome"
-                                >Nome</Radio
-                            >
-                        </li>
-                        <li>
-                            <Radio class="p-3 checked:bg-red-500" bind:group={filter} value="email"
-                                >E-Mail</Radio
-                            >
-                        </li>
-                        <li>
-                            <Radio class="p-3" bind:group={filter} value="alias"
-                                >Alias</Radio
-                            >
-                        </li>
-                    </ul>
-                </Popover>
-            </button>
+                        Filtra per
+                        <ul
+                            class="w-48 divide-y divide-gray-200 dark:divide-neutral-600"
+                        >
+                            <li>
+                                <Radio
+                                    class="p-3"
+                                    bind:group={filter}
+                                    value="nome">Nome</Radio
+                                >
+                            </li>
+                            <li>
+                                <Radio
+                                    class="p-3 checked:bg-red-500"
+                                    bind:group={filter}
+                                    value="email">E-Mail</Radio
+                                >
+                            </li>
+                            <li>
+                                <Radio
+                                    class="p-3"
+                                    bind:group={filter}
+                                    value="alias">Alias</Radio
+                                >
+                            </li>
+                        </ul>
+                    </Popover>
+                </button>
+            {/snippet}
         </Input>
     </div>
     <div class="mx-5 mt-5">
@@ -223,7 +233,7 @@
                 </TableHeadCell>
                 <TableHeadCell class="text-center">Elimina</TableHeadCell>
             </TableHead>
-            <TableBody tableBodyClass="divide-y">
+            <TableBody class="divide-y">
                 {#each filteredItems || [] as item}
                     <TableBodyRow
                         class="w-full dark:bg-neutral-700 dark:border-neutral-500"
@@ -259,7 +269,6 @@
                                     />
                                     <Tooltip
                                         color="gray"
-                                        border
                                         class="dark:bg-neutral-800 dark:border-neutral-500"
                                         >Google</Tooltip
                                     >
@@ -275,7 +284,6 @@
                                     />
                                     <Tooltip
                                         color="gray"
-                                        border
                                         class="dark:bg-neutral-800 dark:border-neutral-500"
                                         >{(item.email_verified ? "" : "Non ") +
                                             "Verificata"}</Tooltip
@@ -303,9 +311,8 @@
                                         />
                                         <Tooltip
                                             color={perm ? "primary" : "gray"}
-                                            border
                                             class="dark:bg-neutral-800 {perm
-                                                ? ''
+                                                ? 'dark:border-primary-500 border-primary-500'
                                                 : 'dark:border-neutral-500'}"
                                         >
                                             {capitalizeFirstLetter(
@@ -335,7 +342,7 @@
                             <div class="grid w-full place-items-center">
                                 <Button
                                     class="bg-red-500 px-2 py-1 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600"
-                                    on:click={() => {
+                                    onclick={() => {
                                         currSelectedUser = item;
                                         deleteModalOpen = true;
                                     }}
@@ -354,8 +361,8 @@
 {/if}
 
 <FeedbackToast
-    bind:open={feedbackToastOpen}
+    open={true}
     bind:color
-    bind:message={feedbackToastMessage}
+    message={"ciaoooad"}
     bind:ToastIcon
 />

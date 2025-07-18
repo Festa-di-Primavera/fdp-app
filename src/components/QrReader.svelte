@@ -9,7 +9,7 @@
     import QrScanner from "qr-scanner";
     import { onDestroy, onMount } from "svelte";
     import FeedbackToast from "./feedbacks/FeedbackToast.svelte";
-    
+
     interface Props {
         codeResult: string;
     }
@@ -202,14 +202,14 @@
 </div>
 {#if devices.length > 0}
     <Dropdown
-        bind:open={camSelectOpen}
+        bind:isOpen={camSelectOpen}
         placement="bottom-start"
         triggeredBy="#camSelector"
     >
         <DropdownHeader>Fotocamere</DropdownHeader>
         {#each devices as device}
             <DropdownItem
-                on:click={() => {
+                onclick={() => {
                     updateCamera(device.deviceId);
                 }}
                 class={device.deviceId === selectedCam

@@ -41,7 +41,6 @@
 <Card
     class="w-[22rem] h-max border-t-4 relative dark:bg-neutral-700"
     style="border-top-color: {color}"
-    border={false}
 >
     <div class="flex justify-between items-center gap-3 mb-4">
         <h2 class="text-md font-semibold" style="color: {color}">

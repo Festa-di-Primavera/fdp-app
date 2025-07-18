@@ -171,34 +171,29 @@
     <div
         class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5"
     >
-        {#if $user}
-            <h1 class="text-4xl font-bold text-primary-600">Check Point</h1>
-            <p class="text-justify dark:text-white">
-                Scansionare il QR. L'ordine arriverà direttamente in cucina.
-            </p>
-            <div class="w-full">
-                {#if !order}
-                    <Label
-                        class="text-md font-medium text-black dark:text-white"
+        <h1 class="text-4xl font-bold text-primary-600">Check Point</h1>
+        <p class="text-justify dark:text-white">
+            Scansionare il QR. L'ordine arriverà direttamente in cucina.
+        </p>
+        <div class="w-full">
+            {#if !order}
+                <Label class="text-md font-medium text-black dark:text-white">
+                    Codice Biglietto <span class="text-primary-700">*</span>
+                    <Input
+                        required
+                        class="mt-1 dark:bg-neutral-700 dark:border-neutral-500"
+                        bind:value={ticketCodeInput}
+                        name="code"
+                        autocomplete="off"
+                        onkeypress={onKeyDown}
                     >
-                        Codice Biglietto <span class="text-primary-700">*</span>
-                        <Input
-                            required
-                            class="mt-1 dark:bg-neutral-700 dark:border-neutral-500"
-                            bind:value={ticketCodeInput}
-                            name="code"
-                            autocomplete="off"
-                            onkeypress={onKeyDown}
-                        >
+                        {#snippet left()}
                             <TicketIcon
                                 class="h-6 w-6 text-primary-600 dark:text-white"
-                                slot="left"
                             />
-
-                            <div
-                                class="flex h-full items-center gap-2"
-                                slot="right"
-                            >
+                        {/snippet}
+                        {#snippet right()}
+                            <div class="flex h-full items-center gap-2">
                                 {#if ticketCodeInput !== ""}
                                     <button
                                         onclick={() =>
@@ -211,120 +206,104 @@
                                     </button>
                                 {/if}
                             </div>
-                        </Input>
-                    </Label>
-                    <div class="my-6 flex w-full items-center justify-center">
-                        <QrReader bind:codeResult={ticketCode} />
-                    </div>
-                {:else}
-                    <div class="flex flex-col gap-5">
-                        <Card class="w-full text-lg p-3" id="orderInfos">
-                            <div class="flex justify-between items-center">
-                                <span class="text-black dark:text-white w-max">
-                                    <span>Cliente:</span>
-                                    <span>{order.name}</span>
-                                </span>
-                                <Button
-                                    class="text-sm flex items-center gap-2"
-                                    onclick={submitOrder}
-                                >
-                                    <Send class="w-4 h-4" />
-                                    Invia
-                                </Button>
-                            </div>
-                        </Card>
+                        {/snippet}
+                    </Input>
+                </Label>
+                <div class="my-6 flex w-full items-center justify-center">
+                    <QrReader bind:codeResult={ticketCode} />
+                </div>
+            {:else}
+                <div class="flex flex-col gap-5">
+                    <Card class="w-full text-lg p-3" id="orderInfos">
+                        <div class="flex justify-between items-center">
+                            <span class="text-black dark:text-white w-max">
+                                <span>Cliente:</span>
+                                <span>{order.name}</span>
+                            </span>
+                            <Button
+                                class="text-sm flex items-center gap-2"
+                                onclick={submitOrder}
+                            >
+                                <Send class="w-4 h-4" />
+                                Invia
+                            </Button>
+                        </div>
+                    </Card>
 
-                        {#if orderItems.length > 0}
-                            <div class="mt-4 flex flex-col gap-3">
-                                <h3
-                                    class="text-lg font-semibold dark:text-white"
-                                >
-                                    Ordine corrente:
-                                </h3>
-                                {#each [...orderItems].reverse() as item, i}
-                                    <Card padding="sm" class="relative">
-                                        <div
-                                            class="absolute right-2 top-2 flex gap-2"
+                    {#if orderItems.length > 0}
+                        <div class="mt-4 flex flex-col gap-3">
+                            <h3 class="text-lg font-semibold dark:text-white">
+                                Ordine corrente:
+                            </h3>
+                            {#each [...orderItems].reverse() as item, i}
+                                <Card class="relative p-5">
+                                    <div
+                                        class="absolute right-2 top-2 flex gap-2"
+                                    >
+                                        <button
+                                            class="p-1 hover:bg-blue-100 rounded-full transition-colors"
+                                            onclick={() => editOrder(i)}
                                         >
-                                            <button
-                                                class="p-1 hover:bg-blue-100 rounded-full transition-colors"
-                                                onclick={() => editOrder(i)}
+                                            <PencilLine
+                                                class="w-5 h-5 text-blue-500"
+                                            />
+                                        </button>
+                                    </div>
+                                    <div class="pr-20">
+                                        <!-- Increased right padding to accommodate both buttons -->
+                                        <div
+                                            class="flex items-baseline gap-2 mb-1"
+                                        >
+                                            <span class="font-medium text-lg"
+                                                >{item.type}</span
                                             >
-                                                <PencilLine
-                                                    class="w-5 h-5 text-blue-500"
-                                                />
-                                            </button>
-                                        </div>
-                                        <div class="pr-20">
-                                            <!-- Increased right padding to accommodate both buttons -->
-                                            <div
-                                                class="flex items-baseline gap-2 mb-1"
+                                            <span class="text-gray-600"
+                                                >x{item.quantity}</span
                                             >
+                                            {#if item.glutenFree}
                                                 <span
-                                                    class="font-medium text-lg"
-                                                    >{item.type}</span
+                                                    class="text-sm text-orange-300"
+                                                    >(Senza glutine)</span
                                                 >
-                                                <span class="text-gray-600"
-                                                    >x{item.quantity}</span
-                                                >
-                                                {#if item.glutenFree}
-                                                    <span
-                                                        class="text-sm text-orange-300"
-                                                        >(Senza glutine)</span
-                                                    >
-                                                {/if}
-                                            </div>
-                                            {#if item.removedIngredients?.length}
-                                                <div
-                                                    class="text-sm text-red-500"
-                                                >
-                                                    Senza: {item.removedIngredients.join(
-                                                        ", "
-                                                    )}
-                                                </div>
-                                            {/if}
-                                            <div class="text-sm text-green-600">
-                                                Salsa: {item.sauce ||
-                                                    "No salsa"}
-                                            </div>
-                                            {#if item.notes}
-                                                <div
-                                                    class="text-sm text-red-500"
-                                                >
-                                                    Note: {item.notes}
-                                                </div>
                                             {/if}
                                         </div>
-                                    </Card>
-                                {/each}
-                            </div>
-                        {/if}
-                    </div>
-                {/if}
+                                        {#if item.removedIngredients?.length}
+                                            <div class="text-sm text-red-500">
+                                                Senza: {item.removedIngredients.join(
+                                                    ", "
+                                                )}
+                                            </div>
+                                        {/if}
+                                        <div class="text-sm text-green-600">
+                                            Salsa: {item.sauce || "No salsa"}
+                                        </div>
+                                        {#if item.notes}
+                                            <div class="text-sm text-red-500">
+                                                Note: {item.notes}
+                                            </div>
+                                        {/if}
+                                    </div>
+                                </Card>
+                            {/each}
+                        </div>
+                    {/if}
+                </div>
+            {/if}
 
-                <FeedbackToast
-                    bind:open
-                    color={orderSubmitError ? "red" : "green"}
-                    ToastIcon={orderSubmitError ? XCircle : CheckCircle2}
-                    message={orderFeedbackMessage || errorMessage}
-                />
-            </div>
-        {:else}
-            <div
-                class="mt-10 flex w-full flex-grow flex-col items-center justify-center gap-5"
-            >
-                <Spinner size="sm" class="max-w-12 self-center" />
-                <span class="text-2xl font-semibold text-primary-600"
-                    >Attendere...</span
-                >
-            </div>
-        {/if}
+            <FeedbackToast
+                bind:open
+                color={orderSubmitError ? "red" : "green"}
+                ToastIcon={orderSubmitError ? XCircle : CheckCircle2}
+                message={orderFeedbackMessage || errorMessage}
+            />
+        </div>
     </div>
 </section>
 
 <Modal bind:open={showModal} size="md" class="z-50">
-    <h2 class="text-xl font-bold" slot="header">Modifica Ordine</h2>
-
+    {#snippet header()}
+        <h2 class="text-xl font-bold">Modifica Ordine</h2>
+    {/snippet}
     <div class="mb-4 flex flex-col gap-4">
         <!-- Selezione tipo -->
         <div>
@@ -360,7 +339,7 @@
                             checked={currentItem.removedIngredients?.includes(
                                 ingredient
                             )}
-                            on:change={() => {
+                            onchange={() => {
                                 if (
                                     currentItem.removedIngredients?.includes(
                                         ingredient
@@ -401,7 +380,7 @@
                     <Radio
                         name="sauce"
                         checked={!currentItem.sauce}
-                        on:change={() => (currentItem.sauce = undefined)}
+                        onchange={() => (currentItem.sauce = undefined)}
                     />
                     <span>No salsa</span>
                 </Label>
@@ -410,7 +389,7 @@
                         <Radio
                             name="sauce"
                             checked={currentItem.sauce === sauce}
-                            on:change={() => (currentItem.sauce = sauce)}
+                            onchange={() => (currentItem.sauce = sauce)}
                         />
                         <span>{sauce}</span>
                     </Label>

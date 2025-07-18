@@ -1,11 +1,14 @@
 <script lang="ts">
-    import { init } from "$lib/charts/init";
     import { type ChartData, CheckInTimeSlot } from "$lib/charts/utils";
     import { theme } from "$store/store";
+    import { type EChartsOption } from "echarts";
+    import { BarChart } from "echarts/charts";
+    import { GridComponent, TitleComponent } from "echarts/components";
+    import { init, use } from "echarts/core";
+    import { SVGRenderer } from "echarts/renderers";
     import { Card, Select } from "flowbite-svelte";
     import { onMount } from "svelte";
-    import { type EChartsOptions } from "svelte-echarts";
-    import ChartComponent from "../ChartComponent.svelte";
+    import { Chart } from "svelte-echarts";
 
     const MAX_VISIBLE_BARS = 16;
 
@@ -32,7 +35,9 @@
     $effect(() => {
         timeWindow = selected;
     });
-    const options = $derived({
+
+    use([BarChart, SVGRenderer, TitleComponent, GridComponent]);
+    const options: EChartsOption = $derived({
         grid: {
             containLabel: true,
             left: 10,
@@ -131,7 +136,7 @@
                 },
             },
         },
-    } as EChartsOptions);
+    });
 
     let displayChart = $state(false);
 
@@ -144,7 +149,7 @@
     });
 </script>
 
-<Card class="h-96 w-full dark:bg-neutral-700 dark:border-neutral-500">
+<Card class="h-96 w-full dark:bg-neutral-700 dark:border-neutral-500 p-5">
     <div class="mb-3 flex justify-between">
         <div class="grid grid-cols-2 gap-4">
             <div>
@@ -170,6 +175,6 @@
         </div>
     </div>
     {#if displayChart}
-        <ChartComponent {options} {init} />
+        <Chart {options} {init} />
     {/if}
 </Card>

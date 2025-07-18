@@ -104,9 +104,8 @@
             >
                 {#each rest as order, i (i)}
                     <Card
-                        class="w-60 h-max border-l-4 relative dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-200"
+                        class="w-60 h-max border-l-4 relative dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-200 p-5"
                         style="border-left-color: #007a2288;"
-                        padding="sm"
                     >
                         <div class="py-2">
                             <div

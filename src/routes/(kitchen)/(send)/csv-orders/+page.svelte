@@ -2,7 +2,7 @@
     import { getEnumValueFromString } from "$lib/utils/enums";
     import { OFFSET } from "$lib/utils/tickets";
     import { ItemType, Sauce, type Order } from "$models/order";
-    import { Button, Fileupload, Label, NumberInput } from "flowbite-svelte";
+    import { Button, Fileupload, Input, Label } from "flowbite-svelte";
     import Papa from "papaparse";
 
     let processing = $state(false);
@@ -153,7 +153,7 @@
     <div class="mb-4 flex- col">
         <Label>
             Codice di partenza
-            <NumberInput bind:value={rowIndex} class="w-24" />
+            <Input type="number" bind:value={rowIndex} class="w-24" />
         </Label>
         <Fileupload
             accept=".csv"
