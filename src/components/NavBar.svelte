@@ -32,14 +32,13 @@
         View,
         X,
     } from "lucide-svelte";
-    import { sineIn } from "svelte/easing";
     import Logo from "./Logo.svelte";
 
     import { enhance } from "$app/forms";
     import { page } from "$app/state";
     import { hasAnyPermissions } from "$lib/utils/permissions";
     import { UserPermissions } from "$models/permissions";
-    import { theme, user } from "$store/store";
+    import { user } from "$store/store";
     import DarkMode from "./DarkMode.svelte";
 
     interface Route {
@@ -198,34 +197,22 @@
     }
 
     let hidden: boolean = $state(true);
-    let transitionParamsRight = {
-        x: 200,
-        duration: 200,
-        easing: sineIn,
-    };
-
-    function changeTheme() {
-        if ($theme == "dark") {
-            $theme = "light";
-        } else {
-            $theme = "dark";
-        }
-    }
+    let drawerOpen: boolean = $state(false);
 
     let deleteModalOpen: boolean = $state(false);
 </script>
 
 <navbar
-    class="sticky top-0 z-40 flex w-full items-center justify-between bg-primary-foreground"
+    class="sticky top-0 z-40 w-full h-max flex items-center justify-between bg-primary-foreground border-b border-border"
 >
-    <a class="my-2 ml-[1%]" href="/">
+    <a class="my-1 ml-[1%]" href="/">
         <Logo />
     </a>
     <div class="mr-5 flex items-center justify-end gap-5">
         <DarkMode />
 
-        {#if $user !== null}
-            <Drawer.Root direction="right" open class="">
+        {#if $user}
+            <Drawer.Root direction="right" bind:open={drawerOpen}>
                 <Drawer.Trigger>
                     <Button variant="outline" size="icon">
                         <AlignJustify />
@@ -275,7 +262,7 @@
                                                         {#each route.children as childRoute}
                                                             <a
                                                                 onclick={() =>
-                                                                    (hidden = true)}
+                                                                    (drawerOpen = false)}
                                                                 href={childRoute.slug}
                                                             >
                                                                 <span
@@ -298,7 +285,7 @@
                                         </Accordion.Root>
                                     {:else}
                                         <a
-                                            onclick={() => (hidden = true)}
+                                            onclick={() => (drawerOpen = false)}
                                             href={route.slug}
                                         >
                                             <span
@@ -373,7 +360,7 @@
                                                     class="flex gap-2 items-center"
                                                     onclick={() => {
                                                         deleteModalOpen = true;
-                                                        hidden = true;
+                                                        drawerOpen = false;
                                                     }}
                                                 >
                                                     <Trash
@@ -389,6 +376,7 @@
                                         use:enhance
                                         method="POST"
                                         action="/?/logout"
+                                        onsubmit={() => (drawerOpen = false)}
                                     >
                                         <button
                                             type="submit"

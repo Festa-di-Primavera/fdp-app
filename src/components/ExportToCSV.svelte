@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { Ticket } from "$models/ticket";
-    import { Button } from "flowbite-svelte";
     import moment from "moment-timezone";
+    import { Button } from "$lib/components/ui/button";
 
     interface Props {
         tickets?: Ticket[];

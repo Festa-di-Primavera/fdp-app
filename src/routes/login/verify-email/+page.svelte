@@ -1,15 +1,9 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
-    import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
     import type { User } from "$lib/auth/user";
     import { user } from "$store/store";
-    import { Button, Input, Label, Spinner } from "flowbite-svelte";
-    import { XCircle } from "lucide-svelte";
-
-    let feedbackToastOpen: boolean = $state(false);
-    let color: "green" | "red" | "yellow" = $state("green");
-    let timeOut: NodeJS.Timeout | undefined = $state();
-    let toastMessage: string = $state("");
+    import { Button, Input, Label } from "flowbite-svelte";
+    import { toast } from "svelte-sonner";
 
     interface Props {
         data: User;
@@ -22,13 +16,7 @@
 
     $effect(() => {
         if (form && form.error) {
-            color = "red";
-            toastMessage = form.message;
-            feedbackToastOpen = true;
-            timeOut = setTimeout(() => {
-                feedbackToastOpen = false;
-                clearTimeout(timeOut);
-            }, 3500);
+            toast.error(form.message);
         }
     });
 
@@ -159,10 +147,3 @@
         </form>
     </div>
 </section>
-
-<FeedbackToast
-    bind:open={feedbackToastOpen}
-    bind:color
-    bind:message={toastMessage}
-    ToastIcon={XCircle}
-/>

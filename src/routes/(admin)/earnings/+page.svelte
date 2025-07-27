@@ -1,11 +1,9 @@
 <script lang="ts">
-    import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
     import type { User } from "$lib/auth/user";
     import { user } from "$store/store";
     import {
         Button,
         Input,
-        Spinner,
         Table,
         TableBody,
         TableBodyCell,
@@ -13,7 +11,7 @@
         TableHead,
         TableHeadCell,
     } from "flowbite-svelte";
-    import { CheckCircle2, XCircle } from "lucide-svelte";
+    import { toast } from "svelte-sonner";
 
     interface Props {
         data: {
@@ -26,14 +24,6 @@
 
     if (!$user) $user = data.user;
 
-    // changes toast variables
-    let changeToastOpen: boolean = $state(false);
-    let color: "green" | "red" = $state("green");
-    let message: string = $state("");
-    let error: boolean = $state(false);
-    let timeOut: NodeJS.Timeout;
-    const ToastIcon = $derived(error ? XCircle : CheckCircle2);
-
     let sellers: User[] = $state(data.sellers);
     const debtToClaimMap: { [key: string]: number } = $state({});
 
@@ -44,20 +34,14 @@
             isNaN(debtToClaim) ||
             debtToClaim > selectedUser.owned_money
         ) {
-            error = true;
-            color = "red";
-            changeToastOpen = true;
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                changeToastOpen = false;
-                clearTimeout(timeOut);
-            }, 3500);
-            message =
+            const message =
                 debtToClaim <= 0
                     ? "L'importo deve essere positivo"
                     : debtToClaim > selectedUser.owned_money
                       ? "L'importo è troppo alto"
                       : "Errore";
+
+            toast.error(message);
             return;
         }
 
@@ -68,6 +52,7 @@
                 body: JSON.stringify({ money: debtToClaim }),
             });
 
+            let error = true;
             if (resp.ok) {
                 sellers = sellers.map((item: User) => {
                     if (item.id === selectedUser.id) {
@@ -77,30 +62,17 @@
                 });
                 sellers = [...sellers];
                 error = false;
-                color = "green";
-            } else {
-                error = true;
-                color = "red";
             }
 
-            message = (await resp.json()).message;
-            changeToastOpen = true;
+            const message = (await resp.json()).message;
 
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                changeToastOpen = false;
-                clearTimeout(timeOut);
-            }, 3500);
+            if (error) {
+                toast.error(message);
+            } else {
+                toast.success(message);
+            }
         } catch (e) {
-            error = true;
-            color = "red";
-            changeToastOpen = true;
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                changeToastOpen = false;
-                clearTimeout(timeOut);
-            }, 3500);
-            message = "Errore di rete";
+            toast.error("Errore di rete");
         }
         debtToClaimMap[selectedUser.id] = 0;
     };
@@ -216,5 +188,3 @@
         </TableBody>
     </Table>
 </div>
-
-<FeedbackToast bind:open={changeToastOpen} {color} {ToastIcon} {message} />

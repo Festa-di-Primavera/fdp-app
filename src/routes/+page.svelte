@@ -1,20 +1,13 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
     import type { User } from "$lib/auth/user";
-    import { user } from "$store/store";
-    import { AlertCircle, LogOut, XCircle } from "lucide-svelte";
-    import FeedbackToast from "../components/feedbacks/FeedbackToast.svelte";
     import { Button } from "$lib/components/ui/button/index";
+    import { user } from "$store/store";
+    import { LogOut } from "lucide-svelte";
+    import { toast } from "svelte-sonner";
 
     let { data } = $props();
     $user = data as User;
-
-    let feedbackToastMessage: string = $state("");
-    let feedbackToastOpen: boolean = $state(false);
-    let error: boolean = $state(false);
-    let color: "red" | "yellow" = $derived(error ? "red" : "yellow");
-
-    let ToastIcon = $derived(error ? AlertCircle : XCircle);
 </script>
 
 <svelte:head>
@@ -51,10 +44,3 @@
         </div>
     </div>
 </section>
-
-<FeedbackToast
-    bind:open={feedbackToastOpen}
-    {color}
-    bind:message={feedbackToastMessage}
-    {ToastIcon}
-/>

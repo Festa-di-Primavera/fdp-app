@@ -7,14 +7,12 @@
         Input,
         Label,
         Progressbar,
-        Spinner,
     } from "flowbite-svelte";
-    import { CheckCircle2, XCircle } from "lucide-svelte";
     import { sineOut } from "svelte/easing";
 
-    import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
     import type { User } from "$lib/auth/user";
     import { user } from "$store/store";
+    import { toast } from "svelte-sonner";
 
     interface Props {
         data: User;
@@ -48,7 +46,7 @@
 
         const totalChunks = Math.ceil(codes.length / 50);
         let completedChunks = 0;
-        let hasError = false;
+        let error = false;
 
         for (let i = 0; i < codes.length; i += 50) {
             const chunk = codes.slice(i, i + 50);
@@ -64,28 +62,16 @@
                 completedChunks++;
                 progress = (completedChunks / totalChunks) * 100;
             } else {
-                hasError = true;
+                error = true;
                 break;
             }
         }
 
-        // Mostra il toast solo alla fine del processo
-        error = hasError;
-        color = hasError ? "red" : "green";
-        message = hasError
-            ? "Errore durante l'inserimento dei codici"
-            : "Codici inseriti con successo";
-        open = true;
-
-        // Nascondi la progress bar dopo un breve delay
-        setTimeout(() => {
-            showProgress = false;
-            progress = 0;
-            // Nascondi anche il toast dopo qualche secondo
-            setTimeout(() => {
-                open = false;
-            }, 3500);
-        }, 1000);
+        if (error) {
+            toast.error("Errore durante l'inserimento dei codici");
+        } else {
+            toast.success("Codici inseriti con successo");
+        }
     };
 
     let ticketsNumber = $state(1250);
@@ -101,28 +87,17 @@
             },
             body: JSON.stringify({ ticketsNumber, ticketsPerBlock, startCode }),
         });
+        let error = true;
         if (res.ok) {
             error = false;
-            color = "green";
-        } else {
-            error = true;
-            color = "red";
         }
-        message = (await res.json()).message;
-        open = true;
-        clearTimeout(timeOut);
-        timeOut = setTimeout(() => {
-            open = false;
-            clearTimeout(timeOut);
-        }, 3500);
+        const message = (await res.json()).message;
+        if (error) {
+            toast.error(message);
+        } else {
+            toast.success(message);
+        }
     };
-
-    let open = $state(false);
-    let color: "green" | "red" | "yellow" = $state("green");
-    let timeOut: NodeJS.Timeout;
-    let message = $state("");
-    let error = $state(false);
-    let ToastIcon = $derived(error ? XCircle : CheckCircle2);
 </script>
 
 <svelte:head>
@@ -325,5 +300,3 @@
         </div>
     </Card>
 </section>
-
-<FeedbackToast bind:open bind:color bind:message {ToastIcon} />

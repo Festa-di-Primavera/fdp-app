@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { toggleMode } from "mode-watcher";
     import { Button } from "$lib/components/ui/button/index.js";
     import { MoonIcon, SunIcon } from "lucide-svelte";
+    import { toggleMode } from "mode-watcher";
 </script>
 
 <Button onclick={toggleMode} variant="outline" size="icon">

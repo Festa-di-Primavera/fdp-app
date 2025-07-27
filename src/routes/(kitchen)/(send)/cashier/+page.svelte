@@ -1,24 +1,22 @@
 <script lang="ts">
-    import { Button, Card, Input, Label, Spinner } from "flowbite-svelte";
+    import { Button, Card, Input, Label } from "flowbite-svelte";
     import {
         Check,
-        CheckCircle2,
         PencilLine,
         Send,
         Ticket as TicketIcon,
         Trash2,
         X,
-        XCircle,
     } from "lucide-svelte";
 
     import QrReader from "$components/QrReader.svelte";
-    import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
     import OrderModal from "$components/food/cashier/OrderModal.svelte";
     import type { User } from "$lib/auth/user";
     import { getXnrfCode } from "$lib/utils/tickets";
     import { type Order, type OrderItem, ItemType } from "$models/order";
     import type { Ticket } from "$models/ticket";
     import { user } from "$store/store";
+    import { toast } from "svelte-sonner";
 
     interface Props {
         data: User;
@@ -31,29 +29,19 @@
     let ticketCodeInput: string = $state("");
 
     let ticket: Ticket | undefined = $state();
-    let open: boolean = $state(false);
-    let errorMessage: string = $state("Codice biglietto errato");
-
-    let timeOut: NodeJS.Timeout;
 
     async function getTicket(code: string) {
         const res = await fetch(`/api/tickets/${encodeURIComponent(code)}`);
         ticketCodeInput = "";
 
         if (res.status == 404 || res.status == 402 || res.status == 425) {
-            errorMessage =
+            toast.error(
                 res.status === 402
                     ? "Biglietto non ancora venduto"
                     : res.status === 425
                       ? "Biglietto non ancora validato all'ingresso"
-                      : "Codice biglietto errato";
-            open = true;
-
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                open = false;
-                clearTimeout(timeOut);
-            }, 3500);
+                      : "Codice biglietto errato"
+            );
             return;
         }
 
@@ -73,7 +61,6 @@
         ticket = undefined;
         ticketCodeInput = "";
         ticketCode = "";
-        open = false;
     };
 
     const onKeyDown = (e: KeyboardEvent) => {
@@ -169,9 +156,6 @@
         editingIndex = -1;
     }
 
-    let orderSubmitError: boolean = $state(true);
-    let orderFeedbackMessage: string = $state("");
-
     async function submitOrder() {
         try {
             const finalOrder: Order = {
@@ -194,25 +178,15 @@
                 throw new Error("Errore durante l'invio dell'ordine");
             }
 
-            orderFeedbackMessage = (await response.json()).message;
-            orderSubmitError = false;
+            toast.success((await response.json()).message);
             // clear order on success
             orderItems = [];
             // reset all state
             reset();
         } catch (error) {
             console.error("Error submitting order:", error);
-            orderFeedbackMessage = "Errore durante l'invio dell'ordine";
-            orderSubmitError = true;
+            toast.error("Errore durante l'invio dell'ordine");
         }
-        open = true;
-        clearTimeout(timeOut);
-        timeOut = setTimeout(() => {
-            open = false;
-            orderFeedbackMessage = "";
-            orderSubmitError = true;
-            clearTimeout(timeOut);
-        }, 3500);
     }
 
     function adjustQuantity(increment: boolean) {
@@ -393,13 +367,6 @@
                     {/if}
                 </div>
             {/if}
-
-            <FeedbackToast
-                bind:open
-                color={orderSubmitError ? "red" : "green"}
-                ToastIcon={orderSubmitError ? XCircle : CheckCircle2}
-                message={orderFeedbackMessage || errorMessage}
-            />
         </div>
     </div>
 </section>

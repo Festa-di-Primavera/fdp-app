@@ -1,6 +1,5 @@
 <script lang="ts">
     import { type ChartData, SalesTimeSlot } from "$lib/charts/utils";
-    import { theme } from "$store/store";
     import { Card, Select } from "flowbite-svelte";
     import { onMount } from "svelte";
     import { type EChartsOption } from "echarts";
@@ -9,6 +8,7 @@
     import { BarChart } from "echarts/charts";
     import { SVGRenderer } from "echarts/renderers";
     import { GridComponent, TitleComponent } from "echarts/components";
+    import { mode } from "mode-watcher";
 
     const MAX_VISIBLE_BARS = 10;
 
@@ -47,16 +47,16 @@
             left: 10,
             right: 25,
         },
-        backgroundColor: $theme == "dark" ? "#414041" : "white",
+        backgroundColor: mode.current == "dark" ? "#414041" : "white",
         xAxis: {
             data: ticketsData.labels,
             axisLabel: {
-                color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                color: mode.current == "dark" ? "white" : "rgb(55 65 81)",
             },
             axisLine: {
                 show: true,
                 lineStyle: {
-                    color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                    color: mode.current == "dark" ? "white" : "rgb(55 65 81)",
                 },
             },
         },
@@ -73,11 +73,11 @@
                 symbolSize: [8, 8],
                 symbolOffset: [0, 8],
                 lineStyle: {
-                    color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                    color: mode.current == "dark" ? "white" : "rgb(55 65 81)",
                 },
             },
             axisLabel: {
-                color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                color: mode.current == "dark" ? "white" : "rgb(55 65 81)",
             },
             minInterval: 5,
             min: 0,
@@ -129,7 +129,7 @@
                     name: "graph",
                     iconStyle: {
                         borderColor:
-                            $theme == "dark" ? "white" : "rgb(55 65 81)",
+                            mode.current == "dark" ? "white" : "rgb(55 65 81)",
                         borderWidth: 1.5,
                     },
                     icon: `path://M 7 10 L 12 15 L 17 10 M 21 15 v 4 a 2 2 0 0 1 -2 2 H 5 a 2 2 0 0 1 -2 -2 v -4 M 12 4 L 12 15`,
@@ -141,16 +141,6 @@
                 },
             },
         },
-    });
-
-    let displayChart = $state(false);
-
-    onMount(() => {
-        $theme = localStorage.getItem("color-theme") as "light" | "dark";
-        // wait 100ms before displaying the chart
-        setTimeout(() => {
-            displayChart = true;
-        }, 300);
     });
 </script>
 
@@ -179,7 +169,5 @@
             />
         </div>
     </div>
-    {#if displayChart}
         <Chart {options} {init} />
-    {/if}
 </Card>

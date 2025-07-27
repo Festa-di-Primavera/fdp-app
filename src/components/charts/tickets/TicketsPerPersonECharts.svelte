@@ -1,12 +1,12 @@
 <script lang="ts">
     import type { ChartData } from "$lib/charts/utils";
-    import { theme } from "$store/store";
     import type { EChartsOption } from "echarts";
     import { BarChart } from "echarts/charts";
     import { GridComponent, TitleComponent } from "echarts/components";
     import { init, use } from "echarts/core";
     import { SVGRenderer } from "echarts/renderers";
     import { Card } from "flowbite-svelte";
+    import { mode } from "mode-watcher";
     import { onMount } from "svelte";
     import { Chart } from "svelte-echarts";
 
@@ -19,37 +19,24 @@
 
     const numberOfBars = $derived(sellersStats.labels.length);
 
-    let displayChart = $state(false);
-
-    onMount(() => {
-        $theme = localStorage.getItem("color-theme") as "light" | "dark";
-        setTimeout(() => {
-            displayChart = true;
-        }, 300);
-    });
-
-    theme.subscribe((value) => {
-        $theme = value;
-    });
-
-    use([BarChart, SVGRenderer, TitleComponent, GridComponent])
+    use([BarChart, SVGRenderer, TitleComponent, GridComponent]);
     const options: EChartsOption = $derived({
         grid: {
             containLabel: true,
             left: 10,
             right: 25,
         },
-        backgroundColor: $theme == "dark" ? "#414041" : "white",
+        backgroundColor: mode.current == "dark" ? "#414041" : "white",
         xAxis: {
             data: sellersStats.labels,
             axisLabel: {
                 interval: 0,
                 overflow: "truncate",
-                color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                color: mode.current == "dark" ? "white" : "rgb(55 65 81)",
             },
             axisLine: {
                 lineStyle: {
-                    color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                    color: mode.current == "dark" ? "white" : "rgb(55 65 81)",
                 },
             },
         },
@@ -66,11 +53,11 @@
                 symbolSize: [8, 8],
                 symbolOffset: [0, 8],
                 lineStyle: {
-                    color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                    color: mode.current == "dark" ? "white" : "rgb(55 65 81)",
                 },
             },
             axisLabel: {
-                color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                color: mode.current == "dark" ? "white" : "rgb(55 65 81)",
             },
             minInterval: 5,
             min: 0,
@@ -122,7 +109,7 @@
                     name: "graph",
                     iconStyle: {
                         borderColor:
-                            $theme == "dark" ? "white" : "rgb(55 65 81)",
+                            mode.current == "dark" ? "white" : "rgb(55 65 81)",
                         borderWidth: 1.5,
                     },
                     icon: `path://M 7 10 L 12 15 L 17 10 M 21 15 v 4 a 2 2 0 0 1 -2 2 H 5 a 2 2 0 0 1 -2 -2 v -4 M 12 4 L 12 15`,
@@ -152,9 +139,7 @@
 
     {#if options !== null}
         <div class="mt-5 h-full w-full">
-            {#if displayChart}
                 <Chart {options} {init} />
-            {/if}
         </div>
     {/if}
 </Card>

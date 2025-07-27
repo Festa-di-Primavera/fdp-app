@@ -1,14 +1,14 @@
 <script lang="ts">
-    import { Input, Label, Spinner } from "flowbite-svelte";
-    import { Check, Ticket as TicketIcon, X, XCircle } from "lucide-svelte";
+    import { Input, Label } from "flowbite-svelte";
+    import { Check, Ticket as TicketIcon, X } from "lucide-svelte";
     import { onMount } from "svelte";
 
     import InfoCard from "$components/InfoCard.svelte";
     import QrReader from "$components/QrReader.svelte";
-    import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
     import type { User } from "$lib/auth/user";
     import type { Ticket } from "$models/ticket";
     import { user } from "$store/store";
+    import { toast } from "svelte-sonner";
 
     let ticketInfos: Element | null = null;
 
@@ -29,9 +29,6 @@
     let ticketCodeInput: string = $state("");
 
     let ticket: Ticket | undefined = $state();
-    let open: boolean = $state(false);
-
-    let timeOut: NodeJS.Timeout;
 
     async function getTicket(code: string) {
         const res = await fetch(`/api/tickets/${encodeURIComponent(code)}`);
@@ -39,13 +36,7 @@
         ticketCodeInput = "";
 
         if (res.status == 404) {
-            open = true;
-
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                open = false;
-                clearTimeout(timeOut);
-            }, 3500);
+            toast.error("Codice biglietto errato");
 
             ticket = {
                 ticketId: code,
@@ -82,7 +73,6 @@
 
         ticketCodeInput = "";
         ticketCode = "";
-        open = false;
     };
 
     onMount(async () => {
@@ -155,13 +145,6 @@
             </div>
 
             <InfoCard {ticketCode} {ticket} />
-
-            <FeedbackToast
-                bind:open
-                color="red"
-                ToastIcon={XCircle}
-                message="Codice biglietto errato"
-            />
         </div>
     </div>
 </section>

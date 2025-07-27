@@ -1,11 +1,11 @@
 <script lang="ts">
-    import { theme } from "$store/store";
     import type { EChartsOption } from "echarts";
     import { BarChart } from "echarts/charts";
     import { DataZoomComponent, GridComponent, LegendComponent, TitleComponent, ToolboxComponent, TooltipComponent } from "echarts/components";
     import { init, use } from "echarts/core";
     import { SVGRenderer } from "echarts/renderers";
     import { Card } from "flowbite-svelte";
+    import { mode } from "mode-watcher";
     import { onMount } from "svelte";
     import { Chart } from "svelte-echarts";
 
@@ -20,15 +20,6 @@
         notSoldTicketsCount,
     }: Props = $props();
 
-    let displayChart = $state(false);
-
-    onMount(() => {
-        $theme = localStorage.getItem("color-theme") as "light" | "dark";
-        setTimeout(() => {
-            displayChart = true;
-        }, 300);
-    });
-
     use([BarChart, SVGRenderer, TitleComponent, GridComponent, LegendComponent, TooltipComponent, ToolboxComponent, DataZoomComponent]);
     const options: EChartsOption = $derived({
         legend: {
@@ -39,10 +30,10 @@
                 return name;
             },
             textStyle: {
-                color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                color: mode.current == "dark" ? "white" : "rgb(55 65 81)",
             },
         },
-        backgroundColor: $theme == "dark" ? "#414041" : "white",
+        backgroundColor: mode.current == "dark" ? "#414041" : "white",
         tooltip: {
             trigger: "item",
             formatter: "{b}: {c}",
@@ -56,7 +47,7 @@
                 label: {
                     show: true,
                     formatter: "{d}%",
-                    color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                    color: mode.current == "dark" ? "white" : "rgb(55 65 81)",
                 },
                 labelLine: {
                     show: true,
@@ -73,7 +64,7 @@
                         name: "Validati",
                         label: {
                             show: checkedTicketsCount > 0,
-                            color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                            color: mode.current == "dark" ? "white" : "rgb(55 65 81)",
                         },
                     },
                     {
@@ -81,7 +72,7 @@
                         name: "Non validati",
                         label: {
                             show: notCheckedTicketsCount > 0,
-                            color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                            color: mode.current == "dark" ? "white" : "rgb(55 65 81)",
                         },
                     },
                     {
@@ -89,7 +80,7 @@
                         name: "Non venduti",
                         label: {
                             show: notSoldTicketsCount > 0,
-                            color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                            color: mode.current == "dark" ? "white" : "rgb(55 65 81)",
                         },
                     },
                 ],
@@ -107,7 +98,7 @@
                     name: "graph",
                     iconStyle: {
                         borderColor:
-                            $theme == "dark" ? "white" : "rgb(55 65 81)",
+                            mode.current == "dark" ? "white" : "rgb(55 65 81)",
                         borderWidth: 1.5,
                     },
                     icon: `path://M 7 10 L 12 15 L 17 10 M 21 15 v 4 a 2 2 0 0 1 -2 2 H 5 a 2 2 0 0 1 -2 -2 v -4 M 12 4 L 12 15`,
@@ -137,9 +128,7 @@
 
     {#if options !== null}
         <div class="h-full w-full pt-4">
-            {#if displayChart}
                 <Chart {options} {init} />
-            {/if}
         </div>
     {/if}
 </Card>

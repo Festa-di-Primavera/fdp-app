@@ -1,12 +1,12 @@
 <script lang="ts">
     import type { ChartData } from "$lib/charts/utils";
-    import { theme } from "$store/store";
     import type { EChartsOption } from "echarts";
     import { PieChart } from "echarts/charts";
     import { GridComponent, TitleComponent } from "echarts/components";
     import { init, use } from "echarts/core";
     import { SVGRenderer } from "echarts/renderers";
     import { Card } from "flowbite-svelte";
+    import { mode } from "mode-watcher";
     import { onMount } from "svelte";
     import { Chart } from "svelte-echarts";
 
@@ -14,15 +14,6 @@
         ordersStats: ChartData;
     }
     let { ordersStats }: Props = $props();
-
-    let displayChart = $state(false);
-
-    onMount(() => {
-        $theme = localStorage.getItem("color-theme") as "light" | "dark";
-        setTimeout(() => {
-            displayChart = true;
-        }, 300);
-    });
 
     use([PieChart, GridComponent, SVGRenderer, TitleComponent]);
     const options: EChartsOption = $derived({
@@ -34,10 +25,10 @@
                 return name;
             },
             textStyle: {
-                color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                color: mode.current == "dark" ? "white" : "rgb(55 65 81)",
             },
         },
-        backgroundColor: $theme == "dark" ? "#414041" : "white",
+        backgroundColor: mode.current == "dark" ? "#414041" : "white",
         tooltip: {
             trigger: "item",
             formatter: "{b}: {c}",
@@ -51,7 +42,7 @@
                 label: {
                     show: true,
                     formatter: "{d}%",
-                    color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                    color: mode.current == "dark" ? "white" : "rgb(55 65 81)",
                 },
                 labelLine: {
                     show: true,
@@ -67,7 +58,8 @@
                     name: label,
                     label: {
                         show: ordersStats.datasets[index] > 0,
-                        color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                        color:
+                            mode.current == "dark" ? "white" : "rgb(55 65 81)",
                     },
                 })),
             },
@@ -84,7 +76,7 @@
                     name: "graph",
                     iconStyle: {
                         borderColor:
-                            $theme == "dark" ? "white" : "rgb(55 65 81)",
+                            mode.current == "dark" ? "white" : "rgb(55 65 81)",
                         borderWidth: 1.5,
                     },
                     icon: `path://M 7 10 L 12 15 L 17 10 M 21 15 v 4 a 2 2 0 0 1 -2 2 H 5 a 2 2 0 0 1 -2 -2 v -4 M 12 4 L 12 15`,
@@ -114,10 +106,7 @@
 
     {#if options !== null}
         <div class="h-full w-full pt-4">
-            {#if displayChart}
-                <!-- <ChartComponent {options} {init} /> -->
-                <Chart {init} {options} />
-            {/if}
+            <Chart {init} {options} />
         </div>
     {/if}
 </Card>

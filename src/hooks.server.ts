@@ -1,4 +1,3 @@
-// import { lucia } from '$lib/lucia/auth';
 import {
     deleteSessionTokenCookie,
     setSessionTokenCookie,

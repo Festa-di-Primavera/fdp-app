@@ -3,10 +3,10 @@
     import { XCircle } from "lucide-svelte";
 
     import { enhance } from "$app/forms";
-    import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
     import InputErrors from "$components/form/InputErrors.svelte";
     import PasswordEye from "$components/form/PasswordEye.svelte";
     import { user } from "$store/store";
+    import { toast } from "svelte-sonner";
 
     $user = null;
     let option: "login" | "register" = $state("login");
@@ -16,11 +16,6 @@
     let password: string = $state("");
     let repeatPassword: string = $state("");
     let pwVisible: boolean = $state(false);
-
-    let feedbackToastOpen: boolean = $state(false);
-    let color: "green" | "red" | "yellow" = $state("green");
-    let timeOut: NodeJS.Timeout;
-    let toastMessage: string = $state("");
 
     interface Props {
         form: {
@@ -34,21 +29,9 @@
     $effect(() => {
         if (form) {
             if (form.error) {
-                color = "red";
-                toastMessage = form.message;
-                feedbackToastOpen = true;
-                timeOut = setTimeout(() => {
-                    feedbackToastOpen = false;
-                    clearTimeout(timeOut);
-                }, 3500);
+                toast.error(form.message);
             } else {
-                color = "green";
-                toastMessage = form.message;
-                feedbackToastOpen = true;
-                timeOut = setTimeout(() => {
-                    feedbackToastOpen = false;
-                    clearTimeout(timeOut);
-                }, 3500);
+                toast.success(form.message);
             }
         }
     });
@@ -82,8 +65,6 @@
             usernameValidator = !/^[a-zA-Z0-9_\ ]*$/.test(username);
         }
     });
-
-    let ToastIcon = $state(XCircle);
 </script>
 
 <section
@@ -229,19 +210,9 @@
                 class="mt-1 w-max self-end p-0 text-sm hover:text-primary-500 dark:text-neutral-300"
                 href="/login/password-reset">Password dimenticata?</a
             >
-            <Button
-                class="mt-3 w-full"
-                type="submit"
-            >
+            <Button class="mt-3 w-full" type="submit">
                 {option === "login" ? "Accedi" : "Registrati"}
             </Button>
         </form>
     </Card>
 </section>
-
-<FeedbackToast
-    bind:open={feedbackToastOpen}
-    bind:color
-    bind:message={toastMessage}
-    bind:ToastIcon
-/>

@@ -1,5 +1,4 @@
 <script lang="ts">
-    import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
     import type { User } from "$lib/auth/user";
     import { TICKETS } from "$lib/firebase/collections";
     import { formatDate } from "$lib/utils/textFormat";
@@ -20,8 +19,9 @@
         TableHead,
         TableHeadCell,
     } from "flowbite-svelte";
-    import { CheckCircle2, Pen, XCircle } from "lucide-svelte";
+    import { Pen } from "lucide-svelte";
     import { onDestroy, onMount } from "svelte";
+    import { toast } from "svelte-sonner";
 
     interface Props {
         data: { currUser: User; sellers: Map<string, string> };
@@ -63,12 +63,6 @@
 
     let tickets: Ticket[] = $state([]);
 
-    let color: "green" | "red" = $state("green");
-    let feedbackToastMessage: string = $state("");
-    let error: boolean = $state(false);
-    let feedbackToastOpen: boolean = $state(false);
-    let timeOut: NodeJS.Timeout;
-
     const filters = $state({
         name: "",
         surname: "",
@@ -101,7 +95,6 @@
             );
         });
     });
-    let ToastIcon = $derived(error ? XCircle : CheckCircle2);
 
     let currSelectedTicket: Ticket | undefined = $state();
 
@@ -129,16 +122,11 @@
                 }),
             });
             if (response.ok) {
-                error = false;
-                feedbackToastMessage = "Attributo cambiato";
-                feedbackToastOpen = true;
+                toast.success("Attributo cambiato");
+            } else {
+                toast.error("Errore durante la modifica");
             }
 
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                feedbackToastOpen = false;
-                clearTimeout(timeOut);
-            }, 3500);
             attribute = "";
         }
     }
@@ -294,12 +282,6 @@
     </div>
 {/if}
 
-<FeedbackToast
-    bind:open={feedbackToastOpen}
-    bind:color
-    bind:message={feedbackToastMessage}
-    {ToastIcon}
-/>
 <Modal
     autoclose
     outsideclose

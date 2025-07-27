@@ -1,14 +1,6 @@
 <script lang="ts">
+    import { Button, Input, Label, Modal, Tooltip } from "flowbite-svelte";
     import {
-        Button,
-        Input,
-        Label,
-        Modal,
-        Spinner,
-        Tooltip,
-    } from "flowbite-svelte";
-    import {
-        CheckCircle2,
         ChefHat,
         Coins,
         Dna,
@@ -19,17 +11,16 @@
         Ticket,
         Users,
         Utensils,
-        XCircle,
     } from "lucide-svelte";
 
     import UsersTable from "$components/UsersTable.svelte";
-    import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
     import type { User } from "$lib/auth/user";
     import { getStringFromEnumValue } from "$lib/utils/enums";
     import { intToBitArray } from "$lib/utils/permissions";
     import { capitalizeFirstLetter } from "$lib/utils/textFormat";
     import { UserPermissions } from "$models/permissions";
     import { user } from "$store/store.js";
+    import { toast } from "svelte-sonner";
 
     interface Props {
         data: {
@@ -46,14 +37,6 @@
 
     // modal state variable
     let deleteModalOpen: boolean = $state(false);
-
-    // changes toast variables
-    let changeToastOpen: boolean = $state(false);
-    let color: "green" | "red" = $state("green");
-    let message: string = $state("");
-    let error: boolean = $state(false);
-    let timeOut: NodeJS.Timeout;
-    let toastIcon = $derived(error ? XCircle : CheckCircle2);
 
     // association between userpermissions and their respective icons
     const permissionIcons = {
@@ -83,36 +66,22 @@
                 headers: { "Content-Type": "application/json" },
             });
 
+            let error = true;
             if (res.ok) {
                 error = false;
-                color = "green";
                 users = users.filter((item: User) => item.id !== user.id);
             } else if (res.status === 404) {
-                error = true;
-                color = "red";
                 users = users.filter((item: User) => item.id !== user.id);
-            } else {
-                error = true;
-                color = "red";
             }
 
-            message = (await res.json()).message;
-            changeToastOpen = true;
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                changeToastOpen = false;
-                clearTimeout(timeOut);
-            }, 3500);
+            const message = (await res.json()).message;
+            if (error) {
+                toast.error(message);
+            } else {
+                toast.success(message);
+            }
         } catch (e) {
-            error = true;
-            color = "red";
-            changeToastOpen = true;
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                changeToastOpen = false;
-                clearTimeout(timeOut);
-            }, 3500);
-            message = "Errore di rete";
+            toast.error("Errore di rete");
         }
     };
 
@@ -132,31 +101,26 @@
                 headers: { "Content-Type": "application/json" },
             });
 
+            let error = true;
             if (res.ok) {
-                color = "green";
-                error = false;
                 users = users.map((item: User) => {
                     if (item.id === user.id) {
                         item.alias = alias;
                     }
                     return item;
                 });
-            } else {
-                color = "red";
-                error = true;
             }
 
             if (res.status === 404) {
                 users = users.filter((item: User) => item.id !== user.id);
             }
 
-            changeToastOpen = true;
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                changeToastOpen = false;
-                clearTimeout(timeOut);
-            }, 3500);
-            message = (await res.json()).message;
+            const message = (await res.json()).message;
+            if (error) {
+                toast.error(message);
+            } else {
+                toast.success(message);
+            }
         }
 
         aliasModalOpen = false;
@@ -286,10 +250,3 @@
         {/snippet}
     </Modal>
 {/if}
-
-<FeedbackToast
-    bind:open={changeToastOpen}
-    bind:color
-    ToastIcon={toastIcon}
-    bind:message
-/>

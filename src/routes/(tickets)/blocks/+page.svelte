@@ -1,5 +1,4 @@
 <script lang="ts">
-    import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
     import type { User } from "$lib/auth/user";
     import { formatDate } from "$lib/utils/textFormat";
     import { type Block } from "$lib/utils/tickets";
@@ -10,7 +9,6 @@
         DropdownItem,
         Indicator,
         Input,
-        Spinner,
         Table,
         TableBody,
         TableBodyCell,
@@ -18,14 +16,8 @@
         TableHead,
         TableHeadCell,
     } from "flowbite-svelte";
-    import {
-        CheckCircle2,
-        Search,
-        UserCog,
-        UserMinus,
-        UserPlus,
-        XCircle,
-    } from "lucide-svelte";
+    import { Search, UserCog, UserMinus, UserPlus } from "lucide-svelte";
+    import { toast } from "svelte-sonner";
 
     interface Props {
         data: { user: User; sellers: User[]; blockList: Block[] };
@@ -33,16 +25,6 @@
 
     let { data }: Props = $props();
     if (!$user) $user = data.user;
-
-    let error: boolean = $state(false);
-    let color: "green" | "red" = $state("green");
-    let message: string = $state("");
-    let changeToastOpen: boolean = $state(false);
-    let timeOut: NodeJS.Timeout;
-    let ToastIcon = $state(CheckCircle2);
-    $effect(() => {
-        ToastIcon = error ? XCircle : CheckCircle2;
-    });
 
     const addBlock = async (ticketCode: string, seller: User | null) => {
         try {
@@ -57,8 +39,6 @@
             );
 
             if (resp.ok) {
-                error = false;
-                color = "green";
                 blocks = blocks.map((block) => {
                     if (block.id === ticketCode) {
                         block.assigned_to = seller;
@@ -67,29 +47,14 @@
                     }
                     return block;
                 });
+                const message = (await resp.json()).message;
+                toast.success(message);
             } else {
-                error = true;
-                color = "red";
+                const message = (await resp.json()).message;
+                toast.error(message);
             }
-
-            message = (await resp.json()).message;
-            changeToastOpen = true;
-
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                changeToastOpen = false;
-                clearTimeout(timeOut);
-            }, 3500);
         } catch (e) {
-            error = true;
-            color = "red";
-            changeToastOpen = true;
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                changeToastOpen = false;
-                clearTimeout(timeOut);
-            }, 3500);
-            message = "Errore di rete";
+            toast.error("Errore di rete");
         }
     };
 
@@ -318,10 +283,3 @@
         </TableBody>
     </Table>
 </div>
-
-<FeedbackToast
-    bind:open={changeToastOpen}
-    bind:color
-    bind:ToastIcon
-    bind:message
-/>

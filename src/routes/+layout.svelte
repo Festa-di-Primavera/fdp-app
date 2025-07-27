@@ -1,30 +1,23 @@
 <script lang="ts">
-    import { theme } from "$store/store";
-    import { onMount } from "svelte";
+    import { page } from "$app/state";
+    import { Toaster } from "$lib/components/ui/sonner";
+    import { ModeWatcher } from "mode-watcher";
     import "../app-ui.css";
     import NavBar from "../components/NavBar.svelte";
     import type { LayoutProps } from "./$types";
-    import { page } from "$app/state";
 
     let { children }: LayoutProps = $props();
 
-    onMount(() => {
-        if (!localStorage.getItem("color-theme"))
-            localStorage.setItem("color-theme", "dark");
-
-        $theme = localStorage.getItem("color-theme") as "light" | "dark";
-    });
-
-    const noNavbarRoutes = [
-        "/(kitchen)/(receive)/kitchen-stats",
-    ]
+    const noNavbarRoutes = ["/(kitchen)/(receive)/kitchen-stats"];
 </script>
 
-<div
-    class="min-h-[100svh] flex flex-col"
->
+<ModeWatcher />
+<div class="min-h-[100svh] flex flex-col">
     {#if !noNavbarRoutes.includes(page.route.id!!)}
         <NavBar />
     {/if}
+    <Toaster position="top-center" richColors visibleToasts={1} toastOptions={{
+        style: "transform: translateY(+150%);",
+    }} />
     {@render children?.()}
 </div>

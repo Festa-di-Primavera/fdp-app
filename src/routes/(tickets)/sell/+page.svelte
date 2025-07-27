@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Button, Input, Label, Modal, Spinner } from "flowbite-svelte";
+    import { Button, Input, Label, Modal } from "flowbite-svelte";
     import { CheckCircle2, Ticket, XCircle } from "lucide-svelte";
 
     import QrReader from "$components/QrReader.svelte";
@@ -168,9 +168,9 @@
 >
     {@const ModalIcon = error ? XCircle : CheckCircle2}
     <span
-        class="text-2xl font-semibold text-{color}-500 flex items-center gap-2"
+        class="text-2xl font-semibold {color} flex items-center gap-2"
     >
-        <ModalIcon class="h-6 w-6  text-{color}-500" />
+        <ModalIcon class="h-6 w-6 {color}" />
         {error ? "Errore" : "Successo"}
     </span>
     <div class="flex flex-col gap-5">

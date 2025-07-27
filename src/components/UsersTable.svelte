@@ -24,15 +24,13 @@
     } from "flowbite-svelte";
     import {
         Check,
-        CheckCircle2,
         ListFilter,
         PenBox,
         Search,
         Trash2,
-        X,
-        XCircle,
+        X
     } from "lucide-svelte";
-    import FeedbackToast from "./feedbacks/FeedbackToast.svelte";
+    import { toast } from "svelte-sonner";
 
     interface Props {
         users: User[];
@@ -49,17 +47,6 @@
         deleteModalOpen = $bindable(),
         permissionIcons,
     }: Props = $props();
-
-    let color: "green" | "red" = $state("green");
-    let feedbackToastMessage: string = $state("");
-    let error: boolean = $state(false);
-    let feedbackToastOpen: boolean = $state(false);
-    let timeOut: NodeJS.Timeout;
-    let ToastIcon = $state(XCircle);
-
-    $effect(() => {
-        ToastIcon = error ? XCircle : CheckCircle2;
-    });
 
     function getPermissionIcon(permission: UserPermissions) {
         return permissionIcons[permission];
@@ -80,10 +67,8 @@
                 }
             );
 
+            let error = true;
             if (response.ok) {
-                error = false;
-                color = "green";
-
                 users = users.map((item: User) => {
                     if (item.id === currentUser.id) {
                         item.permissions = add
@@ -101,31 +86,17 @@
                         : removePermission($user.permissions, permission);
                 }
                 users = [...users];
-            } else {
-                error = true;
-                color = "red";
             }
 
-            feedbackToastMessage = (await response.json()).message;
-            feedbackToastOpen = true;
+            const message = (await response.json()).message;
 
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                feedbackToastOpen = false;
-                clearTimeout(timeOut);
-            }, 3500);
+            if (error) {
+                toast.error(message);
+            } else {
+                toast.success(message);
+            }
         } catch (e) {
-            error = true;
-            color = "red";
-            feedbackToastOpen = true;
-
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                feedbackToastOpen = false;
-                clearTimeout(timeOut);
-            }, 3500);
-
-            feedbackToastMessage = "Errore di rete";
+            toast.error("Errore di rete");
         }
     };
 
@@ -359,10 +330,3 @@
         </Table>
     </div>
 {/if}
-
-<FeedbackToast
-    open={true}
-    bind:color
-    message={"ciaoooad"}
-    bind:ToastIcon
-/>
