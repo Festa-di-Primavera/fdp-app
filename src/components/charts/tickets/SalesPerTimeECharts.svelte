@@ -1,7 +1,7 @@
 <script lang="ts">
     import { type ChartData, SalesTimeSlot } from "$lib/charts/utils";
-    import { Card, Select } from "flowbite-svelte";
-    import { onMount } from "svelte";
+    import * as Card from "$lib/components/ui/card";
+    import * as Select from "$lib/components/ui/select";
     import { type EChartsOption } from "echarts";
     import { Chart } from "svelte-echarts";
     import { init, use } from "echarts/core";
@@ -19,21 +19,21 @@
 
     let { ticketsData, timeWindow = $bindable() }: Props = $props();
 
-    let selected: SalesTimeSlot = $state(SalesTimeSlot.DAY);
-    const timeOptions = [
-        { value: SalesTimeSlot.TWELVE_HOURS, name: "12h" },
-        { value: SalesTimeSlot.DAY, name: "1 giorno" },
-        { value: SalesTimeSlot.TWO_DAYS, name: "2 giorni" },
-        { value: SalesTimeSlot.WEEK, name: "1 settimana" },
-        { value: SalesTimeSlot.TWO_WEEKS, name: "2 settimane" },
-    ];
+    let selected: string = $state(SalesTimeSlot.DAY.toString());
+    const timeOptions = new Map<string, string>([
+        [SalesTimeSlot.TWELVE_HOURS.toString(), "12h"],
+        [SalesTimeSlot.DAY.toString(), "1 giorno"],
+        [SalesTimeSlot.TWO_DAYS.toString(), "2 giorni"],
+        [SalesTimeSlot.WEEK.toString(), "1 settimana"],
+        [SalesTimeSlot.TWO_WEEKS.toString(), "2 settimane"],
+    ]);
 
     const numberOfBars = $derived(ticketsData.labels.length);
     const numberOfSales = $derived(
         ticketsData.datasets.reduce((acc, curr) => acc + curr, 0)
     );
     $effect(() => {
-        timeWindow = selected;
+        timeWindow = parseInt(selected);
     });
 
     use([BarChart, SVGRenderer, TitleComponent, GridComponent]);
@@ -47,16 +47,16 @@
             left: 10,
             right: 25,
         },
-        backgroundColor: mode.current == "dark" ? "#414041" : "white",
+        backgroundColor: "transparent",
         xAxis: {
             data: ticketsData.labels,
             axisLabel: {
-                color: mode.current == "dark" ? "white" : "rgb(55 65 81)",
+                color: mode.current == "dark" ? "white" : "black",
             },
             axisLine: {
                 show: true,
                 lineStyle: {
-                    color: mode.current == "dark" ? "white" : "rgb(55 65 81)",
+                    color: mode.current == "dark" ? "white" : "black",
                 },
             },
         },
@@ -73,11 +73,11 @@
                 symbolSize: [8, 8],
                 symbolOffset: [0, 8],
                 lineStyle: {
-                    color: mode.current == "dark" ? "white" : "rgb(55 65 81)",
+                    color: mode.current == "dark" ? "white" : "black",
                 },
             },
             axisLabel: {
-                color: mode.current == "dark" ? "white" : "rgb(55 65 81)",
+                color: mode.current == "dark" ? "white" : "black",
             },
             minInterval: 5,
             min: 0,
@@ -98,7 +98,7 @@
                     show: true,
                 },
                 name: "Biglietti Venduti",
-                color: "#008b27",
+                color: "dodgerblue",
             },
         ],
         // scorri il grafico con il mouse
@@ -129,7 +129,7 @@
                     name: "graph",
                     iconStyle: {
                         borderColor:
-                            mode.current == "dark" ? "white" : "rgb(55 65 81)",
+                            mode.current == "dark" ? "white" : "black",
                         borderWidth: 1.5,
                     },
                     icon: `path://M 7 10 L 12 15 L 17 10 M 21 15 v 4 a 2 2 0 0 1 -2 2 H 5 a 2 2 0 0 1 -2 -2 v -4 M 12 4 L 12 15`,
@@ -144,30 +144,43 @@
     });
 </script>
 
-<Card class="h-96 w-full dark:bg-neutral-700 dark:border-neutral-500 p-5">
-    <div class="mb-3 flex justify-between">
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <h5
-                    class="mb-2 inline-flex items-center font-normal leading-none text-gray-500 dark:text-gray-400"
+<Card.Root class="min-h-[25rem]">
+    <Card.Header class="mb-0 flex justify-between items-start">
+        <div>
+            <Card.Title>
+                Vendite <br />
+                <span class="text-2xl font-bold dodgerblue"
+                    >{numberOfSales}</span
                 >
-                    Vendite
-                </h5>
-                <p
-                    class="text-2xl font-bold leading-none text-gray-900 dark:text-white"
-                >
-                    {numberOfSales}
-                </p>
-            </div>
+            </Card.Title>
         </div>
         <div>
-            <Select
-                class="mt-2 dark:bg-neutral-800 dark:border-neutral-500 dark:text-neutral-300"
-                items={timeOptions}
-                bind:value={selected}
-                placeholder="Scegli un'opzione"
-            />
+            <Select.Root type="single" bind:value={selected}>
+                <Select.Trigger class="w-[180px]">
+                    {timeOptions.get(selected)}
+                </Select.Trigger>
+                <Select.Content>
+                    <Select.Group>
+                        <Select.Label>Periodi</Select.Label>
+                        {#each timeOptions as [value, name]}
+                            <Select.Item
+                                {value}
+                                label={name}
+                                class="cursor-pointer"
+                            >
+                                {name}
+                            </Select.Item>
+                        {/each}
+                    </Select.Group>
+                </Select.Content>
+            </Select.Root>
         </div>
-    </div>
-        <Chart {options} {init} />
-</Card>
+    </Card.Header>
+    <Card.Content class="h-full">
+        {#if options !== null}
+            <div class="h-full w-full">
+                <Chart {init} {options} />
+            </div>
+        {/if}
+    </Card.Content>
+</Card.Root>

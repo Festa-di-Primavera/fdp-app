@@ -1,5 +1,9 @@
 <script lang="ts">
-    import { Button, Card, Input, Label, Modal } from "flowbite-svelte";
+    import * as Card from "$lib/components/ui/card";
+    import * as Dialog from "$lib/components/ui/dialog";
+    import { Button } from "$lib/components/ui/button";
+    import { Input } from "$lib/components/ui/input";
+    import { Label } from "$lib/components/ui/label";
     import { onDestroy } from "svelte";
 
     import {
@@ -148,48 +152,48 @@
                     <div
                         class="grid h-full w-full max-w-sm grid-flow-row-dense grid-cols-2 gap-2"
                     >
-                        <Card
-                            class="col-span-2 flex h-full w-full max-w-md flex-col items-center justify-center gap-5 pt-6 dark:bg-neutral-700 dark:border-neutral-500"
+                        <Card.Root
+                            class="col-span-2 flex h-full w-full max-w-md flex-col items-center justify-center gap-5 pt-6"
                         >
                             <h1
-                                class="text-center text-5xl font-bold text-primary-600"
+                                class="text-center text-5xl font-bold text-[#4CAF50]"
                             >
                                 {checkedTicketsCount !== undefined
                                     ? checkedTicketsCount
                                     : "--"}
                             </h1>
-                            <p class="text-center dark:text-white">
+                            <p class="text-center">
                                 Biglietti validati
                             </p>
-                        </Card>
-                        <Card
-                            class="flex aspect-square h-full w-full flex-col items-center justify-center gap-5 pt-6 dark:bg-neutral-700 dark:border-neutral-500"
+                        </Card.Root>
+                        <Card.Root
+                            class="flex aspect-square h-full w-full flex-col items-center justify-center gap-5 pt-6"
                         >
                             <h1
-                                class="text-center text-5xl font-bold text-primary-600"
+                                class="text-center text-5xl font-bold text-[#FFC107]"
                             >
                                 {notCheckedTicketsCount !== undefined
                                     ? notCheckedTicketsCount
                                     : "--"}
                             </h1>
-                            <p class="text-center dark:text-white">
+                            <p class="text-center">
                                 Biglietti venduti non validati
                             </p>
-                        </Card>
-                        <Card
-                            class="flex aspect-square h-full w-full flex-col items-center justify-center gap-5 pt-6 dark:bg-neutral-700 dark:border-neutral-500"
+                        </Card.Root>
+                        <Card.Root
+                            class="flex aspect-square h-full w-full flex-col items-center justify-center gap-5 pt-6"
                         >
                             <h1
-                                class="text-center text-5xl font-bold text-primary-600"
+                                class="text-center text-5xl font-bold text-[#F44336]"
                             >
                                 {notSoldTicketsCount !== undefined
                                     ? notSoldTicketsCount
                                     : "--"}
                             </h1>
-                            <p class="text-center dark:text-white">
+                            <p class="text-center">
                                 Biglietti non venduti
                             </p>
-                        </Card>
+                        </Card.Root>
                     </div>
                     <TicketsECharts
                         {checkedTicketsCount}
@@ -214,42 +218,33 @@
     </div>
 </section>
 
-<Modal
-    bind:open
-    dismissable={false}
-    class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
-    headerClass="dark:bg-neutral-800 dark:text-neutral-300"
-    footerClass="dark:bg-neutral-800 dark:text-neutral-300"
->
-    {#snippet header()}
-        <div class="flex items-center justify-between">
-            <h1 class="text-2xl text-primary-300">Conferma visita</h1>
+<Dialog.Root bind:open>
+    <Dialog.Content>
+        <Dialog.Header>
+            <Dialog.Title class="text-2xl text-chart-2">Conferma visita</Dialog.Title>
+        </Dialog.Header>
+        <div class="">
+            <p class="select-none text-sm">
+                Per evitare letture non necessarie, confermare di voler visitare
+                questa pagina.<br />
+                Inserisci nel campo sottostante il codice
+                <span
+                    class="whitespace-nowrap break-keep rounded-md bg-chart-2/20 px-2 py-1 font-mono"
+                    >Festa di Primavera</span
+                > per confermare.
+            </p>
+            <div class="mt-7 flex flex-col gap-1">
+                <Label for="confirmation-code">Codice di conferma</Label>
+                <Input
+                    id="confirmation-code"
+                    placeholder="Festa di Primavera"
+                    bind:value
+                />
+            </div>
         </div>
-    {/snippet}
-    <div class="leading-8">
-        <p class="select-none">
-            Per evitare letture non necessarie, confermare di voler visitare
-            questa pagina.<br />
-            Inserisci nel campo sottostante il codice
-            <span
-                class="whitespace-nowrap break-keep rounded-md bg-primary-400 bg-opacity-20 px-2 py-1 font-mono"
-                >Festa di Primavera</span
-            > per confermare.
-        </p>
-        <Label class="mt-7 flex flex-col gap-1">
-            Codice di conferma
-            <Input
-                placeholder="Festa di Primavera"
-                bind:value
-                class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
-            />
-        </Label>
-    </div>
-    {#snippet footer()}
-        <div class="flex gap-3">
+        <Dialog.Footer>
             <Button
                 {disabled}
-                color="primary"
                 onclick={() => {
                     if (allowedPassphrases.includes(value.trim())) {
                         getTickets();
@@ -259,10 +254,9 @@
                 }}>Conferma</Button
             >
             <Button
-                color="alternative"
-                class="dark:text-neutral-400 dark:border-neutral-400 dark:hover:bg-neutral-700 dark:hover:border-neutral-300"
+                variant="outline"
                 onclick={() => goto("/")}>Annulla</Button
             >
-        </div>
-    {/snippet}
-</Modal>
+        </Dialog.Footer>
+    </Dialog.Content>
+</Dialog.Root>
