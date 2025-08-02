@@ -73,14 +73,14 @@ export const verifyEmailVerificationCode = async (
 
     // If there's no verification code for the user in the database
     if (!verificationCode) {
-        return { error: true, message: "Verification code not found." };
+        return { error: true, message: "Codice di verifica non trovato." };
     }
 
     // If the provided code doesn't match the one in the database
     if (verificationCode !== code) {
         return {
             error: true,
-            message: "The provided verification code is incorrect.",
+            message: "Il codice di verifica fornito è errato.",
         };
     }
 
@@ -89,7 +89,7 @@ export const verifyEmailVerificationCode = async (
         return {
             error: true,
             message:
-                "The verification code has expired, please request a new one.",
+                "Codice scaduto. Richiedi un nuovo codice di verifica.",
         };
     }
 
@@ -100,5 +100,5 @@ export const verifyEmailVerificationCode = async (
     });
 
     // Return a success message
-    return { error: false, message: "Email verification successful!" };
+    return { error: false, message: "Email verificata con successo!" };
 };

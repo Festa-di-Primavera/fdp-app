@@ -31,7 +31,7 @@
         UtensilsCrossed,
         View,
         X,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import Logo from "./Logo.svelte";
 
     import { enhance } from "$app/forms";

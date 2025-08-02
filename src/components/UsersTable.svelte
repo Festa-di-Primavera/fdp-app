@@ -29,7 +29,7 @@
         Search,
         Trash2,
         X
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import { toast } from "svelte-sonner";
 
     interface Props {

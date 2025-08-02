@@ -1,6 +1,7 @@
 <script lang="ts">
-    import { Input, Label } from "flowbite-svelte";
-    import { Check, Ticket as TicketIcon, X } from "lucide-svelte";
+    import { Input } from "$lib/components/ui/input/index";
+    import { Label } from "$lib/components/ui/label/index";
+    import { Check, X } from "@lucide/svelte";
     import { onMount } from "svelte";
 
     import InfoCard from "$components/InfoCard.svelte";
@@ -108,38 +109,33 @@
             influenzare i check-in e le vendite
         </p>
         <div class="w-full">
-            <Label class="text-md font-medium text-black dark:text-white">
-                Codice Biglietto <span class="text-primary-700">*</span>
+            <Label for="ticketCodeInput" class="text-md font-medium w-full">
+                Codice Biglietto <span class="text-chart-2">*</span>
+            </Label>
+            <div class="flex gap-3 items-center">
                 <Input
                     required
-                    class="mt-1 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+                    class="mt-1"
                     bind:value={ticketCodeInput}
                     name="code"
+                    id="ticketCodeInput"
                     autocomplete="off"
                     onkeypress={onKeyDown}
-                >
-                    {#snippet left()}
-                        <TicketIcon
-                            class="h-6 w-6 text-primary-600 dark:text-white"
-                        />
-                    {/snippet}
-
-                    {#snippet right()}
-                        <div class="flex h-full items-center gap-2">
-                            {#if ticketCodeInput !== ""}
-                                <button
-                                    onclick={() => getTicket(ticketCodeInput)}
-                                >
-                                    <Check color="green" />
-                                </button>
-                                <button onclick={reset}>
-                                    <X color="indianred" />
-                                </button>
-                            {/if}
-                        </div>
-                    {/snippet}
-                </Input>
-            </Label>
+                    placeholder={"FDP" +
+                        new Date().getFullYear().toString().slice(-2) +
+                        "-XXXX"}
+                />
+                {#if ticketCodeInput !== ""}
+                    <div class="flex h-full items-center gap-2">
+                        <button onclick={() => getTicket(ticketCodeInput)}>
+                            <Check color="green" />
+                        </button>
+                        <button onclick={reset}>
+                            <X color="indianred" />
+                        </button>
+                    </div>
+                {/if}
+            </div>
             <div class="my-6 flex w-full items-center justify-center">
                 <QrReader bind:codeResult={ticketCode} />
             </div>

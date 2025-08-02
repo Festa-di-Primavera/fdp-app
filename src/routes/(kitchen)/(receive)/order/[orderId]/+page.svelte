@@ -6,7 +6,7 @@
         type OrderItem,
     } from "$models/order";
     import { Badge, Button, Card, Modal } from "flowbite-svelte";
-    import { AlertTriangle } from "lucide-svelte";
+    import { AlertTriangle } from "@lucide/svelte";
 
     let { data } = $props();
     let order: Order | null = $state(data.order);

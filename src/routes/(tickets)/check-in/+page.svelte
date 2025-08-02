@@ -2,13 +2,7 @@
     import * as Dialog from "$lib/components/ui/dialog/index";
     import { Input } from "$lib/components/ui/input/index";
     import { Label } from "$lib/components/ui/label/index";
-    import {
-        AlertCircle,
-        Check,
-        CheckCircle2,
-        X,
-        XCircle
-    } from "lucide-svelte";
+    import { CircleAlert, Check, CircleCheck, X, CircleX } from "@lucide/svelte";
     import { onMount } from "svelte";
 
     import InfoCard from "$components/InfoCard.svelte";
@@ -34,7 +28,8 @@
     let ticketStatus: "notFound" | "alreadyChecked" | "notSold" | null =
         $state(null);
 
-    let color: "text-green-500" | "text-red-500" | "text-yellow-500" = $state("text-green-500");
+    let color: "text-green-500" | "text-red-500" | "text-yellow-500" =
+        $state("text-green-500");
     let feedbackMessage: string = $state("");
 
     let ticketInfos: Element | null = null;
@@ -193,20 +188,17 @@
         class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5"
     >
         <h1 class="text-4xl font-bold text-primary-600">Check-in</h1>
-        <p class="text-justify dark:text-white">
+        <p class="text-justify">
             Scansionare il QR e verificare la validità del biglietto
         </p>
         <div class="w-full">
-            <Label
-                for="ticketCodeInput"
-                class="text-md font-medium text-black dark:text-white w-full"
-            >
+            <Label for="ticketCodeInput" class="text-md font-medium w-full">
                 Codice Biglietto <span class="text-chart-2">*</span>
             </Label>
             <div class="flex gap-3 items-center">
                 <Input
                     required
-                    class="mt-1 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+                    class="mt-1"
                     bind:value={ticketCodeInput}
                     name="code"
                     id="ticketCodeInput"
@@ -236,10 +228,10 @@
             <Dialog.Root bind:open={errorsModalOpen}>
                 {@const Icon =
                     ticketStatus === "notFound" || ticketStatus === "notSold"
-                        ? XCircle
+                        ? CircleX
                         : ticketStatus === "alreadyChecked"
-                          ? AlertCircle
-                          : CheckCircle2}
+                          ? CircleAlert
+                          : CircleCheck}
                 <Dialog.Content>
                     <Dialog.Title class="{color} text-2xl text-center">
                         <div class="flex items-center justify-center gap-2">

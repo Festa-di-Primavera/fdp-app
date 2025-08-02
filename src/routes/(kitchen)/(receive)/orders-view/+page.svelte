@@ -19,7 +19,7 @@
         TableHead,
         TableHeadCell,
     } from "flowbite-svelte";
-    import { Mail } from "lucide-svelte";
+    import { Mail } from "@lucide/svelte";
     import { onDestroy, onMount } from "svelte";
 
     let orders: Order[] = $state([]);

@@ -11,7 +11,7 @@
         Ticket,
         Users,
         Utensils,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
 
     import UsersTable from "$components/UsersTable.svelte";
     import type { User } from "$lib/auth/user";

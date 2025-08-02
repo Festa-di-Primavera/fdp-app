@@ -1,7 +1,7 @@
 <script lang="ts">
     import { ItemType, type Order } from "$models/order";
     import { Button, Card } from "flowbite-svelte";
-    import { AlertTriangle, Leaf } from "lucide-svelte";
+    import { AlertTriangle, Leaf } from "@lucide/svelte";
 
     interface Props {
         order: Order;

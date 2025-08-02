@@ -7,7 +7,7 @@
         Ticket as TicketIcon,
         Trash2,
         X,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
 
     import QrReader from "$components/QrReader.svelte";
     import OrderModal from "$components/food/cashier/OrderModal.svelte";

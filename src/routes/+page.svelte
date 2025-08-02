@@ -3,8 +3,7 @@
     import type { User } from "$lib/auth/user";
     import { Button } from "$lib/components/ui/button/index";
     import { user } from "$store/store";
-    import { LogOut } from "lucide-svelte";
-    import { toast } from "svelte-sonner";
+    import { LogOut } from "@lucide/svelte";
 
     let { data } = $props();
     $user = data as User;
@@ -34,6 +33,7 @@
             >
                 Se invece vuoi uscire dall'applicazione, clicca qui sotto
                 <Button
+                    type="submit"
                     variant="destructive"
                     class="flex items-center justify-center gap-2"
                 >

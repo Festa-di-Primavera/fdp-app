@@ -13,7 +13,7 @@
         Modal,
         Radio,
     } from "flowbite-svelte";
-    import { Minus, Plus } from "lucide-svelte";
+    import { Minus, Plus } from "@lucide/svelte";
 
     interface Props {
         showModal: boolean;

@@ -15,7 +15,7 @@
         Send,
         Ticket as TicketIcon,
         X,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
 
     import QrReader from "$components/QrReader.svelte";
     import type { User } from "$lib/auth/user";

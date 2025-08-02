@@ -19,7 +19,7 @@
         TableHead,
         TableHeadCell,
     } from "flowbite-svelte";
-    import { Pen } from "lucide-svelte";
+    import { Pen } from "@lucide/svelte";
     import { onDestroy, onMount } from "svelte";
     import { toast } from "svelte-sonner";
 

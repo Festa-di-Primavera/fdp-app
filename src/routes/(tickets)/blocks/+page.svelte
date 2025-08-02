@@ -16,7 +16,7 @@
         TableHead,
         TableHeadCell,
     } from "flowbite-svelte";
-    import { Search, UserCog, UserMinus, UserPlus } from "lucide-svelte";
+    import { Search, UserCog, UserMinus, UserPlus } from "@lucide/svelte";
     import { toast } from "svelte-sonner";
 
     interface Props {

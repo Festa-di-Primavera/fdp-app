@@ -1,8 +1,9 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
     import type { User } from "$lib/auth/user";
+    import { Button } from "$lib/components/ui/button/index";
+    import * as InputOTP from "$lib/components/ui/input-otp/index";
     import { user } from "$store/store";
-    import { Button, Input, Label } from "flowbite-svelte";
     import { toast } from "svelte-sonner";
 
     interface Props {
@@ -20,80 +21,7 @@
         }
     });
 
-    const code = $state(["", "", "", "", "", ""]);
-
-    const onInput = (e: Event, index: number) => {
-        const target = e.target as HTMLInputElement;
-        const value = (target.value = target.value.toUpperCase()); // Forziamo a maiuscolo
-
-        // Accettiamo solo numeri o lettere maiuscole
-        if (!/^[0-9A-Z]$/.test(value)) {
-            target.value = ""; // Cancelliamo l'input se non valido
-            return;
-        }
-
-        code[index] = value; // Salviamo il valore nel codice
-
-        // Spostiamo il focus al prossimo input se esiste
-        const nextInput = target.nextElementSibling as HTMLInputElement;
-        if (nextInput) {
-            nextInput.focus();
-        }
-    };
-
-    const onKeyDown = (e: KeyboardEvent, index: number) => {
-        const target = e.target as HTMLInputElement;
-
-        // Se premiamo Backspace
-        if (e.key === "Backspace") {
-            if (target.value !== "") {
-                // Se l'input non è vuoto, cancelliamo il valore attuale
-                target.value = "";
-                code[index] = ""; // Aggiorniamo il codice cancellando questo indice
-            } else if (index > 0) {
-                // Se l'input è già vuoto, spostiamo il focus al campo precedente
-                const prevInput =
-                    target.previousElementSibling as HTMLInputElement;
-                if (prevInput) {
-                    prevInput.focus();
-                    prevInput.value = ""; // Cancelliamo anche il campo precedente
-                    code[index - 1] = ""; // Aggiorniamo il codice
-                }
-            }
-        }
-    };
-
-    const onPaste = (e: ClipboardEvent) => {
-        const target = e.target as HTMLInputElement;
-        const pasteData = e.clipboardData?.getData("text").toUpperCase();
-
-        // Extract the first 6 characters from the pasted text
-        const validData = pasteData?.slice(0, 6).replace(/[^0-9A-Z]/g, "");
-
-        if (validData) {
-            // Distribute the characters across the inputs
-            for (let i = 0; i < validData.length && i < 6; i++) {
-                code[i] = validData[i];
-                const inputElement = document.getElementById(
-                    `code${i}`
-                ) as HTMLInputElement;
-                if (inputElement) {
-                    inputElement.value = validData[i];
-                }
-            }
-
-            // Set focus to the next input after the last pasted character
-            const nextInput = document.getElementById(
-                `code${validData.length}`
-            ) as HTMLInputElement;
-            if (nextInput) {
-                nextInput.focus();
-            }
-
-            // Prevent the default paste behavior
-            e.preventDefault();
-        }
-    };
+    let code = $state("");
 </script>
 
 <section class="w-full h-full flex flex-col items-center gap-4 flex-grow">
@@ -101,7 +29,7 @@
         class="w-full px-5 pt-5 flex flex-col gap-4 items-start max-w-96 pb-12 flex-grow"
     >
         <h1 class="text-primary-600 font-bold text-4xl">Verifica Email</h1>
-        <p class="dark:text-white text-justify">
+        <p class="text-justify">
             Inserisci il codice di verifica ricevuto all'email <b
                 class="text-primary-300">{$user.email}</b
             > per verificare il tuo account
@@ -110,31 +38,12 @@
             use:enhance
             method="post"
             action="?/resendEmail"
-            class="dark:text-white text-justify"
+            class="text-justify"
         >
             Se non hai ricevuto il codice, <button
                 class="text-primary-600 font-semibold">clicca qui</button
             > per richiederne un altro
         </form>
-        <Label
-            class="text-black dark:text-white font-medium text-md flex justify-between w-full"
-        >
-            {#each code as _, index}
-                <Input
-                    oninput={(e) => onInput(e, index)}
-                    onkeydown={(e) => onKeyDown(e, index)}
-                    onpaste={onPaste}
-                    bind:value={code[index]}
-                    maxlength={1}
-                    class="w-12 aspect-square text-center rounded-md border-2 border-muted dark:bg-neutral-700 dark:border-neutral-500"
-                    pattern="[0-9A-Z]"
-                    id="code{index}"
-                    name="code{index}"
-                    autocomplete="off"
-                    style="caret-color: transparent;"
-                />
-            {/each}
-        </Label>
 
         <form
             use:enhance
@@ -142,7 +51,20 @@
             action="?/verifyCode"
             class="w-full flex flex-col items-center"
         >
-            <input type="hidden" name="code" value={code.join("")} />
+            <InputOTP.Root
+                maxlength={6}
+                bind:value={code}
+                class="flex gap-2"
+                name="code"
+            >
+                {#snippet children({ cells })}
+                    {#each cells.slice(0, 6) as cell (cell)}
+                        <InputOTP.Group>
+                            <InputOTP.Slot {cell} />
+                        </InputOTP.Group>
+                    {/each}
+                {/snippet}
+            </InputOTP.Root>
             <Button type="submit" class="mt-5 w-[90%]">Verifica</Button>
         </form>
     </div>

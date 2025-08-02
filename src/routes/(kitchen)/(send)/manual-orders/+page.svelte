@@ -4,7 +4,7 @@
         PencilLine,
         Send,
         Trash2
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
 
     import OrderModal from "$components/food/cashier/OrderModal.svelte";
     import type { User } from "$lib/auth/user";

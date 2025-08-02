@@ -3,7 +3,7 @@
     import * as Separator from "$lib/components/ui/separator/index";
     import { getFdPCode } from "$lib/utils/tickets";
     import type { Ticket } from "$models/ticket";
-    import { Info } from "lucide-svelte";
+    import { Info } from "@lucide/svelte";
 
     interface Props {
         ticketCode: string;
@@ -31,17 +31,17 @@
                     ""}</span
             >
         </span>
-        <span class="text-black dark:text-white w-full flex justify-between">
+        <span class="w-full flex justify-between">
             <span>Nominativo:</span>
             <span class="text-right"
                 >{(ticket?.name || "") + " " + (ticket?.surname || "")}</span
             >
         </span>
-        <span class="text-black dark:text-white w-full flex justify-between">
+        <span class="w-full flex justify-between">
             <span>Venditore:</span>
             <span>{ticket?.seller || ""}</span>
         </span>
-        <span class="text-black dark:text-white w-full flex justify-between">
+        <span class="w-full flex justify-between">
             <span>Venduto:</span>
             <span
                 >{ticket?.soldAt
@@ -51,7 +51,7 @@
                     : ""}</span
             >
         </span>
-        <span class="text-black dark:text-white w-full flex justify-between">
+        <span class="w-full flex justify-between">
             <span>Entrata:</span>
             <span class="{color} font-bold"
                 >{ticket?.checkIn

@@ -14,7 +14,7 @@
         Sandwich,
         UtensilsCrossed,
         WheatOff,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import { onDestroy, onMount } from "svelte";
 
     let unsubscribe: Unsubscribe = () => {};

@@ -137,3 +137,7 @@
  div::-webkit-scrollbar-thumb:hover {
     @apply bg-chart-2;
 }
+
+button {
+  @apply cursor-pointer;
+}

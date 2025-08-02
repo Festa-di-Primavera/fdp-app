@@ -1,6 +1,6 @@
 <script lang="ts">
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index";
-    import { CameraIcon, X } from "lucide-svelte";
+    import { CameraIcon, X } from "@lucide/svelte";
     import QrScanner from "qr-scanner";
     import { onDestroy, onMount } from "svelte";
     import { toast } from "svelte-sonner";
