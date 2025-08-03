@@ -1,13 +1,10 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
-    import {
-        Button,
-        Card,
-        Fileupload,
-        Input,
-        Label,
-        Progressbar,
-    } from "flowbite-svelte";
+    import { Button } from "$lib/components/ui/button/index";
+    import { Input } from "$lib/components/ui/input/index";
+    import { Label } from "$lib/components/ui/label/index";
+    import * as Card from "$lib/components/ui/card/index";
+    import * as Progress from "$lib/components/ui/progress/index";
     import { sineOut } from "svelte/easing";
 
     import type { User } from "$lib/auth/user";
@@ -71,6 +68,9 @@
             toast.error("Errore durante l'inserimento dei codici");
         } else {
             toast.success("Codici inseriti con successo");
+            setTimeout(() => {
+                showProgress = false;
+            }, 2000);
         }
     };
 
@@ -107,196 +107,230 @@
 <section
     class="flex h-full w-full flex-grow flex-wrap items-start justify-center gap-4 py-6 px-6"
 >
-    <Card class="dark:bg-neutral-900 dark:border-neutral-600 p-10">
-        <div class="flex w-full max-w-96 flex-grow flex-col items-start gap-2">
-            <h1 class="text-4xl font-bold text-primary-600">
+    <Card.Root>
+        <Card.Header>
+            <Card.Title class="text-4xl font-bold text-primary-600">
                 Genera Biglietti
-            </h1>
-            <p class="text-justify dark:text-white">
-                Da questa card puoi generare i biglietti e inserirli nel
-                sistema.
-            </p>
-            <main class="w-full text-center">
-                <div class="flex gap-8">
-                    <Label class="flex flex-col items-start py-4">
-                        Prefisso:
-                        <Input
-                            class="mt-2 text-center dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
-                            bind:value={prefix}
-                            placeholder={"FDP" +
-                                (new Date().getFullYear() - 2000)?.toString() +
-                                "-"}
-                        />
-                    </Label>
-                    <Label class="flex flex-col items-start py-4">
-                        Suffisso:
-                        <Input
-                            class="mt-2 text-center dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
-                            bind:value={suffix}
-                        />
-                    </Label>
-                </div>
-                <div class="flex gap-8">
-                    <Label class="flex flex-col items-start gap-4 py-4">
-                        N° cifre del codice:
-                        <Input
-                            type="number"
-                            bind:value={codeLength}
-                            class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
-                        />
-                    </Label>
-                    <Label class="flex flex-col items-start gap-4 py-4">
-                        Quantità di codici:
-                        <Input
-                            type="number"
-                            bind:value={numberOfCodes}
-                            class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
-                        />
-                    </Label>
-                    <Label class="flex flex-col items-start gap-4 py-4">
-                        Numero di partenza:
-                        <Input
-                            type="number"
-                            bind:value={startingNumber}
-                            class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
-                        />
-                    </Label>
-                </div>
-                <div class="flex w-full flex-col gap-3 py-2">
-                    {#if showProgress}
-                        <Progressbar
-                            {progress}
-                            animate
-                            precision={2}
-                            size="h-4"
-                            labelInside
-                            tweenDuration={1500}
-                            easing={sineOut}
-                        />
-                    {/if}
-                    <span
-                        class="text-sm font-medium text-gray-900 dark:text-gray-300 rtl:text-right"
-                    >
-                        Formato codici: <b class=""
-                            >{prefix}{startingNumber
-                                ?.toString()
-                                .padStart(codeLength, "0")}{suffix}</b
-                        >
-                    </span>
-                    <span
-                        class="text-sm font-medium text-gray-900 dark:text-gray-300 rtl:text-right"
-                    >
-                        Cliccando qui sotto verranno generati e inseriti nel
-                        database i codici da
-                        <span
-                            class="text-sm font-medium text-primary-700 dark:text-primary-300 rtl:text-right"
-                        >
-                            {prefix}{startingNumber
-                                ?.toString()
-                                .padStart(codeLength, "0")}{suffix}
-                        </span>
-                        a
-                        <span
-                            class="text-sm font-medium text-primary-700 dark:text-primary-300 rtl:text-right"
-                        >
-                            {prefix}{(startingNumber + numberOfCodes - 1)
-                                ?.toString()
-                                .padStart(codeLength, "0")}{suffix}
-                        </span>
-                    </span>
-                    <Button onclick={insertCodes} class="rounded text-white"
-                        >Inserisci Codici</Button
-                    >
-                </div>
-            </main>
-        </div>
-    </Card>
-    <Card class="dark:bg-neutral-900 dark:border-neutral-600">
-        <div class="flex w-full max-w-96 flex-grow flex-col items-start gap-2">
-            <h1 class="text-4xl font-bold text-primary-600">
-                Inserisci da file
-            </h1>
-            <p class="text-justify dark:text-white">
-                Da questa card puoi inserire un CSV che contiene un codice per
-                riga se il generatore non soddisfa i requisiti.
-            </p>
-            <form
-                method="post"
-                use:enhance
-                enctype="multipart/form-data"
-                class="flex w-full flex-col gap-4"
+            </Card.Title>
+        </Card.Header>
+        <Card.Content>
+            <div
+                class="flex w-full max-w-96 flex-grow flex-col items-start gap-2"
             >
-                <Fileupload
-                    name="fileToUpload"
-                    size="sm"
-                    class="mt-4 p-0 w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400 [&::file-selector-button]:!bg-neutral-600 [&::file-selector-button]:!hover:bg-neutral-700"
-                    accept=".csv"
-                />
-                <Button type="submit">Inserisci Codici da file</Button>
-            </form>
-        </div>
-    </Card>
-    <Card class="dark:bg-neutral-900 dark:border-neutral-600 p-10">
-        <div class="flex w-full max-w-96 flex-grow flex-col items-start gap-2">
-            <h1 class="text-4xl font-bold text-primary-600">
-                Genera Blocchetti
-            </h1>
-            <p class="text-justify dark:text-white">
-                Da questa card puoi generare i blocchi di biglietti da assegnare
-                ai venditori.<br /><br />
-                <b class="text-primary-300">Attenzione:</b> i blocchetti già presenti
-                nel database verranno cancellati e sostituiti con i nuovi.
-            </p>
-            <main class="w-full text-center">
-                <div class="flex gap-8">
-                    <Label class="flex flex-col items-start gap-4 py-4">
-                        N° biglietti già inseriti:
-                        <Input
-                            type="number"
-                            bind:value={ticketsNumber}
-                            class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
-                        />
-                    </Label>
-                    <Label class="flex flex-col items-start gap-4 py-4">
-                        N° biglietti per blocco:
-                        <Input
-                            type="number"
-                            bind:value={ticketsPerBlock}
-                            class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
-                        />
-                    </Label>
-                    <Label class="flex flex-col items-start gap-4 py-4">
-                        Codice di partenza:
-                        <Input
-                            type="number"
-                            bind:value={startCode}
-                            class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
-                        />
-                    </Label>
-                </div>
-                <div class="flex w-full flex-col gap-3 py-2">
-                    {#if isNotDivisibile}
-                        <span class="text-sm"
-                            ><b class="text-primary-300">{ticketsNumber}</b>
-                            non è divisibile per
-                            <b class="text-primary-300">{ticketsPerBlock}</b>
-                        </span>
-                    {:else}
-                        <span class="text-sm"
-                            >Verranno generati <b class="text-primary-300"
-                                >{ticketsNumber / ticketsPerBlock}</b
+                <p class="text-justify">
+                    Da questa card puoi generare i biglietti e inserirli nel
+                    sistema.
+                </p>
+                <div class="w-full text-center mt-3">
+                    <div class="flex gap-8">
+                        <div>
+                            <Label for="prefix">Prefisso:</Label>
+                            <Input
+                                id="prefix"
+                                class="mt-2 text-center"
+                                bind:value={prefix}
+                                placeholder={"FDP" +
+                                    (
+                                        new Date().getFullYear() - 2000
+                                    )?.toString() +
+                                    "-"}
+                            />
+                        </div>
+                        <div>
+                            <Label for="suffix">Suffisso:</Label>
+                            <Input
+                                id="suffix"
+                                class="mt-2 text-center"
+                                bind:value={suffix}
+                            />
+                        </div>
+                    </div>
+                    <div class="flex gap-8 mt-5">
+                        <div class="w-full">
+                            <Label for="codeLength">N° cifre del codice:</Label>
+                            <Input
+                                id="codeLength"
+                                type="number"
+                                bind:value={codeLength}
+                            />
+                        </div>
+                        <div class="w-full">
+                            <Label for="numberOfCodes"
+                                >Quantità di codici:</Label
                             >
-                            blocchetti da
-                            <b class="text-primary-300">{ticketsPerBlock}</b> biglietti</span
-                        >
-                    {/if}
-                    <Button
-                        onclick={insertBlocks}
-                        class="rounded text-white"
-                        disabled={isNotDivisibile}>Genera Blocchetti</Button
-                    >
+                            <Input
+                                id="numberOfCodes"
+                                type="number"
+                                bind:value={numberOfCodes}
+                            />
+                        </div>
+                        <div class="w-full">
+                            <Label for="startingNumber"
+                                >Numero di partenza:</Label
+                            >
+                            <Input
+                                id="startingNumber"
+                                type="number"
+                                bind:value={startingNumber}
+                            />
+                        </div>
+                    </div>
+                    <div class="flex w-full flex-col gap-3 py-2">
+                        {#if showProgress}
+                            <div class="w-full flex items-center justify-between font-bold mt-5">
+                                <span id="progress-label"> Generazione in corso ...</span>
+                                <span>{progress}%</span>
+                            </div>
+                            <Progress.Root
+                                value={progress}
+                                max={100}
+                                class="h-2 bg-chart-2/20 mb-5"
+                                indicatorClass="bg-chart-2"
+                            />
+                        {/if}
+                        <span class="text-sm font-medium rtl:text-right mt-2">
+                            Formato codici: <b class=""
+                                >{prefix}{startingNumber
+                                    ?.toString()
+                                    .padStart(codeLength, "0")}{suffix}</b
+                            >
+                        </span>
+                        <span class="text-sm font-medium rtl:text-right">
+                            Cliccando qui sotto verranno generati e inseriti nel
+                            database i codici da
+                            <span
+                                class="text-sm font-medium text-chart-2 rtl:text-right"
+                            >
+                                {prefix}{startingNumber
+                                    ?.toString()
+                                    .padStart(codeLength, "0")}{suffix}
+                            </span>
+                            a
+                            <span
+                                class="text-sm font-medium text-chart-2 rtl:text-right"
+                            >
+                                {prefix}{(startingNumber + numberOfCodes - 1)
+                                    ?.toString()
+                                    .padStart(codeLength, "0")}{suffix}
+                            </span>
+                        </span>
+                        <Button onclick={insertCodes}>Inserisci Codici</Button>
+                    </div>
                 </div>
-            </main>
-        </div>
-    </Card>
+            </div>
+        </Card.Content>
+    </Card.Root>
+    <Card.Root>
+        <Card.Header>
+            <Card.Title class="text-4xl font-bold text-primary-600">
+                Inserisci da file
+            </Card.Title>
+        </Card.Header>
+        <Card.Content>
+            <div
+                class="flex w-full max-w-96 flex-grow flex-col items-start gap-2"
+            >
+                <p class="text-justify dark:text-white">
+                    Da questa card puoi inserire un CSV che contiene un codice
+                    per riga se il generatore non soddisfa i requisiti.
+                </p>
+                <form
+                    method="post"
+                    use:enhance
+                    enctype="multipart/form-data"
+                    class="flex w-full flex-col gap-4 p-2"
+                >
+                    <Input type="file" name="fileToUpload" accept=".csv" />
+                    <Button type="submit">Inserisci Codici da file</Button>
+                </form>
+            </div>
+        </Card.Content>
+    </Card.Root>
+    <Card.Root>
+        <Card.Header>
+            <Card.Title class="text-4xl font-bold text-primary-600">
+                Genera Blocchetti
+            </Card.Title>
+        </Card.Header>
+        <Card.Content>
+            <div
+                class="flex w-full max-w-96 flex-grow flex-col items-start gap-2"
+            >
+                <p class="text-justify dark:text-white">
+                    Da questa card puoi generare i blocchi di biglietti da
+                    assegnare ai venditori.<br /><br />
+                    <b class="text-amber-500">Attenzione:</b> i blocchetti già
+                    presenti nel database verranno
+                    <span class="text-destructive underline underline-offset-3"
+                        >cancellati</span
+                    > e sostituiti con i nuovi.
+                </p>
+                <main class="w-full text-center">
+                    <div class="flex gap-8 mb-5">
+                        <div>
+                            <Label
+                                class="flex flex-col items-start gap-4 py-4"
+                                for="ticketsNumber"
+                            >
+                                N° biglietti già inseriti:
+                            </Label>
+                            <Input
+                                id="ticketsNumber"
+                                type="number"
+                                bind:value={ticketsNumber}
+                            />
+                        </div>
+                        <div>
+                            <Label
+                                class="flex flex-col items-start gap-4 py-4"
+                                for="ticketsPerBlock"
+                            >
+                                N° biglietti per blocco:
+                            </Label>
+                            <Input
+                                id="ticketsPerBlock"
+                                type="number"
+                                bind:value={ticketsPerBlock}
+                            />
+                        </div>
+                        <div>
+                            <Label
+                                class="flex flex-col items-start gap-4 py-4"
+                                for="startCode"
+                            >
+                                Codice di partenza:
+                            </Label>
+                            <Input
+                                id="startCode"
+                                type="number"
+                                bind:value={startCode}
+                            />
+                        </div>
+                    </div>
+                    <div class="flex w-full flex-col gap-3 py-2">
+                        {#if isNotDivisibile}
+                            <span class="text-sm"
+                                ><b class="text-destructive">{ticketsNumber}</b>
+                                non è divisibile per
+                                <b class="text-destructive">{ticketsPerBlock}</b
+                                >
+                            </span>
+                        {:else}
+                            <span class="text-sm"
+                                >Verranno generati <b class="text-chart-2"
+                                    >{ticketsNumber / ticketsPerBlock}</b
+                                >
+                                blocchetti da
+                                <b class="text-chart-2">{ticketsPerBlock}</b> biglietti</span
+                            >
+                        {/if}
+                        <Button
+                            onclick={insertBlocks}
+                            disabled={isNotDivisibile}>Genera Blocchetti</Button
+                        >
+                    </div>
+                </main>
+            </div>
+        </Card.Content>
+    </Card.Root>
 </section>

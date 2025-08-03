@@ -4,7 +4,7 @@
     import { Button } from "$lib/components/ui/button/index";
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index";
     import { Input } from "$lib/components/ui/input/index";
-    import * as TableCN from "$lib/components/ui/table/index";
+    import * as Table from "$lib/components/ui/table/index";
     import * as Tooltip from "$lib/components/ui/tooltip/index";
     import { getStringFromEnumValue } from "$lib/utils/enums";
     import {
@@ -159,20 +159,20 @@
         </div>
     </div>
     <div class="mx-5 mt-5">
-        <TableCN.Root>
-            <TableCN.Header>
-                <TableCN.Row>
-                    <TableCN.Head class="pl-5">Nome</TableCN.Head>
-                    <TableCN.Head>Email</TableCN.Head>
-                    <TableCN.Head>Permessi</TableCN.Head>
-                    <TableCN.Head class="text-center">Alias</TableCN.Head>
-                    <TableCN.Head class="text-center">Elimina</TableCN.Head>
-                </TableCN.Row>
-            </TableCN.Header>
-            <TableCN.Body>
+        <Table.Root>
+            <Table.Header>
+                <Table.Row>
+                    <Table.Head class="pl-5">Nome</Table.Head>
+                    <Table.Head>Email</Table.Head>
+                    <Table.Head>Permessi</Table.Head>
+                    <Table.Head class="text-center">Alias</Table.Head>
+                    <Table.Head class="text-center">Elimina</Table.Head>
+                </Table.Row>
+            </Table.Header>
+            <Table.Body>
                 {#each filteredItems || [] as item}
-                    <TableCN.Row>
-                        <TableCN.Cell class="pl-10">
+                    <Table.Row>
+                        <Table.Cell class="pl-10">
                             <span class="flex items-center font-medium gap-4">
                                 <div class="block">
                                     <Avatar.Root>
@@ -189,8 +189,8 @@
                                 </div>
                                 <span class="max-w-24">{item.username}</span>
                             </span>
-                        </TableCN.Cell>
-                        <TableCN.Cell>
+                        </Table.Cell>
+                        <Table.Cell>
                             <span class="flex items-center gap-2">
                                 {#if item.avatar_url}
                                     <Tooltip.Provider delayDuration={300}>
@@ -232,8 +232,8 @@
                                 {/if}
                                 {item.email}
                             </span>
-                        </TableCN.Cell>
-                        <TableCN.Cell>
+                        </Table.Cell>
+                        <Table.Cell>
                             <div class="grid w-max min-w-28 grid-cols-5 gap-2">
                                 {#each intToBitArray(item.permissions, Object.keys(UserPermissions).length / 2).reverse() as perm, index}
                                     {@const PermissionIcon = getPermissionIcon(
@@ -269,16 +269,16 @@
                                     </Tooltip.Provider>
                                 {/each}
                             </div>
-                        </TableCN.Cell>
-                        <TableCN.Cell>
+                        </Table.Cell>
+                        <Table.Cell>
                             <div class="flex gap-2 items-center justify-center">
                                 <span class="w-40 truncate">{item.alias}</span>
                                 <button onclick={() => triggerAliasModal(item)}>
                                     <SquarePen class="h-5 w-5" />
                                 </button>
                             </div>
-                        </TableCN.Cell>
-                        <TableCN.Cell>
+                        </Table.Cell>
+                        <Table.Cell>
                             <div class="grid w-full place-items-center">
                                 <Button
                                     variant="destructive"
@@ -291,10 +291,10 @@
                                     <Trash2 class="aspect-square w-4" />
                                 </Button>
                             </div>
-                        </TableCN.Cell>
-                    </TableCN.Row>
+                        </Table.Cell>
+                    </Table.Row>
                 {/each}
-            </TableCN.Body>
-        </TableCN.Root>
+            </Table.Body>
+        </Table.Root>
     </div>
 {/if}
