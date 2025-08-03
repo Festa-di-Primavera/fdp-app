@@ -1,5 +1,11 @@
 <script lang="ts">
     import type { User } from "$lib/auth/user";
+    import * as Avatar from "$lib/components/ui/avatar/index";
+    import { Button } from "$lib/components/ui/button/index";
+    import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index";
+    import { Input } from "$lib/components/ui/input/index";
+    import * as TableCN from "$lib/components/ui/table/index";
+    import * as Tooltip from "$lib/components/ui/tooltip/index";
     import { getStringFromEnumValue } from "$lib/utils/enums";
     import {
         addPermission,
@@ -9,27 +15,7 @@
     import { capitalizeFirstLetter } from "$lib/utils/textFormat";
     import { UserPermissions } from "$models/permissions";
     import { user } from "$store/store";
-    import {
-        Button,
-        Input,
-        Popover,
-        Radio,
-        Table,
-        TableBody,
-        TableBodyCell,
-        TableBodyRow,
-        TableHead,
-        TableHeadCell,
-        Tooltip,
-    } from "flowbite-svelte";
-    import {
-        Check,
-        ListFilter,
-        PenBox,
-        Search,
-        Trash2,
-        X
-    } from "@lucide/svelte";
+    import { Check, ListFilter, SquarePen, Trash2, X } from "@lucide/svelte";
     import { toast } from "svelte-sonner";
 
     interface Props {
@@ -86,6 +72,7 @@
                         : removePermission($user.permissions, permission);
                 }
                 users = [...users];
+                error = false;
             }
 
             const message = (await response.json()).message;
@@ -93,7 +80,11 @@
             if (error) {
                 toast.error(message);
             } else {
-                toast.success(message);
+                if (add) {
+                    toast.success(message);
+                } else {
+                    toast.warning(message);
+                }
             }
         } catch (e) {
             toast.error("Errore di rete");
@@ -136,197 +127,174 @@
 
 {#if $user}
     <div class="mx-5 mt-5">
-        <Input
-            class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400 ps-10"
-            placeholder={`Cerca per ${filter}`}
-            bind:value={searchTerm}
-        >
-            {#snippet left()}
-                <Search />
-            {/snippet}
-            {#snippet right()}
-                <button>
-                    <ListFilter />
-                    <Popover
-                        placement="bottom-end"
-                        class="z-50 p-0 mt-2 dark:bg-neutral-800 dark:border-neutral-500 dark:divide-neutral-500 dark:text-neutral-300"
-                        defaultClass="pt-2"
-                        arrow={false}
-                    >
-                        Filtra per
-                        <ul
-                            class="w-48 divide-y divide-gray-200 dark:divide-neutral-600"
-                        >
-                            <li>
-                                <Radio
-                                    class="p-3"
-                                    bind:group={filter}
-                                    value="nome">Nome</Radio
-                                >
-                            </li>
-                            <li>
-                                <Radio
-                                    class="p-3 checked:bg-red-500"
-                                    bind:group={filter}
-                                    value="email">E-Mail</Radio
-                                >
-                            </li>
-                            <li>
-                                <Radio
-                                    class="p-3"
-                                    bind:group={filter}
-                                    value="alias">Alias</Radio
-                                >
-                            </li>
-                        </ul>
-                    </Popover>
-                </button>
-            {/snippet}
-        </Input>
+        <div class="flex items-center gap-4">
+            <Input
+                class="flex-1"
+                placeholder={`Cerca per ${filter}`}
+                bind:value={searchTerm}
+            />
+            <DropdownMenu.Root>
+                <DropdownMenu.Trigger>
+                    <Button variant="outline" class="flex items-center gap-2">
+                        <ListFilter class="w-4 h-4" />
+                        <span>Filtra</span>
+                    </Button>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Content align="end">
+                    <DropdownMenu.Label>Filtra per</DropdownMenu.Label>
+                    <DropdownMenu.Separator />
+                    <DropdownMenu.RadioGroup bind:value={filter}>
+                        <DropdownMenu.RadioItem value="nome">
+                            Nome
+                        </DropdownMenu.RadioItem>
+                        <DropdownMenu.RadioItem value="email">
+                            E-Mail
+                        </DropdownMenu.RadioItem>
+                        <DropdownMenu.RadioItem value="alias">
+                            Alias
+                        </DropdownMenu.RadioItem>
+                    </DropdownMenu.RadioGroup>
+                </DropdownMenu.Content>
+            </DropdownMenu.Root>
+        </div>
     </div>
     <div class="mx-5 mt-5">
-        <Table
-            divClass="tableDiv relative overflow-x-auto overflow-y-visible pb-40"
-            class="relative overflow-visible overflow-x-auto rounded-md shadow-md sm:rounded-lg "
-        >
-            <TableHead class="dark:bg-neutral-600 dark:text-neutral-300">
-                <TableHeadCell class="select-none">
-                    <div class="flex gap-1">Nome</div>
-                </TableHeadCell>
-                <TableHeadCell class="select-none">
-                    <div class="flex gap-1">Email</div>
-                </TableHeadCell>
-                <TableHeadCell class="select-none">
-                    <div class="flex gap-1">Permessi</div>
-                </TableHeadCell>
-                <TableHeadCell class="select-none">
-                    <div class="flex justify-center gap-1">Alias</div>
-                </TableHeadCell>
-                <TableHeadCell class="text-center">Elimina</TableHeadCell>
-            </TableHead>
-            <TableBody class="divide-y">
+        <TableCN.Root>
+            <TableCN.Header>
+                <TableCN.Row>
+                    <TableCN.Head class="pl-5">Nome</TableCN.Head>
+                    <TableCN.Head>Email</TableCN.Head>
+                    <TableCN.Head>Permessi</TableCN.Head>
+                    <TableCN.Head class="text-center">Alias</TableCN.Head>
+                    <TableCN.Head class="text-center">Elimina</TableCN.Head>
+                </TableCN.Row>
+            </TableCN.Header>
+            <TableCN.Body>
                 {#each filteredItems || [] as item}
-                    <TableBodyRow
-                        class="w-full dark:bg-neutral-700 dark:border-neutral-500"
-                    >
-                        <TableBodyCell>
-                            <span class="flex items-center gap-4 font-medium">
-                                {#if item.avatar_url}
-                                    <img
-                                        loading="lazy"
-                                        src={item.avatar_url}
-                                        alt={item.username[0]}
-                                        class="h-7 w-7 rounded-full"
-                                    />
-                                {:else}
-                                    <div
-                                        class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary-700 to-primary-400 font-mono text-white"
-                                    >
-                                        <span
-                                            >{item.username[0]?.toUpperCase()}</span
+                    <TableCN.Row>
+                        <TableCN.Cell class="pl-10">
+                            <span class="flex items-center font-medium gap-4">
+                                <div class="block">
+                                    <Avatar.Root>
+                                        <Avatar.Image
+                                            src={item.avatar_url}
+                                            alt={item.username[0]}
+                                        />
+                                        <Avatar.Fallback
+                                            class="bg-gradient-to-br from-neutral-600 to-neutral-400 text-white"
                                         >
-                                    </div>
-                                {/if}
-                                <span class="mr-4">{item.username}</span>
+                                            {item.username[0]?.toUpperCase()}
+                                        </Avatar.Fallback>
+                                    </Avatar.Root>
+                                </div>
+                                <span class="max-w-24">{item.username}</span>
                             </span>
-                        </TableBodyCell>
-                        <TableBodyCell>
+                        </TableCN.Cell>
+                        <TableCN.Cell>
                             <span class="flex items-center gap-2">
                                 {#if item.avatar_url}
-                                    <img
-                                        class="w-5"
-                                        alt="Google"
-                                        src="/google.svg"
-                                    />
-                                    <Tooltip
-                                        color="gray"
-                                        class="dark:bg-neutral-800 dark:border-neutral-500"
-                                        >Google</Tooltip
-                                    >
+                                    <Tooltip.Provider delayDuration={300}>
+                                        <Tooltip.Root>
+                                            <Tooltip.Trigger>
+                                                <img
+                                                    class="w-5"
+                                                    alt="Google"
+                                                    src="/google.svg"
+                                                />
+                                            </Tooltip.Trigger>
+                                            <Tooltip.Content>
+                                                Google
+                                            </Tooltip.Content>
+                                        </Tooltip.Root>
+                                    </Tooltip.Provider>
                                 {:else}
                                     {@const EmailVerified = item.email_verified
                                         ? Check
                                         : X}
-                                    <EmailVerified
-                                        color={item.email_verified
-                                            ? "green"
-                                            : "red"}
-                                        class="w-5"
-                                    />
-                                    <Tooltip
-                                        color="gray"
-                                        class="dark:bg-neutral-800 dark:border-neutral-500"
-                                        >{(item.email_verified ? "" : "Non ") +
-                                            "Verificata"}</Tooltip
-                                    >
+                                    <Tooltip.Provider delayDuration={300}>
+                                        <Tooltip.Root>
+                                            <Tooltip.Trigger>
+                                                <EmailVerified
+                                                    tabindex={-1}
+                                                    color={item.email_verified
+                                                        ? "green"
+                                                        : "red"}
+                                                    class="w-5"
+                                                />
+                                            </Tooltip.Trigger>
+                                            <Tooltip.Content>
+                                                {(item.email_verified
+                                                    ? ""
+                                                    : "Non ") + "Verificata"}
+                                            </Tooltip.Content>
+                                        </Tooltip.Root>
+                                    </Tooltip.Provider>
                                 {/if}
                                 {item.email}
                             </span>
-                        </TableBodyCell>
-                        <TableBodyCell>
+                        </TableCN.Cell>
+                        <TableCN.Cell>
                             <div class="grid w-max min-w-28 grid-cols-5 gap-2">
                                 {#each intToBitArray(item.permissions, Object.keys(UserPermissions).length / 2).reverse() as perm, index}
                                     {@const PermissionIcon = getPermissionIcon(
                                         Math.pow(2, index)
                                     )}
-                                    <button
-                                        onclick={() =>
-                                            handlePermissionChange(
-                                                item,
-                                                Math.pow(2, index),
-                                                !perm
-                                            )}
-                                    >
-                                        <PermissionIcon
-                                            class={`w-4 ${perm ? "text-primary-400" : "text-neutral-400 opacity-65"}`}
-                                        />
-                                        <Tooltip
-                                            color={perm ? "primary" : "gray"}
-                                            class="dark:bg-neutral-800 {perm
-                                                ? 'dark:border-primary-500 border-primary-500'
-                                                : 'dark:border-neutral-500'}"
-                                        >
-                                            {capitalizeFirstLetter(
-                                                getStringFromEnumValue(
-                                                    UserPermissions,
-                                                    Math.pow(2, index)
-                                                )
-                                                    .toLowerCase()
-                                                    .replace("_", " ")
-                                            )}
-                                        </Tooltip>
-                                    </button>
+                                    <Tooltip.Provider delayDuration={300}>
+                                        <Tooltip.Root>
+                                            <Tooltip.Trigger>
+                                                <button
+                                                    onclick={() =>
+                                                        handlePermissionChange(
+                                                            item,
+                                                            Math.pow(2, index),
+                                                            !perm
+                                                        )}
+                                                >
+                                                    <PermissionIcon
+                                                        class={`w-4 ${perm ? "text-chart-2" : "text-neutral-400 opacity-65"}`}
+                                                    />
+                                                </button>
+                                            </Tooltip.Trigger>
+                                            <Tooltip.Content>
+                                                {capitalizeFirstLetter(
+                                                    getStringFromEnumValue(
+                                                        UserPermissions,
+                                                        Math.pow(2, index)
+                                                    )
+                                                        .toLowerCase()
+                                                        .replace("_", " ")
+                                                )}
+                                            </Tooltip.Content>
+                                        </Tooltip.Root>
+                                    </Tooltip.Provider>
                                 {/each}
                             </div>
-                        </TableBodyCell>
-                        <TableBodyCell>
-                            <div
-                                class="flex w-full items-center justify-between gap-3"
-                            >
-                                {item.alias}
+                        </TableCN.Cell>
+                        <TableCN.Cell>
+                            <div class="flex gap-2 items-center justify-center">
+                                <span class="w-40 truncate">{item.alias}</span>
                                 <button onclick={() => triggerAliasModal(item)}>
-                                    <PenBox class="h-5 w-5" />
+                                    <SquarePen class="h-5 w-5" />
                                 </button>
                             </div>
-                        </TableBodyCell>
-                        <TableBodyCell>
+                        </TableCN.Cell>
+                        <TableCN.Cell>
                             <div class="grid w-full place-items-center">
                                 <Button
-                                    class="bg-red-500 px-2 py-1 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600"
+                                    variant="destructive"
+                                    size="sm"
                                     onclick={() => {
                                         currSelectedUser = item;
                                         deleteModalOpen = true;
                                     }}
                                 >
-                                    <Trash2
-                                        class="aspect-square w-4 text-gray-900 dark:text-white"
-                                    />
+                                    <Trash2 class="aspect-square w-4" />
                                 </Button>
                             </div>
-                        </TableBodyCell>
-                    </TableBodyRow>
+                        </TableCN.Cell>
+                    </TableCN.Row>
                 {/each}
-            </TableBody>
-        </Table>
+            </TableCN.Body>
+        </TableCN.Root>
     </div>
 {/if}

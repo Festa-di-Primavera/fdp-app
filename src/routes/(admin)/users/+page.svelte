@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { Button, Input, Label, Modal, Tooltip } from "flowbite-svelte";
     import {
         ChefHat,
         Coins,
@@ -15,6 +14,11 @@
 
     import UsersTable from "$components/UsersTable.svelte";
     import type { User } from "$lib/auth/user";
+    import { Button } from "$lib/components/ui/button/index";
+    import * as Dialog from "$lib/components/ui/dialog/index";
+    import { Input } from "$lib/components/ui/input/index";
+    import { Label } from "$lib/components/ui/label/index";
+    import * as Tooltip from "$lib/components/ui/tooltip/index";
     import { getStringFromEnumValue } from "$lib/utils/enums";
     import { intToBitArray } from "$lib/utils/permissions";
     import { capitalizeFirstLetter } from "$lib/utils/textFormat";
@@ -109,6 +113,7 @@
                     }
                     return item;
                 });
+                error = false;
             }
 
             if (res.status === 404) {
@@ -156,20 +161,25 @@
                     )}
 
                     <div class="flex items-center gap-1">
-                        <PermissionIcon class="w-4 text-primary-300" />
-                        <Tooltip
-                            color="gray"
-                            class="dark:bg-neutral-800 dark:border-neutral-500"
-                        >
-                            {capitalizeFirstLetter(
-                                getStringFromEnumValue(
-                                    UserPermissions,
-                                    Math.pow(2, index)
-                                )
-                                    .toLowerCase()
-                                    .replace("_", " ")
-                            )}
-                        </Tooltip>
+                        <Tooltip.Provider delayDuration={300}>
+                            <Tooltip.Root>
+                                <Tooltip.Trigger>
+                                    <PermissionIcon
+                                        class="w-4 text-primary-300"
+                                    />
+                                </Tooltip.Trigger>
+                                <Tooltip.Content>
+                                    {capitalizeFirstLetter(
+                                        getStringFromEnumValue(
+                                            UserPermissions,
+                                            Math.pow(2, index)
+                                        )
+                                            .toLowerCase()
+                                            .replace("_", " ")
+                                    )}
+                                </Tooltip.Content>
+                            </Tooltip.Root>
+                        </Tooltip.Provider>
                     </div>
                 {/each}
             </div>
@@ -177,23 +187,21 @@
         <span class="text-sm">Alias: {currSelectedUser.alias}</span>
     {/snippet}
 
-    <Modal
-        title={`Elimina ${currSelectedUser.username}`}
-        bind:open={deleteModalOpen}
-        class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
-        headerClass="dark:bg-neutral-800 dark:text-neutral-300"
-        footerClass="dark:bg-neutral-800 dark:text-neutral-300"
-    >
-        <span class="text-md"
-            >Vuoi eliminare l'utente <b>{currSelectedUser.username}</b>?</span
-        >
-        <div class="flex flex-col gap-2">
-            {@render UserInfo(currSelectedUser)}
-        </div>
-        {#snippet footer()}
-            <div class="flex gap-2 mt-4">
+    <Dialog.Root bind:open={deleteModalOpen}>
+        <Dialog.Content>
+            <Dialog.Header>
+                <Dialog.Title>Elimina {currSelectedUser.username}</Dialog.Title>
+            </Dialog.Header>
+            <span class="text-md"
+                >Vuoi eliminare l'utente <b>{currSelectedUser.username}</b
+                >?</span
+            >
+            <div class="flex flex-col gap-2">
+                {@render UserInfo(currSelectedUser)}
+            </div>
+            <Dialog.Footer>
                 <Button
-                    class="bg-red-500 dark:bg-red-500"
+                    variant="destructive"
                     onclick={() => {
                         handleUserDelete(currSelectedUser);
                         deleteModalOpen = false;
@@ -202,43 +210,37 @@
                     Elimina
                 </Button>
                 <Button
-                    color="alternative"
-                    class="dark:text-neutral-400 dark:border-neutral-400 dark:hover:bg-neutral-700 dark:hover:border-neutral-300"
+                    variant="outline"
                     onclick={() => (deleteModalOpen = false)}>Annulla</Button
                 >
+            </Dialog.Footer>
+        </Dialog.Content>
+    </Dialog.Root>
+    <Dialog.Root bind:open={aliasModalOpen}>
+        <Dialog.Content>
+            <Dialog.Header>
+                <Dialog.Title
+                    >Aggiorna l'alias di {currSelectedUser.username}</Dialog.Title
+                >
+            </Dialog.Header>
+            <span class="text-md"
+                >Vuoi aggiornare l'alias di <b>{currSelectedUser.username}</b
+                >?</span
+            >
+            <div class="flex flex-col gap-2">
+                {@render UserInfo(currSelectedUser)}
             </div>
-        {/snippet}
-    </Modal>
-    <Modal
-        bind:open={aliasModalOpen}
-        title={`Aggiorna l'alias di ${currSelectedUser.username}`}
-        class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
-        headerClass="dark:bg-neutral-800 dark:text-neutral-300"
-        footerClass="dark:bg-neutral-800 dark:text-neutral-300"
-    >
-        <span class="text-md"
-            >Vuoi aggiornare l'alias di <b>{currSelectedUser.username}</b
-            >?</span
-        >
-        <div class="flex flex-col gap-2">
-            {@render UserInfo(currSelectedUser)}
-        </div>
 
-        <Label class="mt-4">
-            Nuovo alias
-            <Input
-                bind:value={alias}
-                class="mt-2 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
-            />
-        </Label>
-        {#snippet footer()}
-            <div class="flex gap-2 mt-4">
+            <Label class="mt-4">
+                Nuovo alias
+                <Input bind:value={alias} class="mt-2" />
+            </Label>
+            <Dialog.Footer>
                 <Button onclick={() => handleAliasChange(currSelectedUser)}
                     >Aggiorna</Button
                 >
                 <Button
-                    color="alternative"
-                    class="dark:text-neutral-400 dark:border-neutral-400 dark:hover:bg-neutral-700 dark:hover:border-neutral-300"
+                    variant="outline"
                     onclick={() => {
                         alias = "";
                         aliasModalOpen = false;
@@ -246,7 +248,7 @@
                 >
                     Annulla
                 </Button>
-            </div>
-        {/snippet}
-    </Modal>
+            </Dialog.Footer>
+        </Dialog.Content>
+    </Dialog.Root>
 {/if}

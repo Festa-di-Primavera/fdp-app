@@ -1,16 +1,10 @@
 <script lang="ts">
     import type { User } from "$lib/auth/user";
+    import * as Avatar from "$lib/components/ui/avatar/index";
+    import { Button } from "$lib/components/ui/button/index";
+    import { Input } from "$lib/components/ui/input/index";
+    import * as TableCN from "$lib/components/ui/table/index";
     import { user } from "$store/store";
-    import {
-        Button,
-        Input,
-        Table,
-        TableBody,
-        TableBodyCell,
-        TableBodyRow,
-        TableHead,
-        TableHeadCell,
-    } from "flowbite-svelte";
     import { toast } from "svelte-sonner";
 
     interface Props {
@@ -83,6 +77,79 @@
 </svelte:head>
 
 <div class="mx-5 mt-5">
+    <TableCN.Root>
+        <TableCN.Header>
+            <TableCN.Row>
+                <TableCN.Head class="pl-5">Venditore</TableCN.Head>
+                <TableCN.Head class="text-center">Totale Venduto</TableCN.Head>
+                <TableCN.Head class="text-center">Da riscuotere</TableCN.Head>
+                <TableCN.Head class="text-center">Salda debito</TableCN.Head>
+                <TableCN.Head />
+            </TableCN.Row>
+        </TableCN.Header>
+        <TableCN.Body>
+            {#each sellers || [] as item, index}
+                <TableCN.Row>
+                    <TableCN.Cell class="pl-10">
+                        <span class="flex items-center font-medium gap-4">
+                            <div class="block">
+                                <Avatar.Root>
+                                    <Avatar.Image
+                                        src={item.avatar_url}
+                                        alt={item.username[0]}
+                                    />
+                                    <Avatar.Fallback
+                                        class="bg-gradient-to-br from-neutral-600 to-neutral-400 text-white"
+                                    >
+                                        {item.username[0].toUpperCase()}
+                                    </Avatar.Fallback>
+                                </Avatar.Root>
+                            </div>
+                            <span class="max-w-24">{item.username}</span>
+                        </span>
+                    </TableCN.Cell>
+                    <TableCN.Cell class="text-center">
+                        € {item.total_from_sales}
+                    </TableCN.Cell>
+                    <TableCN.Cell class="text-center">
+                        € {item.owned_money}
+                    </TableCN.Cell>
+                    <TableCN.Cell>
+                        <div
+                            class="flex w-full items-center justify-center gap-4"
+                        >
+                            <Input
+                                type="number"
+                                min="1"
+                                max={item.owned_money}
+                                bind:value={debtToClaimMap[item.id]}
+                                class="z-10 w-max text-center"
+                                disabled={item.owned_money === 0}
+                                placeholder="€€€"
+                            />
+                            <span class="text-nowrap">
+                                su € {item.owned_money}
+                            </span>
+                        </div>
+                    </TableCN.Cell>
+                    <TableCN.Cell>
+                        <Button
+                            class="ml-2"
+                            onclick={() => claimMoney(item)}
+                            disabled={item.owned_money === 0}
+                        >
+                            Salda
+                        </Button>
+                    </TableCN.Cell>
+                </TableCN.Row>
+            {/each}
+        </TableCN.Body>
+    </TableCN.Root>
+</div>
+
+<!-- FLOWBITE OLD VERSION -->
+<!-- 
+<div class="mx-5 mt-5">
     <Table
         divClass="tableDiv relative overflow-x-auto overflow-y-visible"
         class="relative overflow-visible overflow-x-auto rounded-md shadow-md sm:rounded-lg"
@@ -114,7 +181,6 @@
                 >
                     <TableBodyCell class="bg-inherit p-0 pl-5">
                         {#if index < 3}
-                            <!-- Classifica -->
                             <span
                                 class="{index == 0
                                     ? 'text-yellow-400'
@@ -188,3 +254,4 @@
         </TableBody>
     </Table>
 </div>
+-->
