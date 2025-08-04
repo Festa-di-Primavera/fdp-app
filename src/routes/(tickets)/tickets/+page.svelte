@@ -1,25 +1,17 @@
 <script lang="ts">
     import type { User } from "$lib/auth/user";
+    import { Badge } from "$lib/components/ui/badge/index";
+    import { Button } from "$lib/components/ui/button/index";
+    import * as Dialog from "$lib/components/ui/dialog/index";
+    import { Input } from "$lib/components/ui/input/index";
+    import { Label } from "$lib/components/ui/label/index";
+    import * as Table from "$lib/components/ui/table/index";
     import { TICKETS } from "$lib/firebase/collections";
     import { formatDate } from "$lib/utils/textFormat";
     import type { Ticket } from "$models/ticket";
     import { user } from "$store/store";
-    import { onSnapshot, query, type Unsubscribe } from "firebase/firestore";
-    import {
-        Button,
-        Hr,
-        Indicator,
-        Input,
-        Label,
-        Modal,
-        Table,
-        TableBody,
-        TableBodyCell,
-        TableBodyRow,
-        TableHead,
-        TableHeadCell,
-    } from "flowbite-svelte";
     import { Pen } from "@lucide/svelte";
+    import { onSnapshot, query, type Unsubscribe } from "firebase/firestore";
     import { onDestroy, onMount } from "svelte";
     import { toast } from "svelte-sonner";
 
@@ -123,11 +115,13 @@
             });
             if (response.ok) {
                 toast.success("Attributo cambiato");
+                // Close modal and reset form after successful update
+                attribute = "";
+                attrModalOpen = false;
             } else {
                 toast.error("Errore durante la modifica");
+                // Keep modal open on error so user can retry
             }
-
-            attribute = "";
         }
     }
 </script>
@@ -140,77 +134,73 @@
     <div
         class="mr-5 mt-5 grid w-full grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-6 px-5"
     >
-        <Label>
-            Nome
+        <div class="space-y-2">
+            <Label for="name-filter">Nome</Label>
             <Input
+                id="name-filter"
                 bind:value={filters.name}
                 placeholder="Mario"
-                class="mt-1 w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
             />
-        </Label>
-        <Label>
-            Cognome
+        </div>
+        <div class="space-y-2">
+            <Label for="surname-filter">Cognome</Label>
             <Input
+                id="surname-filter"
                 bind:value={filters.surname}
                 placeholder="Rossi"
-                class="mt-1 w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
             />
-        </Label>
-        <Label>
-            Codice Biglietto
+        </div>
+        <div class="space-y-2">
+            <Label for="ticket-filter">Codice Biglietto</Label>
             <Input
+                id="ticket-filter"
                 bind:value={filters.ticketId}
-                placeholder="FDP25-0000"
-                class="mt-1 w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+                placeholder={`FDP${new Date().getFullYear().toString().slice(-2)}-0000`}
             />
-        </Label>
-        <Label>
-            Venditore
+        </div>
+        <div class="space-y-2">
+            <Label for="seller-filter">Venditore</Label>
             <Input
+                id="seller-filter"
                 bind:value={filters.seller}
                 placeholder="Marek"
-                class="mt-1 w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
             />
-        </Label>
+        </div>
     </div>
 
-    <Hr class="mx-5 mt-5 dark:bg-neutral-500" />
-    <div class="mx-5">
-        <Table
-            divClass="tableDiv relative overflow-x-auto overflow-y-visible pb-40"
-            class="relative overflow-visible overflow-x-auto rounded-md shadow-md sm:rounded-lg"
-        >
-            <TableHead class="dark:bg-neutral-600 dark:text-neutral-300">
-                <TableHeadCell class="cursor-pointer select-none">
-                    <div class="flex gap-1">Codice</div>
-                </TableHeadCell>
-                <TableHeadCell class="cursor-pointer select-none">
-                    <div class="flex gap-1">Nome</div>
-                </TableHeadCell>
-                <TableHeadCell class="cursor-pointer select-none">
-                    <div class="flex gap-1">Cognome</div>
-                </TableHeadCell>
-                <TableHeadCell class="cursor-pointer select-none">
-                    <div class="flex gap-1">Venditore</div>
-                </TableHeadCell>
-                <TableHeadCell class="cursor-pointer select-none">
-                    <div class="flex gap-1">Vendita</div>
-                </TableHeadCell>
-                <TableHeadCell class="cursor-pointer select-none">
-                    <div class="flex gap-1">Check-in</div>
-                </TableHeadCell>
-            </TableHead>
-            <TableBody class="divide-y">
+    <div class="mx-5 mt-5">
+        <Table.Root>
+            <Table.Header>
+                <Table.Row>
+                    <Table.Head class="cursor-pointer select-none">
+                        <div class="flex gap-1">Codice</div>
+                    </Table.Head>
+                    <Table.Head class="cursor-pointer select-none">
+                        <div class="flex gap-1">Nome</div>
+                    </Table.Head>
+                    <Table.Head class="cursor-pointer select-none">
+                        <div class="flex gap-1">Cognome</div>
+                    </Table.Head>
+                    <Table.Head class="cursor-pointer select-none">
+                        <div class="flex gap-1">Venditore</div>
+                    </Table.Head>
+                    <Table.Head class="cursor-pointer select-none">
+                        <div class="flex gap-1">Vendita</div>
+                    </Table.Head>
+                    <Table.Head class="cursor-pointer select-none">
+                        <div class="flex gap-1">Check-in</div>
+                    </Table.Head>
+                </Table.Row>
+            </Table.Header>
+            <Table.Body>
                 {#each filteredItems || [] as item}
-                    <TableBodyRow
-                        class="w-full dark:bg-neutral-700 dark:border-neutral-500"
-                    >
-                        <TableBodyCell
+                    <Table.Row>
+                        <Table.Cell
                             class="px-6 py-4 whitespace-nowrap font-medium flex items-center gap-4"
                         >
                             <span class="mr-4">{item.ticketId}</span>
-                        </TableBodyCell>
-                        <TableBodyCell>
+                        </Table.Cell>
+                        <Table.Cell>
                             {#if item.name}
                                 <div class="flex items-center">
                                     <span class="inline-block min-w-[100px]"
@@ -228,8 +218,8 @@
                             {:else}
                                 {"------"}
                             {/if}
-                        </TableBodyCell>
-                        <TableBodyCell>
+                        </Table.Cell>
+                        <Table.Cell>
                             {#if item.surname}
                                 <div class="flex items-center">
                                     <span class="inline-block min-w-[100px]"
@@ -246,26 +236,30 @@
                             {:else}
                                 {"------"}
                             {/if}
-                        </TableBodyCell>
-                        <TableBodyCell>
+                        </Table.Cell>
+                        <Table.Cell>
                             <div
                                 class="flex w-full items-center justify-between gap-3"
                             >
                                 {item.seller || "------"}
                             </div>
-                        </TableBodyCell>
-                        <TableBodyCell>
+                        </Table.Cell>
+                        <Table.Cell>
                             <span class="flex items-center gap-2">
-                                <Indicator
-                                    color={item.soldAt ? "green" : "red"}
+                                <Badge
+                                    class="h-3 min-w-3 rounded-full px-1 font-mono tabular-nums {item.soldAt
+                                        ? 'bg-green-500'
+                                        : 'bg-red-500'}"
                                 />
                                 {formatDate(item.soldAt, "Non venduto")}
                             </span>
-                        </TableBodyCell>
-                        <TableBodyCell>
+                        </Table.Cell>
+                        <Table.Cell>
                             <span class="flex items-center gap-2">
-                                <Indicator
-                                    color={item.checkIn ? "green" : "yellow"}
+                                <Badge
+                                    class="h-3 min-w-3 rounded-full px-1 font-mono tabular-nums {item.checkIn
+                                        ? 'bg-green-500'
+                                        : 'bg-yellow-500'}"
                                 />
                                 <span class="w-max"
                                     >{formatDate(
@@ -274,44 +268,44 @@
                                     )}</span
                                 >
                             </span>
-                        </TableBodyCell>
-                    </TableBodyRow>
+                        </Table.Cell>
+                    </Table.Row>
                 {/each}
-            </TableBody>
-        </Table>
+            </Table.Body>
+        </Table.Root>
     </div>
 {/if}
 
-<Modal
-    autoclose
-    outsideclose
-    bind:open={attrModalOpen}
-    title={`Cambia il ${currAttr == "name" ? "nome" : "cognome"} di ${currSelectedTicket?.name} ${currSelectedTicket?.surname}`}
-    class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
-    headerClass="dark:bg-neutral-800 dark:text-neutral-300"
-    footerClass="dark:bg-neutral-800 dark:text-neutral-300"
->
-    <span class="text-md"
-        >Vuoi aggiornare il {currAttr == "name" ? "nome" : "cognome"} di
-        <b>{currSelectedTicket?.name} {currSelectedTicket?.surname}</b>?</span
-    >
-    <div class="flex flex-col gap-2">
-        <span class="text-sm">Biglietto: {currSelectedTicket?.ticketId}</span>
-        <span class="text-sm">Nome: {currSelectedTicket?.name}</span>
-        <span class="text-sm">Cognome: {currSelectedTicket?.surname}</span>
-        <span class="text-sm">Venditore: {currSelectedTicket?.seller}</span>
-    </div>
-    <Input
-        bind:value={attribute}
-        class="mt-4 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
-        placeholder={currSelectedTicket!![currAttr!!]}
-    />
-    {#snippet footer()}
-        <div class="flex gap-2">
+<Dialog.Root bind:open={attrModalOpen}>
+    <Dialog.Content>
+        <Dialog.Header>
+            <Dialog.Title
+                >Cambia il {currAttr == "name" ? "nome" : "cognome"} di {currSelectedTicket?.name}
+                {currSelectedTicket?.surname}</Dialog.Title
+            >
+        </Dialog.Header>
+        <span class="text-md"
+            >Vuoi aggiornare il {currAttr == "name" ? "nome" : "cognome"} di
+            <b>{currSelectedTicket?.name} {currSelectedTicket?.surname}</b
+            >?</span
+        >
+        <div class="flex flex-col gap-2">
+            <span class="text-sm"
+                >Biglietto: {currSelectedTicket?.ticketId}</span
+            >
+            <span class="text-sm">Nome: {currSelectedTicket?.name}</span>
+            <span class="text-sm">Cognome: {currSelectedTicket?.surname}</span>
+            <span class="text-sm">Venditore: {currSelectedTicket?.seller}</span>
+        </div>
+        <Input
+            bind:value={attribute}
+            class="mt-4"
+            placeholder={currSelectedTicket!![currAttr!!]}
+        />
+        <Dialog.Footer>
             <Button onclick={() => handleAttrModify()}>Aggiorna</Button>
             <Button
-                color="alternative"
-                class="dark:text-neutral-400 dark:border-neutral-400 dark:hover:bg-neutral-700 dark:hover:border-neutral-300"
+                variant="outline"
                 onclick={() => {
                     attribute = "";
                     attrModalOpen = false;
@@ -319,6 +313,6 @@
             >
                 Annulla
             </Button>
-        </div>
-    {/snippet}
-</Modal>
+        </Dialog.Footer>
+    </Dialog.Content>
+</Dialog.Root>
