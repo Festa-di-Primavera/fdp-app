@@ -139,8 +139,8 @@
             <div
                 class="m-auto w-full max-w-sm md:max-w-3xl xl:max-w-6xl 2xl:max-w-[1584px]"
             >
-                <h1 class="text-4xl font-bold text-primary-600">Dashboard</h1>
-                <p class="text-justify dark:text-white">
+                <h1 class="text-4xl font-bold text-app-accent">Dashboard</h1>
+                <p class="text-justify">
                     Informazioni relative ai biglietti
                 </p>
             </div>
@@ -221,15 +221,15 @@
 <Dialog.Root bind:open>
     <Dialog.Content>
         <Dialog.Header>
-            <Dialog.Title class="text-2xl text-chart-2">Conferma visita</Dialog.Title>
+            <Dialog.Title class="text-2xl text-app-accent">Conferma visita</Dialog.Title>
         </Dialog.Header>
         <div class="">
             <p class="select-none text-sm">
                 Per evitare letture non necessarie, confermare di voler visitare
                 questa pagina.<br />
-                Inserisci nel campo sottostante il codice
+                Inserisci nel campo sottostante il codice 
                 <span
-                    class="whitespace-nowrap break-keep rounded-md bg-chart-2/20 px-2 py-1 font-mono"
+                    class="whitespace-nowrap break-keep rounded-md bg-app-accent/20 px-2 py-1 font-mono"
                     >Festa di Primavera</span
                 > per confermare.
             </p>

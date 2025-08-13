@@ -1,10 +1,13 @@
 <script lang="ts">
-    import { Alert, Button, Card } from "flowbite-svelte";
     import { page } from "$app/state";
-    
+    import * as Alert from "$lib/components/ui/alert/index";
+    import { Button } from "$lib/components/ui/button/index";
+    import * as Card from "$lib/components/ui/card/index";
+    import { CircleAlertIcon, House, Info } from "@lucide/svelte";
+
     // Get the error from the page store
     const { status, error } = page;
-    
+
     // Map status codes to friendly messages
     function getErrorMessage(status: number): string {
         switch (status) {
@@ -16,7 +19,7 @@
                 return "Si è verificato un errore";
         }
     }
-    
+
     // Get a detailed explanation based on the status
     function getErrorDescription(status: number): string {
         switch (status) {
@@ -30,26 +33,35 @@
     }
 </script>
 
-<section class="flex h-full w-full flex-grow flex-col items-center py-8">
-    <Card class="max-w-lg w-full dark:bg-neutral-700 dark:border-neutral-500 p-16">
-        <div class="text-center mb-6">
-            <h1 class="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
-                {getErrorMessage(status)}
-            </h1>
-            <div class="text-gray-600 dark:text-gray-400">
-                <p>{getErrorDescription(status)}</p>
-                {#if error?.message}
-                    <Alert color="red" class="mt-4 text-left font-mono dark:bg-neutral-800 dark:border-neutral-500">
-                        <b>Dettagli errore:</b> {error.message}
-                    </Alert>
-                {/if}
-            </div>
-        </div>
+<section class="flex h-full w-full flex-grow flex-col items-center py-8 px-5">
+    <Card.Root class="max-w-lg w-full">
+        <Card.Content>
+            {#if error?.message}
+                <Alert.Root variant="destructive" class="mb-6">
+                    <CircleAlertIcon />
+                    <Alert.Title>{getErrorMessage(status)}</Alert.Title>
+                    <Alert.Description>
+                        <p>{getErrorDescription(status)}</p>
+                    </Alert.Description>
+                </Alert.Root>
+                <Alert.Root>
+                    <Info />
+                    <Alert.Title>Dettagli dell'errore:</Alert.Title>
+                    <Alert.Description class="font-mono">
+                        <p>
+                            {error?.message ||
+                                "Si è verificato un errore sconosciuto."}
+                        </p>
+                    </Alert.Description>
+                </Alert.Root>
+            {/if}
 
-        <div class="flex justify-center">
-            <Button href="/">
-                Torna alla home
-            </Button>
-        </div>
-    </Card>
+            <Card.Footer class="mt-6 flex justify-center">
+                <Button href="/" class="flex items-center">
+                    <House />
+                    Torna alla home
+                </Button>
+            </Card.Footer>
+        </Card.Content>
+    </Card.Root>
 </section>

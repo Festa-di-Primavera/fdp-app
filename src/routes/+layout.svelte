@@ -2,7 +2,7 @@
     import { page } from "$app/state";
     import { Toaster } from "$lib/components/ui/sonner";
     import { ModeWatcher } from "mode-watcher";
-    import "../app-ui.css";
+    import "../app.css";
     import NavBar from "../components/NavBar.svelte";
     import type { LayoutProps } from "./$types";
 

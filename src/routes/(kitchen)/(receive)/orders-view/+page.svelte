@@ -1,8 +1,11 @@
 <script lang="ts">
+    import { Button } from "$lib/components/ui/button/index.js";
+    import * as Table from "$lib/components/ui/table/index.js";
     import { ORDERS } from "$lib/firebase/collections";
     import { getStringFromEnumValue } from "$lib/utils/enums";
     import type { Order } from "$models/order";
     import { ItemType, Sauce } from "$models/order";
+    import { Mail } from "@lucide/svelte";
     import {
         onSnapshot,
         orderBy,
@@ -10,16 +13,6 @@
         Timestamp,
         type Unsubscribe,
     } from "firebase/firestore";
-    import {
-        Button,
-        Table,
-        TableBody,
-        TableBodyCell,
-        TableBodyRow,
-        TableHead,
-        TableHeadCell,
-    } from "flowbite-svelte";
-    import { Mail } from "@lucide/svelte";
     import { onDestroy, onMount } from "svelte";
 
     let orders: Order[] = $state([]);
@@ -82,33 +75,33 @@
 </svelte:head>
 
 <div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4 text-primary-600">
+    <h1 class="text-2xl font-bold mb-4 text-app-accent">
         Ordini: {orders.length}
     </h1>
 
-    <Table class="w-full">
-        <TableHead class="dark:bg-neutral-600 dark:text-neutral-300">
-            <TableHeadCell>Ticket ID</TableHeadCell>
-            <TableHeadCell>Data</TableHeadCell>
-            <TableHeadCell>Nome</TableHeadCell>
-            <TableHeadCell>Cognome</TableHeadCell>
-            <TableHeadCell>Email</TableHeadCell>
-            <TableHeadCell>Dettagli</TableHeadCell>
-            <TableHeadCell>Azioni</TableHeadCell>
-        </TableHead>
-        <TableBody>
+    <Table.Root class="w-full">
+        <Table.Header>
+            <Table.Row>
+                <Table.Head>Ticket ID</Table.Head>
+                <Table.Head>Data</Table.Head>
+                <Table.Head>Nome</Table.Head>
+                <Table.Head>Cognome</Table.Head>
+                <Table.Head>Email</Table.Head>
+                <Table.Head>Dettagli</Table.Head>
+                <Table.Head>Azioni</Table.Head>
+            </Table.Row>
+        </Table.Header>
+        <Table.Body>
             {#each orders as order}
-                <TableBodyRow
-                    class="w-full dark:bg-neutral-700 dark:border-neutral-500"
-                >
-                    <TableBodyCell>{order.ticketId}</TableBodyCell>
-                    <TableBodyCell
-                        >{order.creationDate.toLocaleString()}</TableBodyCell
+                <Table.Row class="w-full">
+                    <Table.Cell>{order.ticketId}</Table.Cell>
+                    <Table.Cell
+                        >{order.creationDate.toLocaleString()}</Table.Cell
                     >
-                    <TableBodyCell>{order.name}</TableBodyCell>
-                    <TableBodyCell>{order.surname}</TableBodyCell>
-                    <TableBodyCell>{order.email || "NON STAFF"}</TableBodyCell>
-                    <TableBodyCell>
+                    <Table.Cell>{order.name}</Table.Cell>
+                    <Table.Cell>{order.surname}</Table.Cell>
+                    <Table.Cell>{order.email || "NON STAFF"}</Table.Cell>
+                    <Table.Cell>
                         {#each order.items as item}
                             <p class="mb-1">
                                 {getStringFromEnumValue(ItemType, item.type)}
@@ -123,11 +116,11 @@
                                 {/if}
                             </p>
                         {/each}
-                    </TableBodyCell>
-                    <TableBodyCell>
+                    </Table.Cell>
+                    <Table.Cell>
                         {#if order.email}
                             <Button
-                                size="xs"
+                                size="sm"
                                 disabled={loading}
                                 onclick={() => resendEmail(order)}
                             >
@@ -135,9 +128,9 @@
                                 Reinvia Email
                             </Button>
                         {/if}
-                    </TableBodyCell>
-                </TableBodyRow>
+                    </Table.Cell>
+                </Table.Row>
             {/each}
-        </TableBody>
-    </Table>
+        </Table.Body>
+    </Table.Root>
 </div>

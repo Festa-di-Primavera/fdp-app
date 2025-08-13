@@ -1,7 +1,7 @@
 <script lang="ts">
     import * as Accordion from "$lib/components/ui/accordion/index";
     import * as Avatar from "$lib/components/ui/avatar/index";
-    import { Button } from "$lib/components/ui/button";
+    import { Button, buttonVariants } from "$lib/components/ui/button";
     import * as Card from "$lib/components/ui/card/index";
     import * as Dialog from "$lib/components/ui/dialog/index";
     import * as Drawer from "$lib/components/ui/drawer/index";
@@ -214,9 +214,14 @@
         {#if $user}
             <Drawer.Root direction="right" bind:open={drawerOpen}>
                 <Drawer.Trigger>
-                    <Button variant="outline" size="icon">
+                    <div
+                        class={buttonVariants({
+                            variant: "outline",
+                            size: "icon",
+                        })}
+                    >
                         <AlignJustify />
-                    </Button>
+                    </div>
                 </Drawer.Trigger>
 
                 <Drawer.Content>
@@ -270,7 +275,7 @@
                                                                         .url
                                                                         .pathname ===
                                                                     childRoute.slug
-                                                                        ? 'font-semibold text-chart-2'
+                                                                        ? 'font-semibold text-app-accent'
                                                                         : 'font-normal'}"
                                                                 >
                                                                     <childRoute.icon
@@ -291,7 +296,7 @@
                                             <span
                                                 class="flex w-full items-center gap-4 text-xl {page
                                                     .url.pathname === route.slug
-                                                    ? 'font-semibold text-chart-2'
+                                                    ? 'font-semibold text-app-accent'
                                                     : 'font-normal'}"
                                             >
                                                 <route.icon />

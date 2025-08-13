@@ -187,13 +187,13 @@
     <div
         class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5"
     >
-        <h1 class="text-4xl font-bold text-primary-600">Check-in</h1>
+        <h1 class="text-4xl font-bold text-app-accent">Check-in</h1>
         <p class="text-justify">
             Scansionare il QR e verificare la validità del biglietto
         </p>
         <div class="w-full">
             <Label for="ticketCodeInput" class="text-md font-medium w-full">
-                Codice Biglietto <span class="text-chart-2">*</span>
+                Codice Biglietto <span class="text-app-accent">*</span>
             </Label>
             <div class="flex gap-3 items-center">
                 <Input

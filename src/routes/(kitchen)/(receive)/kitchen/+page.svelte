@@ -123,17 +123,17 @@
 
 <div class="p-4 w-full">
     <div class="flex flex-col sm:flex-row sm:gap-7 sm:items-center">
-        <h1 class="text-4xl font-bold text-primary-500 mb-4 sm:mb-6 sm:mr-10">
+        <h1 class="text-4xl font-bold text-app-accent mb-4 sm:mb-6 sm:mr-10">
             Cucina
         </h1>
         <div class="grid grid-cols-3 gap-2 sm:flex sm:gap-7 mb-6">
             <div class="flex flex-col items-center">
                 <span
-                    class="text-md font-medium text-primary-600 dark:text-primary-400"
+                    class="text-md font-medium text-app-accent"
                     >Preparati</span
                 >
                 <span
-                    class="text-2xl font-semibold text-primary-600 dark:text-primary-400"
+                    class="text-2xl font-semibold text-app-accent"
                     >{doneOrders.length}</span
                 >
             </div>

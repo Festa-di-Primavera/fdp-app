@@ -3,14 +3,7 @@
     import * as Card from "$lib/components/ui/card/index";
     import { Input } from "$lib/components/ui/input/index";
     import { Label } from "$lib/components/ui/label/index";
-    import {
-        Check,
-        PencilLine,
-        Send,
-        Ticket as TicketIcon,
-        Trash2,
-        X,
-    } from "@lucide/svelte";
+    import { Check, PencilLine, Send, Trash2, X } from "@lucide/svelte";
 
     import QrReader from "$components/QrReader.svelte";
     import OrderModal from "$components/food/cashier/OrderModal.svelte";
@@ -209,7 +202,7 @@
     <div
         class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5"
     >
-        <h1 class="text-4xl font-bold text-primary-600">Cassa</h1>
+        <h1 class="text-4xl font-bold text-app-accent">Cassa</h1>
         <p class="text-justify">
             Scansionare il QR e prendere l'ordine del cliente per inviarlo in
             cucina.
@@ -217,7 +210,7 @@
         <div class="w-full">
             {#if !ticket}
                 <Label class="text-md font-medium" for="ticketCodeInput">
-                    Codice Biglietto <span class="text-chart-2">*</span>
+                    Codice Biglietto <span class="text-app-accent">*</span>
                 </Label>
                 <div class="flex gap-3 items-center">
                     <Input
@@ -266,7 +259,7 @@
                             </span>
                             <div class="flex justify-between mt-3">
                                 <button
-                                    class="text-sm text-chart-2 hover:text-chart-2/80"
+                                    class="text-sm text-app-accent hover:text-app-accent/80"
                                     onclick={reset}
                                 >
                                     Modifica codice
@@ -290,7 +283,7 @@
                                 class="flex-grow"
                             >
                                 <Card.Root
-                                    class="hover:bg-accent transition-colors"
+                                    class="hover:bg-app-accent transition-colors"
                                 >
                                     <Card.Content class="px-4 text-center">
                                         {type}
@@ -327,7 +320,9 @@
                                             </button>
                                         </div>
                                         <div class="pr-20">
-                                            <div class="flex flex-col gap-1 mb-2">
+                                            <div
+                                                class="flex flex-col gap-1 mb-2"
+                                            >
                                                 <div
                                                     class="flex items-baseline gap-2"
                                                 >
@@ -336,7 +331,7 @@
                                                     >
                                                         {item.type}
                                                     </span>
-                                                    <span class="text-chart-2">
+                                                    <span class="text-app-accent">
                                                         x{item.quantity}
                                                     </span>
                                                 </div>

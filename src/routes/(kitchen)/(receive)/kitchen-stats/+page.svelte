@@ -1,13 +1,7 @@
 <script lang="ts">
+    import * as Card from "$lib/components/ui/card/index";
     import { ORDERS } from "$lib/firebase/collections";
     import { type Order, ItemType } from "$models/order";
-    import {
-        type Unsubscribe,
-        onSnapshot,
-        query,
-        where,
-    } from "firebase/firestore";
-    import { Card } from "flowbite-svelte";
     import {
         Beef,
         Leaf,
@@ -15,6 +9,12 @@
         UtensilsCrossed,
         WheatOff,
     } from "@lucide/svelte";
+    import {
+        type Unsubscribe,
+        onSnapshot,
+        query,
+        where,
+    } from "firebase/firestore";
     import { onDestroy, onMount } from "svelte";
 
     let unsubscribe: Unsubscribe = () => {};
@@ -197,124 +197,140 @@
     <div
         class="flex-grow flex flex-wrap gap-10 justify-evenly items-center my-16"
     >
-        <Card
-            class="w-96 dark:bg-neutral-700 dark:border-neutral-500 p-14"
-        >
-            <div class="flex flex-col items-center justify-center gap-3">
-                <Beef class="w-10 h-10 text-red-500" />
-                <span class="text-5xl font-bold text-red-600 dark:text-red-400">
-                    {totalHamburgersConsumed}
-                </span>
-                <span class="text-xl text-center font-medium dark:text-white">
-                    Hamburger consumati
-                </span>
-            </div>
-        </Card>
-        <Card
-            class="w-96 dark:bg-neutral-700 dark:border-neutral-500 p-14"
-        >
-            <div class="flex flex-col items-center justify-center gap-3">
-                <Sandwich class="w-10 h-10 text-primary-500" />
-                <span
-                    class="text-5xl font-bold text-primary-600 dark:text-primary-400"
-                >
-                    {totalSandwichesConsumed}
-                </span>
-                <span class="text-xl text-center font-medium dark:text-white">
-                    Pane consumato
-                </span>
-            </div>
-        </Card>
+        <Card.Root class="w-96 p-14">
+            <Card.Content class="p-0">
+                <div class="flex flex-col items-center justify-center gap-3">
+                    <Beef class="w-10 h-10 text-red-500" />
+                    <span
+                        class="text-5xl font-bold text-red-600 dark:text-red-400"
+                    >
+                        {totalHamburgersConsumed}
+                    </span>
+                    <span
+                        class="text-xl text-center font-medium dark:text-white"
+                    >
+                        Hamburger consumati
+                    </span>
+                </div>
+            </Card.Content>
+        </Card.Root>
+        <Card.Root class="w-96 p-14">
+            <Card.Content class="p-0">
+                <div class="flex flex-col items-center justify-center gap-3">
+                    <Sandwich class="w-10 h-10 text-app-accent" />
+                    <span class="text-5xl font-bold text-app-accent/80">
+                        {totalSandwichesConsumed}
+                    </span>
+                    <span
+                        class="text-xl text-center font-medium dark:text-white"
+                    >
+                        Pane consumato
+                    </span>
+                </div>
+            </Card.Content>
+        </Card.Root>
     </div>
 
     <!-- Statistical Cards - centered vertically -->
     <div class="flex-grow flex flex-wrap gap-10 justify-evenly items-center">
         <!-- Non-vegetarian Card Group -->
-        <Card
-            class="w-96 h-[500px] flex flex-col items-center justify-center py-8 dark:bg-neutral-700 dark:border-neutral-500 p-16"
+        <Card.Root
+            class="w-96 h-[500px] flex flex-col items-center justify-center py-8 p-16"
         >
-            <div class="flex flex-col items-center justify-center gap-6">
-                <UtensilsCrossed class="w-14 h-14 text-violet-500" />
-                <span
-                    class="text-6xl font-bold text-violet-600 dark:text-violet-400"
-                >
-                    {nonVegetarianCount}
-                </span>
-                <span class="text-3xl text-center font-medium dark:text-white">
-                    Non-vegetariani in coda
-                </span>
-
-                <!-- Subcategories in separate cards -->
-                <div class="flex gap-6 mt-6 w-full">
-                    <Card
-                        class="flex-1 dark:bg-neutral-600 dark:border-neutral-500 p-14"
+            <Card.Content class="p-0 h-full flex items-center justify-center">
+                <div class="flex flex-col items-center justify-center gap-6">
+                    <UtensilsCrossed class="w-14 h-14 text-violet-500" />
+                    <span
+                        class="text-6xl font-bold text-violet-600 dark:text-violet-400"
                     >
-                        <div class="flex flex-col items-center gap-4">
-                            <span
-                                class="text-5xl font-bold text-orange-600 dark:text-orange-400"
-                            >
-                                {ontiCount}
-                            </span>
-                            <span
-                                class="text-2xl text-center font-medium text-orange-600 dark:text-orange-400"
-                            >
-                                Onti
-                            </span>
-                        </div>
-                    </Card>
-
-                    <Card
-                        class="flex-1 dark:bg-neutral-600 dark:border-neutral-500 p-14"
+                        {nonVegetarianCount}
+                    </span>
+                    <span
+                        class="text-3xl text-center font-medium dark:text-white"
                     >
-                        <div class="flex flex-col items-center gap-4">
-                            <span
-                                class="text-5xl font-bold text-blue-600 dark:text-blue-400"
-                            >
-                                {basicCount}
-                            </span>
-                            <span
-                                class="text-2xl text-center font-medium text-blue-600 dark:text-blue-400"
-                            >
-                                Basic
-                            </span>
-                        </div>
-                    </Card>
+                        Non-vegetariani in coda
+                    </span>
+
+                    <!-- Subcategories in separate cards -->
+                    <div class="flex gap-6 mt-6 w-full">
+                        <Card.Root class="flex-1 p-14">
+                            <Card.Content class="p-0">
+                                <div class="flex flex-col items-center gap-4">
+                                    <span
+                                        class="text-5xl font-bold text-orange-600 dark:text-orange-400"
+                                    >
+                                        {ontiCount}
+                                    </span>
+                                    <span
+                                        class="text-2xl text-center font-medium text-orange-600 dark:text-orange-400"
+                                    >
+                                        Onti
+                                    </span>
+                                </div>
+                            </Card.Content>
+                        </Card.Root>
+
+                        <Card.Root class="flex-1 p-14">
+                            <Card.Content class="p-0">
+                                <div class="flex flex-col items-center gap-4">
+                                    <span
+                                        class="text-5xl font-bold text-blue-600 dark:text-blue-400"
+                                    >
+                                        {basicCount}
+                                    </span>
+                                    <span
+                                        class="text-2xl text-center font-medium text-blue-600 dark:text-blue-400"
+                                    >
+                                        Basic
+                                    </span>
+                                </div>
+                            </Card.Content>
+                        </Card.Root>
+                    </div>
                 </div>
-            </div>
-        </Card>
+            </Card.Content>
+        </Card.Root>
 
         <!-- Vegetarian Card -->
-        <Card
-            class="w-96 h-[500px] flex flex-col items-center justify-center py-8 dark:bg-neutral-700 dark:border-neutral-500 p-16"
+        <Card.Root
+            class="w-96 h-[500px] flex flex-col items-center justify-center py-8 p-16"
         >
-            <div class="flex flex-col items-center justify-center gap-6">
-                <Leaf class="w-14 h-14 text-green-500" />
-                <span
-                    class="text-6xl font-bold text-green-600 dark:text-green-400"
-                >
-                    {vegetarianCount}
-                </span>
-                <span class="text-3xl text-center font-medium dark:text-white">
-                    Vegetariani in coda
-                </span>
-            </div>
-        </Card>
+            <Card.Content class="p-0 h-full flex items-center justify-center">
+                <div class="flex flex-col items-center justify-center gap-6">
+                    <Leaf class="w-14 h-14 text-green-500" />
+                    <span
+                        class="text-6xl font-bold text-green-600 dark:text-green-400"
+                    >
+                        {vegetarianCount}
+                    </span>
+                    <span
+                        class="text-3xl text-center font-medium dark:text-white"
+                    >
+                        Vegetariani in coda
+                    </span>
+                </div>
+            </Card.Content>
+        </Card.Root>
 
         <!-- Gluten-free Card -->
-        <Card
-            class="w-96 h-[500px] flex flex-col items-center justify-center py-8 dark:bg-neutral-700 dark:border-neutral-500 p-16"
+        <Card.Root
+            class="w-96 h-[500px] flex flex-col items-center justify-center py-8 p-16"
         >
-            <div class="flex flex-col items-center justify-center gap-6">
-                <WheatOff class="w-14 h-14 text-amber-500" />
-                <span
-                    class="text-6xl font-bold text-amber-600 dark:text-amber-400"
-                >
-                    {glutenFreeCount}
-                </span>
-                <span class="text-3xl text-center font-medium dark:text-white">
-                    Senza glutine in coda
-                </span>
-            </div>
-        </Card>
+            <Card.Content class="p-0 h-full flex items-center justify-center">
+                <div class="flex flex-col items-center justify-center gap-6">
+                    <WheatOff class="w-14 h-14 text-amber-500" />
+                    <span
+                        class="text-6xl font-bold text-amber-600 dark:text-amber-400"
+                    >
+                        {glutenFreeCount}
+                    </span>
+                    <span
+                        class="text-3xl text-center font-medium dark:text-white"
+                    >
+                        Senza glutine in coda
+                    </span>
+                </div>
+            </Card.Content>
+        </Card.Root>
     </div>
 </div>

@@ -46,7 +46,7 @@
     <div
         class="w-full px-5 pt-5 flex flex-col gap-4 items-start max-w-96 pb-12 flex-grow"
     >
-        <h1 class="text-primary-600 font-bold text-4xl">Reset Password</h1>
+        <h1 class="text-app-accent font-bold text-4xl">Reset Password</h1>
         <p class="text-justify">
             Inserisci la nuova password per fare il reset
         </p>

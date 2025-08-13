@@ -110,7 +110,7 @@
     <div
         class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5"
     >
-        <h1 class="text-4xl font-bold text-primary-600">Vendi</h1>
+        <h1 class="text-4xl font-bold text-app-accent">Vendi</h1>
         <p class="text-justify">
             Inserire nome, cognome e, scansionando il QR, il codice del
             biglietto.
@@ -119,7 +119,7 @@
         <div class="flex flex-col w-full gap-2">
             <div>
                 <Label class="text-md w-full font-medium" for="name">
-                    Nome Ospite <span class="text-chart-2">*</span>
+                    Nome Ospite <span class="text-app-accent">*</span>
                 </Label>
                 <Input
                     id="name"
@@ -130,7 +130,7 @@
             </div>
             <div>
                 <Label class="text-md w-full font-medium " for="surname">
-                    Cognome Ospite <span class="text-chart-2">*</span>
+                    Cognome Ospite <span class="text-app-accent">*</span>
                 </Label>
                 <Input
                     id="surname"
@@ -141,7 +141,7 @@
             </div>
             <div>
                 <Label class="text-md w-full font-medium" for="ticketCodeInput">
-                    Codice Biglietto <span class="text-chart-2">*</span>
+                    Codice Biglietto <span class="text-app-accent">*</span>
                 </Label>
                 <Input
                     required

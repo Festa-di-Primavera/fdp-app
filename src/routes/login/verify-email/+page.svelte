@@ -28,10 +28,10 @@
     <div
         class="w-full px-5 pt-5 flex flex-col gap-4 items-start max-w-96 pb-12 flex-grow"
     >
-        <h1 class="text-primary-600 font-bold text-4xl">Verifica Email</h1>
+        <h1 class="text-app-accent font-bold text-4xl">Verifica Email</h1>
         <p class="text-justify">
             Inserisci il codice di verifica ricevuto all'email <b
-                class="text-primary-300">{$user.email}</b
+                class="text-app-accent">{$user.email}</b
             > per verificare il tuo account
         </p>
         <form
@@ -41,7 +41,7 @@
             class="text-justify"
         >
             Se non hai ricevuto il codice, <button
-                class="text-primary-600 font-semibold">clicca qui</button
+                class="text-app-accent font-semibold">clicca qui</button
             > per richiederne un altro
         </form>
 

@@ -1,5 +1,6 @@
 <script lang="ts">
-    import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index";
+    import Badge from "$lib/components/ui/badge/badge.svelte";
+import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index";
     import { CameraIcon, X } from "@lucide/svelte";
     import QrScanner from "qr-scanner";
     import { onDestroy, onMount } from "svelte";
@@ -152,16 +153,16 @@
 
 <div class="flex w-full flex-col items-center gap-3">
     <div
-        class="relative aspect-square w-[80%] rounded-xl border-4 border-primary-600 bg-gray-400 dark:bg-neutral-600 md:max-w-96"
+        class="relative aspect-square w-[80%] rounded-xl border-2 border-app-accent md:max-w-96"
         id="videocontainer"
     >
         <button
             bind:this={camSelectAnchor}
-            class="absolute left-2 top-2 aspect-square rounded-md bg-transparent focus-within:ring-0 hover:bg-opacity-30 dark:bg-transparent dark:hover:bg-opacity-30"
+            class="absolute left-3 top-3 aspect-square rounded-md bg-transparent focus-within:ring-0 hover:bg-opacity-30 dark:bg-transparent dark:hover:bg-opacity-30"
             onclick={() => (camSelectOpen = !camSelectOpen)}
         >
             <CameraIcon
-                class="absolute z-10 h-6 w-6 text-primary-800 dark:text-primary-300"
+                class="absolute z-10 h-6 w-6 text-app-accent"
             />
         </button>
         <!-- svelte-ignore a11y_media_has_caption -->
@@ -171,17 +172,15 @@
             bind:this={videoFrame}
         ></video>
         {#if opened}
-            <button
-                type="button"
-                class="absolute right-2 top-2 z-10 flex items-center gap-1 rounded-md bg-neutral-400 bg-opacity-40 p-1 text-primary-400 dark:text-primary-900"
-                onclick={closeScanner}
-            >
-                Chiudi
-                <X class="size-5" />
+            <button onclick={closeScanner}>
+                <Badge class="absolute right-3 top-3 z-10 flex items-center justify-center gap-1 rounded-md text-app-accent bg-black/30">
+                    Chiudi
+                    <X class="size-5" />
+                </Badge>
             </button>
         {/if}
     </div>
-    <span class="text-center font-semibold text-primary-500"
+    <span class="text-center font-semibold text-app-accent"
         >{!opened || isPaused
             ? "Clicca nel riquadro per scansionare"
             : "Scansione in corso"}</span
@@ -201,7 +200,7 @@
                         updateCamera(device.deviceId);
                     }}
                     class={device.deviceId === selectedCam
-                        ? "text-primary-800 dark:text-primary-200"
+                        ? "text-app-accent font-semibold"
                         : ""}
                 >
                     {device.label}

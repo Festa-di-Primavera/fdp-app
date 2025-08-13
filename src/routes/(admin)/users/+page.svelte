@@ -165,7 +165,7 @@
                             <Tooltip.Root>
                                 <Tooltip.Trigger>
                                     <PermissionIcon
-                                        class="w-4 text-primary-300"
+                                        class="w-4 text-app-accent"
                                     />
                                 </Tooltip.Trigger>
                                 <Tooltip.Content>

@@ -18,7 +18,7 @@
 >
     <div class="flex flex-col items-center">
         <div class="flex flex-col items-center gap-4 text-center">
-            <h1 class="text-3xl font-semibold text-chart-2">Home</h1>
+            <h1 class="text-3xl font-semibold text-app-accent">Home</h1>
             <p class="text-center text-2xl">Ciao <b>{data?.username}</b>!</p>
             <p class="text-center">Questa è solo la home page!</p>
             <p class="flex items-end">

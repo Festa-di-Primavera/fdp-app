@@ -42,6 +42,8 @@ export async function POST({ request, locals }) {
         .replace(/\//g, "-")
         .replace(" ", "");
 
+    console.log(`${order.ticketId}-${timestamp}`);
+
     await setDoc(doc(ORDERS, `${order.ticketId}-${timestamp}`), {
         ...order,
         creationDate: Timestamp.fromDate(new Date(order.creationDate)),

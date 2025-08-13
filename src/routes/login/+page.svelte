@@ -134,7 +134,7 @@
         {/if}
 
         <a
-            class="mt-1 w-max self-end p-0 text-sm hover:text-chart-2"
+            class="mt-1 w-max self-end p-0 text-sm hover:text-app-accent"
             href="/login/password-reset"
         >
             Password dimenticata?

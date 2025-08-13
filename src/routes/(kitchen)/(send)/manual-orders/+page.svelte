@@ -1,10 +1,9 @@
 <script lang="ts">
-    import { Button, Card, Input, Label } from "flowbite-svelte";
-    import {
-        PencilLine,
-        Send,
-        Trash2
-    } from "@lucide/svelte";
+    import { Button } from "$lib/components/ui/button/index";
+    import * as Card from "$lib/components/ui/card/index";
+    import { Input } from "$lib/components/ui/input/index";
+    import { Label } from "$lib/components/ui/label/index";
+    import { PencilLine, Send, Trash2 } from "@lucide/svelte";
 
     import OrderModal from "$components/food/cashier/OrderModal.svelte";
     import type { User } from "$lib/auth/user";
@@ -185,42 +184,50 @@
     <div
         class="flex w-full max-w-96 flex-grow flex-col items-start gap-5 px-5 pb-12 pt-5"
     >
-        <h1 class="text-4xl font-bold text-primary-600 mb-2">Ordini Manuali</h1>
-        <p class="text-justify dark:text-white">
+        <h1 class="text-4xl font-bold text-app-accent mb-2">Ordini Manuali</h1>
+        <p class="text-justify">
             Inserisci i dettagli del collegiale e dell'ordine.<br />
-            <span class="font-bold">CONTROLLARE BENE L'EMAIL<span> </span></span
-            >
+            <span class="font-bold">CONTROLLARE BENE L'EMAIL</span>
         </p>
         <div class="w-full space-y-4">
             <div class="flex gap-4">
-                <Label class="block">
-                    Nome <span class="text-primary-700">*</span>
+                <div class="flex-1">
+                    <Label for="name"
+                        >Nome <span class="text-app-accent">*</span></Label
+                    >
                     <Input
+                        id="name"
                         name="name"
                         bind:value={order.name}
                         required
-                        class="mt-2 dark:bg-neutral-700 dark:border-neutral-500"
+                        class="mt-1"
                     />
-                </Label>
-                <Label class="block">
-                    Cognome <span class="text-primary-700">*</span>
+                </div>
+                <div class="flex-1">
+                    <Label for="surname"
+                        >Cognome <span class="text-app-accent">*</span></Label
+                    >
                     <Input
+                        id="surname"
                         name="surname"
                         bind:value={order.surname}
                         required
-                        class="mt-2 dark:bg-neutral-700 dark:border-neutral-500"
+                        class="mt-1"
                     />
-                </Label>
+                </div>
             </div>
-            <Label class="block mb-3">
-                Email <span class="text-primary-700">*</span>
+            <div>
+                <Label for="email"
+                    >Email <span class="text-app-accent">*</span></Label
+                >
                 <Input
+                    id="email"
                     name="email"
                     bind:value={order.email}
                     required
-                    class="mt-2 dark:bg-neutral-700 dark:border-neutral-500"
+                    class="mt-1"
                 />
-            </Label>
+            </div>
 
             <div class="flex gap-3 justify-around flex-wrap mt-3">
                 {#each Object.values(ItemType) as type}
@@ -228,15 +235,16 @@
                         onclick={() => openOrderModal(type)}
                         class="flex-grow"
                     >
-                        <Card
-                            class="w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors p-5"
-                            >{type}</Card
-                        >
+                        <Card.Root class="hover:bg-app-accent transition-colors">
+                            <Card.Content class="px-4 text-center">
+                                {type}
+                            </Card.Content>
+                        </Card.Root>
                     </button>
                 {/each}
             </div>
             <Button
-                class="text-md flex items-center gap-2 w-full"
+                class="flex items-center gap-2 w-full"
                 onclick={submitOrder}
                 disabled={!order.name ||
                     !order.surname ||
@@ -249,53 +257,52 @@
             </Button>
             {#if orderItems.length > 0}
                 <div class="mt-5 flex flex-col gap-3">
-                    <h3 class="text-lg font-semibold dark:text-white">
-                        Prodotto selezionato:
-                    </h3>
+                    <h3 class="text-lg font-semibold">Prodotto selezionato:</h3>
                     {#each [...orderItems].reverse() as item, i}
-                        <Card
-                            class="relative dark:bg-neutral-700 dark:border-neutral-500 p-5"
-                        >
-                            <div class="absolute right-2 top-2 flex gap-2">
-                                <button
-                                    class="p-1 hover:bg-blue-100 dark:hover:bg-blue-900 rounded-full transition-colors"
-                                    onclick={() => editOrder(i)}
-                                >
-                                    <PencilLine class="w-5 h-5 text-blue-500" />
-                                </button>
-                                <button
-                                    class="p-1 hover:bg-red-100 dark:hover:bg-red-900 rounded-full transition-colors"
-                                    onclick={() => removeFromOrder(i)}
-                                >
-                                    <Trash2 class="w-5 h-5 text-red-500" />
-                                </button>
-                            </div>
-                            <div class="pr-20">
-                                <!-- Increased right padding to accommodate both buttons -->
-                                <div class="flex items-baseline gap-2 mb-1">
-                                    <span
-                                        class="font-medium text-lg dark:text-white"
-                                        >{item.type}</span
+                        <Card.Root class="relative">
+                            <Card.Content class="py-0 px-4">
+                                <div class="absolute right-4 top-8 flex gap-3">
+                                    <button
+                                        class="p-1 hover:bg-blue-100 rounded-full transition-colors"
+                                        onclick={() => editOrder(i)}
                                     >
-                                    <span
-                                        class="text-gray-600 dark:text-gray-300"
-                                        >x{item.quantity}</span
+                                        <PencilLine
+                                            class="w-5 h-5 text-blue-400 hover:text-blue-500"
+                                        />
+                                    </button>
+                                    <button
+                                        class="p-1 hover:bg-red-100 rounded-full transition-colors"
+                                        onclick={() => removeFromOrder(i)}
                                     >
-                                    {#if item.glutenFree}
-                                        <span class="text-sm text-orange-300"
-                                            >(Senza glutine)</span
+                                        <Trash2
+                                            class="w-5 h-5 text-red-400 hover:text-red-500"
+                                        />
+                                    </button>
+                                </div>
+                                <div class="pr-20">
+                                    <div class="flex items-baseline gap-2 mb-1">
+                                        <span class="font-medium text-lg"
+                                            >{item.type}</span
                                         >
+                                        <span class="text-app-accent"
+                                            >x{item.quantity}</span
+                                        >
+                                        {#if item.glutenFree}
+                                            <span
+                                                class="text-sm text-orange-300 font-bold"
+                                                >SENZA GLUTINE</span
+                                            >
+                                        {/if}
+                                    </div>
+                                    {#if item.removedIngredients?.length}
+                                        <div class="text-sm text-red-400">
+                                            <b>Senza:</b>
+                                            {item.removedIngredients.join(", ")}
+                                        </div>
                                     {/if}
                                 </div>
-                                {#if item.removedIngredients?.length}
-                                    <div class="text-sm text-red-500">
-                                        Senza: {item.removedIngredients.join(
-                                            ", "
-                                        )}
-                                    </div>
-                                {/if}
-                            </div>
-                        </Card>
+                            </Card.Content>
+                        </Card.Root>
                     {/each}
                 </div>
             {/if}

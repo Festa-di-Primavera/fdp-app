@@ -158,7 +158,7 @@
             </DropdownMenu.Root>
         </div>
     </div>
-    <div class="mx-5 mt-5">
+    <div class="m-5">
         <Table.Root>
             <Table.Header>
                 <Table.Row>
@@ -251,7 +251,7 @@
                                                         )}
                                                 >
                                                     <PermissionIcon
-                                                        class={`w-4 ${perm ? "text-chart-2" : "text-neutral-400 opacity-65"}`}
+                                                        class={`w-4 ${perm ? "text-app-accent" : "text-neutral-400 opacity-65"}`}
                                                     />
                                                 </button>
                                             </Tooltip.Trigger>

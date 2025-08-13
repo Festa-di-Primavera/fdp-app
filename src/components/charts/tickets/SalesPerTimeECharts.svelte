@@ -149,7 +149,7 @@
         <div>
             <Card.Title>
                 Vendite <br />
-                <span class="text-2xl font-bold dodgerblue"
+                <span class="text-2xl font-bold text-[dodgerblue]"
                     >{numberOfSales}</span
                 >
             </Card.Title>

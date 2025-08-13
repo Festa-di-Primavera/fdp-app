@@ -109,7 +109,7 @@
 >
     <Card.Root>
         <Card.Header>
-            <Card.Title class="text-4xl font-bold text-primary-600">
+            <Card.Title class="text-4xl font-bold text-app-accent">
                 Genera Biglietti
             </Card.Title>
         </Card.Header>
@@ -184,8 +184,8 @@
                             <Progress.Root
                                 value={progress}
                                 max={100}
-                                class="h-2 bg-chart-2/20 mb-5"
-                                indicatorClass="bg-chart-2"
+                                class="h-2 bg-app-accent/20 mb-5"
+                                indicatorClass="bg-app-accent"
                             />
                         {/if}
                         <span class="text-sm font-medium rtl:text-right mt-2">
@@ -199,7 +199,7 @@
                             Cliccando qui sotto verranno generati e inseriti nel
                             database i codici da
                             <span
-                                class="text-sm font-medium text-chart-2 rtl:text-right"
+                                class="text-sm font-medium text-app-accent rtl:text-right"
                             >
                                 {prefix}{startingNumber
                                     ?.toString()
@@ -207,7 +207,7 @@
                             </span>
                             a
                             <span
-                                class="text-sm font-medium text-chart-2 rtl:text-right"
+                                class="text-sm font-medium text-app-accent rtl:text-right"
                             >
                                 {prefix}{(startingNumber + numberOfCodes - 1)
                                     ?.toString()
@@ -222,7 +222,7 @@
     </Card.Root>
     <Card.Root>
         <Card.Header>
-            <Card.Title class="text-4xl font-bold text-primary-600">
+            <Card.Title class="text-4xl font-bold text-app-accent">
                 Inserisci da file
             </Card.Title>
         </Card.Header>
@@ -248,7 +248,7 @@
     </Card.Root>
     <Card.Root>
         <Card.Header>
-            <Card.Title class="text-4xl font-bold text-primary-600">
+            <Card.Title class="text-4xl font-bold text-app-accent">
                 Genera Blocchetti
             </Card.Title>
         </Card.Header>
@@ -317,11 +317,11 @@
                             </span>
                         {:else}
                             <span class="text-sm"
-                                >Verranno generati <b class="text-chart-2"
+                                >Verranno generati <b class="text-app-accent"
                                     >{ticketsNumber / ticketsPerBlock}</b
                                 >
                                 blocchetti da
-                                <b class="text-chart-2">{ticketsPerBlock}</b> biglietti</span
+                                <b class="text-app-accent">{ticketsPerBlock}</b> biglietti</span
                             >
                         {/if}
                         <Button

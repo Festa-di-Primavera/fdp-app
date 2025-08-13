@@ -1,20 +1,17 @@
 <script lang="ts">
-    import {
-        Button,
-        Card,
-        Checkbox,
-        Input,
-        Label,
-        Modal,
-        Radio,
-    } from "flowbite-svelte";
+    import { Button } from "$lib/components/ui/button/index";
+    import * as Card from "$lib/components/ui/card/index";
+    import { Checkbox } from "$lib/components/ui/checkbox/index";
+    import * as Dialog from "$lib/components/ui/dialog/index";
+    import { Input } from "$lib/components/ui/input/index";
+    import { Label } from "$lib/components/ui/label/index";
+    import * as RadioGroup from "$lib/components/ui/radio-group/index";
     import {
         Check,
-        CheckCircle2,
+        CircleCheck,
         PencilLine,
         Send,
-        Ticket as TicketIcon,
-        X,
+        X
     } from "@lucide/svelte";
 
     import QrReader from "$components/QrReader.svelte";
@@ -144,119 +141,130 @@
     <div
         class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5"
     >
-        <h1 class="text-4xl font-bold text-primary-600">Check Point</h1>
-        <p class="text-justify dark:text-white">
+        <h1 class="text-4xl font-bold text-app-accent">Check Point</h1>
+        <p class="text-justify">
             Scansionare il QR. L'ordine arriverà direttamente in cucina.
         </p>
         <div class="w-full">
             {#if !order}
-                <Label class="text-md font-medium text-black dark:text-white">
-                    Codice Biglietto <span class="text-primary-700">*</span>
+                <Label class="text-md font-medium" for="ticketCodeInput">
+                    Codice Biglietto <span class="text-app-accent">*</span>
+                </Label>
+                <div class="flex gap-3 items-center">
                     <Input
                         required
-                        class="mt-1 dark:bg-neutral-700 dark:border-neutral-500"
+                        class="mt-1"
                         bind:value={ticketCodeInput}
                         name="code"
+                        id="ticketCodeInput"
                         autocomplete="off"
                         onkeypress={onKeyDown}
-                    >
-                        {#snippet left()}
-                            <TicketIcon
-                                class="h-6 w-6 text-primary-600 dark:text-white"
-                            />
-                        {/snippet}
-                        {#snippet right()}
-                            <div class="flex h-full items-center gap-2">
-                                {#if ticketCodeInput !== ""}
-                                    <button
-                                        onclick={() =>
-                                            getOrder(ticketCodeInput)}
-                                    >
-                                        <Check color="green" />
-                                    </button>
-                                    <button onclick={reset}>
-                                        <X color="indianred" />
-                                    </button>
-                                {/if}
-                            </div>
-                        {/snippet}
-                    </Input>
-                </Label>
+                    />
+                    {#if ticketCodeInput !== ""}
+                        <div class="flex h-full items-center gap-2">
+                            <button onclick={() => getOrder(ticketCodeInput)}>
+                                <Check color="green" />
+                            </button>
+                            <button onclick={reset}>
+                                <X color="indianred" />
+                            </button>
+                        </div>
+                    {/if}
+                </div>
                 <div class="my-6 flex w-full items-center justify-center">
                     <QrReader bind:codeResult={ticketCode} />
                 </div>
             {:else}
                 <div class="flex flex-col gap-5">
-                    <Card class="w-full text-lg p-3" id="orderInfos">
-                        <div class="flex justify-between items-center">
-                            <span class="text-black dark:text-white w-max">
-                                <span>Cliente:</span>
-                                <span>{order.name}</span>
-                            </span>
-                            <Button
-                                class="text-sm flex items-center gap-2"
-                                onclick={submitOrder}
-                            >
-                                <Send class="w-4 h-4" />
-                                Invia
-                            </Button>
-                        </div>
-                    </Card>
+                    <Card.Root id="orderInfos">
+                        <Card.Content class="px-6 py-2">
+                            <div class="flex justify-between items-center">
+                                <span class="w-max">
+                                    <span>Cliente:</span>
+                                    <span>{order.name}</span>
+                                </span>
+                                <Button
+                                    class="text-sm flex items-center gap-2"
+                                    onclick={submitOrder}
+                                >
+                                    <Send class="w-4 h-4" />
+                                    Invia
+                                </Button>
+                            </div>
+                        </Card.Content>
+                    </Card.Root>
 
                     {#if orderItems.length > 0}
                         <div class="mt-4 flex flex-col gap-3">
-                            <h3 class="text-lg font-semibold dark:text-white">
+                            <h3 class="text-lg font-semibold">
                                 Ordine corrente:
                             </h3>
                             {#each [...orderItems].reverse() as item, i}
-                                <Card class="relative p-5">
-                                    <div
-                                        class="absolute right-2 top-2 flex gap-2"
-                                    >
-                                        <button
-                                            class="p-1 hover:bg-blue-100 rounded-full transition-colors"
-                                            onclick={() => editOrder(i)}
-                                        >
-                                            <PencilLine
-                                                class="w-5 h-5 text-blue-500"
-                                            />
-                                        </button>
-                                    </div>
-                                    <div class="pr-20">
-                                        <!-- Increased right padding to accommodate both buttons -->
+                                <Card.Root class="relative">
+                                    <Card.Content class="py-0 px-4">
                                         <div
-                                            class="flex items-baseline gap-2 mb-1"
+                                            class="absolute right-4 top-8 flex gap-3"
                                         >
-                                            <span class="font-medium text-lg"
-                                                >{item.type}</span
+                                            <button
+                                                class="p-1 hover:bg-blue-100 rounded-full transition-colors"
+                                                onclick={() => editOrder(i)}
                                             >
-                                            <span class="text-gray-600"
-                                                >x{item.quantity}</span
+                                                <PencilLine
+                                                    class="w-5 h-5 text-blue-400 hover:text-blue-500"
+                                                />
+                                            </button>
+                                        </div>
+                                        <div class="pr-20">
+                                            <div
+                                                class="flex flex-col gap-1 mb-2"
                                             >
-                                            {#if item.glutenFree}
-                                                <span
-                                                    class="text-sm text-orange-300"
-                                                    >(Senza glutine)</span
+                                                <div
+                                                    class="flex items-baseline gap-2"
                                                 >
+                                                    <span
+                                                        class="font-medium text-lg"
+                                                        >{item.type}</span
+                                                    >
+                                                    <span class="text-app-accent"
+                                                        >x{item.quantity}</span
+                                                    >
+                                                </div>
+                                                {#if item.glutenFree}
+                                                    <span
+                                                        class="text-sm text-orange-300 font-bold"
+                                                        >SENZA GLUTINE</span
+                                                    >
+                                                {/if}
+                                            </div>
+                                            {#if item.removedIngredients?.length}
+                                                <div
+                                                    class="text-sm text-red-400"
+                                                >
+                                                    <b>Senza:</b>
+                                                    {item.removedIngredients.join(
+                                                        ", "
+                                                    )}
+                                                </div>
+                                            {/if}
+                                            {#if item.sauce}
+                                                <div
+                                                    class="text-sm text-green-600"
+                                                >
+                                                    <b>Salsa:</b>
+                                                    {item.sauce}
+                                                </div>
+                                            {/if}
+                                            {#if item.notes}
+                                                <div
+                                                    class="text-sm text-red-400"
+                                                >
+                                                    <b>Note:</b>
+                                                    {item.notes}
+                                                </div>
                                             {/if}
                                         </div>
-                                        {#if item.removedIngredients?.length}
-                                            <div class="text-sm text-red-500">
-                                                Senza: {item.removedIngredients.join(
-                                                    ", "
-                                                )}
-                                            </div>
-                                        {/if}
-                                        <div class="text-sm text-green-600">
-                                            Salsa: {item.sauce || "No salsa"}
-                                        </div>
-                                        {#if item.notes}
-                                            <div class="text-sm text-red-500">
-                                                Note: {item.notes}
-                                            </div>
-                                        {/if}
-                                    </div>
-                                </Card>
+                                    </Card.Content>
+                                </Card.Root>
                             {/each}
                         </div>
                     {/if}
@@ -266,120 +274,140 @@
     </div>
 </section>
 
-<Modal bind:open={showModal} size="md" class="z-50">
-    {#snippet header()}
-        <h2 class="text-xl font-bold">Modifica Ordine</h2>
-    {/snippet}
-    <div class="mb-4 flex flex-col gap-4">
-        <!-- Selezione tipo -->
-        <div>
-            <span class="font-semibold mb-2 block">Tipo:</span>
-            <div class="grid grid-cols-3 gap-2">
-                {#each Object.values(ItemType) as type}
-                    <Card
-                        class="w-full cursor-pointer flex flex-row gap-2 items-center"
-                        onclick={() => (currentItem.type = type)}
-                    >
-                        {#if currentItem.type === type}
-                            <CheckCircle2 class="w-6 h-6 text-green-500" />
-                        {/if}
-                        {type}
-                    </Card>
-                {/each}
-            </div>
-        </div>
-
-        <Label class="flex items-center gap-2">
-            <Checkbox bind:checked={currentItem.glutenFree} />
-            <span class="font-semibold text-orange-300">Senza glutine</span>
-        </Label>
-
-        {#if DEFAULT_INGREDIENTS[currentItem.type]?.length > 0}
+<Dialog.Root bind:open={showModal}>
+    <Dialog.Content class="max-w-md">
+        <Dialog.Header>
+            <Dialog.Title>Modifica Ordine</Dialog.Title>
+        </Dialog.Header>
+        <div class="mb-4 flex flex-col gap-4">
+            <!-- Selezione tipo -->
             <div>
-                <span class="font-semibold text-red-500 block mb-2"
-                    >Rimuovi ingredienti:</span
-                >
-                {#each DEFAULT_INGREDIENTS[currentItem.type] as ingredient}
-                    <Label class="flex items-center gap-2 p-1">
-                        <Checkbox
-                            checked={currentItem.removedIngredients?.includes(
-                                ingredient
-                            )}
-                            onchange={() => {
-                                if (
-                                    currentItem.removedIngredients?.includes(
-                                        ingredient
-                                    )
-                                ) {
-                                    currentItem.removedIngredients =
-                                        currentItem.removedIngredients.filter(
-                                            (i) => i !== ingredient
-                                        );
-                                } else {
-                                    currentItem.removedIngredients = [
-                                        ...(currentItem.removedIngredients ||
-                                            []),
-                                        ingredient,
-                                    ];
-                                }
-                            }}
-                        />
-                        <span
-                            class:line-through={currentItem.removedIngredients?.includes(
-                                ingredient
-                            )}
-                            class:text-red-500={currentItem.removedIngredients?.includes(
-                                ingredient
-                            )}
+                <span class="font-semibold mb-2 block">Tipo:</span>
+                <div class="flex gap-3 justify-around flex-wrap">
+                    {#each Object.values(ItemType) as type}
+                        <button
+                            onclick={() => (currentItem.type = type)}
+                            class="flex-grow"
                         >
-                            {ingredient}
-                        </span>
-                    </Label>
-                {/each}
+                            <Card.Root
+                                class="hover:bg-accent transition-colors {currentItem.type ===
+                                type
+                                    ? 'border-primary'
+                                    : ''}"
+                            >
+                                <Card.Content
+                                    class="px-4 text-center flex items-center justify-center gap-2"
+                                >
+                                    {#if currentItem.type === type}
+                                        <CircleCheck
+                                            class="w-5 h-5 text-green-500"
+                                        />
+                                    {/if}
+                                    {type}
+                                </Card.Content>
+                            </Card.Root>
+                        </button>
+                    {/each}
+                </div>
             </div>
-        {/if}
 
-        <div>
-            <span class="font-semibold text-green-500 block mb-2">Salsa:</span>
-            <div class="grid gap-2">
-                <Label class="flex items-center gap-2 p-1 w-max">
-                    <Radio
-                        name="sauce"
-                        checked={!currentItem.sauce}
-                        onchange={() => (currentItem.sauce = undefined)}
-                    />
-                    <span>No salsa</span>
+            <div class="flex items-center space-x-2">
+                <Checkbox
+                    id="glutenFree"
+                    bind:checked={currentItem.glutenFree}
+                />
+                <Label
+                    for="glutenFree"
+                    class="text-sm font-semibold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-orange-300"
+                >
+                    Senza glutine
                 </Label>
-                {#each Object.values(Sauce) as sauce}
-                    <Label class="flex items-center gap-2 p-1">
-                        <Radio
-                            name="sauce"
-                            checked={currentItem.sauce === sauce}
-                            onchange={() => (currentItem.sauce = sauce)}
-                        />
-                        <span>{sauce}</span>
-                    </Label>
-                {/each}
+            </div>
+
+            {#if DEFAULT_INGREDIENTS[currentItem.type]?.length > 0}
+                <div>
+                    <span class="font-semibold text-red-400 block mb-2"
+                        >Rimuovi ingredienti:</span
+                    >
+                    {#each DEFAULT_INGREDIENTS[currentItem.type] as ingredient}
+                        <div class="flex items-center space-x-2 p-1">
+                            <Checkbox
+                                id={ingredient}
+                                checked={currentItem.removedIngredients?.includes(
+                                    ingredient
+                                )}
+                                onCheckedChange={(checked) => {
+                                    if (checked) {
+                                        currentItem.removedIngredients = [
+                                            ...(currentItem.removedIngredients ||
+                                                []),
+                                            ingredient,
+                                        ];
+                                    } else {
+                                        currentItem.removedIngredients =
+                                            currentItem.removedIngredients?.filter(
+                                                (i) => i !== ingredient
+                                            ) || [];
+                                    }
+                                }}
+                            />
+                            <Label
+                                for={ingredient}
+                                class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 {currentItem.removedIngredients?.includes(
+                                    ingredient
+                                )
+                                    ? 'line-through text-red-400'
+                                    : ''}"
+                            >
+                                {ingredient}
+                            </Label>
+                        </div>
+                    {/each}
+                </div>
+            {/if}
+
+            <div>
+                <span class="font-semibold text-green-500 block mb-2"
+                    >Salsa:</span
+                >
+                <RadioGroup.Root value={currentItem.sauce}>
+                    {#each Object.values(Sauce) as sauce}
+                        <div class="flex items-center space-x-2 p-1">
+                            <RadioGroup.Item
+                                id={sauce}
+                                value={sauce}
+                                onclick={() => {
+                                    currentItem.sauce = sauce;
+                                }}
+                            />
+                            <Label for={sauce} class="text-sm font-medium">
+                                <span
+                                    class:text-green-500={currentItem.sauce ===
+                                        sauce}
+                                >
+                                    {sauce}
+                                </span>
+                            </Label>
+                        </div>
+                    {/each}
+                </RadioGroup.Root>
+            </div>
+
+            <div>
+                <span class="font-semibold text-red-400 block mb-2">Note:</span>
+                <Input
+                    type="text"
+                    bind:value={currentItem.notes}
+                    placeholder="Inserisci eventuali note..."
+                />
             </div>
         </div>
 
-        <div>
-            <span class="font-semibold text-red-500 block mb-2">Note:</span>
-            <Input
-                type="text"
-                class="dark:bg-neutral-700 dark:border-neutral-500"
-                bind:value={currentItem.notes}
-                placeholder="Inserisci eventuali note..."
-            />
-        </div>
-    </div>
-
-    <div class="flex justify-end gap-3">
-        <Button color="alternative" onclick={() => (showModal = false)}
-            >Annulla</Button
-        >
-        <Button color="primary" onclick={saveItemChanges}
-            >Salva modifiche</Button
-        >
-    </div>
-</Modal>
+        <Dialog.Footer class="flex justify-end gap-3">
+            <Button variant="outline" onclick={() => (showModal = false)}
+                >Annulla</Button
+            >
+            <Button onclick={saveItemChanges}>Salva modifiche</Button>
+        </Dialog.Footer>
+    </Dialog.Content>
+</Dialog.Root>
