@@ -321,7 +321,7 @@
                                                     src={$user?.avatar_url}
                                                     alt={$user.username[0]}
                                                 />
-                                                <Avatar.Fallback>
+                                                <Avatar.Fallback class="bg-neutral-700 border-2 border-neutral-600">
                                                     {($user?.username ?? "")
                                                         .split(" ")
                                                         .map((word) =>

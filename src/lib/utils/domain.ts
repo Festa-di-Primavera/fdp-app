@@ -1,0 +1,1 @@
+export const DOMAIN = "festa.isaiatonini.com";

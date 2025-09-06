@@ -99,7 +99,7 @@
                                         alt={item.username[0]}
                                     />
                                     <Avatar.Fallback
-                                        class="bg-gradient-to-br from-neutral-600 to-neutral-400 text-white"
+                                        class="bg-neutral-700 border-2 border-neutral-600 text-white"
                                     >
                                         {item.username[0].toUpperCase()}
                                     </Avatar.Fallback>

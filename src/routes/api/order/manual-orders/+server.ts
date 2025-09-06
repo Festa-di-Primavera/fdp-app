@@ -1,5 +1,6 @@
 import { ID_ENCRYPTION_KEY } from "$env/static/private";
 import { ORDERS } from "$lib/firebase/collections";
+import { DOMAIN } from "$lib/utils/domain";
 import { getStringFromEnumValue } from "$lib/utils/enums";
 import { sendEmail } from "$lib/utils/resend";
 import { ItemType, type Order } from "$models/order";
@@ -34,14 +35,14 @@ export async function POST({ request }) {
         ID_ENCRYPTION_KEY
     ).toString();
 
-    const personalURL = `https://festa-cus.it/order/${encodeURIComponent(
+    const personalURL = `https://${DOMAIN}/order/${encodeURIComponent(
         encryptedOrderId
     )}`;
 
     const htmlContent = `
         <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto; padding: 16px; color: #2d3748; background-color: #ffffff;">
             <div style="text-align: center; background-color: #008b27; background-opacity: 50%; padding: 10px 0; border-radius: 10px;">
-                <img src="https://drive.usercontent.google.com/download?id=1egXVzkx2v2BahSlCb6hOTgcyl-ndychU&authuser=0" alt="fdp-logo" border="0" height="80rem">
+                <img src="https://${DOMAIN}/logo.png" alt="fdp-logo" border="0" height="80rem">
             </div>
             <p style="font-size: 16px; line-height: 1.5;">Ciao ${capName} ${capSurname}</p>
             <p style="font-size: 16px; line-height: 1.5;"><b>In fondo</b> alla mail trovi il pulsante per attivare l'ordine ↓</p>

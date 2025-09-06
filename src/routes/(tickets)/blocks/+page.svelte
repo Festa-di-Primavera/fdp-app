@@ -112,7 +112,7 @@
                                         alt={block.assigned_to?.alias}
                                     />
                                     <Avatar.Fallback
-                                        class="bg-gradient-to-br from-neutral-600 to-neutral-400 text-white font-mono"
+                                        class="bg-neutral-700 border-2 border-neutral-600 text-white"
                                     >
                                         {block.assigned_to?.alias[0].toUpperCase()}
                                     </Avatar.Fallback>
@@ -134,7 +134,7 @@
                                         alt={block.assigned_by?.alias}
                                     />
                                     <Avatar.Fallback
-                                        class="bg-gradient-to-br from-neutral-600 to-neutral-400 text-white font-mono"
+                                        class="bg-neutral-700 border-2 border-neutral-600 text-white"
                                     >
                                         {block.assigned_by?.alias[0].toUpperCase()}
                                     </Avatar.Fallback>
@@ -187,7 +187,7 @@
                                                         alt={seller.alias}
                                                     />
                                                     <Avatar.Fallback
-                                                        class="bg-gradient-to-br from-neutral-600 to-neutral-400 text-white font-mono"
+                                                        class="bg-neutral-700 border-2 border-neutral-600 text-white font-mono"
                                                     >
                                                         {seller.alias[0].toUpperCase()}
                                                     </Avatar.Fallback>
@@ -224,7 +224,7 @@
                                                         alt={seller.alias}
                                                     />
                                                     <Avatar.Fallback
-                                                        class="bg-gradient-to-br from-neutral-600 to-neutral-400 text-white font-mono"
+                                                        class="bg-neutral-700 border-2 border-neutral-600 text-white font-mono"
                                                     >
                                                         {seller.alias[0].toUpperCase()}
                                                     </Avatar.Fallback>
