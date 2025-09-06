@@ -235,7 +235,7 @@
                         onclick={() => openOrderModal(type)}
                         class="flex-grow"
                     >
-                        <Card.Root class="hover:bg-app-accent transition-colors">
+                        <Card.Root class="hover:bg-accent transition-colors">
                             <Card.Content class="px-4 text-center">
                                 {type}
                             </Card.Content>

@@ -22,6 +22,15 @@
     });
 
     let code = $state("");
+    
+    $effect(() => {
+        if (code) {
+            const upperCode = code.toUpperCase();
+            if (upperCode !== code) {
+                code = upperCode;
+            }
+        }
+    });
 </script>
 
 <section class="w-full h-full flex flex-col items-center gap-4 flex-grow">

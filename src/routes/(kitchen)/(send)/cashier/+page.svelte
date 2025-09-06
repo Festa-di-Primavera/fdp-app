@@ -283,7 +283,7 @@
                                 class="flex-grow"
                             >
                                 <Card.Root
-                                    class="hover:bg-app-accent transition-colors"
+                                    class="hover:bg-accent transition-colors"
                                 >
                                     <Card.Content class="px-4 text-center">
                                         {type}
