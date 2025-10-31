@@ -1,6 +1,6 @@
 <script lang="ts">
     import Badge from "$lib/components/ui/badge/badge.svelte";
-import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index";
+    import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index";
     import { CameraIcon, X } from "@lucide/svelte";
     import QrScanner from "qr-scanner";
     import { onDestroy, onMount } from "svelte";
@@ -161,9 +161,7 @@ import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index";
             class="absolute left-3 top-3 aspect-square rounded-md bg-transparent focus-within:ring-0 hover:bg-opacity-30 dark:bg-transparent dark:hover:bg-opacity-30"
             onclick={() => (camSelectOpen = !camSelectOpen)}
         >
-            <CameraIcon
-                class="absolute z-10 h-6 w-6 text-app-accent"
-            />
+            <CameraIcon class="absolute z-10 h-6 w-6 text-app-accent" />
         </button>
         <!-- svelte-ignore a11y_media_has_caption -->
         <video
@@ -173,7 +171,9 @@ import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index";
         ></video>
         {#if opened}
             <button onclick={closeScanner}>
-                <Badge class="absolute right-3 top-3 z-10 flex items-center justify-center gap-1 rounded-md text-app-accent bg-black/30">
+                <Badge
+                    class="absolute right-3 top-3 z-10 flex items-center justify-center gap-1 rounded-md text-app-accent bg-black/30"
+                >
                     Chiudi
                     <X class="size-5" />
                 </Badge>

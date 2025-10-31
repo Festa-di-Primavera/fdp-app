@@ -25,7 +25,7 @@ export async function sendEmail(
         });
 
         if (error) {
-            console.error(`[EMAIL] Error sending to ${email}:`, error);
+            console.error(`[RESEND] Error sending to ${email}:`, error);
             return {
                 error: true,
                 message: `Failed to send email: ${error.message}`,
@@ -33,14 +33,14 @@ export async function sendEmail(
             };
         }
 
-        console.log(`[EMAIL] Successfully sent to ${email}. ID: ${data?.id}`);
+        console.log(`[RESEND] Successfully sent to ${email}. ID: ${data?.id}`);
         return {
             error: false,
             message: "Email sent successfully",
             data
         };
     } catch (e) {
-        console.error(`[EMAIL] Exception while sending to ${email}:`, e);
+        console.error(`[RESEND] Exception while sending to ${email}:`, e);
         return {
             error: true,
             message: `Exception while sending email: ${e instanceof Error ? e.message : 'Unknown error'}`,

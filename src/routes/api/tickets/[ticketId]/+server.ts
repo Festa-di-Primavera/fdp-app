@@ -1,7 +1,7 @@
 import type { User } from "$lib/auth/user";
 import { TICKETS, USERS } from "$lib/firebase/collections.js";
 import { hasAnyPermissions } from "$lib/utils/permissions";
-import { getFdPCode } from "$lib/utils/tickets";
+import { getFdPOrStaffCode } from "$lib/utils/tickets";
 import { UserPermissions } from "$models/permissions";
 import type { Ticket } from "$models/ticket";
 import { doc, getDoc, setDoc, Timestamp, updateDoc } from "firebase/firestore";
@@ -36,7 +36,7 @@ export async function GET({ params, locals }) {
         );
     }
 
-    const code = getFdPCode(params.ticketId);
+    const code = getFdPOrStaffCode(params.ticketId);
     if (code === null) {
         return new Response(JSON.stringify({ message: "Codice non valido" }), {
             status: 404,
@@ -144,7 +144,7 @@ export async function PUT({ params, locals }) {
         );
     }
 
-    const code = getFdPCode(params.ticketId);
+    const code = getFdPOrStaffCode(params.ticketId);
 
     if (code === null) {
         return new Response(JSON.stringify({ message: "Codice non valido" }), {
@@ -280,7 +280,7 @@ export async function POST({ params, request, locals }) {
     }
 
     const formData = await request.json();
-    const code = getFdPCode(params.ticketId);
+    const code = getFdPOrStaffCode(params.ticketId);
 
     if (code === null) {
         const response = new Response(

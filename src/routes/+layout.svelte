@@ -12,7 +12,7 @@
 </script>
 
 <ModeWatcher />
-<div class="min-h-[100svh] flex flex-col">
+<div class="min-h-svh flex flex-col">
     {#if !noNavbarRoutes.includes(page.route.id!!)}
         <NavBar />
     {/if}

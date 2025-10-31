@@ -4,11 +4,9 @@
     import * as Dialog from "$lib/components/ui/dialog/index";
     import { Input } from "$lib/components/ui/input/index";
     import { Label } from "$lib/components/ui/label/index";
-    import * as RadioGroup from "$lib/components/ui/radio-group/index";
     import {
         BaseIngredient,
         DEFAULT_INGREDIENTS,
-        Sauce,
         type OrderItem,
     } from "$models/order";
     import { Minus, Plus } from "@lucide/svelte";
@@ -19,7 +17,6 @@
         currentItem: OrderItem;
         isEditing: boolean;
         hasQty?: boolean;
-        hasSauce?: boolean;
         addToOrder: () => void;
         adjustQuantity: (increase: boolean) => void;
     }
@@ -29,14 +26,18 @@
         currentItem = $bindable({} as OrderItem),
         isEditing = $bindable(false),
         hasQty = true,
-        hasSauce = true,
         addToOrder,
         adjustQuantity,
     }: Props = $props();
 </script>
 
 <Dialog.Root bind:open={showModal}>
-    <Dialog.Content class="max-w-md">
+    <Dialog.Content
+        class="max-w-md"
+        onOpenAutoFocus={(e) => {
+            e.preventDefault();
+        }}
+    >
         <Dialog.Header>
             <Dialog.Title class="text-xl font-bold">
                 Personalizza {currentItem.type}
@@ -80,9 +81,16 @@
 
         <div class="mb-4 flex flex-col">
             <span class="flex items-center gap-2 mb-2">
-                <Checkbox bind:checked={currentItem.glutenFree} id="gluten-free" />
+                <Checkbox
+                    bind:checked={currentItem.glutenFree}
+                    id="gluten-free"
+                />
                 <Label for="gluten-free">
-                    <span class="font-semibold {mode.current === 'dark' ? 'text-orange-300' : 'text-orange-500'}">
+                    <span
+                        class="font-semibold {mode.current === 'dark'
+                            ? 'text-orange-300'
+                            : 'text-orange-500'}"
+                    >
                         Senza glutine
                     </span>
                 </Label>
@@ -136,33 +144,6 @@
                     </div>
                 {/each}
             </div>
-
-            {#if hasSauce}
-                <span class="mb-2 text-green-500 font-bold"
-                    >Aggiungi salse:</span
-                >
-                <RadioGroup.Root value={currentItem.sauce}>
-                    {#each Object.values(Sauce) as sauce}
-                        <div class="flex items-center gap-2 rounded">
-                            <RadioGroup.Item
-                                id={sauce}
-                                value={sauce}
-                                onclick={() => {
-                                    currentItem.sauce = sauce;
-                                }}
-                            />
-                            <Label for={sauce}>
-                                <span
-                                    class:text-green-500={currentItem.sauce ===
-                                        sauce}
-                                >
-                                    {sauce}
-                                </span>
-                            </Label>
-                        </div>
-                    {/each}
-                </RadioGroup.Root>
-            {/if}
         </div>
 
         <Dialog.Footer>

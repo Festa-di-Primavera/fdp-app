@@ -147,7 +147,7 @@
 {/snippet}
 
 <section
-    class="flex w-full flex-grow flex-col items-center justify-start px-5 pt-10 text-xl"
+    class="flex w-full grow flex-col items-center justify-start px-5 pt-10 text-xl"
 >
     <Card.Root class="w-full max-w-96">
         <Card.Content>

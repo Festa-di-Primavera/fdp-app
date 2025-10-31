@@ -15,7 +15,7 @@ import {
 import { TimeSpan } from "../../../models/timespan";
 import { sendEmail } from "../../utils/resend";
 import type { User } from "../user";
-import { passwordResetTemplate } from "../email-templates/password_reset";
+import { passwordResetTemplate } from "../../utils/email-templates/password_reset";
 import { createDate, isWithinExpirationDate } from "./timespan";
 
 interface PasswordResetToken {

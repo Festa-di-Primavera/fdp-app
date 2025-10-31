@@ -4,7 +4,7 @@
     import { ORDERS } from "$lib/firebase/collections";
     import { getStringFromEnumValue } from "$lib/utils/enums";
     import type { Order } from "$models/order";
-    import { ItemType, Sauce } from "$models/order";
+    import { ItemType } from "$models/order";
     import { Mail } from "@lucide/svelte";
     import {
         onSnapshot,
@@ -14,6 +14,7 @@
         type Unsubscribe,
     } from "firebase/firestore";
     import { onDestroy, onMount } from "svelte";
+    import { toast } from "svelte-sonner";
 
     let orders: Order[] = $state([]);
     let unsubscribe: Unsubscribe = () => {};
@@ -25,7 +26,7 @@
         unsubscribe = onSnapshot(q, (querySnapshot) => {
             orders = querySnapshot.docs.map((doc) => ({
                 ...doc.data(),
-                ticketId: doc.id,
+                firebaseId: doc.id,
                 creationDate: (doc.data().creationDate as Timestamp).toDate(),
             })) as Order[];
         });
@@ -42,28 +43,29 @@
     async function resendEmail(order: Order) {
         loading = true;
         try {
-            const response = await fetch("/api/order/manual-orders", {
+            const response = await fetch("/api/order/resend-email", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    orderId: order.ticketId,
-                    name: order.name,
-                    surname: order.surname,
-                    email: order.email,
                     order: order,
                 }),
             });
 
             if (!response.ok) {
+                const errorData = await response.json();
+                toast.error(errorData.message || "Errore nel reinvio dell'email");
                 throw new Error("Failed to resend email");
             }
 
-            alert("Email inviata con successo!");
+            const data = await response.json();
+            toast.success(data.message || "Email reinviata con successo!");
         } catch (error) {
             console.error("Error resending email:", error);
-            alert("Errore nell'invio dell'email");
+            if (toast) {
+                toast.error("Errore nel reinvio dell'email");
+            }
         } finally {
             loading = false;
         }
@@ -105,12 +107,6 @@
                         {#each order.items as item}
                             <p class="mb-1">
                                 {getStringFromEnumValue(ItemType, item.type)}
-                                {#if item.sauce}
-                                    - {getStringFromEnumValue(
-                                        Sauce,
-                                        item.sauce
-                                    )}
-                                {/if}
                                 {#if item.glutenFree}
                                     - SENZA GLUTINE
                                 {/if}

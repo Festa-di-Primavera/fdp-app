@@ -1,7 +1,7 @@
 <script lang="ts">
+    import { Button } from "$lib/components/ui/button";
     import * as Card from "$lib/components/ui/card";
     import * as Dialog from "$lib/components/ui/dialog";
-    import { Button } from "$lib/components/ui/button";
     import { Input } from "$lib/components/ui/input";
     import { Label } from "$lib/components/ui/label";
     import { onDestroy } from "svelte";
@@ -133,16 +133,14 @@
     <title>Dashboard</title>
 </svelte:head>
 
-<section class="flex h-full w-full flex-grow flex-col items-center gap-4">
-    <div class="flex w-full flex-grow flex-col gap-4 px-5 pb-12 pt-5">
+<section class="flex h-full w-full grow flex-col items-center gap-4">
+    <div class="flex w-full grow flex-col gap-4 px-5 pb-12 pt-5">
         {#if tickets.length > 0}
             <div
                 class="m-auto w-full max-w-sm md:max-w-3xl xl:max-w-6xl 2xl:max-w-[1584px]"
             >
                 <h1 class="text-4xl font-bold text-app-accent">Dashboard</h1>
-                <p class="text-justify">
-                    Informazioni relative ai biglietti
-                </p>
+                <p class="text-justify">Informazioni relative ai biglietti</p>
             </div>
 
             <div class="flex flex-col gap-4">
@@ -162,9 +160,7 @@
                                     ? checkedTicketsCount
                                     : "--"}
                             </h1>
-                            <p class="text-center">
-                                Biglietti validati
-                            </p>
+                            <p class="text-center">Biglietti validati</p>
                         </Card.Root>
                         <Card.Root
                             class="flex aspect-square h-full w-full flex-col items-center justify-center gap-5 pt-6"
@@ -190,9 +186,7 @@
                                     ? notSoldTicketsCount
                                     : "--"}
                             </h1>
-                            <p class="text-center">
-                                Biglietti non venduti
-                            </p>
+                            <p class="text-center">Biglietti non venduti</p>
                         </Card.Root>
                     </div>
                     <TicketsECharts
@@ -219,15 +213,21 @@
 </section>
 
 <Dialog.Root bind:open>
-    <Dialog.Content>
+    <Dialog.Content
+        onOpenAutoFocus={(e) => {
+            e.preventDefault();
+        }}
+    >
         <Dialog.Header>
-            <Dialog.Title class="text-2xl text-app-accent">Conferma visita</Dialog.Title>
+            <Dialog.Title class="text-2xl text-app-accent"
+                >Conferma visita</Dialog.Title
+            >
         </Dialog.Header>
         <div class="">
             <p class="select-none text-sm">
                 Per evitare letture non necessarie, confermare di voler visitare
                 questa pagina.<br />
-                Inserisci nel campo sottostante il codice 
+                Inserisci nel campo sottostante il codice
                 <span
                     class="whitespace-nowrap break-keep rounded-md bg-app-accent/20 px-2 py-1 font-mono"
                     >Festa di Primavera</span
@@ -253,10 +253,7 @@
                     }
                 }}>Conferma</Button
             >
-            <Button
-                variant="outline"
-                onclick={() => goto("/")}>Annulla</Button
-            >
+            <Button variant="outline" onclick={() => goto("/")}>Annulla</Button>
         </Dialog.Footer>
     </Dialog.Content>
 </Dialog.Root>

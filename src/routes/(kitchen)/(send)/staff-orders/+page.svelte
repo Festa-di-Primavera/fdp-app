@@ -19,7 +19,7 @@
     if (!$user) $user = data;
 
     let order: Order = $state({
-        ticketId: "STAFF",
+        ticketId: "",
         name: "",
         surname: "",
         email: "",
@@ -34,7 +34,6 @@
         type: ItemType.ONTO,
         quantity: 1,
         removedIngredients: [],
-        addedSauces: [],
     });
 
     let isEditing = $state(false);
@@ -112,7 +111,7 @@
 
         try {
             const finalOrder: Order = {
-                ticketId: order?.ticketId || "",
+                ticketId: "",
                 name: `${order.name}`,
                 surname: order.surname || "",
                 email: order.email,
@@ -125,35 +124,20 @@
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(finalOrder),
+                body: JSON.stringify(
+                    {
+                        order: finalOrder,
+                        shouldSendEmail: true
+                    }
+                ),
             });
-
-            if (!response.ok) {
-                throw new Error("Errore durante l'invio dell'ordine");
-            }
 
             const orderResp = await response.json();
-            const orderId = orderResp.orderId;
-
-            const emailResp = await fetch("/api/order/manual-orders", {
-                method: "POST",
-                body: JSON.stringify({
-                    name: order.name.trim(),
-                    surname: order.surname.trim(),
-                    email: order.email?.trim(),
-                    orderId: orderId,
-                    order: finalOrder,
-                }),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
 
             toast.success(orderResp.message);
-            // clear order on success
             orderItems = [];
             order = {
-                ticketId: "STAFF",
+                ticketId: "",
                 name: "",
                 surname: "",
                 email: "",
@@ -161,6 +145,7 @@
                 creationDate: new Date(),
                 done: null,
             };
+            disableSend = false;
         } catch (error) {
             console.error("Error submitting order:", error);
             toast.error("Errore durante l'invio dell'ordine");
@@ -177,14 +162,14 @@
 </script>
 
 <svelte:head>
-    <title>Ordini Manuali</title>
+    <title>Ordini Staff</title>
 </svelte:head>
 
-<section class="flex h-full w-full flex-grow flex-col items-center gap-4">
+<section class="flex h-full w-full grow flex-col items-center gap-4">
     <div
-        class="flex w-full max-w-96 flex-grow flex-col items-start gap-5 px-5 pb-12 pt-5"
+        class="flex w-full max-w-96 grow flex-col items-start gap-5 px-5 pb-12 pt-5"
     >
-        <h1 class="text-4xl font-bold text-app-accent mb-2">Ordini Manuali</h1>
+        <h1 class="text-4xl font-bold text-app-accent mb-2">Ordini Staff</h1>
         <p class="text-justify">
             Inserisci i dettagli del collegiale e dell'ordine.<br />
             <span class="font-bold">CONTROLLARE BENE L'EMAIL</span>
@@ -231,10 +216,7 @@
 
             <div class="flex gap-3 justify-around flex-wrap mt-3">
                 {#each Object.values(ItemType) as type}
-                    <button
-                        onclick={() => openOrderModal(type)}
-                        class="flex-grow"
-                    >
+                    <button onclick={() => openOrderModal(type)} class="grow">
                         <Card.Root class="hover:bg-accent transition-colors">
                             <Card.Content class="px-4 text-center">
                                 {type}
@@ -315,7 +297,6 @@
     bind:currentItem
     bind:isEditing
     hasQty={false}
-    hasSauce={false}
     {addToOrder}
     {adjustQuantity}
 />

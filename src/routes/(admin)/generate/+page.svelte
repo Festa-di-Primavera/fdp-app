@@ -105,7 +105,7 @@
 </svelte:head>
 
 <section
-    class="flex h-full w-full flex-grow flex-wrap items-start justify-center gap-4 py-6 px-6"
+    class="flex h-full w-full grow flex-wrap items-start justify-center gap-4 py-6 px-6"
 >
     <Card.Root>
         <Card.Header>
@@ -115,7 +115,7 @@
         </Card.Header>
         <Card.Content>
             <div
-                class="flex w-full max-w-96 flex-grow flex-col items-start gap-2"
+                class="flex w-full max-w-96 grow flex-col items-start gap-2"
             >
                 <p class="text-justify">
                     Da questa card puoi generare i biglietti e inserirli nel
@@ -228,7 +228,7 @@
         </Card.Header>
         <Card.Content>
             <div
-                class="flex w-full max-w-96 flex-grow flex-col items-start gap-2"
+                class="flex w-full max-w-96 grow flex-col items-start gap-2"
             >
                 <p class="text-justify dark:text-white">
                     Da questa card puoi inserire un CSV che contiene un codice
@@ -254,7 +254,7 @@
         </Card.Header>
         <Card.Content>
             <div
-                class="flex w-full max-w-96 flex-grow flex-col items-start gap-2"
+                class="flex w-full max-w-96 grow flex-col items-start gap-2"
             >
                 <p class="text-justify dark:text-white">
                     Da questa card puoi generare i blocchi di biglietti da

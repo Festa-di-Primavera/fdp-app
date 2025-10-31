@@ -8,14 +8,14 @@
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index";
 
     import {
-        AlignJustify,
+        TextAlignJustify,
         ChefHat,
         CloudUpload,
         CoinsIcon,
         Dna,
         DollarSign,
         HandPlatter,
-        Home,
+        House,
         Info,
         Key,
         LayoutDashboard,
@@ -59,7 +59,7 @@
         {
             label: "Home",
             slug: "/",
-            icon: Home,
+            icon: House,
         },
         {
             label: "Gestione Utenti",
@@ -137,13 +137,19 @@
             icon: CoinsIcon,
         },
         {
+            label: "Checkpoint",
+            slug: "/checkpoint",
+            permission: UserPermissions.ORDINI,
+            icon: ScanQrCode,
+        },
+        {
             label: "Cucina",
             slug: "/kitchen",
             permission: UserPermissions.CUCINA,
             icon: ChefHat,
         },
         {
-            label: "Ordini Manuali",
+            label: "Ordini",
             icon: UtensilsCrossed,
             permission: [
                 UserPermissions.ORDINI,
@@ -152,28 +158,16 @@
             ],
             children: [
                 {
-                    label: "Carica Ordini",
-                    slug: "/csv-orders",
-                    permission: UserPermissions.ORDINI,
-                    icon: CloudUpload,
-                },
-                {
-                    label: "Ordini Manuali",
-                    slug: "/manual-orders",
+                    label: "Ordini Staff",
+                    slug: "/staff-orders",
                     permission: UserPermissions.ORDINI,
                     icon: HandPlatter,
                 },
                 {
                     label: "Vedi Ordini",
                     slug: "/orders-view",
-                    permission: UserPermissions.CUCINA,
-                    icon: View,
-                },
-                {
-                    label: "Checkpoint",
-                    slug: "/checkpoint",
                     permission: UserPermissions.ORDINI,
-                    icon: ScanQrCode,
+                    icon: View,
                 },
             ],
         },
@@ -220,7 +214,7 @@
                             size: "icon",
                         })}
                     >
-                        <AlignJustify />
+                        <TextAlignJustify />
                     </div>
                 </Drawer.Trigger>
 
@@ -321,7 +315,9 @@
                                                     src={$user?.avatar_url}
                                                     alt={$user.username[0]}
                                                 />
-                                                <Avatar.Fallback class="bg-neutral-700 border-2 border-neutral-600">
+                                                <Avatar.Fallback
+                                                    class="bg-neutral-700 border-2 border-neutral-600"
+                                                >
                                                     {($user?.username ?? "")
                                                         .split(" ")
                                                         .map((word) =>
@@ -401,7 +397,11 @@
 </navbar>
 
 <Dialog.Root bind:open={deleteModalOpen}>
-    <Dialog.Content>
+    <Dialog.Content
+        onOpenAutoFocus={(e) => {
+            e.preventDefault();
+        }}
+    >
         <Dialog.Header>Elimina Account</Dialog.Header>
         <form
             action="/login?/delete"

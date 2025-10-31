@@ -14,7 +14,7 @@
 </svelte:head>
 
 <section
-    class="flex w-full flex-grow flex-col items-center justify-start px-5 py-10 text-xl"
+    class="flex w-full grow flex-col items-center justify-start px-5 py-10 text-xl"
 >
     <div class="flex flex-col items-center">
         <div class="flex flex-col items-center gap-4 text-center">

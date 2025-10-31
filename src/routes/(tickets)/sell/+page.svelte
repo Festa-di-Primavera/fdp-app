@@ -1,13 +1,13 @@
 <script lang="ts">
     import { Button } from "$lib/components/ui/button/index";
+    import * as Dialog from "$lib/components/ui/dialog/index";
     import { Input } from "$lib/components/ui/input/index";
     import { Label } from "$lib/components/ui/label/index";
-    import * as Dialog from "$lib/components/ui/dialog/index";
     import { CircleCheck, CircleX } from "@lucide/svelte";
 
     import QrReader from "$components/QrReader.svelte";
     import type { User } from "$lib/auth/user";
-    import { getFdPCode } from "$lib/utils/tickets";
+    import { getFdPOrStaffCode } from "$lib/utils/tickets";
     import { user } from "$store/store";
 
     interface Props {
@@ -48,7 +48,7 @@
         if (name !== "" && surname !== "" && ticketCode !== "") {
             name = name.trim().toUpperCase();
             surname = surname.trim().toUpperCase();
-            ticketCode = getFdPCode(ticketCode?.trim()) ?? "";
+            ticketCode = getFdPOrStaffCode(ticketCode?.trim()) ?? "";
 
             try {
                 let response;
@@ -106,9 +106,9 @@
     <title>Vendi</title>
 </svelte:head>
 
-<section class="flex h-full w-full flex-grow flex-col items-center gap-4">
+<section class="flex h-full w-full grow flex-col items-center gap-4">
     <div
-        class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5"
+        class="flex w-full max-w-96 grow flex-col items-start gap-4 px-5 pb-12 pt-5"
     >
         <h1 class="text-4xl font-bold text-app-accent">Vendi</h1>
         <p class="text-justify">
@@ -168,14 +168,24 @@
 </section>
 
 <Dialog.Root bind:open={modalOpen}>
-    <Dialog.Content>
+    <Dialog.Content
+        onOpenAutoFocus={(e) => {
+            e.preventDefault();
+        }}
+    >
         {@const ModalIcon = error ? CircleX : CircleCheck}
-        <Dialog.Title class="text-2xl font-semibold {color === 'green' ? 'text-green-500' : 'text-red-500'} flex items-center gap-2">
+        <Dialog.Title
+            class="text-2xl font-semibold {color === 'green'
+                ? 'text-green-500'
+                : 'text-red-500'} flex items-center gap-2"
+        >
             <ModalIcon class="h-6 w-6" />
             {error ? "Errore" : "Successo"}
         </Dialog.Title>
         <Dialog.Description class="flex flex-col gap-5">
-            <span class="text-xl font-medium text-neutral-200">{modalMessage}</span>
+            <span class="text-xl font-medium text-neutral-200"
+                >{modalMessage}</span
+            >
             {#if !error}
                 <div class="flex flex-col">
                     <span class="mb-2">Codice: {ticketCode || ""}</span>

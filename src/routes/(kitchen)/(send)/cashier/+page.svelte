@@ -8,7 +8,7 @@
     import QrReader from "$components/QrReader.svelte";
     import OrderModal from "$components/food/cashier/OrderModal.svelte";
     import type { User } from "$lib/auth/user";
-    import { getXnrfCode } from "$lib/utils/tickets";
+    import { getFdPOrStaffCode } from "$lib/utils/tickets";
     import { type Order, type OrderItem, ItemType } from "$models/order";
     import type { Ticket } from "$models/ticket";
     import { user } from "$store/store";
@@ -44,7 +44,7 @@
         let ticketResponse = (await res.json()).ticket;
 
         ticket = {
-            ticketId: getXnrfCode(code) || "",
+            ticketId: getFdPOrStaffCode(code) || "",
             name: ticketResponse.name,
             surname: ticketResponse.surname,
             seller: res.status !== 206 ? ticketResponse.seller : "Non Trovato",
@@ -79,7 +79,6 @@
         type: ItemType.ONTO,
         quantity: 1,
         removedIngredients: [],
-        addedSauces: [],
     });
 
     let isEditing = $state(false);
@@ -159,15 +158,17 @@
                 name: `${ticket?.name}`,
                 surname: ticket?.surname || "",
                 items: orderItems,
-                done: false,
-                creationDate: new Date(Date.now()),
+                done: null,
+                creationDate: new Date(),
             };
             const response = await fetch("/api/order", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(finalOrder),
+                body: JSON.stringify({
+                    order: finalOrder
+                }),
             });
 
             if (!response.ok) {
@@ -198,9 +199,9 @@
     <title>Cassa</title>
 </svelte:head>
 
-<section class="flex h-full w-full flex-grow flex-col items-center gap-4">
+<section class="flex h-full w-full grow flex-col items-center gap-4">
     <div
-        class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5"
+        class="flex w-full max-w-96 grow flex-col items-start gap-4 px-5 pb-12 pt-5"
     >
         <h1 class="text-4xl font-bold text-app-accent">Cassa</h1>
         <p class="text-justify">
@@ -280,7 +281,7 @@
                         {#each Object.values(ItemType) as type}
                             <button
                                 onclick={() => openOrderModal(type)}
-                                class="flex-grow"
+                                class="grow"
                             >
                                 <Card.Root
                                     class="hover:bg-accent transition-colors"
@@ -369,7 +370,6 @@
     bind:showModal
     bind:currentItem
     bind:isEditing
-    hasSauce={false}
     {addToOrder}
     {adjustQuantity}
 />

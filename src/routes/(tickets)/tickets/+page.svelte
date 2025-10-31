@@ -277,7 +277,11 @@
 {/if}
 
 <Dialog.Root bind:open={attrModalOpen}>
-    <Dialog.Content>
+    <Dialog.Content
+        onOpenAutoFocus={(e) => {
+            e.preventDefault();
+        }}
+    >
         <Dialog.Header>
             <Dialog.Title
                 >Cambia il {currAttr == "name" ? "nome" : "cognome"} di {currSelectedTicket?.name}

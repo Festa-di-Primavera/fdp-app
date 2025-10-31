@@ -99,9 +99,9 @@
     <title>Info Biglietti</title>
 </svelte:head>
 
-<section class="flex h-full w-full flex-grow flex-col items-center gap-4">
+<section class="flex h-full w-full grow flex-col items-center gap-4">
     <div
-        class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5"
+        class="flex w-full max-w-96 grow flex-col items-start gap-4 px-5 pb-12 pt-5"
     >
         <h1 class="text-4xl font-bold text-app-accent">Info biglietto</h1>
         <p class="text-justify">

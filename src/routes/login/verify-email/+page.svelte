@@ -33,9 +33,9 @@
     });
 </script>
 
-<section class="w-full h-full flex flex-col items-center gap-4 flex-grow">
+<section class="w-full h-full flex flex-col items-center gap-4 grow">
     <div
-        class="w-full px-5 pt-5 flex flex-col gap-4 items-start max-w-96 pb-12 flex-grow"
+        class="w-full px-5 pt-5 flex flex-col gap-4 items-start max-w-96 pb-12 grow"
     >
         <h1 class="text-app-accent font-bold text-4xl">Verifica Email</h1>
         <p class="text-justify">

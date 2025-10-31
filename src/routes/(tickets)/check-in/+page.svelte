@@ -2,7 +2,13 @@
     import * as Dialog from "$lib/components/ui/dialog/index";
     import { Input } from "$lib/components/ui/input/index";
     import { Label } from "$lib/components/ui/label/index";
-    import { CircleAlert, Check, CircleCheck, X, CircleX } from "@lucide/svelte";
+    import {
+        CircleAlert,
+        Check,
+        CircleCheck,
+        X,
+        CircleX,
+    } from "@lucide/svelte";
     import { onMount } from "svelte";
 
     import InfoCard from "$components/InfoCard.svelte";
@@ -183,9 +189,9 @@
     <title>Check-in</title>
 </svelte:head>
 
-<section class="flex h-full w-full flex-grow flex-col items-center gap-4">
+<section class="flex h-full w-full grow flex-col items-center gap-4">
     <div
-        class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5"
+        class="flex w-full max-w-96 grow flex-col items-start gap-4 px-5 pb-12 pt-5"
     >
         <h1 class="text-4xl font-bold text-app-accent">Check-in</h1>
         <p class="text-justify">
@@ -232,7 +238,11 @@
                         : ticketStatus === "alreadyChecked"
                           ? CircleAlert
                           : CircleCheck}
-                <Dialog.Content>
+                <Dialog.Content
+                    onOpenAutoFocus={(e) => {
+                        e.preventDefault();
+                    }}
+                >
                     <Dialog.Title class="{color} text-2xl text-center">
                         <div class="flex items-center justify-center gap-2">
                             <Icon />

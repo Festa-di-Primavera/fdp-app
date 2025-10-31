@@ -40,7 +40,7 @@
 </script>
 
 <Card.Root
-    class="w-[22rem] h-max border-t-4 relative"
+    class="w-88 h-max border-t-4 relative"
     style="border-top-color: {color}"
 >
     <Card.Header class="pb-3">
@@ -117,12 +117,6 @@
                                     animation: bounce 0.65s infinite;
                                 }
                             </style>
-                        {/if}
-                        {#if item.sauce}
-                            <span
-                                class="text-md text-green-500 dark:text-green-300 font-semibold"
-                                >{item.sauce}</span
-                            >
                         {/if}
                     </div>
                     <button

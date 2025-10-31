@@ -1,9 +1,11 @@
 <script lang="ts">
     import type { User } from "$lib/auth/user";
     import * as Avatar from "$lib/components/ui/avatar/index";
-    import { Button } from "$lib/components/ui/button/index";
+    import { Button, buttonVariants } from "$lib/components/ui/button/index";
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index";
     import { Input } from "$lib/components/ui/input/index";
+    import { Label } from "$lib/components/ui/label";
+    import * as RadioGroup from "$lib/components/ui/radio-group/index";
     import * as Table from "$lib/components/ui/table/index";
     import * as Tooltip from "$lib/components/ui/tooltip/index";
     import { getStringFromEnumValue } from "$lib/utils/enums";
@@ -134,26 +136,31 @@
                 bind:value={searchTerm}
             />
             <DropdownMenu.Root>
-                <DropdownMenu.Trigger>
-                    <Button variant="outline" class="flex items-center gap-2">
-                        <ListFilter class="w-4 h-4" />
-                        <span>Filtra</span>
-                    </Button>
+                <DropdownMenu.Trigger
+                    class="{buttonVariants({
+                        variant: 'outline',
+                    })} flex items-center gap-2"
+                >
+                    <ListFilter class="w-4 h-4" />
+                    <span>Filtra</span>
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content align="end">
                     <DropdownMenu.Label>Filtra per</DropdownMenu.Label>
                     <DropdownMenu.Separator />
-                    <DropdownMenu.RadioGroup bind:value={filter}>
-                        <DropdownMenu.RadioItem value="nome">
-                            Nome
-                        </DropdownMenu.RadioItem>
-                        <DropdownMenu.RadioItem value="email">
-                            E-Mail
-                        </DropdownMenu.RadioItem>
-                        <DropdownMenu.RadioItem value="alias">
-                            Alias
-                        </DropdownMenu.RadioItem>
-                    </DropdownMenu.RadioGroup>
+                    <RadioGroup.Root bind:value={filter}>
+                        <DropdownMenu.Item onclick={() => filter = "nome"}>
+                            <RadioGroup.Item value="nome" id="filter-name" />
+                            <Label for="filter-name">Nome</Label>
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item onclick={() => filter = "email"}>
+                            <RadioGroup.Item value="email" id="filter-email" />
+                            <Label for="filter-email">E-Mail</Label>
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item onclick={() => filter = "alias"}>
+                            <RadioGroup.Item value="alias" id="filter-alias" />
+                            <Label for="filter-alias">Alias</Label>
+                        </DropdownMenu.Item>
+                    </RadioGroup.Root>
                 </DropdownMenu.Content>
             </DropdownMenu.Root>
         </div>
@@ -241,19 +248,17 @@
                                     )}
                                     <Tooltip.Provider delayDuration={300}>
                                         <Tooltip.Root>
-                                            <Tooltip.Trigger>
-                                                <button
-                                                    onclick={() =>
-                                                        handlePermissionChange(
-                                                            item,
-                                                            Math.pow(2, index),
-                                                            !perm
-                                                        )}
-                                                >
-                                                    <PermissionIcon
-                                                        class={`w-4 ${perm ? "text-app-accent" : "text-neutral-400 opacity-65"}`}
-                                                    />
-                                                </button>
+                                            <Tooltip.Trigger
+                                                onclick={() =>
+                                                    handlePermissionChange(
+                                                        item,
+                                                        Math.pow(2, index),
+                                                        !perm
+                                                    )}
+                                            >
+                                                <PermissionIcon
+                                                    class={`w-4 ${perm ? "text-app-accent" : "text-neutral-400 opacity-65"}`}
+                                                />
                                             </Tooltip.Trigger>
                                             <Tooltip.Content>
                                                 {capitalizeFirstLetter(

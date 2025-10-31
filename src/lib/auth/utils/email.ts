@@ -11,7 +11,7 @@ import { generateRandomString } from "@oslojs/crypto/random"
 import type { RandomReader } from "@oslojs/crypto/random";
 
 import { sendEmail } from "../../utils/resend";
-import { verificationCodeTemplate } from "../email-templates/verification_code";
+import { verificationCodeTemplate } from "../../utils/email-templates/verification_code";
 import { createDate } from "./timespan";
 import { isWithinExpirationDate, TimeSpan } from "$models/timespan";
 

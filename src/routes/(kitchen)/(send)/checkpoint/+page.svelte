@@ -5,22 +5,14 @@
     import * as Dialog from "$lib/components/ui/dialog/index";
     import { Input } from "$lib/components/ui/input/index";
     import { Label } from "$lib/components/ui/label/index";
-    import * as RadioGroup from "$lib/components/ui/radio-group/index";
-    import {
-        Check,
-        CircleCheck,
-        PencilLine,
-        Send,
-        X
-    } from "@lucide/svelte";
+    import { Check, CircleCheck, PencilLine, Send, X } from "@lucide/svelte";
 
     import QrReader from "$components/QrReader.svelte";
     import type { User } from "$lib/auth/user";
-    import { getXnrfCode } from "$lib/utils/tickets";
+    import { getFdPOrStaffCode } from "$lib/utils/tickets";
     import {
         DEFAULT_INGREDIENTS,
         ItemType,
-        Sauce,
         type Order,
         type OrderItem,
     } from "$models/order";
@@ -37,24 +29,22 @@
     let ticketCode: string = $state("");
     let ticketCodeInput: string = $state("");
 
-    let order: Order | undefined = $state();
+    let orders: Order[] = $state([]);
+    let selectedOrders: Set<string> = $state(new Set());
 
-    let orderItems: OrderItem[] = $state([]);
     let showModal = $state(false);
     let currentItem: OrderItem = $state({
         type: ItemType.ONTO,
         quantity: 1,
         removedIngredients: [],
-        addedSauces: [],
     });
 
-    let isEditing = $state(false);
+    let editingOrderId = $state("");
     let editingIndex = $state(-1);
-    let isOrderModified = $state(false);
 
     async function getOrder(code: string) {
         const res = await fetch(
-            `/api/order/${encodeURIComponent(getXnrfCode(code)!!)}`
+            `/api/order/${encodeURIComponent(getFdPOrStaffCode(code)!!)}`
         );
         ticketCodeInput = "";
 
@@ -64,31 +54,49 @@
             return;
         }
 
-        order = responseBody.order as Order;
-        orderItems = order.items;
-        isOrderModified = false;
+        orders = responseBody.orders as Order[];
+        selectedOrders = new Set();
     }
 
-    function editOrder(displayIndex: number) {
-        const actualIndex = orderItems.length - 1 - displayIndex;
-        currentItem = { ...orderItems[actualIndex] };
-        isEditing = true;
-        editingIndex = actualIndex;
+    function toggleOrderSelection(orderId: string) {
+        if (selectedOrders.has(orderId)) {
+            selectedOrders.delete(orderId);
+        } else {
+            selectedOrders.add(orderId);
+        }
+        selectedOrders = new Set(selectedOrders);
+    }
+
+    function editOrder(orderId: string, itemIndex: number) {
+        const order = orders.find((o) => o.firebaseId === orderId);
+        if (!order) return;
+
+        currentItem = { ...order.items[itemIndex] };
+        editingOrderId = orderId;
+        editingIndex = itemIndex;
         showModal = true;
     }
 
     function saveItemChanges() {
-        isOrderModified = true;
-        orderItems = orderItems.map((item, index) =>
-            index === editingIndex ? { ...currentItem } : item
-        );
+        orders = orders.map((order) => {
+            if (order.firebaseId === editingOrderId) {
+                return {
+                    ...order,
+                    items: order.items.map((item, index) =>
+                        index === editingIndex ? { ...currentItem } : item
+                    ),
+                };
+            }
+            return order;
+        });
         showModal = false;
-        isEditing = false;
+        editingOrderId = "";
         editingIndex = -1;
     }
 
     const reset = () => {
-        order = undefined;
+        orders = [];
+        selectedOrders = new Set();
         ticketCodeInput = "";
         ticketCode = "";
     };
@@ -108,27 +116,44 @@
     });
 
     async function submitOrder() {
-        try {
-            const response = await fetch("/api/order", {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    orderId: order!!.ticketId,
-                    done: false,
-                    creationDate: new Date(Date.now()),
-                    ...(isOrderModified && { items: orderItems }),
-                }),
-            });
+        if (selectedOrders.size === 0) {
+            toast.error("Seleziona almeno un ordine da inviare");
+            return;
+        }
 
-            if (!response.ok) {
-                throw new Error("Errore durante l'invio dell'ordine");
+        try {
+            const ordersToSubmit = orders.filter((order) =>
+                selectedOrders.has(order.firebaseId!)
+            );
+
+            // Submit each selected order
+            const promises = ordersToSubmit.map((order) =>
+                fetch("/api/order", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        orderId: order.firebaseId,
+                        done: false,
+                        creationDate: new Date(Date.now()),
+                        items: order.items,
+                    }),
+                })
+            );
+
+            const responses = await Promise.all(promises);
+
+            const allSuccessful = responses.every((r) => r.ok);
+            if (!allSuccessful) {
+                throw new Error("Alcuni ordini non sono stati inviati");
             }
 
-            toast.success((await response.json()).message);
+            toast.success(
+                `${ordersToSubmit.length} ordine/i inviato/i in cucina`
+            );
             reset();
         } catch (error) {
-            console.error("Error submitting order:", error);
-            toast.error("Errore durante l'invio dell'ordine");
+            console.error("Error submitting orders:", error);
+            toast.error("Errore durante l'invio degli ordini");
         }
     }
 </script>
@@ -137,16 +162,16 @@
     <title>Check Point</title>
 </svelte:head>
 
-<section class="flex h-full w-full flex-grow flex-col items-center gap-4">
+<section class="flex h-full w-full grow flex-col items-center gap-4">
     <div
-        class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5"
+        class="flex w-full max-w-96 grow flex-col items-start gap-4 px-5 pb-12 pt-5"
     >
         <h1 class="text-4xl font-bold text-app-accent">Check Point</h1>
         <p class="text-justify">
             Scansionare il QR. L'ordine arriverà direttamente in cucina.
         </p>
         <div class="w-full">
-            {#if !order}
+            {#if orders.length === 0}
                 <Label class="text-md font-medium" for="ticketCodeInput">
                     Codice Biglietto <span class="text-app-accent">*</span>
                 </Label>
@@ -175,99 +200,134 @@
                     <QrReader bind:codeResult={ticketCode} />
                 </div>
             {:else}
-                <div class="flex flex-col gap-5">
-                    <Card.Root id="orderInfos">
-                        <Card.Content class="px-6 py-2">
-                            <div class="flex justify-between items-center">
-                                <span class="w-max">
-                                    <span>Cliente:</span>
-                                    <span>{order.name}</span>
+                <div class="flex flex-col gap-4">
+                    <Card.Root>
+                        <Card.Content class="px-6 py-3">
+                            <div class="mb-2">
+                                <div class="font-semibold text-lg">
+                                    {orders[0].name}
+                                    {orders[0].surname}
+                                </div>
+                                <div class="text-sm text-muted-foreground">
+                                    {orders[0].ticketId}
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <span class="font-semibold">
+                                    {orders.length}
+                                    {orders.length === 1
+                                        ? "ordine trovato"
+                                        : "ordini trovati"}
                                 </span>
+                            </div>
+                            <div class="flex gap-2 justify-end">
                                 <Button
-                                    class="text-sm flex items-center gap-2"
-                                    onclick={submitOrder}
+                                    variant="outline"
+                                    size="sm"
+                                    onclick={reset}
                                 >
-                                    <Send class="w-4 h-4" />
-                                    Invia
+                                    <X class="w-4 h-4 mr-1" />
+                                    Annulla
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    onclick={submitOrder}
+                                    disabled={selectedOrders.size === 0}
+                                >
+                                    <Send class="w-4 h-4 mr-1" />
+                                    Invia ({selectedOrders.size})
                                 </Button>
                             </div>
                         </Card.Content>
                     </Card.Root>
 
-                    {#if orderItems.length > 0}
-                        <div class="mt-4 flex flex-col gap-3">
-                            <h3 class="text-lg font-semibold">
-                                Ordine corrente:
-                            </h3>
-                            {#each [...orderItems].reverse() as item, i}
-                                <Card.Root class="relative">
-                                    <Card.Content class="py-0 px-4">
-                                        <div
-                                            class="absolute right-4 top-8 flex gap-3"
-                                        >
-                                            <button
-                                                class="p-1 hover:bg-blue-100 rounded-full transition-colors"
-                                                onclick={() => editOrder(i)}
-                                            >
-                                                <PencilLine
-                                                    class="w-5 h-5 text-blue-400 hover:text-blue-500"
-                                                />
-                                            </button>
-                                        </div>
-                                        <div class="pr-20">
-                                            <div
-                                                class="flex flex-col gap-1 mb-2"
-                                            >
-                                                <div
-                                                    class="flex items-baseline gap-2"
-                                                >
-                                                    <span
-                                                        class="font-medium text-lg"
-                                                        >{item.type}</span
+                    {#each orders as order (order.firebaseId)}
+                        <Card.Root
+                            class="transition-all cursor-pointer {selectedOrders.has(
+                                order.firebaseId!
+                            )
+                                ? 'border-app-accent border-2'
+                                : ''}"
+                            onclick={() =>
+                                toggleOrderSelection(order.firebaseId!)}
+                        >
+                            <Card.Content>
+                                <div class="flex items-start gap-3">
+                                    <div class="flex-1">
+                                        {#if order.items.length > 0}
+                                            <div class="flex flex-col gap-2">
+                                                {#each order.items as item, itemIndex}
+                                                    <div
+                                                        class="relative bg-accent/70 rounded-md p-3"
                                                     >
-                                                    <span class="text-app-accent"
-                                                        >x{item.quantity}</span
-                                                    >
-                                                </div>
-                                                {#if item.glutenFree}
-                                                    <span
-                                                        class="text-sm text-orange-300 font-bold"
-                                                        >SENZA GLUTINE</span
-                                                    >
-                                                {/if}
+                                                        <div
+                                                            class="absolute right-2 top-2"
+                                                        >
+                                                            <button
+                                                                class="p-1 hover:text-blue-500 rounded-full transition-colors"
+                                                                onclick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    editOrder(
+                                                                        order.firebaseId!,
+                                                                        itemIndex
+                                                                    );
+                                                                }}
+                                                            >
+                                                                <PencilLine
+                                                                    class="w-4 h-4 text-blue-400 hover:text-blue-500"
+                                                                />
+                                                            </button>
+                                                        </div>
+                                                        <div class="pr-8">
+                                                            <div
+                                                                class="flex items-baseline gap-2 mb-1"
+                                                            >
+                                                                <span
+                                                                    class="font-medium"
+                                                                    >{item.type}</span
+                                                                >
+                                                                <span
+                                                                    class="text-app-accent text-sm"
+                                                                    >x{item.quantity}</span
+                                                                >
+                                                            </div>
+                                                            {#if item.glutenFree}
+                                                                <div
+                                                                    class="text-sm text-orange-300 font-bold"
+                                                                >
+                                                                    SENZA
+                                                                    GLUTINE
+                                                                </div>
+                                                            {/if}
+                                                            {#if item.removedIngredients?.length}
+                                                                <div
+                                                                    class="text-sm text-red-400"
+                                                                >
+                                                                    <b>Senza:</b
+                                                                    >
+                                                                    {item.removedIngredients.join(
+                                                                        ", "
+                                                                    )}
+                                                                </div>
+                                                            {/if}
+                                                            {#if item.notes}
+                                                                <div
+                                                                    class="text-sm text-red-400"
+                                                                >
+                                                                    <b>Note:</b>
+                                                                    {item.notes}
+                                                                </div>
+                                                            {/if}
+                                                        </div>
+                                                    </div>
+                                                {/each}
                                             </div>
-                                            {#if item.removedIngredients?.length}
-                                                <div
-                                                    class="text-sm text-red-400"
-                                                >
-                                                    <b>Senza:</b>
-                                                    {item.removedIngredients.join(
-                                                        ", "
-                                                    )}
-                                                </div>
-                                            {/if}
-                                            {#if item.sauce}
-                                                <div
-                                                    class="text-sm text-green-600"
-                                                >
-                                                    <b>Salsa:</b>
-                                                    {item.sauce}
-                                                </div>
-                                            {/if}
-                                            {#if item.notes}
-                                                <div
-                                                    class="text-sm text-red-400"
-                                                >
-                                                    <b>Note:</b>
-                                                    {item.notes}
-                                                </div>
-                                            {/if}
-                                        </div>
-                                    </Card.Content>
-                                </Card.Root>
-                            {/each}
-                        </div>
-                    {/if}
+                                        {/if}
+                                    </div>
+                                </div>
+                            </Card.Content>
+                        </Card.Root>
+                    {/each}
                 </div>
             {/if}
         </div>
@@ -287,7 +347,7 @@
                     {#each Object.values(ItemType) as type}
                         <button
                             onclick={() => (currentItem.type = type)}
-                            class="flex-grow"
+                            class="grow"
                         >
                             <Card.Root
                                 class="hover:bg-accent transition-colors {currentItem.type ===
@@ -365,33 +425,6 @@
                     {/each}
                 </div>
             {/if}
-
-            <div>
-                <span class="font-semibold text-green-500 block mb-2"
-                    >Salsa:</span
-                >
-                <RadioGroup.Root value={currentItem.sauce}>
-                    {#each Object.values(Sauce) as sauce}
-                        <div class="flex items-center space-x-2 p-1">
-                            <RadioGroup.Item
-                                id={sauce}
-                                value={sauce}
-                                onclick={() => {
-                                    currentItem.sauce = sauce;
-                                }}
-                            />
-                            <Label for={sauce} class="text-sm font-medium">
-                                <span
-                                    class:text-green-500={currentItem.sauce ===
-                                        sauce}
-                                >
-                                    {sauce}
-                                </span>
-                            </Label>
-                        </div>
-                    {/each}
-                </RadioGroup.Root>
-            </div>
 
             <div>
                 <span class="font-semibold text-red-400 block mb-2">Note:</span>

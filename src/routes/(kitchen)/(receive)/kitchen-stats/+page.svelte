@@ -195,7 +195,7 @@
 <div class="px-4 w-full flex flex-col">
     <!-- Card con statistiche di consumo -->
     <div
-        class="flex-grow flex flex-wrap gap-10 justify-evenly items-center my-16"
+        class="grow flex flex-wrap gap-10 justify-evenly items-center my-16"
     >
         <Card.Root class="w-96 p-14">
             <Card.Content class="p-0">
@@ -232,7 +232,7 @@
     </div>
 
     <!-- Statistical Cards - centered vertically -->
-    <div class="flex-grow flex flex-wrap gap-10 justify-evenly items-center">
+    <div class="grow flex flex-wrap gap-10 justify-evenly items-center">
         <!-- Non-vegetarian Card Group -->
         <Card.Root
             class="w-96 h-[500px] flex flex-col items-center justify-center py-8 p-16"

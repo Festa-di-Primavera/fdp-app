@@ -149,46 +149,54 @@
         <span class="text-sm">UID: {currSelectedUser.id}</span>
         <span class="text-sm">Nome: {currSelectedUser.username}</span>
         <span class="text-sm">E-mail: {currSelectedUser.email}</span>
-        <span class="text-sm flex gap-4 items-center"
+        <span class="text-sm flex gap-2 items-center"
             >Permessi:
-            <div class="flex gap-2">
-                {#each intToBitArray(currSelectedUser.permissions, Object.keys(UserPermissions).length / 2)
-                    .reverse()
-                    .map((perm, index) => ({ perm, index }))
-                    .filter(({ perm }) => perm) as { index }}
-                    {@const PermissionIcon = getPermissionIcon(
-                        Math.pow(2, index)
-                    )}
+            {#if currSelectedUser.permissions > 0}
+                <div class="flex gap-2">
+                    {#each intToBitArray(currSelectedUser.permissions, Object.keys(UserPermissions).length / 2)
+                        .reverse()
+                        .map((perm, index) => ({ perm, index }))
+                        .filter(({ perm }) => perm) as { index }}
+                        {@const PermissionIcon = getPermissionIcon(
+                            Math.pow(2, index)
+                        )}
 
-                    <div class="flex items-center gap-1">
-                        <Tooltip.Provider delayDuration={300}>
-                            <Tooltip.Root>
-                                <Tooltip.Trigger>
-                                    <PermissionIcon
-                                        class="w-4 text-app-accent"
-                                    />
-                                </Tooltip.Trigger>
-                                <Tooltip.Content>
-                                    {capitalizeFirstLetter(
-                                        getStringFromEnumValue(
-                                            UserPermissions,
-                                            Math.pow(2, index)
-                                        )
-                                            .toLowerCase()
-                                            .replace("_", " ")
-                                    )}
-                                </Tooltip.Content>
-                            </Tooltip.Root>
-                        </Tooltip.Provider>
-                    </div>
-                {/each}
-            </div>
+                        <div class="flex items-center gap-1">
+                            <Tooltip.Provider delayDuration={300}>
+                                <Tooltip.Root>
+                                    <Tooltip.Trigger>
+                                        <PermissionIcon
+                                            class="w-4 text-app-accent"
+                                        />
+                                    </Tooltip.Trigger>
+                                    <Tooltip.Content>
+                                        {capitalizeFirstLetter(
+                                            getStringFromEnumValue(
+                                                UserPermissions,
+                                                Math.pow(2, index)
+                                            )
+                                                .toLowerCase()
+                                                .replace("_", " ")
+                                        )}
+                                    </Tooltip.Content>
+                                </Tooltip.Root>
+                            </Tooltip.Provider>
+                        </div>
+                    {/each}
+                </div>
+            {:else}
+                <span class="text-app-accent">Nessuno</span>
+            {/if}
         </span>
         <span class="text-sm">Alias: {currSelectedUser.alias}</span>
     {/snippet}
 
     <Dialog.Root bind:open={deleteModalOpen}>
-        <Dialog.Content>
+        <Dialog.Content
+            onOpenAutoFocus={(e) => {
+                e.preventDefault();
+            }}
+        >
             <Dialog.Header>
                 <Dialog.Title>Elimina {currSelectedUser.username}</Dialog.Title>
             </Dialog.Header>
@@ -217,7 +225,11 @@
         </Dialog.Content>
     </Dialog.Root>
     <Dialog.Root bind:open={aliasModalOpen}>
-        <Dialog.Content>
+        <Dialog.Content
+            onOpenAutoFocus={(e) => {
+                e.preventDefault();
+            }}
+        >
             <Dialog.Header>
                 <Dialog.Title
                     >Aggiorna l'alias di {currSelectedUser.username}</Dialog.Title
@@ -231,9 +243,9 @@
                 {@render UserInfo(currSelectedUser)}
             </div>
 
-            <Label class="mt-4">
-                Nuovo alias
-                <Input bind:value={alias} class="mt-2" />
+            <Label class="mt-4 flex gap-2 items-center">
+                <span class="w-max text-nowrap">Nuovo alias</span>
+                <Input bind:value={alias} class="w-full" />
             </Label>
             <Dialog.Footer>
                 <Button onclick={() => handleAliasChange(currSelectedUser)}

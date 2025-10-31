@@ -50,7 +50,7 @@
     <title>Coda</title>
 </svelte:head>
 
-<div class="py-4 px-16 w-full overflow-hidden h-full flex-grow">
+<div class="py-4 px-16 w-full overflow-hidden h-full grow">
     <div class="flex gap-10">
         <!-- Colonna top 5 -->
         <div class="flex flex-col w-1/4">
