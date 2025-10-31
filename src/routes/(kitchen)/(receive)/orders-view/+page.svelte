@@ -1,8 +1,11 @@
 <script lang="ts">
+    import { Button } from "$lib/components/ui/button/index.js";
+    import * as Table from "$lib/components/ui/table/index.js";
     import { ORDERS } from "$lib/firebase/collections";
     import { getStringFromEnumValue } from "$lib/utils/enums";
     import type { Order } from "$models/order";
-    import { ItemType, Sauce } from "$models/order";
+    import { ItemType } from "$models/order";
+    import { Mail } from "@lucide/svelte";
     import {
         onSnapshot,
         orderBy,
@@ -10,17 +13,8 @@
         Timestamp,
         type Unsubscribe,
     } from "firebase/firestore";
-    import {
-        Button,
-        Table,
-        TableBody,
-        TableBodyCell,
-        TableBodyRow,
-        TableHead,
-        TableHeadCell,
-    } from "flowbite-svelte";
-    import { Mail } from "lucide-svelte";
     import { onDestroy, onMount } from "svelte";
+    import { toast } from "svelte-sonner";
 
     let orders: Order[] = $state([]);
     let unsubscribe: Unsubscribe = () => {};
@@ -32,7 +26,7 @@
         unsubscribe = onSnapshot(q, (querySnapshot) => {
             orders = querySnapshot.docs.map((doc) => ({
                 ...doc.data(),
-                ticketId: doc.id,
+                firebaseId: doc.id,
                 creationDate: (doc.data().creationDate as Timestamp).toDate(),
             })) as Order[];
         });
@@ -49,28 +43,29 @@
     async function resendEmail(order: Order) {
         loading = true;
         try {
-            const response = await fetch("/api/order/manual-orders", {
+            const response = await fetch("/api/order/resend-email", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    orderId: order.ticketId,
-                    name: order.name,
-                    surname: order.surname,
-                    email: order.email,
                     order: order,
                 }),
             });
 
             if (!response.ok) {
+                const errorData = await response.json();
+                toast.error(errorData.message || "Errore nel reinvio dell'email");
                 throw new Error("Failed to resend email");
             }
 
-            alert("Email inviata con successo!");
+            const data = await response.json();
+            toast.success(data.message || "Email reinviata con successo!");
         } catch (error) {
             console.error("Error resending email:", error);
-            alert("Errore nell'invio dell'email");
+            if (toast) {
+                toast.error("Errore nel reinvio dell'email");
+            }
         } finally {
             loading = false;
         }
@@ -82,52 +77,46 @@
 </svelte:head>
 
 <div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4 text-primary-600">
+    <h1 class="text-2xl font-bold mb-4 text-app-accent">
         Ordini: {orders.length}
     </h1>
 
-    <Table class="w-full">
-        <TableHead class="dark:bg-neutral-600 dark:text-neutral-300">
-            <TableHeadCell>Ticket ID</TableHeadCell>
-            <TableHeadCell>Data</TableHeadCell>
-            <TableHeadCell>Nome</TableHeadCell>
-            <TableHeadCell>Cognome</TableHeadCell>
-            <TableHeadCell>Email</TableHeadCell>
-            <TableHeadCell>Dettagli</TableHeadCell>
-            <TableHeadCell>Azioni</TableHeadCell>
-        </TableHead>
-        <TableBody>
+    <Table.Root class="w-full">
+        <Table.Header>
+            <Table.Row>
+                <Table.Head>Ticket ID</Table.Head>
+                <Table.Head>Data</Table.Head>
+                <Table.Head>Nome</Table.Head>
+                <Table.Head>Cognome</Table.Head>
+                <Table.Head>Email</Table.Head>
+                <Table.Head>Dettagli</Table.Head>
+                <Table.Head>Azioni</Table.Head>
+            </Table.Row>
+        </Table.Header>
+        <Table.Body>
             {#each orders as order}
-                <TableBodyRow
-                    class="w-full dark:bg-neutral-700 dark:border-neutral-500"
-                >
-                    <TableBodyCell>{order.ticketId}</TableBodyCell>
-                    <TableBodyCell
-                        >{order.creationDate.toLocaleString()}</TableBodyCell
+                <Table.Row class="w-full">
+                    <Table.Cell>{order.ticketId}</Table.Cell>
+                    <Table.Cell
+                        >{order.creationDate.toLocaleString()}</Table.Cell
                     >
-                    <TableBodyCell>{order.name}</TableBodyCell>
-                    <TableBodyCell>{order.surname}</TableBodyCell>
-                    <TableBodyCell>{order.email || "NON STAFF"}</TableBodyCell>
-                    <TableBodyCell>
+                    <Table.Cell>{order.name}</Table.Cell>
+                    <Table.Cell>{order.surname}</Table.Cell>
+                    <Table.Cell>{order.email || "NON STAFF"}</Table.Cell>
+                    <Table.Cell>
                         {#each order.items as item}
                             <p class="mb-1">
                                 {getStringFromEnumValue(ItemType, item.type)}
-                                {#if item.sauce}
-                                    - {getStringFromEnumValue(
-                                        Sauce,
-                                        item.sauce
-                                    )}
-                                {/if}
                                 {#if item.glutenFree}
                                     - SENZA GLUTINE
                                 {/if}
                             </p>
                         {/each}
-                    </TableBodyCell>
-                    <TableBodyCell>
+                    </Table.Cell>
+                    <Table.Cell>
                         {#if order.email}
                             <Button
-                                size="xs"
+                                size="sm"
                                 disabled={loading}
                                 onclick={() => resendEmail(order)}
                             >
@@ -135,9 +124,9 @@
                                 Reinvia Email
                             </Button>
                         {/if}
-                    </TableBodyCell>
-                </TableBodyRow>
+                    </Table.Cell>
+                </Table.Row>
             {/each}
-        </TableBody>
-    </Table>
+        </Table.Body>
+    </Table.Root>
 </div>

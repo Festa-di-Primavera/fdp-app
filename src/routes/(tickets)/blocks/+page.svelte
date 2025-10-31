@@ -1,31 +1,16 @@
 <script lang="ts">
-    import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
     import type { User } from "$lib/auth/user";
+    import * as Avatar from "$lib/components/ui/avatar/index";
+    import { Badge } from "$lib/components/ui/badge/index";
+    import { Button } from "$lib/components/ui/button/index";
+    import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index";
+    import { Input } from "$lib/components/ui/input/index";
+    import * as Table from "$lib/components/ui/table/index";
     import { formatDate } from "$lib/utils/textFormat";
     import { type Block } from "$lib/utils/tickets";
     import { user } from "$store/store";
-    import {
-        Button,
-        Dropdown,
-        DropdownItem,
-        Indicator,
-        Input,
-        Spinner,
-        Table,
-        TableBody,
-        TableBodyCell,
-        TableBodyRow,
-        TableHead,
-        TableHeadCell,
-    } from "flowbite-svelte";
-    import {
-        CheckCircle2,
-        Search,
-        UserCog,
-        UserMinus,
-        UserPlus,
-        XCircle,
-    } from "lucide-svelte";
+    import { Search, UserCog, UserMinus, UserPlus } from "@lucide/svelte";
+    import { toast } from "svelte-sonner";
 
     interface Props {
         data: { user: User; sellers: User[]; blockList: Block[] };
@@ -33,16 +18,6 @@
 
     let { data }: Props = $props();
     if (!$user) $user = data.user;
-
-    let error: boolean = $state(false);
-    let color: "green" | "red" = $state("green");
-    let message: string = $state("");
-    let changeToastOpen: boolean = $state(false);
-    let timeOut: NodeJS.Timeout;
-    let ToastIcon = $state(CheckCircle2);
-    $effect(() => {
-        ToastIcon = error ? XCircle : CheckCircle2;
-    });
 
     const addBlock = async (ticketCode: string, seller: User | null) => {
         try {
@@ -57,9 +32,7 @@
             );
 
             if (resp.ok) {
-                error = false;
-                color = "green";
-                blocks = blocks.map((block) => {
+                blockList = blockList.map((block) => {
                     if (block.id === ticketCode) {
                         block.assigned_to = seller;
                         block.assigned_by = $user;
@@ -67,35 +40,21 @@
                     }
                     return block;
                 });
+                const message = (await resp.json()).message;
+                toast.success(message);
             } else {
-                error = true;
-                color = "red";
+                const message = (await resp.json()).message;
+                toast.error(message);
             }
-
-            message = (await resp.json()).message;
-            changeToastOpen = true;
-
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                changeToastOpen = false;
-                clearTimeout(timeOut);
-            }, 3500);
         } catch (e) {
-            error = true;
-            color = "red";
-            changeToastOpen = true;
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                changeToastOpen = false;
-                clearTimeout(timeOut);
-            }, 3500);
-            message = "Errore di rete";
+            toast.error("Errore di rete");
         }
     };
 
     let searchTerm: string = $state("");
+    let blockList = $state(data.blockList);
     let blocks = $derived(
-        data.blockList.filter((block) => block.id.includes(searchTerm))
+        blockList.filter((block) => block.id.includes(searchTerm))
     );
 </script>
 
@@ -103,236 +62,191 @@
     <title>Blocchetti</title>
 </svelte:head>
 
-{#if $user}
-    <div class="mx-5 mt-5">
+<div class="mx-5 mt-5">
+    <div class="relative">
+        <Search
+            class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+        />
         <Input
-            class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+            class="pl-9"
             placeholder="Cerca per codice"
             bind:value={searchTerm}
-        >
-            <Search slot="left" />
-        </Input>
+        />
     </div>
-    <div class="m-5">
-        <Table
-            divClass="tableDiv relative overflow-visible"
-            class="relative overflow-x-visible overflow-y-auto rounded-md shadow-md sm:rounded-lg"
-        >
-            <TableHead class="dark:bg-neutral-600 dark:text-neutral-300">
-                <TableHeadCell class="cursor-pointer select-none"
-                    >Codice Primo Biglietto</TableHeadCell
+</div>
+<div class="m-5">
+    <Table.Root>
+        <Table.Header>
+            <Table.Row>
+                <Table.Head class="cursor-pointer select-none"
+                    >Codice Primo Biglietto</Table.Head
                 >
-                <TableHeadCell class="cursor-pointer select-none"
-                    >Assegnato A</TableHeadCell
+                <Table.Head class="cursor-pointer select-none"
+                    >Assegnato A</Table.Head
                 >
-                <TableHeadCell class="cursor-pointer select-none"
-                    >Assegnato Da</TableHeadCell
+                <Table.Head class="cursor-pointer select-none"
+                    >Assegnato Da</Table.Head
                 >
-                <TableHeadCell class="cursor-pointer select-none"
-                    >Data Assegnazione</TableHeadCell
+                <Table.Head class="cursor-pointer select-none"
+                    >Data Assegnazione</Table.Head
                 >
-                <TableHeadCell class="cursor-pointer select-none text-center"
-                    >Assegna/Modifica</TableHeadCell
+                <Table.Head class="cursor-pointer select-none text-center"
+                    >Assegna/Modifica</Table.Head
                 >
-            </TableHead>
-            <TableBody tableBodyClass="divide-y">
-                {#each blocks as block, index}
-                    <TableBodyRow
-                        class="w-full dark:bg-neutral-700 dark:border-neutral-500"
-                    >
-                        <TableBodyCell>
-                            <span class="flex items-center gap-4 font-medium">
-                                <span class="mr-4">{block.id}</span>
-                            </span>
-                        </TableBodyCell>
-                        <TableBodyCell>
-                            {#if block.assigned_to}
-                                <span class="flex items-center gap-2">
-                                    {#if block.assigned_to?.avatar_url}
-                                        <img
-                                            loading="lazy"
-                                            src={block.assigned_to.avatar_url}
-                                            alt={block.assigned_to.alias[0]}
-                                            class="h-7 w-7 rounded-full"
-                                        />
-                                    {:else}
-                                        <div
-                                            class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary-700 to-primary-400 font-mono text-white"
-                                        >
-                                            <span
-                                                >{block.assigned_to?.alias[0].toUpperCase()}</span
-                                            >
-                                        </div>
-                                    {/if}
-                                    {block.assigned_to?.alias}
-                                </span>
-                            {:else}
-                                <span class="flex items-center gap-2">
-                                    <span>---------</span>
-                                </span>
-                            {/if}
-                        </TableBodyCell>
-                        <TableBodyCell>
-                            {#if block.assigned_by}
-                                <span class="flex items-center gap-2">
-                                    {#if block.assigned_by?.avatar_url}
-                                        <img
-                                            loading="lazy"
-                                            src={block.assigned_by?.avatar_url}
-                                            alt={block.assigned_by?.alias[0]}
-                                            class="h-7 w-7 rounded-full"
-                                        />
-                                    {:else}
-                                        <div
-                                            class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary-700 to-primary-400 font-mono text-white"
-                                        >
-                                            <span
-                                                >{block.assigned_by?.alias[0].toUpperCase()}</span
-                                            >
-                                        </div>
-                                    {/if}
-                                    {block.assigned_by?.alias}
-                                </span>
-                            {:else}
-                                <span class="flex items-center gap-2">
-                                    <span>---------</span>
-                                </span>
-                            {/if}
-                        </TableBodyCell>
-                        <TableBodyCell>
+            </Table.Row>
+        </Table.Header>
+        <Table.Body>
+            {#each blocks as block, index}
+                <Table.Row>
+                    <Table.Cell>
+                        <span class="flex items-center gap-4 font-medium">
+                            <span class="mr-4">{block.id}</span>
+                        </span>
+                    </Table.Cell>
+                    <Table.Cell>
+                        {#if block.assigned_to}
                             <span class="flex items-center gap-2">
-                                <Indicator
-                                    color={block.assigned_to
-                                        ? "green"
-                                        : block.assigned_at
-                                          ? "yellow"
-                                          : "red"}
-                                />
-                                {formatDate(block.assigned_at, "Non Assegnato")}
+                                <Avatar.Root class="h-7 w-7">
+                                    <Avatar.Image
+                                        src={block.assigned_to?.avatar_url}
+                                        alt={block.assigned_to?.alias}
+                                    />
+                                    <Avatar.Fallback
+                                        class="bg-neutral-700 border-2 border-neutral-600 text-white"
+                                    >
+                                        {block.assigned_to?.alias[0].toUpperCase()}
+                                    </Avatar.Fallback>
+                                </Avatar.Root>
+                                {block.assigned_to?.alias}
                             </span>
-                        </TableBodyCell>
-                        <TableBodyCell>
-                            <div
-                                class="flex w-full items-center justify-center gap-3"
-                            >
-                                {#if !block.assigned_to}
-                                    <Button
-                                        id="assign-{index}"
-                                        color="blue"
-                                        class="bg-blue-500 px-2 py-1 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-600"
+                        {:else}
+                            <span class="flex items-center gap-2">
+                                <span>---------</span>
+                            </span>
+                        {/if}
+                    </Table.Cell>
+                    <Table.Cell>
+                        {#if block.assigned_by}
+                            <span class="flex items-center gap-2">
+                                <Avatar.Root class="h-7 w-7">
+                                    <Avatar.Image
+                                        src={block.assigned_by?.avatar_url}
+                                        alt={block.assigned_by?.alias}
+                                    />
+                                    <Avatar.Fallback
+                                        class="bg-neutral-700 border-2 border-neutral-600 text-white"
                                     >
-                                        <UserPlus
-                                            class="aspect-square w-5 text-gray-900 dark:text-white"
-                                        />
-                                    </Button>
-                                    <Dropdown
-                                        placement="bottom-end"
-                                        border
-                                        classContainer="dark:bg-neutral-800 dark:border-neutral-600"
-                                        triggeredBy="#assign-{index}"
-                                    >
+                                        {block.assigned_by?.alias[0].toUpperCase()}
+                                    </Avatar.Fallback>
+                                </Avatar.Root>
+                                {block.assigned_by?.alias}
+                            </span>
+                        {:else}
+                            <span class="flex items-center gap-2">
+                                <span>---------</span>
+                            </span>
+                        {/if}
+                    </Table.Cell>
+                    <Table.Cell>
+                        <span class="flex items-center gap-2">
+                            <Badge
+                                class="h-3 min-w-3 rounded-full px-1 font-mono tabular-nums {block.assigned_at
+                                    ? 'bg-green-500'
+                                    : block.assigned_to
+                                      ? 'bg-yellow-500'
+                                      : 'bg-red-500'}"
+                            />
+                            {formatDate(block.assigned_at, "Non Assegnato")}
+                        </span>
+                    </Table.Cell>
+                    <Table.Cell>
+                        <div
+                            class="flex w-full items-center justify-center gap-3"
+                        >
+                            {#if !block.assigned_to}
+                                <DropdownMenu.Root>
+                                    <DropdownMenu.Trigger>
+                                        <Button
+                                            class="bg-blue-500 px-2 py-1 hover:bg-blue-600"
+                                        >
+                                            <UserPlus
+                                                class="aspect-square w-5 text-black dark:text-white"
+                                            />
+                                        </Button>
+                                    </DropdownMenu.Trigger>
+                                    <DropdownMenu.Content>
                                         {#each data.sellers as seller}
-                                            <DropdownItem
-                                                class="flex items-center justify-start gap-2 dark:hover:bg-neutral-700"
-                                                on:click={() =>
+                                            <DropdownMenu.Item
+                                                class="flex items-center justify-start gap-2"
+                                                onclick={() =>
                                                     addBlock(block.id, seller)}
                                             >
-                                                {#if seller.avatar_url}
-                                                    <img
-                                                        loading="lazy"
+                                                <Avatar.Root class="h-7 w-7">
+                                                    <Avatar.Image
                                                         src={seller.avatar_url}
-                                                        alt={seller.alias[0]}
-                                                        class="h-7 w-7 rounded-full"
+                                                        alt={seller.alias}
                                                     />
-                                                {:else}
-                                                    <div
-                                                        class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary-700 to-primary-400 font-mono text-white"
+                                                    <Avatar.Fallback
+                                                        class="bg-neutral-700 border-2 border-neutral-600 text-white font-mono"
                                                     >
-                                                        <span
-                                                            >{seller.alias[0].toUpperCase()}</span
-                                                        >
-                                                    </div>
-                                                {/if}
+                                                        {seller.alias[0].toUpperCase()}
+                                                    </Avatar.Fallback>
+                                                </Avatar.Root>
                                                 {seller.alias}
-                                            </DropdownItem>
+                                            </DropdownMenu.Item>
                                         {/each}
-                                    </Dropdown>
-                                {:else}
-                                    <Button
-                                        id="edit-assign-{index}"
-                                        color="yellow"
-                                        class="bg-yellow-500 px-2 py-1 hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600"
-                                    >
-                                        <UserCog
-                                            class="aspect-square w-5 text-gray-900 dark:text-white"
-                                        />
-                                    </Button>
-                                    <Dropdown
-                                        placement="bottom-end"
-                                        border
-                                        triggeredBy="#edit-assign-{index}"
-                                        classContainer="dark:bg-neutral-800 dark:border-neutral-600"
-                                    >
+                                    </DropdownMenu.Content>
+                                </DropdownMenu.Root>
+                            {:else}
+                                <DropdownMenu.Root>
+                                    <DropdownMenu.Trigger>
+                                        <Button
+                                            class="bg-yellow-500 px-2 py-1 hover:bg-yellow-600"
+                                        >
+                                            <UserCog
+                                                class="aspect-square w-5 text-black dark:text-white"
+                                            />
+                                        </Button>
+                                    </DropdownMenu.Trigger>
+                                    <DropdownMenu.Content>
                                         {#each data.sellers as seller}
-                                            <DropdownItem
+                                            <DropdownMenu.Item
                                                 class="flex items-center justify-start gap-2 {seller.id ===
-                                                block.assigned_to.id
-                                                    ? 'text-primary-400'
+                                                block.assigned_to?.id
+                                                    ? 'bg-primary/20 font-semibold text-primary'
                                                     : ''}"
-                                                on:click={() =>
+                                                onclick={() =>
                                                     addBlock(block.id, seller)}
                                             >
-                                                {#if seller.avatar_url}
-                                                    <img
-                                                        loading="lazy"
+                                                <Avatar.Root class="h-7 w-7">
+                                                    <Avatar.Image
                                                         src={seller.avatar_url}
-                                                        alt={seller.alias[0]}
-                                                        class="h-7 w-7 rounded-full"
+                                                        alt={seller.alias}
                                                     />
-                                                {:else}
-                                                    <div
-                                                        class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary-700 to-primary-400 font-mono text-white"
+                                                    <Avatar.Fallback
+                                                        class="bg-neutral-700 border-2 border-neutral-600 text-white font-mono"
                                                     >
-                                                        <span
-                                                            >{seller.alias[0].toUpperCase()}</span
-                                                        >
-                                                    </div>
-                                                {/if}
+                                                        {seller.alias[0].toUpperCase()}
+                                                    </Avatar.Fallback>
+                                                </Avatar.Root>
                                                 {seller.alias}
-                                            </DropdownItem>
+                                            </DropdownMenu.Item>
                                         {/each}
-                                    </Dropdown>
-                                    <Button
-                                        color="red"
-                                        class="bg-red-500 px-2 py-1 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600"
-                                        on:click={() =>
-                                            addBlock(block.id, null)}
-                                    >
-                                        <UserMinus
-                                            class="aspect-square w-5 text-gray-900 dark:text-white"
-                                        />
-                                    </Button>
-                                {/if}
-                            </div>
-                        </TableBodyCell>
-                    </TableBodyRow>
-                {/each}
-            </TableBody>
-        </Table>
-    </div>
-{:else}
-    <div
-        class="mt-10 flex w-full flex-grow flex-col items-center justify-center gap-5"
-    >
-        <Spinner size="sm" class="max-w-12 self-center" />
-        <span class="text-2xl font-semibold text-primary-600">Attendere...</span
-        >
-    </div>
-{/if}
-
-<FeedbackToast
-    bind:open={changeToastOpen}
-    bind:color
-    bind:ToastIcon
-    bind:message
-/>
+                                    </DropdownMenu.Content>
+                                </DropdownMenu.Root>
+                                <Button
+                                    class="bg-red-500 px-2 py-1 hover:bg-red-600"
+                                    onclick={() => addBlock(block.id, null)}
+                                >
+                                    <UserMinus
+                                        class="aspect-square w-5 text-black dark:text-white"
+                                    />
+                                </Button>
+                            {/if}
+                        </div>
+                    </Table.Cell>
+                </Table.Row>
+            {/each}
+        </Table.Body>
+    </Table.Root>
+</div>

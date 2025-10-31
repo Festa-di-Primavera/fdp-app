@@ -22,3 +22,4 @@ export const TICKETS = collection(
 );
 export const BLOCKS = collection(getClientDB(), dev ? "blocksDEV" : "blocks");
 export const ORDERS = collection(getClientDB(), dev ? "ordersDEV" : "orders");
+export const STAFF_TICKETS_INCREMENTAL = collection(getClientDB(), dev ? "staffTicketsIncrementalDEV" : "staffTicketsIncremental");

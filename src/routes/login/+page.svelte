@@ -1,12 +1,15 @@
 <script lang="ts">
-    import { Button, Card, Helper, Input, Label } from "flowbite-svelte";
-    import { XCircle } from "lucide-svelte";
+    import { Button } from "$lib/components/ui/button/index";
+    import { Input } from "$lib/components/ui/input/index";
+    import { Label } from "$lib/components/ui/label/index";
 
     import { enhance } from "$app/forms";
-    import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
-    import InputErrors from "$components/form/InputErrors.svelte";
-    import PasswordEye from "$components/form/PasswordEye.svelte";
+    import * as Card from "$lib/components/ui/card/index";
+    import * as Password from "$lib/components/ui/password/index";
+    import Separator from "$lib/components/ui/separator/separator.svelte";
+    import * as Tabs from "$lib/components/ui/tabs/index";
     import { user } from "$store/store";
+    import { toast } from "svelte-sonner";
 
     $user = null;
     let option: "login" | "register" = $state("login");
@@ -15,12 +18,6 @@
     let email: string = $state("");
     let password: string = $state("");
     let repeatPassword: string = $state("");
-    let pwVisible: boolean = $state(false);
-
-    let feedbackToastOpen: boolean = $state(false);
-    let color: "green" | "red" | "yellow" = $state("green");
-    let timeOut: NodeJS.Timeout;
-    let toastMessage: string = $state("");
 
     interface Props {
         form: {
@@ -34,200 +31,156 @@
     $effect(() => {
         if (form) {
             if (form.error) {
-                color = "red";
-                toastMessage = form.message;
-                feedbackToastOpen = true;
-                timeOut = setTimeout(() => {
-                    feedbackToastOpen = false;
-                    clearTimeout(timeOut);
-                }, 3500);
+                toast.error(form.message);
             } else {
-                color = "green";
-                toastMessage = form.message;
-                feedbackToastOpen = true;
-                timeOut = setTimeout(() => {
-                    feedbackToastOpen = false;
-                    clearTimeout(timeOut);
-                }, 3500);
+                toast.success(form.message);
             }
         }
     });
 
-    let validatorError: boolean = $state(true);
     let lessThanEightChars = $state(false);
     let noUpperCase = $state(false);
     let noNumber = $state(false);
     let noSpecialChar = $state(false);
-    let usernameValidator: boolean = $state(false);
+    let usernameValidator: boolean = $derived(
+        option === "login" ? false : !/^[a-zA-Z0-9_\ ]*$/.test(username)
+    );
+    let validatorError: boolean = $derived(!(password === repeatPassword));
 
-    $effect(() => {
-        if (validatorError) {
-            validatorError = !(password === repeatPassword);
-        }
-
-        if (option === "register") {
-            if (lessThanEightChars) lessThanEightChars = password.length < 8;
-
-            if (noUpperCase) noUpperCase = !/[A-Z]/.test(password);
-
-            if (noNumber) noNumber = !/[0-9]/.test(password);
-
-            if (noSpecialChar)
-                noSpecialChar = !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(
-                    password
-                );
-        }
-
-        if (option === "register") {
-            usernameValidator = !/^[a-zA-Z0-9_\ ]*$/.test(username);
-        }
-    });
-
-    let disableButton = $state(false);
-    let ToastIcon = $state(XCircle);
+    function validatePassword() {
+        lessThanEightChars = password.length < 8;
+        noUpperCase = !/[A-Z]/.test(password);
+        noNumber = !/[0-9]/.test(password);
+        noSpecialChar = !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(
+            password
+        );
+    }
 </script>
 
-<section
-    class="flex w-full flex-grow flex-col items-center justify-start px-5 py-10 text-xl text-black dark:text-white"
->
-    <Card class="flex w-full max-w-96 flex-col items-center justify-center dark:bg-neutral-900 dark:border-neutral-700 dark:divide-neutral-500">
-        <div class="mb-5 flex w-full justify-around dark:text-neutral-400">
-            <button
-                onclick={() => (option = "login")}
-                class="w-[40%] border-b-2 {option == 'login'
-                    ? 'border-primary-500 text-black dark:text-white'
-                    : 'border-transparent'} pb-3">Login</button
-            >
-            <button
-                onclick={() => (option = "register")}
-                class="w-[40%] border-b-2 {option == 'register'
-                    ? 'border-primary-500 text-black dark:text-white'
-                    : 'border-transparent'} pb-3">Registrati</button
-            >
-        </div>
-
-        <Card padding="none" class="mb-5 w-60 dark:bg-neutral-800 dark:text-neutral-400">
-            <a
-                class="flex items-center justify-center gap-2 px-4 py-2"
-                href="/api/auth/google"
-                role="button"
-            >
-                <img class="w-8" alt="G" src="/google.svg" />
-                <span>Login con Google</span>
-            </a>
-        </Card>
-        <div class="mb-5 w-full border-b-2"></div>
-        <form
-            class="flex w-full flex-col gap-3"
-            method="post"
-            use:enhance
-            action="?/{option === 'login' ? 'signin' : 'signup'}"
+{#snippet passwordField()}
+    <Label for="password">Password</Label>
+    <Password.Root class="mb-3">
+        <Password.Input
+            id="password"
+            name="password"
+            required
+            bind:value={password}
+            onblur={validatePassword}
         >
-            <h1 class="w-max text-3xl font-semibold text-primary-600">
-                {option === "login"
-                    ? "Accedi"
-                    : option === "register"
-                      ? "Registrati"
-                      : "Recupera password"}
-            </h1>
+            <Password.ToggleVisibility />
+        </Password.Input>
+        {#if option === "register"}
+            <Password.Helper enabled={lessThanEightChars} color="red">
+                La password contiene meno di 8 caratteri
+            </Password.Helper>
+            <Password.Helper enabled={noUpperCase} color="red">
+                La password non ha maiuscole
+            </Password.Helper>
+            <Password.Helper enabled={noNumber} color="red">
+                La password non ha numeri
+            </Password.Helper>
+            <Password.Helper enabled={noSpecialChar} color="red">
+                La password non ha caratteri speciali
+            </Password.Helper>
+        {/if}
+    </Password.Root>
+{/snippet}
 
-            {#if option === "register"}
-                <Label>
-                    Nome utente
-                    <Input name="username" bind:value={username} required class="mt-2 dark:bg-neutral-700 dark:border-neutral-500" />
+{#snippet formContent()}
+    <form
+        class="flex w-full flex-col"
+        method="post"
+        use:enhance
+        action="?/{option === 'register' ? 'signup' : 'signin'}"
+    >
+        {#if option === "register"}
+            <Label for="username">Nome utente</Label>
+            <Input
+                id="username"
+                name="username"
+                bind:value={username}
+                required
+                class="mb-3"
+            />
+            <Password.Helper enabled={usernameValidator} color="red">
+                Solo lettere, numeri, underscore e spazi
+            </Password.Helper>
+        {/if}
 
-                    {#if usernameValidator}
-                        <Helper
-                            class="mt-1 flex items-center gap-1"
-                            color="gray"
-                        >
-                            <XCircle class="h-3 w-3" />
-                            Il nome utente non deve contenere spazi o caratteri speciali
-                        </Helper>
-                    {/if}
-                </Label>
-            {/if}
+        <Label for="email"
+            >{option === "register" ? "Email" : "Email o nome utente"}</Label
+        >
+        <Input id="email" name="email" bind:value={email} required class="mb-3" />
 
-            <Label>
-                Email {#if option === "login"}o nome utente{/if}
-                <Input name="email" bind:value={email} required class="mt-2 dark:bg-neutral-700 dark:border-neutral-500" />
-            </Label>
+        {@render passwordField()}
 
-            <Label>
-                Password
-                <Input
-                    id="password"
-                    name="password"
-                    type={pwVisible ? "text" : "password"}
+        {#if option === "register"}
+            <Label for="password_repeat">Conferma Password</Label>
+            <Password.Root class="mb-3">
+                <Password.Input
+                    id="password_repeat"
+                    name="password_repeat"
                     required
-                    bind:value={password}
-                    onblur={() => {
-                        lessThanEightChars = password.length < 8;
-                        noUpperCase = !/[A-Z]/.test(password);
-                        noNumber = !/[0-9]/.test(password);
-                        noSpecialChar =
-                            !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(
-                                password
-                            );
-                    }}
-                    class="mt-2 dark:bg-neutral-700 dark:border-neutral-500"
+                    bind:value={repeatPassword}
+                    onblur={() =>
+                        (validatorError = !(password === repeatPassword))}
                 >
-                    <PasswordEye bind:pwVisible slot="right" />
-                </Input>
-                <InputErrors
-                    bind:lessThanEightChars
-                    bind:noUpperCase
-                    bind:noNumber
-                    bind:noSpecialChar
-                    bind:option
-                />
-            </Label>
+                    <Password.ToggleVisibility />
+                </Password.Input>
+                <Password.Helper enabled={validatorError}>
+                    Le password non corrispondono
+                </Password.Helper>
+            </Password.Root>
+        {/if}
 
-            {#if option === "register"}
-                <Label>
-                    Conferma password
-                    <Input
-                        name="password_repeat"
-                        type={pwVisible ? "text" : "password"}
-                        color={!validatorError ? "base" : "red"}
-                        bind:value={repeatPassword}
-                        required
-                        onblur={() =>
-                            (validatorError = !(password === repeatPassword))}
-                        class="mt-2 dark:bg-neutral-700 dark:border-neutral-500"
+        <a
+            class="mt-1 w-max self-end p-0 text-sm hover:text-app-accent"
+            href="/login/password-reset"
+        >
+            Password dimenticata?
+        </a>
+
+        <Button class="mt-3 w-full" type="submit">
+            {option === "register" ? "Registrati" : "Accedi"}
+        </Button>
+    </form>
+{/snippet}
+
+<section
+    class="flex w-full grow flex-col items-center justify-start px-5 pt-10 text-xl"
+>
+    <Card.Root class="w-full max-w-96">
+        <Card.Content>
+            <Tabs.Root bind:value={option}>
+                <Tabs.List class="w-full">
+                    <Tabs.Trigger value="login">Accedi</Tabs.Trigger>
+                    <Tabs.Trigger value="register">Registrati</Tabs.Trigger>
+                </Tabs.List>
+
+                <Card.Root class="w-60 my-2 py-2 self-center">
+                    <a
+                        class="flex items-center justify-center gap-2"
+                        href="/api/auth/google"
+                        role="button"
                     >
-                        <PasswordEye bind:pwVisible slot="right" />
-                    </Input>
-                    {#if validatorError}
-                        <Helper
-                            class="mt-1 flex items-center gap-1"
-                            color="gray"
-                        >
-                            <XCircle class="h-3 w-3" />
-                            Le password non corrispondono
-                        </Helper>
-                    {/if}
-                </Label>
-            {/if}
+                        <img class="w-8" alt="G" src="/google.svg" />
+                        <span>Login con Google</span>
+                    </a>
+                </Card.Root>
+                <Separator class="mb-4" />
 
-            <a
-                class="mt-1 w-max self-end p-0 text-sm hover:text-primary-500 dark:text-neutral-300"
-                href="/login/password-reset">Password dimenticata?</a
-            >
-            <Button
-                class="mt-3 w-full"
-                type="submit"
-                bind:disabled={disableButton}
-            >
-                {option === "login" ? "Accedi" : "Registrati"}
-            </Button>
-        </form>
-    </Card>
+                {#if option === "login"}
+                    <Tabs.Content value="login">
+                        {@render formContent()}
+                    </Tabs.Content>
+                {/if}
+
+                {#if option === "register"}
+                    <Tabs.Content value="register">
+                        {@render formContent()}
+                    </Tabs.Content>
+                {/if}
+            </Tabs.Root>
+        </Card.Content>
+    </Card.Root>
 </section>
-
-<FeedbackToast
-    bind:open={feedbackToastOpen}
-    bind:color
-    bind:message={toastMessage}
-    bind:ToastIcon
-/>

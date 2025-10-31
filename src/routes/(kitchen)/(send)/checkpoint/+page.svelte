@@ -1,36 +1,23 @@
 <script lang="ts">
-    import {
-        Button,
-        Card,
-        Checkbox,
-        Input,
-        Label,
-        Modal,
-        Radio,
-        Spinner,
-    } from "flowbite-svelte";
-    import {
-        Check,
-        CheckCircle2,
-        PencilLine,
-        Send,
-        Ticket as TicketIcon,
-        X,
-        XCircle,
-    } from "lucide-svelte";
+    import { Button } from "$lib/components/ui/button/index";
+    import * as Card from "$lib/components/ui/card/index";
+    import { Checkbox } from "$lib/components/ui/checkbox/index";
+    import * as Dialog from "$lib/components/ui/dialog/index";
+    import { Input } from "$lib/components/ui/input/index";
+    import { Label } from "$lib/components/ui/label/index";
+    import { Check, CircleCheck, PencilLine, Send, X } from "@lucide/svelte";
 
     import QrReader from "$components/QrReader.svelte";
-    import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
     import type { User } from "$lib/auth/user";
-    import { getXnrfCode } from "$lib/utils/tickets";
+    import { getFdPOrStaffCode } from "$lib/utils/tickets";
     import {
         DEFAULT_INGREDIENTS,
         ItemType,
-        Sauce,
         type Order,
         type OrderItem,
     } from "$models/order";
     import { user } from "$store/store";
+    import { toast } from "svelte-sonner";
 
     interface Props {
         data: User;
@@ -42,72 +29,76 @@
     let ticketCode: string = $state("");
     let ticketCodeInput: string = $state("");
 
-    let order: Order | undefined = $state();
-    let open: boolean = $state(false);
-    let errorMessage: string = $state("Codice biglietto errato");
+    let orders: Order[] = $state([]);
+    let selectedOrders: Set<string> = $state(new Set());
 
-    let timeOut: NodeJS.Timeout;
-
-    let orderItems: OrderItem[] = $state([]);
     let showModal = $state(false);
     let currentItem: OrderItem = $state({
         type: ItemType.ONTO,
         quantity: 1,
         removedIngredients: [],
-        addedSauces: [],
     });
 
-    let isEditing = $state(false);
+    let editingOrderId = $state("");
     let editingIndex = $state(-1);
-    let isOrderModified = $state(false);
 
     async function getOrder(code: string) {
         const res = await fetch(
-            `/api/order/${encodeURIComponent(getXnrfCode(code)!!)}`
+            `/api/order/${encodeURIComponent(getFdPOrStaffCode(code)!!)}`
         );
         ticketCodeInput = "";
 
         const responseBody = await res.json();
         if (res.status == 404 || res.status == 403 || res.status == 401) {
-            errorMessage = responseBody.message;
-            open = true;
-
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                open = false;
-                clearTimeout(timeOut);
-            }, 3500);
+            toast.error(responseBody.message);
             return;
         }
 
-        order = responseBody.order as Order;
-        orderItems = order.items;
-        isOrderModified = false;
+        orders = responseBody.orders as Order[];
+        selectedOrders = new Set();
     }
 
-    function editOrder(displayIndex: number) {
-        const actualIndex = orderItems.length - 1 - displayIndex;
-        currentItem = { ...orderItems[actualIndex] };
-        isEditing = true;
-        editingIndex = actualIndex;
+    function toggleOrderSelection(orderId: string) {
+        if (selectedOrders.has(orderId)) {
+            selectedOrders.delete(orderId);
+        } else {
+            selectedOrders.add(orderId);
+        }
+        selectedOrders = new Set(selectedOrders);
+    }
+
+    function editOrder(orderId: string, itemIndex: number) {
+        const order = orders.find((o) => o.firebaseId === orderId);
+        if (!order) return;
+
+        currentItem = { ...order.items[itemIndex] };
+        editingOrderId = orderId;
+        editingIndex = itemIndex;
         showModal = true;
     }
 
     function saveItemChanges() {
-        isOrderModified = true;
-        orderItems = orderItems.map((item, index) =>
-            index === editingIndex ? { ...currentItem } : item
-        );
+        orders = orders.map((order) => {
+            if (order.firebaseId === editingOrderId) {
+                return {
+                    ...order,
+                    items: order.items.map((item, index) =>
+                        index === editingIndex ? { ...currentItem } : item
+                    ),
+                };
+            }
+            return order;
+        });
         showModal = false;
-        isEditing = false;
+        editingOrderId = "";
         editingIndex = -1;
     }
 
     const reset = () => {
-        order = undefined;
+        orders = [];
+        selectedOrders = new Set();
         ticketCodeInput = "";
         ticketCode = "";
-        open = false;
     };
 
     const onKeyDown = (e: KeyboardEvent) => {
@@ -124,42 +115,46 @@
         }
     });
 
-    let orderSubmitError: boolean = $state(true);
-    let orderFeedbackMessage: string = $state("");
-
     async function submitOrder() {
-        try {
-            const response = await fetch("/api/order", {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    orderId: order!!.ticketId,
-                    done: false,
-                    creationDate: new Date(Date.now()),
-                    ...(isOrderModified && { items: orderItems }),
-                }),
-            });
+        if (selectedOrders.size === 0) {
+            toast.error("Seleziona almeno un ordine da inviare");
+            return;
+        }
 
-            if (!response.ok) {
-                throw new Error("Errore durante l'invio dell'ordine");
+        try {
+            const ordersToSubmit = orders.filter((order) =>
+                selectedOrders.has(order.firebaseId!)
+            );
+
+            // Submit each selected order
+            const promises = ordersToSubmit.map((order) =>
+                fetch("/api/order", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        orderId: order.firebaseId,
+                        done: false,
+                        creationDate: new Date(Date.now()),
+                        items: order.items,
+                    }),
+                })
+            );
+
+            const responses = await Promise.all(promises);
+
+            const allSuccessful = responses.every((r) => r.ok);
+            if (!allSuccessful) {
+                throw new Error("Alcuni ordini non sono stati inviati");
             }
 
-            orderFeedbackMessage = (await response.json()).message;
-            orderSubmitError = false;
+            toast.success(
+                `${ordersToSubmit.length} ordine/i inviato/i in cucina`
+            );
             reset();
         } catch (error) {
-            console.error("Error submitting order:", error);
-            orderFeedbackMessage = "Errore durante l'invio dell'ordine";
-            orderSubmitError = true;
+            console.error("Error submitting orders:", error);
+            toast.error("Errore durante l'invio degli ordini");
         }
-        open = true;
-        clearTimeout(timeOut);
-        timeOut = setTimeout(() => {
-            open = false;
-            orderFeedbackMessage = "";
-            orderSubmitError = true;
-            clearTimeout(timeOut);
-        }, 3500);
     }
 </script>
 
@@ -167,274 +162,285 @@
     <title>Check Point</title>
 </svelte:head>
 
-<section class="flex h-full w-full flex-grow flex-col items-center gap-4">
+<section class="flex h-full w-full grow flex-col items-center gap-4">
     <div
-        class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5"
+        class="flex w-full max-w-96 grow flex-col items-start gap-4 px-5 pb-12 pt-5"
     >
-        {#if $user}
-            <h1 class="text-4xl font-bold text-primary-600">Check Point</h1>
-            <p class="text-justify dark:text-white">
-                Scansionare il QR. L'ordine arriverà direttamente in cucina.
-            </p>
-            <div class="w-full">
-                {#if !order}
-                    <Label
-                        class="text-md font-medium text-black dark:text-white"
-                    >
-                        Codice Biglietto <span class="text-primary-700">*</span>
-                        <Input
-                            required
-                            class="mt-1 dark:bg-neutral-700 dark:border-neutral-500"
-                            bind:value={ticketCodeInput}
-                            name="code"
-                            autocomplete="off"
-                            onkeypress={onKeyDown}
-                        >
-                            <TicketIcon
-                                class="h-6 w-6 text-primary-600 dark:text-white"
-                                slot="left"
-                            />
-
-                            <div
-                                class="flex h-full items-center gap-2"
-                                slot="right"
-                            >
-                                {#if ticketCodeInput !== ""}
-                                    <button
-                                        onclick={() =>
-                                            getOrder(ticketCodeInput)}
-                                    >
-                                        <Check color="green" />
-                                    </button>
-                                    <button onclick={reset}>
-                                        <X color="indianred" />
-                                    </button>
-                                {/if}
+        <h1 class="text-4xl font-bold text-app-accent">Check Point</h1>
+        <p class="text-justify">
+            Scansionare il QR. L'ordine arriverà direttamente in cucina.
+        </p>
+        <div class="w-full">
+            {#if orders.length === 0}
+                <Label class="text-md font-medium" for="ticketCodeInput">
+                    Codice Biglietto <span class="text-app-accent">*</span>
+                </Label>
+                <div class="flex gap-3 items-center">
+                    <Input
+                        required
+                        class="mt-1"
+                        bind:value={ticketCodeInput}
+                        name="code"
+                        id="ticketCodeInput"
+                        autocomplete="off"
+                        onkeypress={onKeyDown}
+                    />
+                    {#if ticketCodeInput !== ""}
+                        <div class="flex h-full items-center gap-2">
+                            <button onclick={() => getOrder(ticketCodeInput)}>
+                                <Check color="green" />
+                            </button>
+                            <button onclick={reset}>
+                                <X color="indianred" />
+                            </button>
+                        </div>
+                    {/if}
+                </div>
+                <div class="my-6 flex w-full items-center justify-center">
+                    <QrReader bind:codeResult={ticketCode} />
+                </div>
+            {:else}
+                <div class="flex flex-col gap-4">
+                    <Card.Root>
+                        <Card.Content class="px-6 py-3">
+                            <div class="mb-2">
+                                <div class="font-semibold text-lg">
+                                    {orders[0].name}
+                                    {orders[0].surname}
+                                </div>
+                                <div class="text-sm text-muted-foreground">
+                                    {orders[0].ticketId}
+                                </div>
                             </div>
-                        </Input>
-                    </Label>
-                    <div class="my-6 flex w-full items-center justify-center">
-                        <QrReader bind:codeResult={ticketCode} />
-                    </div>
-                {:else}
-                    <div class="flex flex-col gap-5">
-                        <Card class="w-full text-lg p-3" id="orderInfos">
-                            <div class="flex justify-between items-center">
-                                <span class="text-black dark:text-white w-max">
-                                    <span>Cliente:</span>
-                                    <span>{order.name}</span>
+                            <div class="mb-2">
+                                <span class="font-semibold">
+                                    {orders.length}
+                                    {orders.length === 1
+                                        ? "ordine trovato"
+                                        : "ordini trovati"}
                                 </span>
+                            </div>
+                            <div class="flex gap-2 justify-end">
                                 <Button
-                                    class="text-sm flex items-center gap-2"
-                                    onclick={submitOrder}
+                                    variant="outline"
+                                    size="sm"
+                                    onclick={reset}
                                 >
-                                    <Send class="w-4 h-4" />
-                                    Invia
+                                    <X class="w-4 h-4 mr-1" />
+                                    Annulla
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    onclick={submitOrder}
+                                    disabled={selectedOrders.size === 0}
+                                >
+                                    <Send class="w-4 h-4 mr-1" />
+                                    Invia ({selectedOrders.size})
                                 </Button>
                             </div>
-                        </Card>
+                        </Card.Content>
+                    </Card.Root>
 
-                        {#if orderItems.length > 0}
-                            <div class="mt-4 flex flex-col gap-3">
-                                <h3
-                                    class="text-lg font-semibold dark:text-white"
-                                >
-                                    Ordine corrente:
-                                </h3>
-                                {#each [...orderItems].reverse() as item, i}
-                                    <Card padding="sm" class="relative">
-                                        <div
-                                            class="absolute right-2 top-2 flex gap-2"
-                                        >
-                                            <button
-                                                class="p-1 hover:bg-blue-100 rounded-full transition-colors"
-                                                onclick={() => editOrder(i)}
-                                            >
-                                                <PencilLine
-                                                    class="w-5 h-5 text-blue-500"
-                                                />
-                                            </button>
-                                        </div>
-                                        <div class="pr-20">
-                                            <!-- Increased right padding to accommodate both buttons -->
-                                            <div
-                                                class="flex items-baseline gap-2 mb-1"
-                                            >
-                                                <span
-                                                    class="font-medium text-lg"
-                                                    >{item.type}</span
-                                                >
-                                                <span class="text-gray-600"
-                                                    >x{item.quantity}</span
-                                                >
-                                                {#if item.glutenFree}
-                                                    <span
-                                                        class="text-sm text-orange-300"
-                                                        >(Senza glutine)</span
+                    {#each orders as order (order.firebaseId)}
+                        <Card.Root
+                            class="transition-all cursor-pointer {selectedOrders.has(
+                                order.firebaseId!
+                            )
+                                ? 'border-app-accent border-2'
+                                : ''}"
+                            onclick={() =>
+                                toggleOrderSelection(order.firebaseId!)}
+                        >
+                            <Card.Content>
+                                <div class="flex items-start gap-3">
+                                    <div class="flex-1">
+                                        {#if order.items.length > 0}
+                                            <div class="flex flex-col gap-2">
+                                                {#each order.items as item, itemIndex}
+                                                    <div
+                                                        class="relative bg-accent/70 rounded-md p-3"
                                                     >
-                                                {/if}
+                                                        <div
+                                                            class="absolute right-2 top-2"
+                                                        >
+                                                            <button
+                                                                class="p-1 hover:text-blue-500 rounded-full transition-colors"
+                                                                onclick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    editOrder(
+                                                                        order.firebaseId!,
+                                                                        itemIndex
+                                                                    );
+                                                                }}
+                                                            >
+                                                                <PencilLine
+                                                                    class="w-4 h-4 text-blue-400 hover:text-blue-500"
+                                                                />
+                                                            </button>
+                                                        </div>
+                                                        <div class="pr-8">
+                                                            <div
+                                                                class="flex items-baseline gap-2 mb-1"
+                                                            >
+                                                                <span
+                                                                    class="font-medium"
+                                                                    >{item.type}</span
+                                                                >
+                                                                <span
+                                                                    class="text-app-accent text-sm"
+                                                                    >x{item.quantity}</span
+                                                                >
+                                                            </div>
+                                                            {#if item.glutenFree}
+                                                                <div
+                                                                    class="text-sm text-orange-300 font-bold"
+                                                                >
+                                                                    SENZA
+                                                                    GLUTINE
+                                                                </div>
+                                                            {/if}
+                                                            {#if item.removedIngredients?.length}
+                                                                <div
+                                                                    class="text-sm text-red-400"
+                                                                >
+                                                                    <b>Senza:</b
+                                                                    >
+                                                                    {item.removedIngredients.join(
+                                                                        ", "
+                                                                    )}
+                                                                </div>
+                                                            {/if}
+                                                            {#if item.notes}
+                                                                <div
+                                                                    class="text-sm text-red-400"
+                                                                >
+                                                                    <b>Note:</b>
+                                                                    {item.notes}
+                                                                </div>
+                                                            {/if}
+                                                        </div>
+                                                    </div>
+                                                {/each}
                                             </div>
-                                            {#if item.removedIngredients?.length}
-                                                <div
-                                                    class="text-sm text-red-500"
-                                                >
-                                                    Senza: {item.removedIngredients.join(
-                                                        ", "
-                                                    )}
-                                                </div>
-                                            {/if}
-                                            <div class="text-sm text-green-600">
-                                                Salsa: {item.sauce ||
-                                                    "No salsa"}
-                                            </div>
-                                            {#if item.notes}
-                                                <div
-                                                    class="text-sm text-red-500"
-                                                >
-                                                    Note: {item.notes}
-                                                </div>
-                                            {/if}
-                                        </div>
-                                    </Card>
-                                {/each}
-                            </div>
-                        {/if}
-                    </div>
-                {/if}
-
-                <FeedbackToast
-                    bind:open
-                    color={orderSubmitError ? "red" : "green"}
-                    ToastIcon={orderSubmitError ? XCircle : CheckCircle2}
-                    message={orderFeedbackMessage || errorMessage}
-                />
-            </div>
-        {:else}
-            <div
-                class="mt-10 flex w-full flex-grow flex-col items-center justify-center gap-5"
-            >
-                <Spinner size="sm" class="max-w-12 self-center" />
-                <span class="text-2xl font-semibold text-primary-600"
-                    >Attendere...</span
-                >
-            </div>
-        {/if}
+                                        {/if}
+                                    </div>
+                                </div>
+                            </Card.Content>
+                        </Card.Root>
+                    {/each}
+                </div>
+            {/if}
+        </div>
     </div>
 </section>
 
-<Modal bind:open={showModal} size="md" class="z-50">
-    <h2 class="text-xl font-bold" slot="header">Modifica Ordine</h2>
-
-    <div class="mb-4 flex flex-col gap-4">
-        <!-- Selezione tipo -->
-        <div>
-            <span class="font-semibold mb-2 block">Tipo:</span>
-            <div class="grid grid-cols-3 gap-2">
-                {#each Object.values(ItemType) as type}
-                    <Card
-                        class="w-full cursor-pointer flex flex-row gap-2 items-center"
-                        onclick={() => (currentItem.type = type)}
-                    >
-                        {#if currentItem.type === type}
-                            <CheckCircle2 class="w-6 h-6 text-green-500" />
-                        {/if}
-                        {type}
-                    </Card>
-                {/each}
-            </div>
-        </div>
-
-        <Label class="flex items-center gap-2">
-            <Checkbox bind:checked={currentItem.glutenFree} />
-            <span class="font-semibold text-orange-300">Senza glutine</span>
-        </Label>
-
-        {#if DEFAULT_INGREDIENTS[currentItem.type]?.length > 0}
+<Dialog.Root bind:open={showModal}>
+    <Dialog.Content class="max-w-md">
+        <Dialog.Header>
+            <Dialog.Title>Modifica Ordine</Dialog.Title>
+        </Dialog.Header>
+        <div class="mb-4 flex flex-col gap-4">
+            <!-- Selezione tipo -->
             <div>
-                <span class="font-semibold text-red-500 block mb-2"
-                    >Rimuovi ingredienti:</span
-                >
-                {#each DEFAULT_INGREDIENTS[currentItem.type] as ingredient}
-                    <Label class="flex items-center gap-2 p-1">
-                        <Checkbox
-                            checked={currentItem.removedIngredients?.includes(
-                                ingredient
-                            )}
-                            on:change={() => {
-                                if (
-                                    currentItem.removedIngredients?.includes(
-                                        ingredient
-                                    )
-                                ) {
-                                    currentItem.removedIngredients =
-                                        currentItem.removedIngredients.filter(
-                                            (i) => i !== ingredient
-                                        );
-                                } else {
-                                    currentItem.removedIngredients = [
-                                        ...(currentItem.removedIngredients ||
-                                            []),
-                                        ingredient,
-                                    ];
-                                }
-                            }}
-                        />
-                        <span
-                            class:line-through={currentItem.removedIngredients?.includes(
-                                ingredient
-                            )}
-                            class:text-red-500={currentItem.removedIngredients?.includes(
-                                ingredient
-                            )}
+                <span class="font-semibold mb-2 block">Tipo:</span>
+                <div class="flex gap-3 justify-around flex-wrap">
+                    {#each Object.values(ItemType) as type}
+                        <button
+                            onclick={() => (currentItem.type = type)}
+                            class="grow"
                         >
-                            {ingredient}
-                        </span>
-                    </Label>
-                {/each}
+                            <Card.Root
+                                class="hover:bg-accent transition-colors {currentItem.type ===
+                                type
+                                    ? 'border-primary'
+                                    : ''}"
+                            >
+                                <Card.Content
+                                    class="px-4 text-center flex items-center justify-center gap-2"
+                                >
+                                    {#if currentItem.type === type}
+                                        <CircleCheck
+                                            class="w-5 h-5 text-green-500"
+                                        />
+                                    {/if}
+                                    {type}
+                                </Card.Content>
+                            </Card.Root>
+                        </button>
+                    {/each}
+                </div>
             </div>
-        {/if}
 
-        <div>
-            <span class="font-semibold text-green-500 block mb-2">Salsa:</span>
-            <div class="grid gap-2">
-                <Label class="flex items-center gap-2 p-1 w-max">
-                    <Radio
-                        name="sauce"
-                        checked={!currentItem.sauce}
-                        on:change={() => (currentItem.sauce = undefined)}
-                    />
-                    <span>No salsa</span>
+            <div class="flex items-center space-x-2">
+                <Checkbox
+                    id="glutenFree"
+                    bind:checked={currentItem.glutenFree}
+                />
+                <Label
+                    for="glutenFree"
+                    class="text-sm font-semibold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-orange-300"
+                >
+                    Senza glutine
                 </Label>
-                {#each Object.values(Sauce) as sauce}
-                    <Label class="flex items-center gap-2 p-1">
-                        <Radio
-                            name="sauce"
-                            checked={currentItem.sauce === sauce}
-                            on:change={() => (currentItem.sauce = sauce)}
-                        />
-                        <span>{sauce}</span>
-                    </Label>
-                {/each}
+            </div>
+
+            {#if DEFAULT_INGREDIENTS[currentItem.type]?.length > 0}
+                <div>
+                    <span class="font-semibold text-red-400 block mb-2"
+                        >Rimuovi ingredienti:</span
+                    >
+                    {#each DEFAULT_INGREDIENTS[currentItem.type] as ingredient}
+                        <div class="flex items-center space-x-2 p-1">
+                            <Checkbox
+                                id={ingredient}
+                                checked={currentItem.removedIngredients?.includes(
+                                    ingredient
+                                )}
+                                onCheckedChange={(checked) => {
+                                    if (checked) {
+                                        currentItem.removedIngredients = [
+                                            ...(currentItem.removedIngredients ||
+                                                []),
+                                            ingredient,
+                                        ];
+                                    } else {
+                                        currentItem.removedIngredients =
+                                            currentItem.removedIngredients?.filter(
+                                                (i) => i !== ingredient
+                                            ) || [];
+                                    }
+                                }}
+                            />
+                            <Label
+                                for={ingredient}
+                                class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 {currentItem.removedIngredients?.includes(
+                                    ingredient
+                                )
+                                    ? 'line-through text-red-400'
+                                    : ''}"
+                            >
+                                {ingredient}
+                            </Label>
+                        </div>
+                    {/each}
+                </div>
+            {/if}
+
+            <div>
+                <span class="font-semibold text-red-400 block mb-2">Note:</span>
+                <Input
+                    type="text"
+                    bind:value={currentItem.notes}
+                    placeholder="Inserisci eventuali note..."
+                />
             </div>
         </div>
 
-        <div>
-            <span class="font-semibold text-red-500 block mb-2">Note:</span>
-            <Input
-                type="text"
-                class="dark:bg-neutral-700 dark:border-neutral-500"
-                bind:value={currentItem.notes}
-                placeholder="Inserisci eventuali note..."
-            />
-        </div>
-    </div>
-
-    <div class="flex justify-end gap-3">
-        <Button color="alternative" onclick={() => (showModal = false)}
-            >Annulla</Button
-        >
-        <Button color="primary" onclick={saveItemChanges}
-            >Salva modifiche</Button
-        >
-    </div>
-</Modal>
+        <Dialog.Footer class="flex justify-end gap-3">
+            <Button variant="outline" onclick={() => (showModal = false)}
+                >Annulla</Button
+            >
+            <Button onclick={saveItemChanges}>Salva modifiche</Button>
+        </Dialog.Footer>
+    </Dialog.Content>
+</Dialog.Root>

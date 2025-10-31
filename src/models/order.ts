@@ -11,18 +11,11 @@ export enum ItemType {
 	VEGETARIANO = 'VEGETARIANO',
 }
 
-export enum Sauce {
-	MAIONESE = 'MAIONESE',
-	KETCHUP = 'KETCHUP',
-	BBQ = 'BBQ',
-}
-
 export interface OrderItem {
 	type: ItemType;
 	quantity: number;
 	glutenFree?: boolean;
 	removedIngredients?: BaseIngredient[];
-	sauce?: Sauce;
 	ready?: boolean;
 	notes?: string;
 }

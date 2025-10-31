@@ -1,4 +1,4 @@
-// import { lucia } from '$lib/lucia/auth';
+import { dev } from "$app/environment";
 import {
     deleteSessionTokenCookie,
     setSessionTokenCookie,
@@ -7,8 +7,16 @@ import {
 import type { Handle } from "@sveltejs/kit";
 
 export const handle: Handle = async ({ event, resolve }) => {
+    if (
+        dev &&
+        event.url.pathname ===
+            "/.well-known/appspecific/com.chrome.devtools.json"
+    ) {
+        return new Response(undefined, { status: 404 });
+    }
+
     const token = event.cookies.get("session");
-    
+
     if (!token) {
         event.locals.user = null;
         event.locals.session = null;
@@ -18,8 +26,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     const { session, user } = await validateSessionToken(token);
     if (session) {
         setSessionTokenCookie(event, token, session.expiresAt);
-    }
-    else {
+    } else {
         deleteSessionTokenCookie(event);
     }
 

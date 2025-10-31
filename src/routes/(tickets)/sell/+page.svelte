@@ -1,10 +1,13 @@
 <script lang="ts">
-    import { Button, Input, Label, Modal, Spinner } from "flowbite-svelte";
-    import { CheckCircle2, Ticket, XCircle } from "lucide-svelte";
+    import { Button } from "$lib/components/ui/button/index";
+    import * as Dialog from "$lib/components/ui/dialog/index";
+    import { Input } from "$lib/components/ui/input/index";
+    import { Label } from "$lib/components/ui/label/index";
+    import { CircleCheck, CircleX } from "@lucide/svelte";
 
     import QrReader from "$components/QrReader.svelte";
     import type { User } from "$lib/auth/user";
-    import { getFdPCode } from "$lib/utils/tickets";
+    import { getFdPOrStaffCode } from "$lib/utils/tickets";
     import { user } from "$store/store";
 
     interface Props {
@@ -45,7 +48,7 @@
         if (name !== "" && surname !== "" && ticketCode !== "") {
             name = name.trim().toUpperCase();
             surname = surname.trim().toUpperCase();
-            ticketCode = getFdPCode(ticketCode?.trim()) ?? "";
+            ticketCode = getFdPOrStaffCode(ticketCode?.trim()) ?? "";
 
             try {
                 let response;
@@ -103,103 +106,96 @@
     <title>Vendi</title>
 </svelte:head>
 
-<section class="flex h-full w-full flex-grow flex-col items-center gap-4">
+<section class="flex h-full w-full grow flex-col items-center gap-4">
     <div
-        class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5"
+        class="flex w-full max-w-96 grow flex-col items-start gap-4 px-5 pb-12 pt-5"
     >
-        {#if $user}
-            <h1 class="text-4xl font-bold text-primary-600">Vendi</h1>
-            <p class="text-justify dark:text-white">
-                Inserire nome, cognome e, scansionando il QR, il codice del
-                biglietto.
-            </p>
+        <h1 class="text-4xl font-bold text-app-accent">Vendi</h1>
+        <p class="text-justify">
+            Inserire nome, cognome e, scansionando il QR, il codice del
+            biglietto.
+        </p>
 
-            <Label
-                class="text-md w-full font-medium text-black dark:text-white"
-            >
-                Nome Ospite <span class="text-primary-700">*</span>
+        <div class="flex flex-col w-full gap-2">
+            <div>
+                <Label class="text-md w-full font-medium" for="name">
+                    Nome Ospite <span class="text-app-accent">*</span>
+                </Label>
                 <Input
-                    class="mt-1 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+                    id="name"
                     bind:value={name}
                     autocomplete="off"
-                    on:keypress={onKeyDown}
+                    onkeypress={onKeyDown}
                 />
-            </Label>
-            <Label
-                class="text-md w-full font-medium text-black dark:text-white"
-            >
-                Cognome Ospite <span class="text-primary-700">*</span>
+            </div>
+            <div>
+                <Label class="text-md w-full font-medium " for="surname">
+                    Cognome Ospite <span class="text-app-accent">*</span>
+                </Label>
                 <Input
-                    class="mt-1 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+                    id="surname"
                     bind:value={surname}
                     autocomplete="off"
-                    on:keypress={onKeyDown}
+                    onkeypress={onKeyDown}
                 />
-            </Label>
-            <Label
-                class="text-md w-full font-medium text-black dark:text-white"
-            >
-                Codice Biglietto <span class="text-primary-700">*</span>
+            </div>
+            <div>
+                <Label class="text-md w-full font-medium" for="ticketCodeInput">
+                    Codice Biglietto <span class="text-app-accent">*</span>
+                </Label>
                 <Input
-                    class="mt-1 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+                    required
                     bind:value={ticketCode}
+                    id="ticketCodeInput"
                     autocomplete="off"
-                    on:keypress={onKeyDown}
-                >
-                    <Ticket
-                        slot="left"
-                        class="h-6 w-6 text-primary-600 dark:text-white"
-                    />
-                </Input>
-            </Label>
+                    onkeypress={onKeyDown}
+                    placeholder={"FDP" +
+                        new Date().getFullYear().toString().slice(-2) +
+                        "-XXXX"}
+                />
+            </div>
+        </div>
 
-            <div class="mt-6 flex w-full items-center justify-center">
-                <QrReader bind:codeResult={ticketCode} />
-            </div>
-            <Button
-                class="mt-6 w-full"
-                on:click={handleSell}
-                bind:disabled={disableButton}>Vendi</Button
-            >
-        {:else}
-            <div
-                class="mt-10 flex w-full flex-grow flex-col items-center justify-center gap-5"
-            >
-                <Spinner size="sm" class="max-w-12 self-center" />
-                <span class="text-2xl font-semibold text-primary-600"
-                    >Attendere...</span
-                >
-            </div>
-        {/if}
+        <div class="mt-2 flex w-full items-center justify-center">
+            <QrReader bind:codeResult={ticketCode} />
+        </div>
+        <Button
+            class="mt-2 w-full"
+            onclick={handleSell}
+            disabled={disableButton}>Vendi</Button
+        >
     </div>
 </section>
 
-<Modal
-    bind:open={modalOpen}
-    onclose={closeModal}
-    size="xs"
-    class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
-    classHeader="dark:bg-neutral-800 dark:text-neutral-300"
-    classFooter="dark:bg-neutral-800 dark:text-neutral-300"
-    outsideclose
-    autoclose
->
-    {@const ModalIcon = error ? XCircle : CheckCircle2}
-    <span
-        class="text-2xl font-semibold text-{color}-500 flex items-center gap-2"
+<Dialog.Root bind:open={modalOpen}>
+    <Dialog.Content
+        onOpenAutoFocus={(e) => {
+            e.preventDefault();
+        }}
     >
-        <ModalIcon class="h-6 w-6  text-{color}-500" />
-        {error ? "Errore" : "Successo"}
-    </span>
-    <div class="flex flex-col gap-5">
-        <span class="text-xl font-medium text-neutral-400">{modalMessage}</span>
-        {#if !error}
-            <div class="flex flex-col">
-                <span class="mb-3">Codice: {ticketCode || ""}</span>
-                <span>Nome: {name}</span>
-                <span>Cognome: {surname}</span>
-            </div>
-        {/if}
-    </div>
-    <Button slot="footer" class="w-full" on:click={closeModal}>Chiudi</Button>
-</Modal>
+        {@const ModalIcon = error ? CircleX : CircleCheck}
+        <Dialog.Title
+            class="text-2xl font-semibold {color === 'green'
+                ? 'text-green-500'
+                : 'text-red-500'} flex items-center gap-2"
+        >
+            <ModalIcon class="h-6 w-6" />
+            {error ? "Errore" : "Successo"}
+        </Dialog.Title>
+        <Dialog.Description class="flex flex-col gap-5">
+            <span class="text-xl font-medium text-neutral-200"
+                >{modalMessage}</span
+            >
+            {#if !error}
+                <div class="flex flex-col">
+                    <span class="mb-2">Codice: {ticketCode || ""}</span>
+                    <span>Nome: {name}</span>
+                    <span>Cognome: {surname}</span>
+                </div>
+            {/if}
+        </Dialog.Description>
+        <div class="flex justify-end pt-4">
+            <Button class="w-full" onclick={closeModal}>Chiudi</Button>
+        </div>
+    </Dialog.Content>
+</Dialog.Root>

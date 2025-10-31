@@ -2,7 +2,7 @@ import { getClientDB } from "$lib/firebase/client";
 import { PASSWORD_RESET_TOKENS, USERS } from "$lib/firebase/collections";
 import { hash, verify } from "@node-rs/argon2";
 import { sha256 } from "@oslojs/crypto/sha2";
-import { encodeBase32LowerCaseNoPadding } from "@oslojs/encoding";
+import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from "@oslojs/encoding";
 import {
     doc,
     getDoc,
@@ -12,12 +12,11 @@ import {
     Timestamp,
     where,
 } from "firebase/firestore";
-import { createDate, isWithinExpirationDate } from "oslo";
-import { encodeHex } from "oslo/encoding";
 import { TimeSpan } from "../../../models/timespan";
 import { sendEmail } from "../../utils/resend";
 import type { User } from "../user";
-import { passwordResetTemplate } from "../email-templates/password_reset";
+import { passwordResetTemplate } from "../../utils/email-templates/password_reset";
+import { createDate, isWithinExpirationDate } from "./timespan";
 
 interface PasswordResetToken {
     user_id: string;
@@ -50,7 +49,7 @@ const generateRandomToken = () => {
 /// Generate a random token and store it in the database
 export const generatePasswordResetToken = async (userId: string) => {
     const tokenId = generateRandomToken();
-    const tokenHash = encodeHex(sha256(new TextEncoder().encode(tokenId)));
+    const tokenHash = encodeHexLowerCase(sha256(new TextEncoder().encode(tokenId)));
 
     const db = getClientDB();
 
@@ -73,7 +72,7 @@ export const verifyPasswordResetToken = async (tokenId: string) => {
         where(
             "token_hash",
             "==",
-            encodeHex(sha256(new TextEncoder().encode(tokenId)))
+            encodeHexLowerCase(sha256(new TextEncoder().encode(tokenId)))
         )
     );
     const passwordResetTokenDoc = (

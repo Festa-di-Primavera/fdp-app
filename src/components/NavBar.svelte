@@ -1,25 +1,23 @@
 <script lang="ts">
+    import * as Accordion from "$lib/components/ui/accordion/index";
+    import * as Avatar from "$lib/components/ui/avatar/index";
+    import { Button, buttonVariants } from "$lib/components/ui/button";
+    import * as Card from "$lib/components/ui/card/index";
+    import * as Dialog from "$lib/components/ui/dialog/index";
+    import * as Drawer from "$lib/components/ui/drawer/index";
+    import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index";
+
     import {
-        Accordion,
-        AccordionItem,
-        Button,
-        CloseButton,
-        DarkMode,
-        Drawer,
-        Dropdown,
-        DropdownItem,
-        Modal,
-    } from "flowbite-svelte";
-    import {
-        AlignJustify,
+        TextAlignJustify,
         ChefHat,
         CloudUpload,
         CoinsIcon,
         Dna,
         DollarSign,
         HandPlatter,
-        Home,
+        House,
         Info,
+        Key,
         LayoutDashboard,
         LogOut,
         NotepadText,
@@ -27,19 +25,21 @@
         ScanQrCode,
         ScrollText,
         Ticket,
+        Trash,
         UserCog,
         Users,
         UtensilsCrossed,
         View,
-    } from "lucide-svelte";
-    import { sineIn } from "svelte/easing";
+        X,
+    } from "@lucide/svelte";
     import Logo from "./Logo.svelte";
 
     import { enhance } from "$app/forms";
     import { page } from "$app/state";
     import { hasAnyPermissions } from "$lib/utils/permissions";
     import { UserPermissions } from "$models/permissions";
-    import { theme, user } from "$store/store";
+    import { user } from "$store/store";
+    import DarkMode from "./DarkMode.svelte";
 
     interface Route {
         label: string;
@@ -59,7 +59,7 @@
         {
             label: "Home",
             slug: "/",
-            icon: Home,
+            icon: House,
         },
         {
             label: "Gestione Utenti",
@@ -86,7 +86,11 @@
         {
             label: "Biglietti",
             icon: Ticket,
-            permission: [UserPermissions.DASHBOARD, UserPermissions.LISTA_BIGLIETTI, UserPermissions.GENERAZIONE],
+            permission: [
+                UserPermissions.DASHBOARD,
+                UserPermissions.LISTA_BIGLIETTI,
+                UserPermissions.GENERAZIONE,
+            ],
             children: [
                 {
                     label: "Dashboard",
@@ -133,39 +137,37 @@
             icon: CoinsIcon,
         },
         {
+            label: "Checkpoint",
+            slug: "/checkpoint",
+            permission: UserPermissions.ORDINI,
+            icon: ScanQrCode,
+        },
+        {
             label: "Cucina",
             slug: "/kitchen",
             permission: UserPermissions.CUCINA,
             icon: ChefHat,
         },
         {
-            label: "Ordini Manuali",
+            label: "Ordini",
             icon: UtensilsCrossed,
-            permission: [UserPermissions.ORDINI, UserPermissions.CASSA, UserPermissions.CUCINA],
+            permission: [
+                UserPermissions.ORDINI,
+                UserPermissions.CASSA,
+                UserPermissions.CUCINA,
+            ],
             children: [
                 {
-                    label: "Carica Ordini",
-                    slug: "/csv-orders",
-                    permission: UserPermissions.ORDINI,
-                    icon: CloudUpload,
-                },
-                {
-                    label: "Ordini Manuali",
-                    slug: "/manual-orders",
+                    label: "Ordini Staff",
+                    slug: "/staff-orders",
                     permission: UserPermissions.ORDINI,
                     icon: HandPlatter,
                 },
                 {
                     label: "Vedi Ordini",
                     slug: "/orders-view",
-                    permission: UserPermissions.CUCINA,
-                    icon: View,
-                },
-                {
-                    label: "Checkpoint",
-                    slug: "/checkpoint",
                     permission: UserPermissions.ORDINI,
-                    icon: ScanQrCode,
+                    icon: View,
                 },
             ],
         },
@@ -189,212 +191,241 @@
     }
 
     let hidden: boolean = $state(true);
-    let transitionParamsRight = {
-        x: 200,
-        duration: 200,
-        easing: sineIn,
-    };
-
-    function changeTheme() {
-        if ($theme == "dark") {
-            $theme = "light";
-        } else {
-            $theme = "dark";
-        }
-    }
+    let drawerOpen: boolean = $state(false);
 
     let deleteModalOpen: boolean = $state(false);
 </script>
 
 <navbar
-    class="sticky top-0 z-40 flex w-full items-center justify-between bg-gray-100 dark:bg-neutral-900"
+    class="sticky top-0 z-40 w-full h-max flex items-center justify-between bg-primary-foreground border-b border-border"
 >
-    <a class="my-2 ml-[1%]" href="/">
+    <a class="my-1 ml-[1%]" href="/">
         <Logo />
     </a>
     <div class="mr-5 flex items-center justify-end gap-5">
-        <DarkMode
-            onclick={changeTheme}
-            btnClass="text-gray-500 dark:text-gray-400 rounded-lg text-sm p-1.5"
-        />
+        <DarkMode />
 
-        {#if $user !== null}
-            <button
-                onclick={() => {
-                    hidden = false;
-                }}
-                class="rounded-md border-2 border-black border-opacity-10 p-1 dark:border-white dark:border-opacity-20"
-                ><AlignJustify
-                    class="text-gray-500 dark:text-gray-400"
-                /></button
-            >
+        {#if $user}
+            <Drawer.Root direction="right" bind:open={drawerOpen}>
+                <Drawer.Trigger>
+                    <div
+                        class={buttonVariants({
+                            variant: "outline",
+                            size: "icon",
+                        })}
+                    >
+                        <TextAlignJustify />
+                    </div>
+                </Drawer.Trigger>
+
+                <Drawer.Content>
+                    <div
+                        class="mx-auto w-full max-w-sm h-screen flex flex-col justify-between"
+                    >
+                        <div class="flex flex-col overflow-y-hidden">
+                            <Drawer.Header class="relative">
+                                <Drawer.Title>Menu</Drawer.Title>
+                                <Drawer.Close class="absolute top-4 right-5">
+                                    <X class="cursor-pointer" />
+                                </Drawer.Close>
+                            </Drawer.Header>
+                            <div
+                                class="flex gap-4 flex-col overflow-y-auto py-2 px-4"
+                            >
+                                {#each filterRoutes(routes) as route}
+                                    {#if route.children}
+                                        <Accordion.Root
+                                            type="single"
+                                            class="w-full"
+                                            value={route.children.reduce(
+                                                (acc, child) =>
+                                                    acc ||
+                                                    child.slug ===
+                                                        page.url.pathname,
+                                                false
+                                            )
+                                                ? route.label
+                                                : ""}
+                                        >
+                                            <Accordion.Item value={route.label}>
+                                                <Accordion.Trigger class="py-0">
+                                                    <span
+                                                        class="mr-4 flex w-max items-center gap-4 text-xl font-normal"
+                                                    >
+                                                        <route.icon />
+                                                        {route.label}
+                                                    </span>
+                                                </Accordion.Trigger>
+                                                <Accordion.Content class="pb-0">
+                                                    <div class="mt-2 pl-5">
+                                                        {#each route.children as childRoute}
+                                                            <a
+                                                                onclick={() =>
+                                                                    (drawerOpen = false)}
+                                                                href={childRoute.slug}
+                                                            >
+                                                                <span
+                                                                    class="flex w-full items-center gap-4 py-2 text-xl {page
+                                                                        .url
+                                                                        .pathname ===
+                                                                    childRoute.slug
+                                                                        ? 'font-semibold text-app-accent'
+                                                                        : 'font-normal'}"
+                                                                >
+                                                                    <childRoute.icon
+                                                                    />
+                                                                    {childRoute.label}
+                                                                </span>
+                                                            </a>
+                                                        {/each}
+                                                    </div>
+                                                </Accordion.Content>
+                                            </Accordion.Item>
+                                        </Accordion.Root>
+                                    {:else}
+                                        <a
+                                            onclick={() => (drawerOpen = false)}
+                                            href={route.slug}
+                                        >
+                                            <span
+                                                class="flex w-full items-center gap-4 text-xl {page
+                                                    .url.pathname === route.slug
+                                                    ? 'font-semibold text-app-accent'
+                                                    : 'font-normal'}"
+                                            >
+                                                <route.icon />
+                                                {route.label}
+                                            </span>
+                                        </a>
+                                    {/if}
+                                {/each}
+                            </div>
+                        </div>
+                        {#if $user !== null}
+                            <Card.Root class="m-5 bottom-0 py-4">
+                                <Card.Content
+                                    class="flex justify-between items-center px-3"
+                                >
+                                    <DropdownMenu.Root>
+                                        <DropdownMenu.Trigger
+                                            class="flex items-center gap-3"
+                                        >
+                                            <Avatar.Root>
+                                                <Avatar.Image
+                                                    src={$user?.avatar_url}
+                                                    alt={$user.username[0]}
+                                                />
+                                                <Avatar.Fallback
+                                                    class="bg-neutral-700 border-2 border-neutral-600"
+                                                >
+                                                    {($user?.username ?? "")
+                                                        .split(" ")
+                                                        .map((word) =>
+                                                            word[0]?.toUpperCase()
+                                                        )
+                                                        .join("")
+                                                        .slice(0, 3)}
+                                                </Avatar.Fallback>
+                                            </Avatar.Root>
+                                            <span
+                                                class="overflow-x-hidden overflow-ellipsis"
+                                            >
+                                                {$user?.username ||
+                                                    "Non registrato"}
+                                            </span>
+                                        </DropdownMenu.Trigger>
+                                        <DropdownMenu.Content align="start">
+                                            <DropdownMenu.Label
+                                                >Il mio account</DropdownMenu.Label
+                                            >
+                                            <DropdownMenu.Separator />
+                                            <DropdownMenu.Group>
+                                                <DropdownMenu.Item
+                                                    class="flex gap-2 items-center"
+                                                    disabled
+                                                >
+                                                    <Key
+                                                        class="text-amber-500"
+                                                    />
+                                                    <div
+                                                        class="flex flex-col gap-1"
+                                                    >
+                                                        Cambia Password
+                                                        <span
+                                                            class="text-xs italic"
+                                                            >In arrivo...</span
+                                                        >
+                                                    </div>
+                                                </DropdownMenu.Item>
+                                                <DropdownMenu.Item
+                                                    class="flex gap-2 items-center"
+                                                    onclick={() => {
+                                                        deleteModalOpen = true;
+                                                        drawerOpen = false;
+                                                    }}
+                                                >
+                                                    <Trash
+                                                        class="text-red-500"
+                                                    />
+                                                    Elimina Account
+                                                </DropdownMenu.Item>
+                                            </DropdownMenu.Group>
+                                        </DropdownMenu.Content>
+                                    </DropdownMenu.Root>
+
+                                    <form
+                                        use:enhance
+                                        method="POST"
+                                        action="/?/logout"
+                                        onsubmit={() => (drawerOpen = false)}
+                                    >
+                                        <button
+                                            type="submit"
+                                            class="flex items-center justify-center"
+                                        >
+                                            <LogOut class="text-red-400" />
+                                        </button>
+                                    </form>
+                                </Card.Content>
+                            </Card.Root>
+                        {/if}
+                    </div>
+                </Drawer.Content>
+            </Drawer.Root>
         {/if}
     </div>
 </navbar>
-<Drawer
-    class="z-50 max-h-screen overflow-y-hidden dark:bg-neutral-800"
-    placement="right"
-    transitionType="fly"
-    transitionParams={transitionParamsRight}
-    width="w-72"
-    bind:hidden
->
-    <div class="flex h-full w-full flex-col">
-        <div class="flex items-center">
-            <h4
-                class=" mb-4 items-center text-2xl font-semibold text-gray-500 dark:text-neutral-400"
-            >
-                Menu
-            </h4>
-            <CloseButton
-                on:click={() => (hidden = true)}
-                class="mb-4 dark:text-white"
-            />
-        </div>
-        <div class="sidebar flex h-full flex-col justify-between">
-            <!-- Sezione dei pulsanti -->
-            <div
-                class="flex max-h-[calc(100vh-10rem)] flex-col gap-4 overflow-y-auto py-2"
-            >
-                {#each filterRoutes(routes) as route}
-                    {#if route.children}
-                        <Accordion flush>
-                            <AccordionItem
-                                borderBottomClass=""
-                                class="dark:text-neutral-400"
-                                paddingFlush="p-0 justify-start"
-                                open={route.children.some(
-                                    (child) => child.slug === page.url.pathname
-                                )}
-                            >
-                                <span
-                                    slot="header"
-                                    class="mr-4 flex w-max items-center gap-4 text-xl font-normal"
-                                >
-                                    <route.icon />
-                                    {route.label}
-                                </span>
-                                <div class="mt-2 pl-5">
-                                    {#each route.children as childRoute}
-                                        <a
-                                            onclick={() => (hidden = true)}
-                                            class={`${childRoute.slug == page.url.pathname ? "text-primary-500" : "text-gray-500 dark:text-neutral-400"}`}
-                                            href={childRoute.slug}
-                                        >
-                                            <span
-                                                class="flex w-full items-center gap-4 py-2 text-xl"
-                                            >
-                                                <childRoute.icon />
-                                                {childRoute.label}
-                                            </span>
-                                        </a>
-                                    {/each}
-                                </div>
-                            </AccordionItem>
-                        </Accordion>
-                    {:else}
-                        <a
-                            onclick={() => (hidden = true)}
-                            class={`${route.slug == page.url.pathname ? "text-primary-500" : "text-gray-500 dark:text-neutral-400"}`}
-                            href={route.slug}
-                        >
-                            <span
-                                class="flex w-full items-center gap-4 text-xl"
-                            >
-                                <route.icon />
-                                {route.label}
-                            </span>
-                        </a>
-                    {/if}
-                {/each}
-            </div>
 
-            <!-- Div in fondo -->
-            {#if $user !== null}
-                <div
-                    class="text-md mx-auto flex w-full items-center justify-between self-baseline rounded-lg bg-gray-100 p-3 dark:bg-neutral-600 dark:text-white"
-                >
-                    <button
-                        id="account"
-                        class="text-md flex items-center gap-4 truncate overflow-ellipsis pr-5"
-                    >
-                        {#if $user?.avatar_url}
-                            <img
-                                loading="lazy"
-                                src={$user?.avatar_url}
-                                alt={$user.username[0]}
-                                class="h-8 w-8 rounded-full"
-                            />
-                        {:else}
-                            <div
-                                class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary-700 to-primary-400 font-mono text-white"
-                            >
-                                <span>{$user?.username[0]?.toUpperCase()}</span>
-                            </div>
-                        {/if}
-                        <span class="overflow-x-hidden overflow-ellipsis"
-                            >{$user?.username || "Non registrato"}</span
-                        >
-                    </button>
-                    <Dropdown
-                        placement="top"
-                        triggeredBy="#account"
-                        classContainer="divide-y z-50 dark:bg-neutral-700"
-                    >
-                        <DropdownItem
-                            defaultClass="rounded-md font-medium py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-neutral-600"
-                        >
-                            <button
-                                class="text-red-400"
-                                onclick={() => {
-                                    deleteModalOpen = true;
-                                    hidden = true;
-                                }}>Elimina Account</button
-                            >
-                        </DropdownItem>
-                    </Dropdown>
-
-                    <form use:enhance method="POST" action="/?/logout">
-                        <button type="submit">
-                            <LogOut class="text-gray-500 dark:text-white" />
-                        </button>
-                    </form>
-                </div>
-            {/if}
-        </div>
-    </div>
-</Drawer>
-<Modal
-    title="Elimina account"
-    outsideclose
-    bind:open={deleteModalOpen}
-    onclose={() => (deleteModalOpen = false)}
-    size="sm"
-    class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
-    classHeader="dark:bg-neutral-800 dark:text-neutral-300"
-    classFooter="dark:bg-neutral-800 dark:text-neutral-300"
->
-    <form
-        action="/login?/delete"
-        method="post"
-        use:enhance
-        onsubmit={() => {
-            deleteModalOpen = false;
+<Dialog.Root bind:open={deleteModalOpen}>
+    <Dialog.Content
+        onOpenAutoFocus={(e) => {
+            e.preventDefault();
         }}
     >
-        <div class="flex flex-col items-center justify-center gap-5">
-            <span class="text-xl">Vuoi eliminare questo account?</span>
-            <div class="flex flex-col gap-2">
-                <span class="text-md">Nome: {$user?.username}</span>
-                <span class="text-md">E-mail: {$user?.email}</span>
-            </div>
-        </div>
-        <Button type="submit" color="red">Sì</Button>
-        <Button
-            type="reset"
-            color="alternative"
-            class="dark:text-neutral-400 dark:border-neutral-400 dark:hover:bg-neutral-700 dark:hover:border-neutral-300"
-            on:click={() => (deleteModalOpen = false)}>No</Button
+        <Dialog.Header>Elimina Account</Dialog.Header>
+        <form
+            action="/login?/delete"
+            method="post"
+            use:enhance
+            onsubmit={() => {
+                deleteModalOpen = false;
+            }}
         >
-    </form>
-</Modal>
+            <div class="flex flex-col items-center justify-center gap-5 mb-5">
+                <span class="text-xl">Vuoi eliminare questo account?</span>
+                <div class="flex flex-col gap-2">
+                    <span class="text-md">Nome: {$user?.username}</span>
+                    <span class="text-md">E-mail: {$user?.email}</span>
+                </div>
+            </div>
+            <Dialog.Footer>
+                <Button type="submit" variant="destructive">Sì</Button>
+                <Button
+                    type="reset"
+                    variant="outline"
+                    onclick={() => (deleteModalOpen = false)}>No</Button
+                >
+            </Dialog.Footer>
+        </form>
+    </Dialog.Content>
+</Dialog.Root>

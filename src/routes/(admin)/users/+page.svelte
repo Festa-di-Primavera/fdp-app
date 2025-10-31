@@ -1,14 +1,5 @@
 <script lang="ts">
     import {
-        Button,
-        Input,
-        Label,
-        Modal,
-        Spinner,
-        Tooltip,
-    } from "flowbite-svelte";
-    import {
-        CheckCircle2,
         ChefHat,
         Coins,
         Dna,
@@ -19,17 +10,21 @@
         Ticket,
         Users,
         Utensils,
-        XCircle,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
 
     import UsersTable from "$components/UsersTable.svelte";
-    import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
     import type { User } from "$lib/auth/user";
+    import { Button } from "$lib/components/ui/button/index";
+    import * as Dialog from "$lib/components/ui/dialog/index";
+    import { Input } from "$lib/components/ui/input/index";
+    import { Label } from "$lib/components/ui/label/index";
+    import * as Tooltip from "$lib/components/ui/tooltip/index";
     import { getStringFromEnumValue } from "$lib/utils/enums";
     import { intToBitArray } from "$lib/utils/permissions";
     import { capitalizeFirstLetter } from "$lib/utils/textFormat";
     import { UserPermissions } from "$models/permissions";
     import { user } from "$store/store.js";
+    import { toast } from "svelte-sonner";
 
     interface Props {
         data: {
@@ -46,14 +41,6 @@
 
     // modal state variable
     let deleteModalOpen: boolean = $state(false);
-
-    // changes toast variables
-    let changeToastOpen: boolean = $state(false);
-    let color: "green" | "red" = $state("green");
-    let message: string = $state("");
-    let error: boolean = $state(false);
-    let timeOut: NodeJS.Timeout;
-    let toastIcon = $derived(error ? XCircle : CheckCircle2);
 
     // association between userpermissions and their respective icons
     const permissionIcons = {
@@ -83,36 +70,22 @@
                 headers: { "Content-Type": "application/json" },
             });
 
+            let error = true;
             if (res.ok) {
                 error = false;
-                color = "green";
                 users = users.filter((item: User) => item.id !== user.id);
             } else if (res.status === 404) {
-                error = true;
-                color = "red";
                 users = users.filter((item: User) => item.id !== user.id);
-            } else {
-                error = true;
-                color = "red";
             }
 
-            message = (await res.json()).message;
-            changeToastOpen = true;
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                changeToastOpen = false;
-                clearTimeout(timeOut);
-            }, 3500);
+            const message = (await res.json()).message;
+            if (error) {
+                toast.error(message);
+            } else {
+                toast.success(message);
+            }
         } catch (e) {
-            error = true;
-            color = "red";
-            changeToastOpen = true;
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                changeToastOpen = false;
-                clearTimeout(timeOut);
-            }, 3500);
-            message = "Errore di rete";
+            toast.error("Errore di rete");
         }
     };
 
@@ -132,31 +105,27 @@
                 headers: { "Content-Type": "application/json" },
             });
 
+            let error = true;
             if (res.ok) {
-                color = "green";
-                error = false;
                 users = users.map((item: User) => {
                     if (item.id === user.id) {
                         item.alias = alias;
                     }
                     return item;
                 });
-            } else {
-                color = "red";
-                error = true;
+                error = false;
             }
 
             if (res.status === 404) {
                 users = users.filter((item: User) => item.id !== user.id);
             }
 
-            changeToastOpen = true;
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                changeToastOpen = false;
-                clearTimeout(timeOut);
-            }, 3500);
-            message = (await res.json()).message;
+            const message = (await res.json()).message;
+            if (error) {
+                toast.error(message);
+            } else {
+                toast.success(message);
+            }
         }
 
         aliasModalOpen = false;
@@ -168,21 +137,21 @@
     <title>Utenti</title>
 </svelte:head>
 
-{#if $user}
-    <UsersTable
-        bind:users
-        bind:currSelectedUser
-        bind:aliasModalOpen
-        bind:deleteModalOpen
-        {permissionIcons}
-    />
-    {#if currSelectedUser !== undefined}
-        {#snippet UserInfo(currSelectedUser: User)}
-            <span class="text-sm">UID: {currSelectedUser.id}</span>
-            <span class="text-sm">Nome: {currSelectedUser.username}</span>
-            <span class="text-sm">E-mail: {currSelectedUser.email}</span>
-            <span class="text-sm flex gap-4 items-center"
-                >Permessi:
+<UsersTable
+    bind:users
+    bind:currSelectedUser
+    bind:aliasModalOpen
+    bind:deleteModalOpen
+    {permissionIcons}
+/>
+{#if currSelectedUser !== undefined}
+    {#snippet UserInfo(currSelectedUser: User)}
+        <span class="text-sm">UID: {currSelectedUser.id}</span>
+        <span class="text-sm">Nome: {currSelectedUser.username}</span>
+        <span class="text-sm">E-mail: {currSelectedUser.email}</span>
+        <span class="text-sm flex gap-2 items-center"
+            >Permessi:
+            {#if currSelectedUser.permissions > 0}
                 <div class="flex gap-2">
                     {#each intToBitArray(currSelectedUser.permissions, Object.keys(UserPermissions).length / 2)
                         .reverse()
@@ -193,35 +162,44 @@
                         )}
 
                         <div class="flex items-center gap-1">
-                            <PermissionIcon class="w-4 text-primary-300" />
-                            <Tooltip
-                                color="gray"
-                                class="dark:bg-neutral-800 dark:border-neutral-500"
-                                border
-                            >
-                                {capitalizeFirstLetter(
-                                    getStringFromEnumValue(
-                                        UserPermissions,
-                                        Math.pow(2, index)
-                                    )
-                                        .toLowerCase()
-                                        .replace("_", " ")
-                                )}
-                            </Tooltip>
+                            <Tooltip.Provider delayDuration={300}>
+                                <Tooltip.Root>
+                                    <Tooltip.Trigger>
+                                        <PermissionIcon
+                                            class="w-4 text-app-accent"
+                                        />
+                                    </Tooltip.Trigger>
+                                    <Tooltip.Content>
+                                        {capitalizeFirstLetter(
+                                            getStringFromEnumValue(
+                                                UserPermissions,
+                                                Math.pow(2, index)
+                                            )
+                                                .toLowerCase()
+                                                .replace("_", " ")
+                                        )}
+                                    </Tooltip.Content>
+                                </Tooltip.Root>
+                            </Tooltip.Provider>
                         </div>
                     {/each}
                 </div>
-            </span>
-            <span class="text-sm">Alias: {currSelectedUser.alias}</span>
-        {/snippet}
+            {:else}
+                <span class="text-app-accent">Nessuno</span>
+            {/if}
+        </span>
+        <span class="text-sm">Alias: {currSelectedUser.alias}</span>
+    {/snippet}
 
-        <Modal
-            title={`Elimina ${currSelectedUser.username}`}
-            bind:open={deleteModalOpen}
-            class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
-            classHeader="dark:bg-neutral-800 dark:text-neutral-300"
-            classFooter="dark:bg-neutral-800 dark:text-neutral-300"
+    <Dialog.Root bind:open={deleteModalOpen}>
+        <Dialog.Content
+            onOpenAutoFocus={(e) => {
+                e.preventDefault();
+            }}
         >
+            <Dialog.Header>
+                <Dialog.Title>Elimina {currSelectedUser.username}</Dialog.Title>
+            </Dialog.Header>
             <span class="text-md"
                 >Vuoi eliminare l'utente <b>{currSelectedUser.username}</b
                 >?</span
@@ -229,10 +207,10 @@
             <div class="flex flex-col gap-2">
                 {@render UserInfo(currSelectedUser)}
             </div>
-            <div class="flex gap-2 mt-4" slot="footer">
+            <Dialog.Footer>
                 <Button
-                    class="bg-red-500 dark:bg-red-500"
-                    on:click={() => {
+                    variant="destructive"
+                    onclick={() => {
                         handleUserDelete(currSelectedUser);
                         deleteModalOpen = false;
                     }}
@@ -240,19 +218,23 @@
                     Elimina
                 </Button>
                 <Button
-                    color="alternative"
-                    class="dark:text-neutral-400 dark:border-neutral-400 dark:hover:bg-neutral-700 dark:hover:border-neutral-300"
-                    on:click={() => (deleteModalOpen = false)}>Annulla</Button
+                    variant="outline"
+                    onclick={() => (deleteModalOpen = false)}>Annulla</Button
                 >
-            </div>
-        </Modal>
-        <Modal
-            bind:open={aliasModalOpen}
-            title={`Aggiorna l'alias di ${currSelectedUser.username}`}
-            class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
-            classHeader="dark:bg-neutral-800 dark:text-neutral-300"
-            classFooter="dark:bg-neutral-800 dark:text-neutral-300"
+            </Dialog.Footer>
+        </Dialog.Content>
+    </Dialog.Root>
+    <Dialog.Root bind:open={aliasModalOpen}>
+        <Dialog.Content
+            onOpenAutoFocus={(e) => {
+                e.preventDefault();
+            }}
         >
+            <Dialog.Header>
+                <Dialog.Title
+                    >Aggiorna l'alias di {currSelectedUser.username}</Dialog.Title
+                >
+            </Dialog.Header>
             <span class="text-md"
                 >Vuoi aggiornare l'alias di <b>{currSelectedUser.username}</b
                 >?</span
@@ -261,43 +243,24 @@
                 {@render UserInfo(currSelectedUser)}
             </div>
 
-            <Label class="mt-4">
-                Nuovo alias
-                <Input
-                    bind:value={alias}
-                    class="mt-2 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
-                />
+            <Label class="mt-4 flex gap-2 items-center">
+                <span class="w-max text-nowrap">Nuovo alias</span>
+                <Input bind:value={alias} class="w-full" />
             </Label>
-            <div class="flex gap-2 mt-4" slot="footer">
-                <Button on:click={() => handleAliasChange(currSelectedUser)}
+            <Dialog.Footer>
+                <Button onclick={() => handleAliasChange(currSelectedUser)}
                     >Aggiorna</Button
                 >
                 <Button
-                    color="alternative"
-                    class="dark:text-neutral-400 dark:border-neutral-400 dark:hover:bg-neutral-700 dark:hover:border-neutral-300"
-                    on:click={() => {
+                    variant="outline"
+                    onclick={() => {
                         alias = "";
                         aliasModalOpen = false;
                     }}
                 >
                     Annulla
                 </Button>
-            </div>
-        </Modal>
-    {/if}
-{:else}
-    <div
-        class="mt-10 flex w-full flex-grow flex-col items-center justify-center gap-5"
-    >
-        <Spinner size="sm" class="max-w-12 self-center" />
-        <span class="text-2xl font-semibold text-primary-600">Attendere...</span
-        >
-    </div>
+            </Dialog.Footer>
+        </Dialog.Content>
+    </Dialog.Root>
 {/if}
-
-<FeedbackToast
-    bind:open={changeToastOpen}
-    bind:color
-    ToastIcon={toastIcon}
-    bind:message
-/>

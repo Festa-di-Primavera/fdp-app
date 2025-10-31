@@ -1,12 +1,9 @@
 <script lang="ts">
-    import {
-        Button,
-        Card,
-        Input,
-        Label,
-        Modal,
-        Spinner,
-    } from "flowbite-svelte";
+    import { Button } from "$lib/components/ui/button";
+    import * as Card from "$lib/components/ui/card";
+    import * as Dialog from "$lib/components/ui/dialog";
+    import { Input } from "$lib/components/ui/input";
+    import { Label } from "$lib/components/ui/label";
     import { onDestroy } from "svelte";
 
     import {
@@ -136,149 +133,127 @@
     <title>Dashboard</title>
 </svelte:head>
 
-<section class="flex h-full w-full flex-grow flex-col items-center gap-4">
-    <div class="flex w-full flex-grow flex-col gap-4 px-5 pb-12 pt-5">
-        {#if $user}
-            {#if tickets.length > 0}
-                <div
-                    class="m-auto w-full max-w-sm md:max-w-3xl xl:max-w-6xl 2xl:max-w-[1584px]"
-                >
-                    <h1 class="text-4xl font-bold text-primary-600">
-                        Dashboard
-                    </h1>
-                    <p class="text-justify dark:text-white">
-                        Informazioni relative ai biglietti
-                    </p>
-                </div>
-
-                <div class="flex flex-col gap-4">
-                    <div
-                        class="m-auto grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
-                    >
-                        <div
-                            class="grid h-full w-full max-w-sm grid-flow-row-dense grid-cols-2 gap-2"
-                        >
-                            <Card
-                                class="col-span-2 flex h-full w-full max-w-md flex-col items-center justify-center gap-5 pt-6 dark:bg-neutral-700 dark:border-neutral-500"
-                            >
-                                <h1
-                                    class="text-center text-5xl font-bold text-primary-600"
-                                >
-                                    {checkedTicketsCount !== undefined
-                                        ? checkedTicketsCount
-                                        : "--"}
-                                </h1>
-                                <p class="text-center dark:text-white">
-                                    Biglietti validati
-                                </p>
-                            </Card>
-                            <Card
-                                class="flex aspect-square h-full w-full flex-col items-center justify-center gap-5 pt-6 dark:bg-neutral-700 dark:border-neutral-500"
-                            >
-                                <h1
-                                    class="text-center text-5xl font-bold text-primary-600"
-                                >
-                                    {notCheckedTicketsCount !== undefined
-                                        ? notCheckedTicketsCount
-                                        : "--"}
-                                </h1>
-                                <p class="text-center dark:text-white">
-                                    Biglietti venduti non validati
-                                </p>
-                            </Card>
-                            <Card
-                                class="flex aspect-square h-full w-full flex-col items-center justify-center gap-5 pt-6 dark:bg-neutral-700 dark:border-neutral-500"
-                            >
-                                <h1
-                                    class="text-center text-5xl font-bold text-primary-600"
-                                >
-                                    {notSoldTicketsCount !== undefined
-                                        ? notSoldTicketsCount
-                                        : "--"}
-                                </h1>
-                                <p class="text-center dark:text-white">
-                                    Biglietti non venduti
-                                </p>
-                            </Card>
-                        </div>
-                        <TicketsECharts
-                            {checkedTicketsCount}
-                            {notCheckedTicketsCount}
-                            {notSoldTicketsCount}
-                        />
-                        <TicketsPerPersonECharts {sellersStats} />
-                        <TicketsPerHourECharts {sellHoursStats} />
-                        <SalesPerTimeECharts
-                            ticketsData={salesPerTime}
-                            bind:timeWindow={timeWindowSalesPerTime}
-                        />
-                        <CheckInPerTimeECharts
-                            ticketsData={checkInPerTime}
-                            bind:timeWindow={timeWindowCheckInPerTime}
-                        />
-                        <OrdersECharts {ordersStats} />
-                    </div>
-                </div>
-                <ExportToCsv bind:tickets />
-            {/if}
-        {:else}
+<section class="flex h-full w-full grow flex-col items-center gap-4">
+    <div class="flex w-full grow flex-col gap-4 px-5 pb-12 pt-5">
+        {#if tickets.length > 0}
             <div
-                class="mt-10 flex w-full flex-grow flex-col items-center justify-center gap-5"
+                class="m-auto w-full max-w-sm md:max-w-3xl xl:max-w-6xl 2xl:max-w-[1584px]"
             >
-                <Spinner size="sm" class="max-w-12 self-center" />
-                <span class="text-2xl font-semibold text-primary-600"
-                    >Attendere...</span
-                >
+                <h1 class="text-4xl font-bold text-app-accent">Dashboard</h1>
+                <p class="text-justify">Informazioni relative ai biglietti</p>
             </div>
+
+            <div class="flex flex-col gap-4">
+                <div
+                    class="m-auto grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
+                >
+                    <div
+                        class="grid h-full w-full max-w-sm grid-flow-row-dense grid-cols-2 gap-2"
+                    >
+                        <Card.Root
+                            class="col-span-2 flex h-full w-full max-w-md flex-col items-center justify-center gap-5 pt-6"
+                        >
+                            <h1
+                                class="text-center text-5xl font-bold text-[#4CAF50]"
+                            >
+                                {checkedTicketsCount !== undefined
+                                    ? checkedTicketsCount
+                                    : "--"}
+                            </h1>
+                            <p class="text-center">Biglietti validati</p>
+                        </Card.Root>
+                        <Card.Root
+                            class="flex aspect-square h-full w-full flex-col items-center justify-center gap-5 pt-6"
+                        >
+                            <h1
+                                class="text-center text-5xl font-bold text-[#FFC107]"
+                            >
+                                {notCheckedTicketsCount !== undefined
+                                    ? notCheckedTicketsCount
+                                    : "--"}
+                            </h1>
+                            <p class="text-center">
+                                Biglietti venduti non validati
+                            </p>
+                        </Card.Root>
+                        <Card.Root
+                            class="flex aspect-square h-full w-full flex-col items-center justify-center gap-5 pt-6"
+                        >
+                            <h1
+                                class="text-center text-5xl font-bold text-[#F44336]"
+                            >
+                                {notSoldTicketsCount !== undefined
+                                    ? notSoldTicketsCount
+                                    : "--"}
+                            </h1>
+                            <p class="text-center">Biglietti non venduti</p>
+                        </Card.Root>
+                    </div>
+                    <TicketsECharts
+                        {checkedTicketsCount}
+                        {notCheckedTicketsCount}
+                        {notSoldTicketsCount}
+                    />
+                    <TicketsPerPersonECharts {sellersStats} />
+                    <TicketsPerHourECharts {sellHoursStats} />
+                    <SalesPerTimeECharts
+                        ticketsData={salesPerTime}
+                        bind:timeWindow={timeWindowSalesPerTime}
+                    />
+                    <CheckInPerTimeECharts
+                        ticketsData={checkInPerTime}
+                        bind:timeWindow={timeWindowCheckInPerTime}
+                    />
+                    <OrdersECharts {ordersStats} />
+                </div>
+            </div>
+            <ExportToCsv bind:tickets />
         {/if}
     </div>
 </section>
 
-<Modal
-    bind:open
-    dismissable={false}
-    class="z-50 dark:bg-neutral-800 dark:divide-neutral-500 dark:text-neutral-300"
-    classHeader="dark:bg-neutral-800 dark:text-neutral-300"
-    classFooter="dark:bg-neutral-800 dark:text-neutral-300"
->
-    <div slot="header" class="flex items-center justify-between">
-        <h1 class="text-2xl text-primary-300">Conferma visita</h1>
-    </div>
-    <div class="leading-8">
-        <p class="select-none">
-            Per evitare letture non necessarie, confermare di voler visitare
-            questa pagina.<br />
-            Inserisci nel campo sottostante il codice
-            <span
-                class="whitespace-nowrap break-keep rounded-md bg-primary-400 bg-opacity-20 px-2 py-1 font-mono"
-                >Festa di Primavera</span
-            > per confermare.
-        </p>
-        <Label class="mt-7 flex flex-col gap-1">
-            Codice di conferma
-            <Input
-                placeholder="Festa di Primavera"
-                bind:value
-                class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
-            />
-        </Label>
-    </div>
-    <div slot="footer" class="flex gap-3">
-        <Button
-            {disabled}
-            color="primary"
-            on:click={() => {
-                if (allowedPassphrases.includes(value.trim())) {
-                    getTickets();
-                    getOrders();
-                    open = false;
-                }
-            }}>Conferma</Button
-        >
-        <Button
-            color="alternative"
-            class="dark:text-neutral-400 dark:border-neutral-400 dark:hover:bg-neutral-700 dark:hover:border-neutral-300"
-            on:click={() => goto("/")}>Annulla</Button
-        >
-    </div>
-</Modal>
+<Dialog.Root bind:open>
+    <Dialog.Content
+        onOpenAutoFocus={(e) => {
+            e.preventDefault();
+        }}
+    >
+        <Dialog.Header>
+            <Dialog.Title class="text-2xl text-app-accent"
+                >Conferma visita</Dialog.Title
+            >
+        </Dialog.Header>
+        <div class="">
+            <p class="select-none text-sm">
+                Per evitare letture non necessarie, confermare di voler visitare
+                questa pagina.<br />
+                Inserisci nel campo sottostante il codice
+                <span
+                    class="whitespace-nowrap break-keep rounded-md bg-app-accent/20 px-2 py-1 font-mono"
+                    >Festa di Primavera</span
+                > per confermare.
+            </p>
+            <div class="mt-7 flex flex-col gap-1">
+                <Label for="confirmation-code">Codice di conferma</Label>
+                <Input
+                    id="confirmation-code"
+                    placeholder="Festa di Primavera"
+                    bind:value
+                />
+            </div>
+        </div>
+        <Dialog.Footer>
+            <Button
+                {disabled}
+                onclick={() => {
+                    if (allowedPassphrases.includes(value.trim())) {
+                        getTickets();
+                        getOrders();
+                        open = false;
+                    }
+                }}>Conferma</Button
+            >
+            <Button variant="outline" onclick={() => goto("/")}>Annulla</Button>
+        </Dialog.Footer>
+    </Dialog.Content>
+</Dialog.Root>

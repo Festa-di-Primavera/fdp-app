@@ -1,24 +1,18 @@
 <script lang="ts">
-    import { Button, Card, Input, Label, Spinner } from "flowbite-svelte";
-    import {
-        Check,
-        CheckCircle2,
-        PencilLine,
-        Send,
-        Ticket as TicketIcon,
-        Trash2,
-        X,
-        XCircle,
-    } from "lucide-svelte";
+    import { Button } from "$lib/components/ui/button/index";
+    import * as Card from "$lib/components/ui/card/index";
+    import { Input } from "$lib/components/ui/input/index";
+    import { Label } from "$lib/components/ui/label/index";
+    import { Check, PencilLine, Send, Trash2, X } from "@lucide/svelte";
 
     import QrReader from "$components/QrReader.svelte";
-    import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
     import OrderModal from "$components/food/cashier/OrderModal.svelte";
     import type { User } from "$lib/auth/user";
-    import { getXnrfCode } from "$lib/utils/tickets";
+    import { getFdPOrStaffCode } from "$lib/utils/tickets";
     import { type Order, type OrderItem, ItemType } from "$models/order";
     import type { Ticket } from "$models/ticket";
     import { user } from "$store/store";
+    import { toast } from "svelte-sonner";
 
     interface Props {
         data: User;
@@ -31,36 +25,26 @@
     let ticketCodeInput: string = $state("");
 
     let ticket: Ticket | undefined = $state();
-    let open: boolean = $state(false);
-    let errorMessage: string = $state("Codice biglietto errato");
-
-    let timeOut: NodeJS.Timeout;
 
     async function getTicket(code: string) {
         const res = await fetch(`/api/tickets/${encodeURIComponent(code)}`);
         ticketCodeInput = "";
 
         if (res.status == 404 || res.status == 402 || res.status == 425) {
-            errorMessage =
+            toast.error(
                 res.status === 402
                     ? "Biglietto non ancora venduto"
                     : res.status === 425
                       ? "Biglietto non ancora validato all'ingresso"
-                      : "Codice biglietto errato";
-            open = true;
-
-            clearTimeout(timeOut);
-            timeOut = setTimeout(() => {
-                open = false;
-                clearTimeout(timeOut);
-            }, 3500);
+                      : "Codice biglietto errato"
+            );
             return;
         }
 
         let ticketResponse = (await res.json()).ticket;
 
         ticket = {
-            ticketId: getXnrfCode(code) || "",
+            ticketId: getFdPOrStaffCode(code) || "",
             name: ticketResponse.name,
             surname: ticketResponse.surname,
             seller: res.status !== 206 ? ticketResponse.seller : "Non Trovato",
@@ -73,7 +57,6 @@
         ticket = undefined;
         ticketCodeInput = "";
         ticketCode = "";
-        open = false;
     };
 
     const onKeyDown = (e: KeyboardEvent) => {
@@ -96,7 +79,6 @@
         type: ItemType.ONTO,
         quantity: 1,
         removedIngredients: [],
-        addedSauces: [],
     });
 
     let isEditing = $state(false);
@@ -169,9 +151,6 @@
         editingIndex = -1;
     }
 
-    let orderSubmitError: boolean = $state(true);
-    let orderFeedbackMessage: string = $state("");
-
     async function submitOrder() {
         try {
             const finalOrder: Order = {
@@ -179,40 +158,32 @@
                 name: `${ticket?.name}`,
                 surname: ticket?.surname || "",
                 items: orderItems,
-                done: false,
-                creationDate: new Date(Date.now()),
+                done: null,
+                creationDate: new Date(),
             };
             const response = await fetch("/api/order", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(finalOrder),
+                body: JSON.stringify({
+                    order: finalOrder
+                }),
             });
 
             if (!response.ok) {
                 throw new Error("Errore durante l'invio dell'ordine");
             }
 
-            orderFeedbackMessage = (await response.json()).message;
-            orderSubmitError = false;
+            toast.success((await response.json()).message);
             // clear order on success
             orderItems = [];
             // reset all state
             reset();
         } catch (error) {
             console.error("Error submitting order:", error);
-            orderFeedbackMessage = "Errore durante l'invio dell'ordine";
-            orderSubmitError = true;
+            toast.error("Errore durante l'invio dell'ordine");
         }
-        open = true;
-        clearTimeout(timeOut);
-        timeOut = setTimeout(() => {
-            open = false;
-            orderFeedbackMessage = "";
-            orderSubmitError = true;
-            clearTimeout(timeOut);
-        }, 3500);
     }
 
     function adjustQuantity(increment: boolean) {
@@ -228,73 +199,58 @@
     <title>Cassa</title>
 </svelte:head>
 
-<section class="flex h-full w-full flex-grow flex-col items-center gap-4">
+<section class="flex h-full w-full grow flex-col items-center gap-4">
     <div
-        class="flex w-full max-w-96 flex-grow flex-col items-start gap-4 px-5 pb-12 pt-5"
+        class="flex w-full max-w-96 grow flex-col items-start gap-4 px-5 pb-12 pt-5"
     >
-        {#if $user}
-            <h1 class="text-4xl font-bold text-primary-600">Cassa</h1>
-            <p class="text-justify dark:text-white">
-                Scansionare il QR e prendere l'ordine del cliente per inviarlo
-                in cucina.
-            </p>
-            <div class="w-full">
-                {#if !ticket}
-                    <Label
-                        class="text-md font-medium text-black dark:text-white"
-                    >
-                        Codice Biglietto <span class="text-primary-700">*</span>
-                        <Input
-                            required
-                            class="mt-1 dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
-                            bind:value={ticketCodeInput}
-                            name="code"
-                            autocomplete="off"
-                            onkeypress={onKeyDown}
-                        >
-                            <TicketIcon
-                                class="h-6 w-6 text-primary-600 dark:text-white"
-                                slot="left"
-                            />
-
-                            <div
-                                class="flex h-full items-center gap-2"
-                                slot="right"
-                            >
-                                {#if ticketCodeInput !== ""}
-                                    <button
-                                        onclick={() =>
-                                            getTicket(ticketCodeInput)}
-                                    >
-                                        <Check color="green" />
-                                    </button>
-                                    <button onclick={reset}>
-                                        <X color="indianred" />
-                                    </button>
-                                {/if}
-                            </div>
-                        </Input>
-                    </Label>
-                    <div class="my-6 flex w-full items-center justify-center">
-                        <QrReader bind:codeResult={ticketCode} />
-                    </div>
-                {:else}
-                    <div class="flex flex-col gap-5">
-                        <Card
-                            class="w-full flex flex-col text-lg p-3 dark:bg-neutral-700 dark:border-neutral-500"
-                            id="ticketInfos"
-                        >
-                            <span
-                                class="text-black dark:text-white w-full flex justify-between"
-                            >
+        <h1 class="text-4xl font-bold text-app-accent">Cassa</h1>
+        <p class="text-justify">
+            Scansionare il QR e prendere l'ordine del cliente per inviarlo in
+            cucina.
+        </p>
+        <div class="w-full">
+            {#if !ticket}
+                <Label class="text-md font-medium" for="ticketCodeInput">
+                    Codice Biglietto <span class="text-app-accent">*</span>
+                </Label>
+                <div class="flex gap-3 items-center">
+                    <Input
+                        required
+                        class="mt-1"
+                        bind:value={ticketCodeInput}
+                        name="code"
+                        id="ticketCodeInput"
+                        autocomplete="off"
+                        onkeypress={onKeyDown}
+                        placeholder={"FDP" +
+                            new Date().getFullYear().toString().slice(-2) +
+                            "-XXXX"}
+                    />
+                    {#if ticketCodeInput !== ""}
+                        <div class="flex h-full items-center gap-2">
+                            <button onclick={() => getTicket(ticketCodeInput)}>
+                                <Check color="green" />
+                            </button>
+                            <button onclick={reset}>
+                                <X color="indianred" />
+                            </button>
+                        </div>
+                    {/if}
+                </div>
+                <div class="my-6 flex w-full items-center justify-center">
+                    <QrReader bind:codeResult={ticketCode} />
+                </div>
+            {:else}
+                <div class="flex flex-col gap-5">
+                    <Card.Root id="ticketInfos">
+                        <Card.Content class="px-6 py-2">
+                            <span class="w-full flex justify-between">
                                 <span>N° biglietto:</span>
                                 <span class="font-mono">
                                     <b>{ticket.ticketId}</b>
                                 </span>
                             </span>
-                            <span
-                                class="text-black dark:text-white w-full flex justify-between"
-                            >
+                            <span class="w-full flex justify-between">
                                 <span>Nominativo:</span>
                                 <span class="text-right"
                                     >{(ticket?.name || "") +
@@ -304,7 +260,7 @@
                             </span>
                             <div class="flex justify-between mt-3">
                                 <button
-                                    class="text-sm text-primary-400 hover:text-primary-500"
+                                    class="text-sm text-app-accent hover:text-app-accent/80"
                                     onclick={reset}
                                 >
                                     Modifica codice
@@ -319,106 +275,94 @@
                                     </Button>
                                 {/if}
                             </div>
-                        </Card>
-                        <div class="flex gap-3 justify-around flex-wrap">
-                            {#each Object.values(ItemType) as type}
-                                <button
-                                    onclick={() => openOrderModal(type)}
-                                    class="flex-grow"
+                        </Card.Content>
+                    </Card.Root>
+                    <div class="flex gap-3 justify-around flex-wrap">
+                        {#each Object.values(ItemType) as type}
+                            <button
+                                onclick={() => openOrderModal(type)}
+                                class="grow"
+                            >
+                                <Card.Root
+                                    class="hover:bg-accent transition-colors"
                                 >
-                                    <Card
-                                        class="w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-200"
-                                        padding="sm">{type}</Card
-                                    >
-                                </button>
-                            {/each}
-                        </div>
-                        {#if orderItems.length > 0}
-                            <div class="mt-4 flex flex-col gap-3">
-                                <h3
-                                    class="text-lg font-semibold dark:text-white"
-                                >
-                                    Ordine corrente:
-                                </h3>
-                                {#each [...orderItems].reverse() as item, i}
-                                    <Card
-                                        padding="sm"
-                                        class="relative dark:bg-neutral-700 dark:border-neutral-500"
-                                    >
+                                    <Card.Content class="px-4 text-center">
+                                        {type}
+                                    </Card.Content>
+                                </Card.Root>
+                            </button>
+                        {/each}
+                    </div>
+                    {#if orderItems.length > 0}
+                        <div class="mt-4 flex flex-col gap-3">
+                            <h3 class="text-lg font-semibold">
+                                Ordine corrente:
+                            </h3>
+                            {#each [...orderItems].reverse() as item, i}
+                                <Card.Root class="relative">
+                                    <Card.Content class="py-0 px-4">
                                         <div
-                                            class="absolute right-2 top-2 flex gap-2"
+                                            class="absolute right-4 top-8 flex gap-3"
                                         >
                                             <button
-                                                class="p-1 hover:bg-blue-100 rounded-full transition-colors"
                                                 onclick={() => editOrder(i)}
                                             >
                                                 <PencilLine
-                                                    class="w-5 h-5 text-blue-500"
+                                                    class="w-5 h-5 text-blue-400 hover:text-blue-500"
                                                 />
                                             </button>
                                             <button
-                                                class="p-1 hover:bg-red-100 rounded-full transition-colors"
                                                 onclick={() =>
                                                     removeFromOrder(i)}
                                             >
                                                 <Trash2
-                                                    class="w-5 h-5 text-red-500"
+                                                    class="w-5 h-5 text-red-400 hover:text-red-500"
                                                 />
                                             </button>
                                         </div>
                                         <div class="pr-20">
-                                            <!-- Increased right padding to accommodate both buttons -->
                                             <div
-                                                class="flex items-baseline gap-2 mb-1"
+                                                class="flex flex-col gap-1 mb-2"
                                             >
-                                                <span
-                                                    class="font-medium text-lg"
-                                                    >{item.type}</span
+                                                <div
+                                                    class="flex items-baseline gap-2"
                                                 >
-                                                <span class="text-primary-400"
-                                                    >x{item.quantity}</span
-                                                >
+                                                    <span
+                                                        class="font-medium text-lg"
+                                                    >
+                                                        {item.type}
+                                                    </span>
+                                                    <span class="text-app-accent">
+                                                        x{item.quantity}
+                                                    </span>
+                                                </div>
                                                 {#if item.glutenFree}
                                                     <span
                                                         class="text-sm text-orange-300 font-bold"
-                                                        >No glutine</span
                                                     >
+                                                        SENZA GLUTINE
+                                                    </span>
                                                 {/if}
                                             </div>
                                             {#if item.removedIngredients?.length}
                                                 <div
-                                                    class="text-sm text-red-500 dark:text-red-400"
+                                                    class="text-sm text-red-400"
                                                 >
-                                                    Senza: {item.removedIngredients.join(
+                                                    <b>Senza:</b>
+                                                    {item.removedIngredients.join(
                                                         ", "
                                                     )}
                                                 </div>
                                             {/if}
                                         </div>
-                                    </Card>
-                                {/each}
-                            </div>
-                        {/if}
-                    </div>
-                {/if}
-
-                <FeedbackToast
-                    bind:open
-                    color={orderSubmitError ? "red" : "green"}
-                    ToastIcon={orderSubmitError ? XCircle : CheckCircle2}
-                    message={orderFeedbackMessage || errorMessage}
-                />
-            </div>
-        {:else}
-            <div
-                class="mt-10 flex w-full flex-grow flex-col items-center justify-center gap-5"
-            >
-                <Spinner size="sm" class="max-w-12 self-center" />
-                <span class="text-2xl font-semibold text-primary-600"
-                    >Attendere...</span
-                >
-            </div>
-        {/if}
+                                    </Card.Content>
+                                </Card.Root>
+                            {/each}
+                        </div>
+                    {/if}
+                </div>
+            {/if}
+        </div>
     </div>
 </section>
 
@@ -426,7 +370,6 @@
     bind:showModal
     bind:currentItem
     bind:isEditing
-    hasSauce={false}
     {addToOrder}
     {adjustQuantity}
 />

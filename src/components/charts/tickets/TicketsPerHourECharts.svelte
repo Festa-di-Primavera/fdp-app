@@ -1,11 +1,13 @@
 <script lang="ts">
-    import { init } from "$lib/charts/init";
     import type { ChartData } from "$lib/charts/utils";
-    import { theme } from "$store/store";
-    import { Card } from "flowbite-svelte";
-    import { onMount } from "svelte";
-    import { type EChartsOptions } from "svelte-echarts";
-    import ChartComponent from "../ChartComponent.svelte";
+    import type { EChartsOption } from "echarts";
+    import { BarChart } from "echarts/charts";
+    import { GridComponent, TitleComponent } from "echarts/components";
+    import { init, use } from "echarts/core";
+    import { SVGRenderer } from "echarts/renderers";
+    import * as Card from "$lib/components/ui/card";
+    import { mode } from "mode-watcher";
+    import { Chart } from "svelte-echarts";
 
     interface Props {
         sellHoursStats: ChartData;
@@ -13,21 +15,22 @@
 
     let { sellHoursStats }: Props = $props();
 
-    const options = $derived({
+    use([BarChart, SVGRenderer, TitleComponent, GridComponent]);
+    const options: EChartsOption = $derived({
         grid: {
             containLabel: true,
             left: 10,
             right: 25,
         },
-        backgroundColor: $theme == "dark" ? "#414041" : "white",
+        backgroundColor: "transparent",
         xAxis: {
             data: sellHoursStats.labels,
             axisLabel: {
-                color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                color: mode.current == "dark" ? "white" : "black",
             },
             axisLine: {
                 lineStyle: {
-                    color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                    color: mode.current == "dark" ? "white" : "black",
                 },
             },
         },
@@ -43,11 +46,11 @@
                 symbolSize: [8, 8],
                 symbolOffset: [0, 8],
                 lineStyle: {
-                    color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                    color: mode.current == "dark" ? "white" : "black",
                 },
             },
             axisLabel: {
-                color: $theme == "dark" ? "white" : "rgb(55 65 81)",
+                color: mode.current == "dark" ? "white" : "black",
             },
             minInterval: 5,
             min: 0,
@@ -69,7 +72,7 @@
                     show: true,
                 },
                 name: "Biglietti Venduti",
-                color: "#008b27",
+                color: "dodgerblue",
             },
         ],
         // scorri il grafico con il mouse
@@ -96,48 +99,33 @@
                     name: "graph",
                     iconStyle: {
                         borderColor:
-                            $theme == "dark" ? "white" : "rgb(55 65 81)",
+                            mode.current == "dark" ? "white" : "black",
                         borderWidth: 1.5,
                     },
                     icon: `path://M 7 10 L 12 15 L 17 10 M 21 15 v 4 a 2 2 0 0 1 -2 2 H 5 a 2 2 0 0 1 -2 -2 v -4 M 12 4 L 12 15`,
                     emphasis: {
                         iconStyle: {
-                            borderColor: "#008b27",
+                            borderColor: "dodgerblue",
                         },
                     },
                 },
             },
         },
-    } as EChartsOptions);
-
-    let displayChart = $state(false);
-
-    onMount(() => {
-        $theme = localStorage.getItem("color-theme") as "light" | "dark";
-        setTimeout(() => {
-            displayChart = true;
-        }, 300);
     });
 </script>
 
-<Card class="h-96 w-full dark:bg-neutral-700 dark:border-neutral-500">
-    <div class="flex w-full items-start justify-between">
-        <div class="flex-col items-center">
-            <div class="mb-1 flex items-center">
-                <h5
-                    class="me-1 text-xl font-bold leading-none text-gray-900 dark:text-white"
-                >
-                    Vendite per Fascia Oraria
-                </h5>
+<Card.Root class="min-h-[25rem]">
+    <Card.Header class="mb-0">
+        <Card.Title>Vendite per Fascia Oraria</Card.Title>
+        <Card.Description>
+            Visualizza le vendite distribuite per ora
+        </Card.Description>
+    </Card.Header>
+    <Card.Content class="h-full">
+        {#if options !== null}
+            <div class="h-full w-full">
+                <Chart {options} {init} />
             </div>
-        </div>
-    </div>
-
-    {#if options !== null}
-        <div class="mt-5 h-full w-full">
-            {#if displayChart}
-                <ChartComponent {options} {init} />
-            {/if}
-        </div>
-    {/if}
-</Card>
+        {/if}
+    </Card.Content>
+</Card.Root>

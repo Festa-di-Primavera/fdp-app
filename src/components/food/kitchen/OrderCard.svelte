@@ -1,7 +1,8 @@
 <script lang="ts">
+    import { Button } from "$lib/components/ui/button/index";
+    import * as Card from "$lib/components/ui/card/index";
     import { ItemType, type Order } from "$models/order";
-    import { Button, Card } from "flowbite-svelte";
-    import { AlertTriangle, Leaf } from "lucide-svelte";
+    import { Leaf, TriangleAlert } from "@lucide/svelte";
 
     interface Props {
         order: Order;
@@ -38,24 +39,25 @@
     }
 </script>
 
-<Card
-    class="w-[22rem] h-max border-t-4 relative dark:bg-neutral-700"
+<Card.Root
+    class="w-88 h-max border-t-4 relative"
     style="border-top-color: {color}"
-    border={false}
 >
-    <div class="flex justify-between items-center gap-3 mb-4">
-        <h2 class="text-md font-semibold" style="color: {color}">
-            {order.name}
-            {order.surname}
-        </h2>
-        <span class="text-lg text-gray-700 dark:text-gray-200">
-            <span class="font-mono">
-                <b>{order.ticketId}</b>
+    <Card.Header class="pb-3">
+        <div class="flex justify-between items-center gap-3">
+            <Card.Title class="text-md font-semibold" style="color: {color}">
+                {order.name}
+                {order.surname}
+            </Card.Title>
+            <span class="text-lg">
+                <span class="font-mono">
+                    <b>{order.ticketId}</b>
+                </span>
             </span>
-        </span>
-    </div>
+        </div>
+    </Card.Header>
 
-    <div class="space-y-3 dark:text-white">
+    <Card.Content class="space-y-3 dark:text-white">
         {#each order.items as item, itemIndex}
             <div
                 class="border-b-2 border-gray-200 dark:border-gray-400 pb-3 last:border-0"
@@ -85,9 +87,9 @@
                             <div
                                 class="animate-bounce-custom flex items-center gap-2 text-md text-amber-600 dark:text-amber-400 underline underline-offset-4 font-bold"
                             >
-                                <AlertTriangle />
+                                <TriangleAlert />
                                 NO GLUTINE
-                                <AlertTriangle />
+                                <TriangleAlert />
                             </div>
                             <style>
                                 @keyframes bounce {
@@ -116,17 +118,11 @@
                                 }
                             </style>
                         {/if}
-                        {#if item.sauce}
-                            <span
-                                class="text-md text-green-500 dark:text-green-300 font-semibold"
-                                >{item.sauce}</span
-                            >
-                        {/if}
                     </div>
                     <button
                         class="px-2 py-1 text-sm rounded-md font-semibold border-2 text-nowrap
                                     {item.ready
-                            ? 'border-primary-400 text-primary-400'
+                            ? 'border-app-accent text-app-accent'
                             : 'border-gray-500 text-gray-500 dark:border-neutral-400 dark:text-neutral-400'}"
                         onclick={() => toggleItemReady(order, itemIndex)}
                     >
@@ -148,13 +144,15 @@
                 {/if}
             </div>
         {/each}
-    </div>
+    </Card.Content>
 
     {#if order.items.every((item) => item.ready === true)}
-        <div class="mt-2 flex justify-end">
-            <Button size="sm" onclick={() => closeOrder(order.firebaseId)}>
-                Chiudi Ordine
-            </Button>
-        </div>
+        <Card.Footer class="pt-0">
+            <div class="flex justify-end w-full">
+                <Button onclick={() => closeOrder(order.firebaseId)}>
+                    Chiudi Ordine
+                </Button>
+            </div>
+        </Card.Footer>
     {/if}
-</Card>
+</Card.Root>

@@ -1,21 +1,15 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
-    import {
-        Button,
-        Card,
-        Fileupload,
-        Input,
-        Label,
-        NumberInput,
-        Progressbar,
-        Spinner,
-    } from "flowbite-svelte";
-    import { CheckCircle2, XCircle } from "lucide-svelte";
+    import { Button } from "$lib/components/ui/button/index";
+    import { Input } from "$lib/components/ui/input/index";
+    import { Label } from "$lib/components/ui/label/index";
+    import * as Card from "$lib/components/ui/card/index";
+    import * as Progress from "$lib/components/ui/progress/index";
     import { sineOut } from "svelte/easing";
 
-    import FeedbackToast from "$components/feedbacks/FeedbackToast.svelte";
     import type { User } from "$lib/auth/user";
     import { user } from "$store/store";
+    import { toast } from "svelte-sonner";
 
     interface Props {
         data: User;
@@ -49,7 +43,7 @@
 
         const totalChunks = Math.ceil(codes.length / 50);
         let completedChunks = 0;
-        let hasError = false;
+        let error = false;
 
         for (let i = 0; i < codes.length; i += 50) {
             const chunk = codes.slice(i, i + 50);
@@ -65,28 +59,19 @@
                 completedChunks++;
                 progress = (completedChunks / totalChunks) * 100;
             } else {
-                hasError = true;
+                error = true;
                 break;
             }
         }
 
-        // Mostra il toast solo alla fine del processo
-        error = hasError;
-        color = hasError ? "red" : "green";
-        message = hasError
-            ? "Errore durante l'inserimento dei codici"
-            : "Codici inseriti con successo";
-        open = true;
-
-        // Nascondi la progress bar dopo un breve delay
-        setTimeout(() => {
-            showProgress = false;
-            progress = 0;
-            // Nascondi anche il toast dopo qualche secondo
+        if (error) {
+            toast.error("Errore durante l'inserimento dei codici");
+        } else {
+            toast.success("Codici inseriti con successo");
             setTimeout(() => {
-                open = false;
-            }, 3500);
-        }, 1000);
+                showProgress = false;
+            }, 2000);
+        }
     };
 
     let ticketsNumber = $state(1250);
@@ -102,55 +87,47 @@
             },
             body: JSON.stringify({ ticketsNumber, ticketsPerBlock, startCode }),
         });
+        let error = true;
         if (res.ok) {
             error = false;
-            color = "green";
-        } else {
-            error = true;
-            color = "red";
         }
-        message = (await res.json()).message;
-        open = true;
-        clearTimeout(timeOut);
-        timeOut = setTimeout(() => {
-            open = false;
-            clearTimeout(timeOut);
-        }, 3500);
+        const message = (await res.json()).message;
+        if (error) {
+            toast.error(message);
+        } else {
+            toast.success(message);
+        }
     };
-
-    let open = $state(false);
-    let color: "green" | "red" | "yellow" = $state("green");
-    let timeOut: NodeJS.Timeout;
-    let message = $state("");
-    let error = $state(false);
-    let ToastIcon = $derived(error ? XCircle : CheckCircle2);
 </script>
 
 <svelte:head>
     <title>Genera</title>
 </svelte:head>
 
-{#if $user}
-    <section
-        class="flex h-full w-full flex-grow flex-wrap items-start justify-center gap-4 py-6 px-6"
-    >
-        <Card padding="md" class="dark:bg-neutral-900 dark:border-neutral-600">
+<section
+    class="flex h-full w-full grow flex-wrap items-start justify-center gap-4 py-6 px-6"
+>
+    <Card.Root>
+        <Card.Header>
+            <Card.Title class="text-4xl font-bold text-app-accent">
+                Genera Biglietti
+            </Card.Title>
+        </Card.Header>
+        <Card.Content>
             <div
-                class="flex w-full max-w-96 flex-grow flex-col items-start gap-2"
+                class="flex w-full max-w-96 grow flex-col items-start gap-2"
             >
-                <h1 class="text-4xl font-bold text-primary-600">
-                    Genera Biglietti
-                </h1>
-                <p class="text-justify dark:text-white">
+                <p class="text-justify">
                     Da questa card puoi generare i biglietti e inserirli nel
                     sistema.
                 </p>
-                <main class="w-full text-center">
+                <div class="w-full text-center mt-3">
                     <div class="flex gap-8">
-                        <Label class="flex flex-col items-start py-4">
-                            Prefisso:
+                        <div>
+                            <Label for="prefix">Prefisso:</Label>
                             <Input
-                                class="mt-2 text-center dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+                                id="prefix"
+                                class="mt-2 text-center"
                                 bind:value={prefix}
                                 placeholder={"FDP" +
                                     (
@@ -158,66 +135,71 @@
                                     )?.toString() +
                                     "-"}
                             />
-                        </Label>
-                        <Label class="flex flex-col items-start py-4">
-                            Suffisso:
+                        </div>
+                        <div>
+                            <Label for="suffix">Suffisso:</Label>
                             <Input
-                                class="mt-2 text-center dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
+                                id="suffix"
+                                class="mt-2 text-center"
                                 bind:value={suffix}
                             />
-                        </Label>
+                        </div>
                     </div>
-                    <div class="flex gap-8">
-                        <Label class="flex flex-col items-start gap-4 py-4">
-                            N° cifre del codice:
-                            <NumberInput
+                    <div class="flex gap-8 mt-5">
+                        <div class="w-full">
+                            <Label for="codeLength">N° cifre del codice:</Label>
+                            <Input
+                                id="codeLength"
+                                type="number"
                                 bind:value={codeLength}
-                                class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
                             />
-                        </Label>
-                        <Label class="flex flex-col items-start gap-4 py-4">
-                            Quantità di codici:
-                            <NumberInput
+                        </div>
+                        <div class="w-full">
+                            <Label for="numberOfCodes"
+                                >Quantità di codici:</Label
+                            >
+                            <Input
+                                id="numberOfCodes"
+                                type="number"
                                 bind:value={numberOfCodes}
-                                class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
                             />
-                        </Label>
-                        <Label class="flex flex-col items-start gap-4 py-4">
-                            Numero di partenza:
-                            <NumberInput
+                        </div>
+                        <div class="w-full">
+                            <Label for="startingNumber"
+                                >Numero di partenza:</Label
+                            >
+                            <Input
+                                id="startingNumber"
+                                type="number"
                                 bind:value={startingNumber}
-                                class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
                             />
-                        </Label>
+                        </div>
                     </div>
                     <div class="flex w-full flex-col gap-3 py-2">
                         {#if showProgress}
-                            <Progressbar
-                                {progress}
-                                animate
-                                precision={2}
-                                size="h-4"
-                                labelInside
-                                tweenDuration={1500}
-                                easing={sineOut}
+                            <div class="w-full flex items-center justify-between font-bold mt-5">
+                                <span id="progress-label"> Generazione in corso ...</span>
+                                <span>{progress}%</span>
+                            </div>
+                            <Progress.Root
+                                value={progress}
+                                max={100}
+                                class="h-2 bg-app-accent/20 mb-5"
+                                indicatorClass="bg-app-accent"
                             />
                         {/if}
-                        <span
-                            class="text-sm font-medium text-gray-900 dark:text-gray-300 rtl:text-right"
-                        >
+                        <span class="text-sm font-medium rtl:text-right mt-2">
                             Formato codici: <b class=""
                                 >{prefix}{startingNumber
                                     ?.toString()
                                     .padStart(codeLength, "0")}{suffix}</b
                             >
                         </span>
-                        <span
-                            class="text-sm font-medium text-gray-900 dark:text-gray-300 rtl:text-right"
-                        >
+                        <span class="text-sm font-medium rtl:text-right">
                             Cliccando qui sotto verranno generati e inseriti nel
                             database i codici da
                             <span
-                                class="text-sm font-medium text-primary-700 dark:text-primary-300 rtl:text-right"
+                                class="text-sm font-medium text-app-accent rtl:text-right"
                             >
                                 {prefix}{startingNumber
                                     ?.toString()
@@ -225,28 +207,29 @@
                             </span>
                             a
                             <span
-                                class="text-sm font-medium text-primary-700 dark:text-primary-300 rtl:text-right"
+                                class="text-sm font-medium text-app-accent rtl:text-right"
                             >
                                 {prefix}{(startingNumber + numberOfCodes - 1)
                                     ?.toString()
                                     .padStart(codeLength, "0")}{suffix}
                             </span>
                         </span>
-                        <Button
-                            on:click={insertCodes}
-                            class="rounded text-white">Inserisci Codici</Button
-                        >
+                        <Button onclick={insertCodes}>Inserisci Codici</Button>
                     </div>
-                </main>
+                </div>
             </div>
-        </Card>
-        <Card class="dark:bg-neutral-900 dark:border-neutral-600">
+        </Card.Content>
+    </Card.Root>
+    <Card.Root>
+        <Card.Header>
+            <Card.Title class="text-4xl font-bold text-app-accent">
+                Inserisci da file
+            </Card.Title>
+        </Card.Header>
+        <Card.Content>
             <div
-                class="flex w-full max-w-96 flex-grow flex-col items-start gap-2"
+                class="flex w-full max-w-96 grow flex-col items-start gap-2"
             >
-                <h1 class="text-4xl font-bold text-primary-600">
-                    Inserisci da file
-                </h1>
                 <p class="text-justify dark:text-white">
                     Da questa card puoi inserire un CSV che contiene un codice
                     per riga se il generatore non soddisfa i requisiti.
@@ -255,92 +238,99 @@
                     method="post"
                     use:enhance
                     enctype="multipart/form-data"
-                    class="flex w-full flex-col gap-4"
+                    class="flex w-full flex-col gap-4 p-2"
                 >
-                    <Fileupload
-                        name="fileToUpload"
-                        size="sm"
-                        class="mt-4 p-0 w-full dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400 [&::file-selector-button]:!bg-neutral-600 [&::file-selector-button]:!hover:bg-neutral-700"
-                        accept=".csv"
-                    />
+                    <Input type="file" name="fileToUpload" accept=".csv" />
                     <Button type="submit">Inserisci Codici da file</Button>
                 </form>
             </div>
-        </Card>
-        <Card padding="md" class="dark:bg-neutral-900 dark:border-neutral-600">
+        </Card.Content>
+    </Card.Root>
+    <Card.Root>
+        <Card.Header>
+            <Card.Title class="text-4xl font-bold text-app-accent">
+                Genera Blocchetti
+            </Card.Title>
+        </Card.Header>
+        <Card.Content>
             <div
-                class="flex w-full max-w-96 flex-grow flex-col items-start gap-2"
+                class="flex w-full max-w-96 grow flex-col items-start gap-2"
             >
-                <h1 class="text-4xl font-bold text-primary-600">
-                    Genera Blocchetti
-                </h1>
                 <p class="text-justify dark:text-white">
                     Da questa card puoi generare i blocchi di biglietti da
                     assegnare ai venditori.<br /><br />
-                    <b class="text-primary-300">Attenzione:</b> i blocchetti già
-                    presenti nel database verranno cancellati e sostituiti con i
-                    nuovi.
+                    <b class="text-amber-500">Attenzione:</b> i blocchetti già
+                    presenti nel database verranno
+                    <span class="text-destructive underline underline-offset-3"
+                        >cancellati</span
+                    > e sostituiti con i nuovi.
                 </p>
                 <main class="w-full text-center">
-                    <div class="flex gap-8">
-                        <Label class="flex flex-col items-start gap-4 py-4">
-                            N° biglietti già inseriti:
-                            <NumberInput
+                    <div class="flex gap-8 mb-5">
+                        <div>
+                            <Label
+                                class="flex flex-col items-start gap-4 py-4"
+                                for="ticketsNumber"
+                            >
+                                N° biglietti già inseriti:
+                            </Label>
+                            <Input
+                                id="ticketsNumber"
+                                type="number"
                                 bind:value={ticketsNumber}
-                                class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
                             />
-                        </Label>
-                        <Label class="flex flex-col items-start gap-4 py-4">
-                            N° biglietti per blocco:
-                            <NumberInput
+                        </div>
+                        <div>
+                            <Label
+                                class="flex flex-col items-start gap-4 py-4"
+                                for="ticketsPerBlock"
+                            >
+                                N° biglietti per blocco:
+                            </Label>
+                            <Input
+                                id="ticketsPerBlock"
+                                type="number"
                                 bind:value={ticketsPerBlock}
-                                class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
                             />
-                        </Label>
-                        <Label class="flex flex-col items-start gap-4 py-4">
-                            Codice di partenza:
-                            <NumberInput
+                        </div>
+                        <div>
+                            <Label
+                                class="flex flex-col items-start gap-4 py-4"
+                                for="startCode"
+                            >
+                                Codice di partenza:
+                            </Label>
+                            <Input
+                                id="startCode"
+                                type="number"
                                 bind:value={startCode}
-                                class="dark:bg-neutral-700 dark:border-neutral-500 dark:text-neutral-300 dark:placeholder-neutral-400"
                             />
-                        </Label>
+                        </div>
                     </div>
                     <div class="flex w-full flex-col gap-3 py-2">
                         {#if isNotDivisibile}
                             <span class="text-sm"
-                                ><b class="text-primary-300">{ticketsNumber}</b>
+                                ><b class="text-destructive">{ticketsNumber}</b>
                                 non è divisibile per
-                                <b class="text-primary-300">{ticketsPerBlock}</b
+                                <b class="text-destructive">{ticketsPerBlock}</b
                                 >
                             </span>
                         {:else}
                             <span class="text-sm"
-                                >Verranno generati <b class="text-primary-300"
+                                >Verranno generati <b class="text-app-accent"
                                     >{ticketsNumber / ticketsPerBlock}</b
                                 >
                                 blocchetti da
-                                <b class="text-primary-300">{ticketsPerBlock}</b
-                                > biglietti</span
+                                <b class="text-app-accent">{ticketsPerBlock}</b> biglietti</span
                             >
                         {/if}
                         <Button
-                            on:click={insertBlocks}
-                            class="rounded text-white"
+                            onclick={insertBlocks}
                             disabled={isNotDivisibile}>Genera Blocchetti</Button
                         >
                     </div>
                 </main>
             </div>
-        </Card>
-    </section>
-{:else}
-    <div
-        class="mt-10 flex w-full flex-grow flex-col items-center justify-center gap-5"
-    >
-        <Spinner size="sm" class="max-w-12 self-center" />
-        <span class="text-2xl font-semibold text-primary-600">Attendere...</span
-        >
-    </div>
-{/if}
-
-<FeedbackToast bind:open bind:color bind:message {ToastIcon} />
+        </Card.Content>
+    </Card.Root>
+</section>
