@@ -183,6 +183,11 @@
                         name="code"
                         id="ticketCodeInput"
                         autocomplete="off"
+                        placeholder={"FDP" +
+                            new Date().getFullYear().toString().slice(-2) +
+                            "-XXXX o STAFF" +
+                            new Date().getFullYear().toString().slice(-2) +
+                            "-XXXX"}
                         onkeypress={onKeyDown}
                     />
                     {#if ticketCodeInput !== ""}

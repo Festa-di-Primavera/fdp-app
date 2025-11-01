@@ -121,18 +121,15 @@
 
     function addToOrder() {
         if (isEditing) {
-            // In modalità modifica, mantieni la posizione originale
             orderItems = orderItems.map((item, index) =>
                 index === editingIndex ? { ...currentItem } : item
             );
         } else {
-            // Cerca un ordine identico esistente
             const existingIndex = orderItems.findIndex((item) =>
                 areOrderItemsEqual(item, currentItem)
             );
 
             if (existingIndex !== -1) {
-                // Aggiorna la quantità dell'ordine esistente
                 orderItems = orderItems.map((item, index) =>
                     index === existingIndex
                         ? {
@@ -142,7 +139,6 @@
                         : item
                 );
             } else {
-                // Aggiungi nuovo ordine
                 orderItems = [...orderItems, { ...currentItem }];
             }
         }
@@ -176,9 +172,7 @@
             }
 
             toast.success((await response.json()).message);
-            // clear order on success
             orderItems = [];
-            // reset all state
             reset();
         } catch (error) {
             console.error("Error submitting order:", error);
@@ -223,6 +217,8 @@
                         autocomplete="off"
                         onkeypress={onKeyDown}
                         placeholder={"FDP" +
+                            new Date().getFullYear().toString().slice(-2) +
+                            "-XXXX o STAFF" +
                             new Date().getFullYear().toString().slice(-2) +
                             "-XXXX"}
                     />

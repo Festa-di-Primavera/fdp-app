@@ -1,4 +1,4 @@
-import { ItemType, type Order, BaseIngredient } from "../../../models/order";
+import { ItemType, type Order } from "../../../models/order";
 import React from 'react';
 
 interface StaffOrderOGProps {
@@ -7,22 +7,7 @@ interface StaffOrderOGProps {
 	logoBase64: string;
 }
 
-function getIngredientsList(type: ItemType): string {
-	switch (type) {
-		case ItemType.ONTO:
-			return "Pane, hamburger, formaggio, cipolla, peperoni, insalata";
-		case ItemType.VEGETARIANO:
-			return "Pane, formaggio, cipolla, peperoni, insalata";
-		case ItemType.BASIC:
-			return "Pane, hamburger, formaggio";
-		default:
-			return "ERRORE NEL RECUPERO DEGLI INGREDIENTI";
-	}
-}
-
 export default function StaffOrderOG({ order, qrCodeBase64, logoBase64 }: StaffOrderOGProps) {
-	const item = order.items[0];
-
 	return (
 		<div
 			style={{
