@@ -1,5 +1,5 @@
-import { ItemType, type Order } from "../../../models/order";
-import React from 'react';
+import { type Order } from "../../../models/order";
+import React from "react";
 
 interface StaffOrderOGProps {
 	order: Order;
