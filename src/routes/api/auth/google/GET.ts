@@ -1,4 +1,4 @@
-import { GOOGLE_OAUTH_CLIENT } from "$lib/auth/google";
+import { createGoogleOAuthClient } from "$lib/auth/google";
 import type { RequestEvent } from "@sveltejs/kit";
 import { redirect } from "@sveltejs/kit";
 import { generateCodeVerifier, generateState } from "arctic";
@@ -6,7 +6,7 @@ import { generateCodeVerifier, generateState } from "arctic";
 export async function handleRequest(event: RequestEvent): Promise<Response> {
     const state = generateState();
     const codeVerifier = generateCodeVerifier();
-    const url = GOOGLE_OAUTH_CLIENT.createAuthorizationURL(
+    const url = createGoogleOAuthClient(event.url.origin).createAuthorizationURL(
         state,
         codeVerifier,
         ["openid", "profile", "email"]

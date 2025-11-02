@@ -1,4 +1,4 @@
-import { GOOGLE_OAUTH_CLIENT } from "$lib/auth/google";
+import { createGoogleOAuthClient } from "$lib/auth/google";
 import {
     createSession,
     generateSessionToken,
@@ -33,7 +33,7 @@ export async function handleRequest(event: RequestEvent): Promise<Response> {
     }
 
     try {
-        const tokens = await GOOGLE_OAUTH_CLIENT.validateAuthorizationCode(
+        const tokens = await createGoogleOAuthClient(event.url.origin).validateAuthorizationCode(
             code,
             codeVerifier
         );
