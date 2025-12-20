@@ -13,7 +13,9 @@
 
     let { data, form }: Props = $props();
 
-    if (!$user) $user = data;
+    $effect(() => {
+        if (!$user) $user = data;
+    });
 
     $effect(() => {
         if (form && form.error) {
@@ -40,7 +42,7 @@
         <h1 class="text-app-accent font-bold text-4xl">Verifica Email</h1>
         <p class="text-justify">
             Inserisci il codice di verifica ricevuto all'email <b
-                class="text-app-accent">{$user.email}</b
+                class="text-app-accent">{$user?.email}</b
             > per verificare il tuo account
         </p>
         <form

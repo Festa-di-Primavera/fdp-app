@@ -16,7 +16,9 @@
     }
 
     let { data }: Props = $props();
-    if (!$user) $user = data;
+    $effect(() => {
+        if (!$user) $user = data;
+    });
 
     // prefisso = FDP24 se 2024, FDP25 se 2025, ecc.
     let prefix = $state(
@@ -114,9 +116,7 @@
             </Card.Title>
         </Card.Header>
         <Card.Content>
-            <div
-                class="flex w-full max-w-96 grow flex-col items-start gap-2"
-            >
+            <div class="flex w-full max-w-96 grow flex-col items-start gap-2">
                 <p class="text-justify">
                     Da questa card puoi generare i biglietti e inserirli nel
                     sistema.
@@ -177,8 +177,12 @@
                     </div>
                     <div class="flex w-full flex-col gap-3 py-2">
                         {#if showProgress}
-                            <div class="w-full flex items-center justify-between font-bold mt-5">
-                                <span id="progress-label"> Generazione in corso ...</span>
+                            <div
+                                class="w-full flex items-center justify-between font-bold mt-5"
+                            >
+                                <span id="progress-label">
+                                    Generazione in corso ...</span
+                                >
                                 <span>{progress}%</span>
                             </div>
                             <Progress.Root
@@ -227,9 +231,7 @@
             </Card.Title>
         </Card.Header>
         <Card.Content>
-            <div
-                class="flex w-full max-w-96 grow flex-col items-start gap-2"
-            >
+            <div class="flex w-full max-w-96 grow flex-col items-start gap-2">
                 <p class="text-justify dark:text-white">
                     Da questa card puoi inserire un CSV che contiene un codice
                     per riga se il generatore non soddisfa i requisiti.
@@ -253,9 +255,7 @@
             </Card.Title>
         </Card.Header>
         <Card.Content>
-            <div
-                class="flex w-full max-w-96 grow flex-col items-start gap-2"
-            >
+            <div class="flex w-full max-w-96 grow flex-col items-start gap-2">
                 <p class="text-justify dark:text-white">
                     Da questa card puoi generare i blocchi di biglietti da
                     assegnare ai venditori.<br /><br />
@@ -321,7 +321,8 @@
                                     >{ticketsNumber / ticketsPerBlock}</b
                                 >
                                 blocchetti da
-                                <b class="text-app-accent">{ticketsPerBlock}</b> biglietti</span
+                                <b class="text-app-accent">{ticketsPerBlock}</b>
+                                biglietti</span
                             >
                         {/if}
                         <Button

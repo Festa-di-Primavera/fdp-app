@@ -36,7 +36,9 @@
     }
 
     let { data }: Props = $props();
-    if (data.user) $user = data.user;
+    $effect(() => {
+        if (data.user) $user = data.user;
+    });
 
     let tickets: Ticket[] = $state([]);
     let orders: Order[] = $state([]);

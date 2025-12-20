@@ -16,9 +16,11 @@
 
     let { data }: Props = $props();
 
-    if (!$user) $user = data.user;
+    $effect(() => {
+        if (!$user) $user = data.user;
+    });
 
-    let sellers: User[] = $state(data.sellers);
+    let sellers: User[] = $derived(data.sellers);
     const debtToClaimMap: { [key: string]: number } = $state({});
 
     const claimMoney = async (selectedUser: User) => {

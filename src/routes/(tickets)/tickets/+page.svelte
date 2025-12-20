@@ -21,7 +21,9 @@
 
     let { data }: Props = $props();
 
-    if (!$user) $user = data.currUser;
+    $effect(() => {
+        if (!$user) $user = data.currUser;
+    });
 
     let unsubscribe: Unsubscribe = () => {};
 
