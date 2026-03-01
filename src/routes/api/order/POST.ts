@@ -9,7 +9,7 @@ import { hasAnyPermissions } from "$lib/utils/permissions";
 import { sendEmail } from "$lib/utils/resend";
 import type { Order } from "$models/order";
 import { UserPermissions } from "$models/permissions";
-import { doc, getDoc, setDoc, Timestamp, updateDoc } from "firebase/firestore";
+import { doc, getFirestore, runTransaction, setDoc, Timestamp } from "firebase/firestore";
 import type { Attachment } from "resend";
 import { v4 as uuidv4 } from "uuid";
 
@@ -23,7 +23,7 @@ export async function handleRequest(
             {
                 status: 401,
                 headers: {
-                    "Content-Type": "text/plain",
+                    "Content-Type": "application/json",
                 },
             }
         );
@@ -41,7 +41,7 @@ export async function handleRequest(
             {
                 status: 403,
                 headers: {
-                    "Content-Type": "text/plain",
+                    "Content-Type": "application/json",
                 },
             }
         );
@@ -61,25 +61,23 @@ export async function handleRequest(
 
     const orderUUID = uuidv4();
 
-    await setDoc(doc(ORDERS, orderUUID), {
-        ...order,
-        creationDate: Timestamp.fromDate(new Date(order.creationDate)),
-    })
-        .then(() => {
-            console.log("Document successfully written for ", order.name);
-        })
-        .catch((error) => {
-            console.error("Error adding document: ", error);
-            return new Response(
-                JSON.stringify({ message: "Errore nell'invio dell'ordine" }),
-                {
-                    status: 500,
-                    headers: {
-                        "Content-Type": "text/plain",
-                    },
-                }
-            );
+    try {
+        await setDoc(doc(ORDERS, orderUUID), {
+            ...order,
+            creationDate: Timestamp.fromDate(new Date(order.creationDate)),
         });
+    } catch (err) {
+        console.error("Error adding document: ", err);
+        return new Response(
+            JSON.stringify({ message: "Errore nell'invio dell'ordine" }),
+            {
+                status: 500,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+    }
 
     if (shouldSendEmail) {
         if (!order.email) {
@@ -166,27 +164,30 @@ export async function handleRequest(
         {
             status: 201,
             headers: {
-                "Content-Type": "text/plain",
+                "Content-Type": "application/json",
             },
         }
     );
 }
 
 async function getStaffTicketId(): Promise<string> {
+    const db = getFirestore();
     const docRef = doc(
         STAFF_TICKETS_INCREMENTAL,
         `STAFF${new Date().getFullYear()}`
     );
-    const ticketCounter = await getDoc(docRef);
-    if (!ticketCounter.exists()) {
-        await setDoc(docRef, { counter: 1 });
-        return `STAFF${new Date().getFullYear().toString().slice(-2)}-0001`;
-    }
 
-    const currentNumber = ticketCounter.data().counter as number;
-
-    const num = currentNumber + 1;
-    await updateDoc(docRef, { counter: num });
+    const num = await runTransaction(db, async (transaction) => {
+        const ticketCounter = await transaction.get(docRef);
+        if (!ticketCounter.exists()) {
+            transaction.set(docRef, { counter: 1 });
+            return 1;
+        }
+        const currentNumber = ticketCounter.data().counter as number;
+        const nextNumber = currentNumber + 1;
+        transaction.update(docRef, { counter: nextNumber });
+        return nextNumber;
+    });
 
     return `STAFF${new Date().getFullYear().toString().slice(-2)}-${num
         .toString()

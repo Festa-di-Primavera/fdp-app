@@ -131,11 +131,11 @@
         <div class="grid grid-cols-3 gap-2 sm:flex sm:gap-7 mb-6">
             <div class="flex flex-col items-center">
                 <span
-                    class="text-md font-medium text-app-accent"
+                    class="text-md font-medium text-green-500 dark:text-green-400"
                     >Preparati</span
                 >
                 <span
-                    class="text-2xl font-semibold text-app-accent"
+                    class="text-2xl font-semibold text-green-500 dark:text-green-400"
                     >{doneOrders.length}</span
                 >
             </div>

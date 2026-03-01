@@ -10,7 +10,7 @@ export async function handleRequest(request: Request, locals: App.Locals) {
             {
                 status: 401,
                 headers: {
-                    "Content-Type": "text/plain",
+                    "Content-Type": "application/json",
                 },
             }
         );
@@ -24,7 +24,7 @@ export async function handleRequest(request: Request, locals: App.Locals) {
             {
                 status: 403,
                 headers: {
-                    "Content-Type": "text/plain",
+                    "Content-Type": "application/json",
                 },
             }
         );

@@ -1,6 +1,7 @@
 import satori from "satori";
 import { Resvg } from "@resvg/resvg-js";
 import type { Order } from "$models/order";
+import { COLORS } from "./colors";
 
 // Fetch Inter font from CDN
 async function loadFont(): Promise<ArrayBuffer> {
@@ -67,8 +68,8 @@ export async function generateOrderImage(
                                         justifyContent: "center",
                                         padding: "30px 0",
                                         marginBottom: "30px",
-                                        borderTop: "1px solid #3DDC84",
-                                        borderBottom: "1px solid #3DDC84",
+                                        borderTop: `1px solid ${COLORS.primary}`,
+                                        borderBottom: `1px solid ${COLORS.primary}`,
                                         width: "100%",
                                     },
                                     children: {
@@ -102,7 +103,7 @@ export async function generateOrderImage(
                                             props: {
                                                 style: {
                                                     fontSize: "14px",
-                                                    color: "#3DDC84",
+                                                    color: COLORS.primary,
                                                     marginBottom: "8px",
                                                     textTransform: "uppercase",
                                                     letterSpacing: "1px",

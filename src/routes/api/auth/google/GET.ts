@@ -21,6 +21,7 @@ export async function handleRequest(event: RequestEvent): Promise<Response> {
     });
     event.cookies.set("google_code_verifier", codeVerifier, {
         path: "/",
+        secure: import.meta.env.PROD,
         httpOnly: true,
         maxAge: 60 * 10, // 10 minutes
         sameSite: "lax",

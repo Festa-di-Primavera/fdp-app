@@ -1,6 +1,7 @@
 import { RESEND_API_KEY } from "$env/static/private";
 import { Resend, type Attachment } from "resend";
 import { DOMAIN } from "./domain";
+import { getLogoCidAttachment } from "./email-logo";
 
 const resend = new Resend(RESEND_API_KEY);
 
@@ -11,17 +12,17 @@ export async function sendEmail(
     options?: { senderName?: string; attachments?: Attachment[] },
 ): Promise<{ error: boolean; message: string; data?: any }> {
     try {
-        const mappedAttachments = options?.attachments?.map(att => ({
-            ...att,
-            content: att.content instanceof Buffer ? att.content.toString('base64') : att.content
-        }));
+        const allAttachments: Attachment[] = [
+            getLogoCidAttachment(),
+            ...(options?.attachments ?? []),
+        ];
 
         const { data, error } = await resend.emails.send({
             from: `${options?.senderName ?? "Festa di Primavera"} <info@${DOMAIN}>`,
             to: email,
             subject: subject,
             html: htmlContent,
-            attachments: mappedAttachments
+            attachments: allAttachments
         });
 
         if (error) {

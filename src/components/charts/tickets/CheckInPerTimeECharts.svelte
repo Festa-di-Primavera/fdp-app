@@ -139,7 +139,7 @@
     });
 </script>
 
-<Card.Root class="min-h-[25rem]">
+<Card.Root class="min-h-100">
     <Card.Header class="mb-0 flex justify-between items-start">
         <div>
             <Card.Title>
@@ -151,7 +151,7 @@
         </div>
         <div>
             <Select.Root type="single" bind:value={selected}>
-                <Select.Trigger class="w-[180px]">
+                <Select.Trigger class="w-45">
                     {timeOptions.get(selected)}
                 </Select.Trigger>
                 <Select.Content>

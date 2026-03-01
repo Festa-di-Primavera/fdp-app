@@ -1,5 +1,6 @@
 <script lang="ts">
     import { type ChartData, SalesTimeSlot } from "$lib/charts/utils";
+    import { COLORS } from "$lib/utils/colors";
     import * as Card from "$lib/components/ui/card";
     import * as Select from "$lib/components/ui/select";
     import { type EChartsOption } from "echarts";
@@ -133,18 +134,13 @@
                         borderWidth: 1.5,
                     },
                     icon: `path://M 7 10 L 12 15 L 17 10 M 21 15 v 4 a 2 2 0 0 1 -2 2 H 5 a 2 2 0 0 1 -2 -2 v -4 M 12 4 L 12 15`,
-                    emphasis: {
-                        iconStyle: {
-                            borderColor: "#008b27",
-                        },
-                    },
                 },
             },
         },
     });
 </script>
 
-<Card.Root class="min-h-[25rem]">
+<Card.Root class="min-h-100">
     <Card.Header class="mb-0 flex justify-between items-start">
         <div>
             <Card.Title>
@@ -156,7 +152,7 @@
         </div>
         <div>
             <Select.Root type="single" bind:value={selected}>
-                <Select.Trigger class="w-[180px]">
+                <Select.Trigger class="w-45">
                     {timeOptions.get(selected)}
                 </Select.Trigger>
                 <Select.Content>
