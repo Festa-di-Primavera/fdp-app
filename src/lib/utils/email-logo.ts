@@ -1,21 +1,26 @@
-import { readFileSync } from "fs";
-import { resolve } from "path";
+import { dev } from "$app/environment";
 import type { Attachment } from "resend";
+import { DOMAIN } from "./domain";
 
 let cachedLogoBuffer: Buffer | null = null;
 
-function getLogoBuffer(): Buffer {
+async function fetchLogoBuffer(): Promise<Buffer> {
     if (!cachedLogoBuffer) {
-        cachedLogoBuffer = readFileSync(resolve("static/logo.png"));
+        const baseUrl = dev ? "http://localhost:5173" : `https://${DOMAIN}`;
+        const response = await fetch(`${baseUrl}/logo.png`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch logo: ${response.status} ${response.statusText}`);
+        }
+        cachedLogoBuffer = Buffer.from(await response.arrayBuffer());
     }
     return cachedLogoBuffer;
 }
 
 /** Returns the logo.png as an inline CID attachment (referenced as `cid:logo` in HTML). */
-export function getLogoCidAttachment(): Attachment {
+export async function getLogoCidAttachment(): Promise<Attachment> {
     return {
         filename: "logo.png",
-        content: getLogoBuffer(),
-		contentId: "logo"
+        content: await fetchLogoBuffer(),
+        contentId: "logo",
     };
 }

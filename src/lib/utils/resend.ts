@@ -13,7 +13,7 @@ export async function sendEmail(
 ): Promise<{ error: boolean; message: string; data?: any }> {
     try {
         const allAttachments: Attachment[] = [
-            getLogoCidAttachment(),
+            await getLogoCidAttachment(),
             ...(options?.attachments ?? []),
         ];
 
