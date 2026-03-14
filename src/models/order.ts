@@ -2,13 +2,18 @@ export enum BaseIngredient {
 	INSALATA = 'Insalata',
 	FORMAGGIO = 'Formaggio',
 	PEPERONI = 'Peperoni',
-	CIPOLLA = 'Cipolla'
+	CIPOLLA = 'Cipolla',
+
+	// Meraner
+	PANE = "Pane",
+	KETCHUP = "Ketchup", // ??
 }
 
 export enum ItemType {
 	BASIC = 'BASIC',
 	ONTO = 'ONTO',
 	VEGETARIANO = 'VEGETARIANO',
+	MERANER = 'MERANER WURSTEL',
 }
 
 export interface OrderItem {
@@ -36,4 +41,5 @@ export const DEFAULT_INGREDIENTS: Record<ItemType, BaseIngredient[]> = {
 	[ItemType.BASIC]: [BaseIngredient.INSALATA, BaseIngredient.FORMAGGIO],
 	[ItemType.ONTO]: [BaseIngredient.INSALATA, BaseIngredient.FORMAGGIO, BaseIngredient.PEPERONI, BaseIngredient.CIPOLLA],
 	[ItemType.VEGETARIANO]: [BaseIngredient.INSALATA, BaseIngredient.FORMAGGIO, BaseIngredient.PEPERONI, BaseIngredient.CIPOLLA],
+	[ItemType.MERANER]: [BaseIngredient.PANE, BaseIngredient.KETCHUP],
 };
