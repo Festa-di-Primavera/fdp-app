@@ -17,7 +17,7 @@ export async function handleRequest(
             {
                 status: 401,
                 headers: {
-                    "Content-Type": "text/plain",
+                    "Content-Type": "application/json",
                 },
             }
         );
@@ -29,7 +29,7 @@ export async function handleRequest(
             {
                 status: 403,
                 headers: {
-                    "Content-Type": "text/plain",
+                    "Content-Type": "application/json",
                 },
             }
         );

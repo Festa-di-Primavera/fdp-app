@@ -12,7 +12,7 @@ export async function handleRequest(params: RouteParams, locals: App.Locals) {
             {
                 status: 401,
                 headers: {
-                    "Content-Type": "text/plain",
+                    "Content-Type": "application/json",
                 },
             }
         );
@@ -24,7 +24,7 @@ export async function handleRequest(params: RouteParams, locals: App.Locals) {
             {
                 status: 403,
                 headers: {
-                    "Content-Type": "text/plain",
+                    "Content-Type": "application/json",
                 },
             }
         );
@@ -42,7 +42,7 @@ export async function handleRequest(params: RouteParams, locals: App.Locals) {
         return new Response(JSON.stringify({ message: "Ordine non trovato" }), {
             status: 404,
             headers: {
-                "Content-Type": "text/plain",
+                "Content-Type": "application/json",
             },
         });
     }

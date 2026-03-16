@@ -6,7 +6,7 @@ import {
 import { getClientDB } from "$lib/firebase/client";
 import { PASSWORD_RESET_TOKENS, USERS } from "$lib/firebase/collections";
 import { hash } from "@node-rs/argon2";
-import { fail, redirect } from "@sveltejs/kit";
+import { error, redirect } from "@sveltejs/kit";
 import { doc, runTransaction } from "firebase/firestore";
 import type { PageServerLoad } from "./$types";
 
@@ -18,21 +18,13 @@ export const load: PageServerLoad = async ({ params }) => {
     const passwordResetToken = (params as Params).token;
 
     if (!passwordResetToken) {
-        fail(400, {
-            error: true,
-            message: "Invalid password reset token",
-        });
+        error(400, "Invalid password reset token");
     }
 
-    const { error, message } = await verifyPasswordResetToken(
-        passwordResetToken
-    );
+    const result = await verifyPasswordResetToken(passwordResetToken);
 
-    if (error) {
-        fail(400, {
-            error: true,
-            message,
-        });
+    if (result.error) {
+        error(400, result.message);
     }
 };
 

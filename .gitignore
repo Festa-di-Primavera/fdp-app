@@ -13,3 +13,4 @@ vite.config.ts.timestamp-*
 src/serviceAccount.json
 .idea
 .vscode
+.vercel

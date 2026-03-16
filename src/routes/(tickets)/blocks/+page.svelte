@@ -17,7 +17,9 @@
     }
 
     let { data }: Props = $props();
-    if (!$user) $user = data.user;
+    $effect(() => {
+        if (!$user) $user = data.user;
+    });
 
     const addBlock = async (ticketCode: string, seller: User | null) => {
         try {
@@ -52,7 +54,7 @@
     };
 
     let searchTerm: string = $state("");
-    let blockList = $state(data.blockList);
+    let blockList = $derived(data.blockList);
     let blocks = $derived(
         blockList.filter((block) => block.id.includes(searchTerm))
     );

@@ -1,3 +1,4 @@
+import { env } from "$env/dynamic/private";
 import { invalidateExpiredSessions } from "$lib/auth/session.js";
 import { getClientDB } from "$lib/firebase/client";
 import {
@@ -16,7 +17,7 @@ export async function handleRequest(request: Request): Promise<Response> {
 	// Authenticate using CRON_SECRET
     if (
         request.headers.get("Authorization") !==
-        `Bearer ${process.env.CRON_SECRET}`
+        `Bearer ${env.CRON_SECRET}`
     ) {
         return new Response(JSON.stringify({ message: "Unauthorized" }), {
             status: 401,
@@ -27,7 +28,7 @@ export async function handleRequest(request: Request): Promise<Response> {
     }
 
     // Invalidate expired sessions
-    invalidateExpiredSessions();
+    await invalidateExpiredSessions();
 
     // Clean password reset tokens
     const passwordTokensQuery = query(

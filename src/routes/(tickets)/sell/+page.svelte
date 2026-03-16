@@ -15,7 +15,9 @@
     }
 
     let { data }: Props = $props();
-    if (!$user) $user = data;
+    $effect(() => {
+        if (!$user) $user = data;
+    });
 
     let ticketCode: string = $state("");
 

@@ -9,7 +9,7 @@
     /tickets    /blocks
     /users      /earnings
     /generate
-    /csv-orders
+    /staff-orders
 */
 
 export enum UserPermissions {

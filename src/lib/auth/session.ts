@@ -25,7 +25,7 @@ type SessionValidationResult =
     | { session: Session; user: User }
     | { session: null; user: null };
 
-interface Session {
+export interface Session {
     id: string;
     expiresAt: Date;
     userId: string;

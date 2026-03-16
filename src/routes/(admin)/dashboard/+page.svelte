@@ -36,7 +36,9 @@
     }
 
     let { data }: Props = $props();
-    if (data.user) $user = data.user;
+    $effect(() => {
+        if (data.user) $user = data.user;
+    });
 
     let tickets: Ticket[] = $state([]);
     let orders: Order[] = $state([]);
@@ -137,7 +139,7 @@
     <div class="flex w-full grow flex-col gap-4 px-5 pb-12 pt-5">
         {#if tickets.length > 0}
             <div
-                class="m-auto w-full max-w-sm md:max-w-3xl xl:max-w-6xl 2xl:max-w-[1584px]"
+                class="m-auto w-full max-w-sm md:max-w-3xl xl:max-w-6xl 2xl:max-w-396"
             >
                 <h1 class="text-4xl font-bold text-app-accent">Dashboard</h1>
                 <p class="text-justify">Informazioni relative ai biglietti</p>

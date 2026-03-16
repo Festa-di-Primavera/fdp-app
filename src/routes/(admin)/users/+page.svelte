@@ -34,10 +34,12 @@
     }
 
     let { data }: Props = $props();
-    if (!$user) $user = data.user;
+    $effect(() => {
+        if (!$user) $user = data.user;
+    });
 
     // fetch all users
-    let users = $state(data.usersList);
+    let users = $derived(data.usersList);
 
     // modal state variable
     let deleteModalOpen: boolean = $state(false);

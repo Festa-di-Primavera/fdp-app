@@ -114,7 +114,7 @@
     });
 </script>
 
-<Card.Root class="min-h-[25rem]">
+<Card.Root class="min-h-100">
     <Card.Header class="mb-0">
         <Card.Title>Vendite per Fascia Oraria</Card.Title>
         <Card.Description>

@@ -6,7 +6,9 @@
     import { LogOut } from "@lucide/svelte";
 
     let { data } = $props();
-    $user = data as User;
+    $effect(() => {
+        $user = data as User;
+    });
 </script>
 
 <svelte:head>

@@ -1,6 +1,6 @@
 import { ORDERS, STAFF_TICKETS_INCREMENTAL } from "$lib/firebase/collections";
 import { staffOrderTemplate } from "$lib/utils/email-templates/staff-order";
-import StaffOrderOG from "$lib/utils/email-templates/StaffOrderOG";
+import { generateOrderImage } from "$lib/utils/generateOrderImage";
 import {
 	generateQRCodeBase64,
 	getLogoBase64,
@@ -9,8 +9,7 @@ import { hasAnyPermissions } from "$lib/utils/permissions";
 import { sendEmail } from "$lib/utils/resend";
 import type { Order } from "$models/order";
 import { UserPermissions } from "$models/permissions";
-import { ImageResponse } from "@vercel/og";
-import { doc, getDoc, setDoc, Timestamp, updateDoc } from "firebase/firestore";
+import { doc, getFirestore, runTransaction, setDoc, Timestamp } from "firebase/firestore";
 import type { Attachment } from "resend";
 import { v4 as uuidv4 } from "uuid";
 
@@ -24,7 +23,7 @@ export async function handleRequest(
             {
                 status: 401,
                 headers: {
-                    "Content-Type": "text/plain",
+                    "Content-Type": "application/json",
                 },
             }
         );
@@ -42,7 +41,7 @@ export async function handleRequest(
             {
                 status: 403,
                 headers: {
-                    "Content-Type": "text/plain",
+                    "Content-Type": "application/json",
                 },
             }
         );
@@ -62,25 +61,23 @@ export async function handleRequest(
 
     const orderUUID = uuidv4();
 
-    await setDoc(doc(ORDERS, orderUUID), {
-        ...order,
-        creationDate: Timestamp.fromDate(new Date(order.creationDate)),
-    })
-        .then(() => {
-            console.log("Document successfully written for ", order.name);
-        })
-        .catch((error) => {
-            console.error("Error adding document: ", error);
-            return new Response(
-                JSON.stringify({ message: "Errore nell'invio dell'ordine" }),
-                {
-                    status: 500,
-                    headers: {
-                        "Content-Type": "text/plain",
-                    },
-                }
-            );
+    try {
+        await setDoc(doc(ORDERS, orderUUID), {
+            ...order,
+            creationDate: Timestamp.fromDate(new Date(order.creationDate)),
         });
+    } catch (err) {
+        console.error("Error adding document: ", err);
+        return new Response(
+            JSON.stringify({ message: "Errore nell'invio dell'ordine" }),
+            {
+                status: 500,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+    }
 
     if (shouldSendEmail) {
         if (!order.email) {
@@ -97,17 +94,26 @@ export async function handleRequest(
         }
 
         const html = await staffOrderTemplate(order);
-        const imageResponse = new ImageResponse(
-            StaffOrderOG({
-                order,
-                qrCodeBase64: await generateQRCodeBase64(order.ticketId),
-                logoBase64: getLogoBase64(),
-            }),
-            {
-                width: 500,
-                height: 650,
-            }
-        );
+        const qrCodeBase64 = await generateQRCodeBase64(order.ticketId);
+        const logoBase64 = getLogoBase64();
+        
+        let imageBuffer: Buffer;
+        try {
+            imageBuffer = await generateOrderImage(order, qrCodeBase64, logoBase64);
+            console.log("Generated image buffer of length:", imageBuffer.length);
+        } catch (imageError) {
+            console.error("Error generating image:", imageError);
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    message: "Errore nella generazione dell'immagine",
+                }),
+                {
+                    status: 500,
+                    headers: { "Content-Type": "application/json" },
+                }
+            );
+        }
 
         const emailResult = await sendEmail(
             order.email,
@@ -116,7 +122,7 @@ export async function handleRequest(
             {
                 attachments: [
                     {
-                        content: Buffer.from(await imageResponse.arrayBuffer()),
+                        content: imageBuffer,
                         type: "image/png",
                         filename: "ordine-panino.png",
                     } as Attachment,
@@ -158,27 +164,30 @@ export async function handleRequest(
         {
             status: 201,
             headers: {
-                "Content-Type": "text/plain",
+                "Content-Type": "application/json",
             },
         }
     );
 }
 
 async function getStaffTicketId(): Promise<string> {
+    const db = getFirestore();
     const docRef = doc(
         STAFF_TICKETS_INCREMENTAL,
         `STAFF${new Date().getFullYear()}`
     );
-    const ticketCounter = await getDoc(docRef);
-    if (!ticketCounter.exists()) {
-        await setDoc(docRef, { counter: 1 });
-        return `STAFF${new Date().getFullYear().toString().slice(-2)}-0001`;
-    }
 
-    const currentNumber = ticketCounter.data().counter as number;
-
-    const num = currentNumber + 1;
-    await updateDoc(docRef, { counter: num });
+    const num = await runTransaction(db, async (transaction) => {
+        const ticketCounter = await transaction.get(docRef);
+        if (!ticketCounter.exists()) {
+            transaction.set(docRef, { counter: 1 });
+            return 1;
+        }
+        const currentNumber = ticketCounter.data().counter as number;
+        const nextNumber = currentNumber + 1;
+        transaction.update(docRef, { counter: nextNumber });
+        return nextNumber;
+    });
 
     return `STAFF${new Date().getFullYear().toString().slice(-2)}-${num
         .toString()

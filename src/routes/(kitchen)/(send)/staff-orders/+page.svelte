@@ -16,7 +16,9 @@
     }
 
     let { data }: Props = $props();
-    if (!$user) $user = data;
+    $effect(() => {
+        if (!$user) $user = data;
+    });
 
     let order: Order = $state({
         ticketId: "",
@@ -185,7 +187,6 @@
                         name="name"
                         bind:value={order.name}
                         required
-                        class="mt-1"
                     />
                 </div>
                 <div class="flex-1">
@@ -197,7 +198,6 @@
                         name="surname"
                         bind:value={order.surname}
                         required
-                        class="mt-1"
                     />
                 </div>
             </div>
@@ -210,7 +210,6 @@
                     name="email"
                     bind:value={order.email}
                     required
-                    class="mt-1"
                 />
             </div>
 

@@ -112,7 +112,7 @@
     });
 </script>
 
-<Card.Root class="min-h-[25rem]">
+<Card.Root class="min-h-100">
     <Card.Header class="mb-0">
         <Card.Title>Biglietti</Card.Title>
         <Card.Description>
