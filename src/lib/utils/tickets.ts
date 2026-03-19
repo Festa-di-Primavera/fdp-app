@@ -10,11 +10,11 @@ export function getFdPOrStaffCode(code: string | undefined): string | null {
         return null;
     }
 
-    if (code.startsWith("STAFF") || code.includes("FDP25")) return code;
+    if (code.startsWith("STAFF") || code.includes("FDP26")) return code;
 
     if (code.includes("XNRF")) {
         code = code.replace("XNRF", "");
-        code = code.replace("/25", "");
+        code = code.replace("/26", "");
         code = code.trim();
 
         let num = parseInt(code);
@@ -24,7 +24,7 @@ export function getFdPOrStaffCode(code: string | undefined): string | null {
         while (str.length < 4) {
             str = "0" + str;
         }
-        return `FDP25-${str}`;
+        return `FDP26-${str}`;
     }
 
     return null;
