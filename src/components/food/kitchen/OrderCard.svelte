@@ -3,7 +3,7 @@
     import * as Card from "$lib/components/ui/card/index";
     import Separator from "$lib/components/ui/separator/separator.svelte";
     import { ItemType, type Order, type OrderItem } from "$models/order";
-    import { Leaf, TriangleAlert, WheatOff } from "@lucide/svelte";
+    import { Leaf, WheatOff } from "@lucide/svelte";
 
     interface Props {
         order: Order;
@@ -86,12 +86,10 @@
                             <div
                                 class="animate-bounce-custom flex items-center gap-2 text-md text-amber-600 dark:text-amber-400 underline underline-offset-4 font-bold"
                             >
-                                <TriangleAlert />
                                 <WheatOff
                                     class="text-amber-700 bg-amber-300 p-1 rounded-md"
                                 />
                                 NO GLUTINE
-                                <TriangleAlert />
                             </div>
                             <style>
                                 @keyframes bounce {
