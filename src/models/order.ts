@@ -13,7 +13,7 @@ export enum ItemType {
 	BASIC = 'BASIC',
 	ONTO = 'ONTO',
 	VEGETARIANO = 'VEGETARIANO',
-	MERANER = 'MERANER WURSTEL',
+	MERANER = 'MERANER',
 }
 
 export interface OrderItem {
