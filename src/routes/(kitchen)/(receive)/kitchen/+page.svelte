@@ -152,7 +152,7 @@
             <!-- ORDINI ANCORA DA SCANNERIZZARE/INVIARE TRAMITE IL LINK -->
             <div class="flex flex-col items-center">
                 <span class="text-md text-red-500 dark:text-red-400"
-                    >Mancanti <i>(STAFF)</i></span
+                    >Mancanti</span
                 >
                 <span
                     class="text-2xl font-semibold text-red-500 dark:text-red-400"
