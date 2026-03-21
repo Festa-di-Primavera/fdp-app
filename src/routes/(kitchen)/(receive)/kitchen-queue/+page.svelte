@@ -26,7 +26,7 @@
             ORDERS,
             where("done", "==", false),
             orderBy("creationDate", "asc"),
-            limit(30)
+            limit(30),
         );
         unsubscribe = onSnapshot(q, (querySnapshot) => {
             orders = querySnapshot.docs.map((orderDoc) => {
@@ -55,20 +55,19 @@
         <!-- Colonna top 5 -->
         <div class="flex flex-col w-1/4">
             <h1
-                class="text-3xl h-12 content-center font-bold text-green-800 dark:text-green-500 mb-6"
+                class="text-3xl h-12 content-center font-bold text-app-accent mb-6"
             >
                 IN PREPARAZIONE
             </h1>
             <div class="flex flex-col gap-10">
                 {#each top as order, i (i)}
                     <Card.Root
-                        class="w-full border-l-4 relative"
-                        style="border-left-color: #007a22"
+                        class="w-full border-l-4 relative border-l-app-accent"
                     >
                         <Card.Content>
                             <!-- segnalino posizione -->
                             <div
-                                class="number-badge absolute flex items-center justify-center h-max top-4 left-4 text-2xl font-normal font-mono px-2 py-1"
+                                class="bg-linear-135 from-app-accent/50 to-app-accent rounded-md z-10 text-white absolute flex items-center justify-center h-max top-4 left-4 text-2xl font-normal font-mono px-2 py-1 shadow-[0_4px_8px_rgba(0,0,0,0.2)]"
                             >
                                 #{i + 1}
                             </div>
@@ -93,13 +92,13 @@
 
         <!-- Divisore verticale -->
         <div
-            class="w-1 h-[75vh] rounded-full bg-gradient-to-b from-primary-500 to-primary-800"
+            class="w-1 h-[75vh] rounded-full bg-linear-to-b from-primary-500 to-primary-800"
         ></div>
 
         <!-- Resto -->
         <div class="flex flex-col w-3/4">
             <h1
-                class="text-2xl h-12 content-center font-bold text-green-800 dark:text-green-500 mb-6"
+                class="text-2xl h-12 content-center font-bold text-app-accent mb-6"
             >
                 PROSSIMI
             </h1>
@@ -108,8 +107,7 @@
             >
                 {#each rest as order, i (i)}
                     <Card.Root
-                        class="w-60 h-max border-l-4 relative p-5"
-                        style="border-left-color: #007a2288;"
+                        class="w-60 h-max border-l-4 relative p-5 border-l-app-accent/60"
                     >
                         <Card.Content class="p-0">
                             <div class="py-2">
@@ -117,7 +115,7 @@
                                     class="absolute flex gap-2 items-center top-4 left-4 text-neutral-900"
                                 >
                                     <span
-                                        class="number-badge-small flex items-center justify-center text-lg font-normal font-mono px-2 py-1"
+                                        class="bg-linear-135 from-app-accent/40 to-app-accent/80 z-10 rounded-sm text-white flex items-center justify-center text-lg font-normal font-mono px-2 py-1 shadow-[0_3px_6px_rgba(0,0,0,0.15)]"
                                     >
                                         #{i + 1 + TOP}
                                     </span>
@@ -149,25 +147,5 @@
     * {
         user-select: none;
         cursor: none;
-    }
-
-    .number-badge {
-        background: linear-gradient(135deg, #007a22, #56b071);
-        color: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        z-index: 10;
-    }
-
-    .number-badge-small {
-        background: linear-gradient(
-            135deg,
-            rgba(0, 122, 34, 0.8),
-            rgba(86, 176, 113, 0.8)
-        );
-        color: white;
-        border-radius: 6px;
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
-        z-index: 10;
     }
 </style>
