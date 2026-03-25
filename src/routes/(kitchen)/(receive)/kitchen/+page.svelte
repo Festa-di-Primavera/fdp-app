@@ -2,7 +2,7 @@
     import OrderCard from "$components/food/kitchen/OrderCard.svelte";
     import type { User } from "$lib/auth/user";
     import { ORDERS } from "$lib/firebase/collections";
-    import { type Order } from "$models/order";
+    import { ItemType, type Order } from "$models/order";
     import { user } from "$store/store";
     import {
         onSnapshot,
@@ -27,6 +27,38 @@
     let inProgressOrders: Order[] = $state([]);
     let doneOrders: Order[] = $state([]);
 
+    const BURGERS = [ItemType.BASIC, ItemType.ONTO, ItemType.VEGETARIANO];
+
+    function countItems(orders: Order[], items: ItemType[]) {
+        let tot = 0;
+
+        for (const order of orders) {
+            for (const item of order.items) {
+                if (items.includes(item.type)) {
+                    tot += item.quantity;
+                }
+            }
+        }
+
+        return tot;
+    }
+
+    const doneBurgers: number = $derived(countItems(doneOrders, BURGERS));
+    const inProgressBurgers: number = $derived(
+        countItems(inProgressOrders, BURGERS),
+    );
+    const toDoBurgers: number = $derived(countItems(toDoOrders, BURGERS));
+
+    const doneMeraner: number = $derived(
+        countItems(doneOrders, [ItemType.MERANER]),
+    );
+    const inProgressMeraner: number = $derived(
+        countItems(inProgressOrders, [ItemType.MERANER]),
+    );
+    const toDoMeraner: number = $derived(
+        countItems(toDoOrders, [ItemType.MERANER]),
+    );
+
     function getOrders() {
         const q = query(ORDERS, orderBy("creationDate", "asc"));
         unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -49,13 +81,13 @@
 
     function addOrderToCorrectArray(order: Order) {
         if (order.done === true) {
-            doneOrders = [...doneOrders, order]
+            doneOrders = [...doneOrders, order];
         } else if (order.done === false) {
             inProgressOrders = [...inProgressOrders, order].sort((a, b) =>
-                a.creationDate < b.creationDate ? -1 : 1
+                a.creationDate < b.creationDate ? -1 : 1,
             );
         } else {
-            toDoOrders = [...toDoOrders, order]
+            toDoOrders = [...toDoOrders, order];
         }
     }
 
@@ -68,7 +100,7 @@
     function removeOrderFromArrays(orderId?: string) {
         doneOrders = doneOrders.filter((o) => o.firebaseId !== orderId);
         inProgressOrders = inProgressOrders.filter(
-            (o) => o.firebaseId !== orderId
+            (o) => o.firebaseId !== orderId,
         );
         toDoOrders = toDoOrders.filter((o) => o.firebaseId !== orderId);
     }
@@ -128,35 +160,68 @@
         <h1 class="text-4xl font-bold text-app-accent mb-4 sm:mb-6 sm:mr-10">
             Cucina
         </h1>
-        <div class="grid grid-cols-3 gap-2 sm:flex sm:gap-7 mb-6">
+        <div class="flex flex-row gap-7 mb-6 pr-6 w-full">
             <div class="flex flex-col items-center">
                 <span
                     class="text-md font-medium text-green-500 dark:text-green-400"
-                    >Preparati</span
+                    >Panini Preparati</span
                 >
                 <span
                     class="text-2xl font-semibold text-green-500 dark:text-green-400"
-                    >{doneOrders.length}</span
+                    >{doneBurgers}</span
                 >
             </div>
             <div class="flex flex-col items-center">
                 <span
                     class="text-md font-medium text-orange-600 dark:text-orange-300"
-                    >In attesa</span
+                    >Panini in attesa</span
                 >
                 <span
                     class="text-2xl font-semibold text-orange-600 dark:text-orange-300"
-                    >{inProgressOrders.length}</span
+                    >{inProgressBurgers}</span
                 >
             </div>
             <!-- ORDINI ANCORA DA SCANNERIZZARE/INVIARE TRAMITE IL LINK -->
             <div class="flex flex-col items-center">
                 <span class="text-md text-red-500 dark:text-red-400"
-                    >Mancanti</span
+                    >Panini mancanti</span
                 >
                 <span
                     class="text-2xl font-semibold text-red-500 dark:text-red-400"
-                    >{toDoOrders.length}</span
+                    >{toDoBurgers}</span
+                >
+            </div>
+
+            <span class="grow"></span>
+
+            <div class="flex flex-col items-center">
+                <span
+                    class="text-md font-medium text-green-500 dark:text-green-400"
+                    >Meraner Preparati</span
+                >
+                <span
+                    class="text-2xl font-semibold text-green-500 dark:text-green-400"
+                    >{doneMeraner}</span
+                >
+            </div>
+            <div class="flex flex-col items-center">
+                <span
+                    class="text-md font-medium text-orange-600 dark:text-orange-300"
+                    >Meraner in attesa</span
+                >
+                <span
+                    class="text-2xl font-semibold text-orange-600 dark:text-orange-300"
+                    >{inProgressMeraner}</span
+                >
+            </div>
+            <!-- ORDINI ANCORA DA SCANNERIZZARE/INVIARE TRAMITE IL LINK -->
+            <div class="flex flex-col items-center">
+                <span class="text-md text-red-500 dark:text-red-400"
+                    >Meraner mancanti</span
+                >
+                <span
+                    class="text-2xl font-semibold text-red-500 dark:text-red-400"
+                    >{toDoMeraner}</span
                 >
             </div>
         </div>
