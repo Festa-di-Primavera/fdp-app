@@ -1,4 +1,0 @@
-allowBuilds:
-  '@firebase/util': true
-  esbuild: true
-  sharp: true
