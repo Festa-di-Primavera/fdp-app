@@ -2,6 +2,7 @@ import { getClientDB } from "$lib/firebase/client.js";
 import { BLOCKS, TICKETS } from "$lib/firebase/collections.js";
 import { hasAnyPermissions } from "$lib/utils/permissions";
 import { UserPermissions } from "$models/permissions";
+import type { Block } from "$models/ticket";
 import {
 	doc,
 	getCountFromServer,
@@ -88,7 +89,7 @@ export async function handleRequest(locals: App.Locals, request: Request) {
                 assigned_at: null,
                 assigned_by: null,
                 assigned_to: null,
-            });
+            } as Block);
         }
 
         return new Response(

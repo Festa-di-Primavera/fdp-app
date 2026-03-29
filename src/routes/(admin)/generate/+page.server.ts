@@ -34,11 +34,17 @@ export const actions = {
 
         const fileContent = Buffer.from(await fileToUpload.arrayBuffer());
 
-        const ticketsCodes = fileContent.toLocaleString().trim().split("\r\n");
+        const lines = fileContent.toLocaleString().trim().split("\r\n");
+        const ticketsCodes: { ticketId: string; fiscalMatrixNumber: string }[] = lines.map((line) => {
+            const [ticketId, fiscalMatrixNumber] = line.split(",");
+            return { ticketId, fiscalMatrixNumber };
+        });
 
         for (const code of ticketsCodes) {
-            const ticketRef = doc(TICKETS, code);
+            const ticketRef = doc(TICKETS, code.ticketId);
             await setDoc(ticketRef, {
+                ticketId: code.ticketId,
+                fiscalMatrixNumber: code.fiscalMatrixNumber,
                 name: null,
                 surname: null,
                 seller: null,

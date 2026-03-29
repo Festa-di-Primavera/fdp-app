@@ -8,7 +8,6 @@
     import QrReader from "$components/QrReader.svelte";
     import OrderModal from "$components/food/cashier/OrderModal.svelte";
     import type { User } from "$lib/auth/user";
-    import { getFdPOrStaffCode } from "$lib/utils/tickets";
     import { type Order, type OrderItem, ItemType } from "$models/order";
     import type { Ticket } from "$models/ticket";
     import { user } from "$store/store";
@@ -46,7 +45,8 @@
         let ticketResponse = (await res.json()).ticket;
 
         ticket = {
-            ticketId: getFdPOrStaffCode(code) || "",
+            ticketId: ticketResponse.ticketId,
+            fiscalMatrixNumber: ticketResponse.fiscalMatrixNumber,
             name: ticketResponse.name,
             surname: ticketResponse.surname,
             seller: res.status !== 206 ? ticketResponse.seller : "Non Trovato",
@@ -153,6 +153,7 @@
         try {
             const finalOrder: Order = {
                 ticketId: ticket?.ticketId || "",
+                fiscalMatrixNumber: ticket?.fiscalMatrixNumber || "",
                 name: `${ticket?.name}`,
                 surname: ticket?.surname || "",
                 items: orderItems,

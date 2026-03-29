@@ -66,6 +66,7 @@
         if (response.status == 404) {
             ticket = {
                 ticketId: code,
+                fiscalMatrixNumber: "",
                 name: "",
                 surname: "",
                 seller: "",
@@ -78,33 +79,25 @@
             return;
         }
 
-        let tick = body.ticket;
+        let tick: Ticket = body.ticket;
+
+        ticket = {
+            ticketId: tick.ticketId,
+            fiscalMatrixNumber: tick.fiscalMatrixNumber,
+            name: tick.name,
+            surname: tick.surname,
+            seller: tick.seller,
+            soldAt: tick.soldAt,
+            checkIn: tick.checkIn,
+        };
 
         if (response.status == 402) {
-            ticket = {
-                ticketId: code,
-                name: tick.name,
-                surname: tick.surname,
-                seller: tick.seller,
-                soldAt: tick.soldAt,
-                checkIn: tick.checkIn,
-            };
-
             triggerPopup(message, "text-red-500", "notSold");
             ticketCodeInput = "";
             return;
         }
 
         if (response.status === 409) {
-            ticket = {
-                ticketId: code,
-                name: tick.name,
-                surname: tick.surname,
-                seller: tick.seller,
-                soldAt: tick.soldAt,
-                checkIn: tick.checkIn,
-            };
-
             triggerPopup(message, "text-yellow-500", "alreadyChecked");
             ticketCodeInput = "";
             return;
@@ -112,7 +105,8 @@
 
         try {
             ticket = {
-                ticketId: code,
+                ticketId: tick.ticketId,
+                fiscalMatrixNumber: tick.fiscalMatrixNumber,
                 name: tick.name,
                 surname: tick.surname,
                 seller: response.status !== 206 ? tick.seller : "Non Trovato",
@@ -160,6 +154,7 @@
     const reset = () => {
         ticket = {
             ticketId: "",
+            fiscalMatrixNumber: "",
             name: "",
             surname: "",
             seller: "",

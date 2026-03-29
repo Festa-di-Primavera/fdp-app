@@ -7,7 +7,7 @@
     import { Input } from "$lib/components/ui/input/index";
     import * as Table from "$lib/components/ui/table/index";
     import { formatDate } from "$lib/utils/textFormat";
-    import { type Block } from "$lib/utils/tickets";
+    import { type Block } from "$models/ticket";
     import { user } from "$store/store";
     import { Search, UserCog, UserMinus, UserPlus } from "@lucide/svelte";
     import { toast } from "svelte-sonner";

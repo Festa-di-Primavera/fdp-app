@@ -1,9 +1,8 @@
 import type { User } from "$lib/auth/user";
 import { TICKETS, USERS } from "$lib/firebase/collections.js";
 import { hasAnyPermissions } from "$lib/utils/permissions";
-import { getFdPOrStaffCode } from "$lib/utils/tickets";
 import { UserPermissions } from "$models/permissions";
-import { doc, getDoc, setDoc, Timestamp, updateDoc } from "firebase/firestore";
+import { doc, getDoc, getDocs, or, query, setDoc, Timestamp, updateDoc, where } from "firebase/firestore";
 import type { RouteParams } from "./$types";
 
 export async function handleRequest(
@@ -36,7 +35,7 @@ export async function handleRequest(
     }
 
     const formData = await request.json();
-    const code = getFdPOrStaffCode(params.ticketId);
+    const code = params.ticketId;
 
     if (code === null) {
         const response = new Response(
@@ -57,9 +56,11 @@ export async function handleRequest(
     const seller = formData.seller;
     const soldAt = Timestamp.fromDate(new Date());
 
-    const ticket = await getDoc(doc(TICKETS, code));
+    const ticketQuery = query(TICKETS, or(where("ticketId", "==", code), where("fiscalMatrixNumber", "==", code)));
+    const querySnapshot = await getDocs(ticketQuery);
+    const ticketDoc = querySnapshot.docs[0];
 
-    if (!ticket.exists()) {
+    if (!ticketDoc || !ticketDoc.exists()) {
         const response = new Response(
             JSON.stringify({ message: "Biglietto non esistente" }),
             {
@@ -73,7 +74,7 @@ export async function handleRequest(
         return response;
     }
 
-    if (ticket.data().soldAt) {
+    if (ticketDoc.data().soldAt) {
         const response = new Response(
             JSON.stringify({ message: "Biglietto già venduto" }),
             {
@@ -88,7 +89,7 @@ export async function handleRequest(
     }
 
     try {
-        await setDoc(doc(TICKETS, `${code}`), {
+        await updateDoc(doc(TICKETS, ticketDoc.id), {
             name: name,
             surname: surname,
             checkIn: null,

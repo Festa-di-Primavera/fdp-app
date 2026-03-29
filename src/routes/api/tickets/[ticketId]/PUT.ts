@@ -1,7 +1,6 @@
 import { hasAnyPermissions } from "$lib/utils/permissions";
-import { getFdPOrStaffCode } from "$lib/utils/tickets";
 import { UserPermissions } from "$models/permissions";
-import { doc, getDoc, Timestamp, updateDoc } from "firebase/firestore";
+import { doc, getDoc, getDocs, or, query, Timestamp, updateDoc, where } from "firebase/firestore";
 import type { RouteParams } from "./$types";
 import { TICKETS, USERS } from "$lib/firebase/collections";
 import type { Ticket } from "$models/ticket";
@@ -31,8 +30,7 @@ export async function handleRequest(params: RouteParams, locals: App.Locals) {
             }
         );
     }
-
-    const code = getFdPOrStaffCode(params.ticketId);
+    const code = params.ticketId;
 
     if (code === null) {
         return new Response(JSON.stringify({ message: "Codice non valido" }), {
@@ -44,12 +42,12 @@ export async function handleRequest(params: RouteParams, locals: App.Locals) {
         });
     }
 
-    const ticketDocRef = doc(TICKETS, code);
-
-    const ticketDoc = await getDoc(ticketDocRef);
+    const ticketQuery = query(TICKETS, or(where("ticketId", "==", code), where("fiscalMatrixNumber", "==", code)));
+    const querySnapshot = await getDocs(ticketQuery);
+    const ticketDoc = querySnapshot.docs[0];
 
     //* BIGLIETTO NON ESISTENTE
-    if (!ticketDoc.exists()) {
+    if (!ticketDoc || !ticketDoc.exists()) {
         return new Response(
             JSON.stringify({ message: "Biglietto non valido" }),
             {
@@ -68,6 +66,7 @@ export async function handleRequest(params: RouteParams, locals: App.Locals) {
     if (ticketData?.seller === null) {
         ticket = {
             ticketId: ticketDoc.id,
+            fiscalMatrixNumber: ticketData?.fiscalMatrixNumber,
             name: ticketData?.name,
             surname: ticketData?.surname,
             seller: null,
@@ -82,6 +81,7 @@ export async function handleRequest(params: RouteParams, locals: App.Locals) {
 
         ticket = {
             ticketId: ticketDoc.id,
+            fiscalMatrixNumber: ticketData.fiscalMatrixNumber,
             name: ticketData.name,
             surname: ticketData.surname,
             seller: sellerName ?? null,
@@ -120,7 +120,7 @@ export async function handleRequest(params: RouteParams, locals: App.Locals) {
 
     //* BIGLIETTO NON ANCORA VALIDATO
     const currentTimestamp = Timestamp.fromDate(new Date());
-    await updateDoc(doc(TICKETS, code), {
+    await updateDoc(doc(TICKETS, ticket.ticketId), {
         checkIn: currentTimestamp,
     });
 

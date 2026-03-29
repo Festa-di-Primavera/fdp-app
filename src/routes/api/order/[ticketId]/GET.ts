@@ -2,7 +2,7 @@ import { ORDERS } from "$lib/firebase/collections.js";
 import { hasAnyPermissions } from "$lib/utils/permissions";
 import type { Order } from "$models/order.js";
 import { UserPermissions } from "$models/permissions";
-import { getDocs, query, Timestamp, where } from "firebase/firestore";
+import { and, getDocs, or, query, Timestamp, where } from "firebase/firestore";
 import type { RouteParams } from "./$types";
 
 export async function handleRequest(params: RouteParams, locals: App.Locals) {
@@ -14,7 +14,7 @@ export async function handleRequest(params: RouteParams, locals: App.Locals) {
                 headers: {
                     "Content-Type": "application/json",
                 },
-            }
+            },
         );
     }
 
@@ -26,15 +26,20 @@ export async function handleRequest(params: RouteParams, locals: App.Locals) {
                 headers: {
                     "Content-Type": "application/json",
                 },
-            }
+            },
         );
     }
 
     const ticketId = decodeURIComponent(params.ticketId);
     const q = query(
         ORDERS,
-        where("ticketId", "==", ticketId),
-        where("done", "==", null)
+        and(
+            or(
+                where("ticketId", "==", ticketId),
+                where("fiscalMatrixNumber", "==", ticketId),
+            ),
+            where("done", "==", null),
+        ),
     );
     const orders = await getDocs(q);
 
@@ -50,6 +55,7 @@ export async function handleRequest(params: RouteParams, locals: App.Locals) {
     let resultOrders: Order[] = orders.docs.map((orderDoc) => {
         return {
             ticketId: orderDoc.data().ticketId,
+            fiscalMatrixNumber: orderDoc.data().fiscalMatrixNumber,
             name: orderDoc.data().name,
             surname: orderDoc.data().surname,
             email: orderDoc.data().email,

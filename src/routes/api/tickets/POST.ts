@@ -3,6 +3,11 @@ import { hasAnyPermissions } from "$lib/utils/permissions";
 import { UserPermissions } from "$models/permissions";
 import { doc, setDoc } from "firebase/firestore";
 
+export type TicketsGenerationRequestBody = {
+    ticketId: string;
+    fiscalMatrixNumber: string;
+}[];
+
 export async function handleRequest(request: Request, locals: App.Locals) {
     if (!locals.user) {
         return new Response(
@@ -30,10 +35,12 @@ export async function handleRequest(request: Request, locals: App.Locals) {
         );
     }
 
-    const body = await request.json();
-    for (const code of body.codes) {
-        const ticketRef = doc(TICKETS, code);
+    const body: TicketsGenerationRequestBody = await request.json();
+    for (const code of body) {
+        const ticketRef = doc(TICKETS, code.ticketId);
         await setDoc(ticketRef, {
+            ticketId: code.ticketId,
+            fiscalMatrixNumber: code.fiscalMatrixNumber,
             name: null,
             surname: null,
             seller: null,

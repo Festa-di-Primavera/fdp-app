@@ -57,6 +57,7 @@ export async function handleRequest(locals: App.Locals) {
     const tickets: Ticket[] = qSnapTickets.docs.map((ticketDoc) => {
         return {
             ticketId: ticketDoc.id,
+            fiscalMatrixNumber: ticketDoc.data().fiscalMatrixNumber,
             name: ticketDoc.data().name,
             surname: ticketDoc.data().surname,
             seller:

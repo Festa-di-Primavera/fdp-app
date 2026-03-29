@@ -74,9 +74,12 @@
                             <div
                                 class="flex flex-col gap-2 justify-between items-center text-gray-800 dark:text-gray-300"
                             >
-                                <span class="text-2xl">
-                                    <span class="font-mono">
+                                <span class="font-mono flex flex-col items-center gap-1">
+                                    <span class="text-2xl">
                                         <b>{order.ticketId}</b>
+                                    </span>
+                                    <span class="text-lg">
+                                        {order.fiscalMatrixNumber}
                                     </span>
                                 </span>
                                 <h2 class="text-xl">
@@ -123,8 +126,16 @@
                                 <div
                                     class="text-gray-800 dark:text-gray-300 flex flex-col gap-2 justify-between items-center"
                                 >
-                                    <span class="text-xl font-mono">
+                                    <!-- <span class="text-xl font-mono">
                                         <b>{order.ticketId}</b>
+                                    </span> -->
+                                    <span class="font-mono flex flex-col items-center gap-1">
+                                        <span class="text-lg">
+                                            <b>{order.ticketId}</b>
+                                        </span>
+                                        <span class="text-sm">
+                                            {order.fiscalMatrixNumber}
+                                        </span>
                                     </span>
                                     <h2 class="text-lg w-full text-center">
                                         {order.name}

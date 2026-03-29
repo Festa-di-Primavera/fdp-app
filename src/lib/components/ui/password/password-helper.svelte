@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { XCircle } from "@lucide/svelte";
-	import type { PasswordHelperProps } from './types.js';
+	import { CircleX } from "@lucide/svelte";
+	import type { PasswordHelperProps } from './types';
 
 	let {
 		children,
@@ -21,7 +21,7 @@
 		{...restProps}
 	>
 		{#if icon}
-			<XCircle class="h-3 w-3 flex-shrink-0" />
+			<CircleX class="h-3 w-3 shrink-0" />
 		{/if}
 		<span>
 			{@render children?.()}

@@ -27,6 +27,7 @@ export interface OrderItem {
 
 export interface Order {
 	ticketId: string;
+	fiscalMatrixNumber: string;
 	name: string;
 	surname: string;
 	items: OrderItem[];

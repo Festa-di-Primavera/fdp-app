@@ -43,6 +43,7 @@
 
             ticket = {
                 ticketId: code,
+                fiscalMatrixNumber: "",
                 name: "",
                 surname: "",
                 seller: "",
@@ -56,6 +57,7 @@
 
         ticket = {
             ticketId: code,
+            fiscalMatrixNumber: tick.fiscalMatrixNumber,
             name: tick.name,
             surname: tick.surname,
             seller: res.status !== 206 ? tick.seller : "Non Trovato",
@@ -67,6 +69,7 @@
     const reset = () => {
         ticket = {
             ticketId: "",
+            fiscalMatrixNumber: "",
             name: "",
             surname: "",
             seller: "",

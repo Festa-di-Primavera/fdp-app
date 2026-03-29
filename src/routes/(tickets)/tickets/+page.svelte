@@ -37,6 +37,7 @@
 
                 return {
                     ticketId: ticketDoc.id,
+                    fiscalMatrixNumber: currentTicket.fiscalMatrixNumber,
                     name: currentTicket.name,
                     surname: currentTicket.surname,
                     seller: sellerName,
@@ -178,6 +179,9 @@
                         <div class="flex gap-1">Codice</div>
                     </Table.Head>
                     <Table.Head class="cursor-pointer select-none">
+                        <div class="flex gap-1">Matrice</div>
+                    </Table.Head>
+                    <Table.Head class="cursor-pointer select-none">
                         <div class="flex gap-1">Nome</div>
                     </Table.Head>
                     <Table.Head class="cursor-pointer select-none">
@@ -203,9 +207,12 @@
                             <span class="mr-4">{item.ticketId}</span>
                         </Table.Cell>
                         <Table.Cell>
+                            <span class="mr-4">{item.fiscalMatrixNumber}</span>
+                        </Table.Cell>
+                        <Table.Cell>
                             {#if item.name}
                                 <div class="flex items-center">
-                                    <span class="inline-block min-w-[100px]"
+                                    <span class="inline-block min-w-25"
                                         >{item.name}</span
                                     >
                                     <button
@@ -224,7 +231,7 @@
                         <Table.Cell>
                             {#if item.surname}
                                 <div class="flex items-center">
-                                    <span class="inline-block min-w-[100px]"
+                                    <span class="inline-block min-w-25"
                                         >{item.surname}</span
                                     >
                                     <button

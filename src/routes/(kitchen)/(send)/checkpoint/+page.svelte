@@ -9,7 +9,6 @@
 
     import QrReader from "$components/QrReader.svelte";
     import type { User } from "$lib/auth/user";
-    import { getFdPOrStaffCode } from "$lib/utils/tickets";
     import {
         DEFAULT_INGREDIENTS,
         ItemType,
@@ -46,7 +45,7 @@
 
     async function getOrder(code: string) {
         const res = await fetch(
-            `/api/order/${encodeURIComponent(getFdPOrStaffCode(code)!!)}`
+            `/api/order/${encodeURIComponent(code)}`
         );
         ticketCodeInput = "";
 

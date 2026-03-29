@@ -1,11 +1,11 @@
 import type { User } from "$lib/auth/user";
 import { BLOCKS, USERS } from "$lib/firebase/collections";
 import { hasAnyPermissions } from "$lib/utils/permissions";
-import type { Block } from "$lib/utils/tickets";
 import { UserPermissions } from "$models/permissions";
 import { redirect } from "@sveltejs/kit";
 import { getDocs, query, where } from "firebase/firestore";
 import type { PageServerLoad } from "./$types";
+import type { Block } from "$models/ticket";
 
 export const load: PageServerLoad = async ({ locals }) => {
     if (!locals.user) redirect(302, "/login");
@@ -21,7 +21,7 @@ export const load: PageServerLoad = async ({ locals }) => {
         where("permissions", ">=", UserPermissions.VENDITA)
     );
 
-    const users = (await getDocs(qUsers)).docs.map((userDoc) => {
+    const users: User[] = (await getDocs(qUsers)).docs.map((userDoc) => {
         return userDoc.data();
     }) as User[];
     const sellers = users.filter((user) =>

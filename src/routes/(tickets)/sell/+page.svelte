@@ -7,7 +7,6 @@
 
     import QrReader from "$components/QrReader.svelte";
     import type { User } from "$lib/auth/user";
-    import { getFdPOrStaffCode } from "$lib/utils/tickets";
     import { user } from "$store/store";
 
     interface Props {
@@ -50,12 +49,12 @@
         if (name !== "" && surname !== "" && ticketCode !== "") {
             name = name.trim().toUpperCase();
             surname = surname.trim().toUpperCase();
-            ticketCode = getFdPOrStaffCode(ticketCode?.trim()) ?? "";
+            ticketCode = ticketCode?.trim() ?? "";
 
             try {
                 let response;
                 if (ticketCode !== "") {
-                    response = await fetch(`/api/tickets/${ticketCode}`, {
+                    response = await fetch(`/api/tickets/${encodeURIComponent(ticketCode)}`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",

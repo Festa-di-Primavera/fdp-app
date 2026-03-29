@@ -235,7 +235,7 @@
     <div class="grow flex flex-wrap gap-10 justify-evenly items-center">
         <!-- Non-vegetarian Card Group -->
         <Card.Root
-            class="w-96 h-[500px] flex flex-col items-center justify-center py-8 p-16"
+            class="w-96 h-125 flex flex-col items-center justify-center py-8 p-16"
         >
             <Card.Content class="p-0 h-full flex items-center justify-center">
                 <div class="flex flex-col items-center justify-center gap-6">
@@ -293,7 +293,7 @@
 
         <!-- Vegetarian Card -->
         <Card.Root
-            class="w-96 h-[500px] flex flex-col items-center justify-center py-8 p-16"
+            class="w-96 h-125 flex flex-col items-center justify-center py-8 p-16"
         >
             <Card.Content class="p-0 h-full flex items-center justify-center">
                 <div class="flex flex-col items-center justify-center gap-6">
@@ -314,7 +314,7 @@
 
         <!-- Gluten-free Card -->
         <Card.Root
-            class="w-96 h-[500px] flex flex-col items-center justify-center py-8 p-16"
+            class="w-96 h-125 flex flex-col items-center justify-center py-8 p-16"
         >
             <Card.Content class="p-0 h-full flex items-center justify-center">
                 <div class="flex flex-col items-center justify-center gap-6">

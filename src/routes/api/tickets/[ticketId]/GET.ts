@@ -1,10 +1,9 @@
 import type { User } from "$lib/auth/user";
 import { TICKETS, USERS } from "$lib/firebase/collections";
 import { hasAnyPermissions } from "$lib/utils/permissions";
-import { getFdPOrStaffCode } from "$lib/utils/tickets";
 import { UserPermissions } from "$models/permissions";
 import type { Ticket } from "$models/ticket";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, getDocs, or, query, where } from "firebase/firestore";
 import type { RouteParams } from "./$types";
 
 export async function handleRequest(params: RouteParams, locals: App.Locals) {
@@ -37,7 +36,7 @@ export async function handleRequest(params: RouteParams, locals: App.Locals) {
         );
     }
 
-    const code = getFdPOrStaffCode(params.ticketId);
+    const code = params.ticketId;
     if (code === null) {
         return new Response(JSON.stringify({ message: "Codice non valido" }), {
             status: 404,
@@ -47,9 +46,11 @@ export async function handleRequest(params: RouteParams, locals: App.Locals) {
         });
     }
 
-    const ticketDoc = await getDoc(doc(TICKETS, code));
+    const ticketQuery = query(TICKETS, or(where("ticketId", "==", code), where("fiscalMatrixNumber", "==", code)));
+    const querySnapshot = await getDocs(ticketQuery);
+    const ticketDoc = querySnapshot.docs[0];
 
-    if (!ticketDoc.exists()) {
+    if (!ticketDoc || !ticketDoc.exists()) {
         return new Response(
             JSON.stringify({ message: "Biglietto non esistente" }),
             {
@@ -67,6 +68,7 @@ export async function handleRequest(params: RouteParams, locals: App.Locals) {
     if (ticketData?.seller === null) {
         ticket = {
             ticketId: ticketDoc.id,
+            fiscalMatrixNumber: ticketData?.fiscalMatrixNumber,
             name: ticketData?.name,
             surname: ticketData?.surname,
             seller: null,
@@ -81,6 +83,7 @@ export async function handleRequest(params: RouteParams, locals: App.Locals) {
 
         ticket = {
             ticketId: ticketDoc.id,
+            fiscalMatrixNumber: ticketData.fiscalMatrixNumber,
             name: ticketData.name,
             surname: ticketData.surname,
             seller: sellerName ?? null,

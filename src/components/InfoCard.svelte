@@ -1,7 +1,6 @@
 <script lang="ts">
     import * as Card from "$lib/components/ui/card/index";
     import * as Separator from "$lib/components/ui/separator/index";
-    import { getFdPOrStaffCode } from "$lib/utils/tickets";
     import type { Ticket } from "$models/ticket";
     import { Info } from "@lucide/svelte";
 
@@ -26,9 +25,13 @@
         <span class="w-full flex justify-between">
             <span>N° biglietto:</span>
             <span
-                >{getFdPOrStaffCode(ticket?.ticketId) ||
-                    getFdPOrStaffCode(ticketCode) ||
-                    ""}</span
+                >{ticket?.ticketId || ticketCode || ""}</span
+            >
+        </span>
+        <span class="w-full flex justify-between">
+            <span>Matrice Fiscale:</span>
+            <span class="font-mono"
+                >{ticket?.fiscalMatrixNumber || ""}</span
             >
         </span>
         <span class="w-full flex justify-between">

@@ -233,7 +233,7 @@
         {/each}
         <!-- Spaziatura per mantenere la griglia ordinata -->
         {#each Array(10).fill(null) as _}
-            <div class="w-[22rem] h-0"></div>
+            <div class="w-88 h-0"></div>
         {/each}
     </div>
 </div>

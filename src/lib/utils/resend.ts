@@ -1,6 +1,5 @@
 import { RESEND_API_KEY } from "$env/static/private";
 import { Resend, type Attachment } from "resend";
-import { DOMAIN } from "./domain";
 import { getLogoCidAttachment } from "./email-logo";
 
 const resend = new Resend(RESEND_API_KEY);
@@ -18,7 +17,7 @@ export async function sendEmail(
         ];
 
         const { data, error } = await resend.emails.send({
-            from: `${options?.senderName ?? "Festa di Primavera"} <info@${DOMAIN}>`,
+            from: `${options?.senderName ?? "Festa di Primavera"} <info@${import.meta.env.VITE_EMAIL_DOMAIN}>`,
             to: email,
             subject: subject,
             html: htmlContent,

@@ -22,6 +22,7 @@
 
     let order: Order = $state({
         ticketId: "",
+        fiscalMatrixNumber: "",
         name: "",
         surname: "",
         email: "",
@@ -114,6 +115,7 @@
         try {
             const finalOrder: Order = {
                 ticketId: "",
+                fiscalMatrixNumber: "",
                 name: `${order.name}`,
                 surname: order.surname || "",
                 email: order.email,
@@ -140,6 +142,7 @@
             orderItems = [];
             order = {
                 ticketId: "",
+                fiscalMatrixNumber: "",
                 name: "",
                 surname: "",
                 email: "",
