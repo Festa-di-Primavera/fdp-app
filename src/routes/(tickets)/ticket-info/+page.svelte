@@ -56,7 +56,7 @@
         let tick = (await res.json()).ticket;
 
         ticket = {
-            ticketId: code,
+            ticketId: tick.ticketId,
             fiscalMatrixNumber: tick.fiscalMatrixNumber,
             name: tick.name,
             surname: tick.surname,
