@@ -49,14 +49,14 @@
     );
     const toDoBurgers: number = $derived(countItems(toDoOrders, BURGERS));
 
-    const doneMeraner: number = $derived(
-        countItems(doneOrders, [ItemType.MERANER]),
+    const doneHotdog: number = $derived(
+        countItems(doneOrders, [ItemType.HOTDOG]),
     );
-    const inProgressMeraner: number = $derived(
-        countItems(inProgressOrders, [ItemType.MERANER]),
+    const inProgressHotdog: number = $derived(
+        countItems(inProgressOrders, [ItemType.HOTDOG]),
     );
-    const toDoMeraner: number = $derived(
-        countItems(toDoOrders, [ItemType.MERANER]),
+    const toDoHotdog: number = $derived(
+        countItems(toDoOrders, [ItemType.HOTDOG]),
     );
 
     function getOrders() {
@@ -197,31 +197,31 @@
             <div class="flex flex-col items-center">
                 <span
                     class="text-md font-medium text-green-500 dark:text-green-400"
-                    >Meraner Preparati</span
+                    >Hot Dog Preparati</span
                 >
                 <span
                     class="text-2xl font-semibold text-green-500 dark:text-green-400"
-                    >{doneMeraner}</span
+                    >{doneHotdog}</span
                 >
             </div>
             <div class="flex flex-col items-center">
                 <span
                     class="text-md font-medium text-orange-600 dark:text-orange-300"
-                    >Meraner in attesa</span
+                    >Hot Dog in attesa</span
                 >
                 <span
                     class="text-2xl font-semibold text-orange-600 dark:text-orange-300"
-                    >{inProgressMeraner}</span
+                    >{inProgressHotdog}</span
                 >
             </div>
             <!-- ORDINI ANCORA DA SCANNERIZZARE/INVIARE TRAMITE IL LINK -->
             <div class="flex flex-col items-center">
                 <span class="text-md text-red-500 dark:text-red-400"
-                    >Meraner mancanti</span
+                    >Hot Dog mancanti</span
                 >
                 <span
                     class="text-2xl font-semibold text-red-500 dark:text-red-400"
-                    >{toDoMeraner}</span
+                    >{toDoHotdog}</span
                 >
             </div>
         </div>

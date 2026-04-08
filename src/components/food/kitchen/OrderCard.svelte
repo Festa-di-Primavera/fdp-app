@@ -52,9 +52,9 @@
     </Card.Header>
 
     <Card.Content class="flex flex-col gap-4 px-3">
-        {#each order.items.toSorted( (a, b) => (a.type == ItemType.MERANER ? 1 : b.type == ItemType.MERANER ? -1 : 0), ) as item}
+        {#each order.items.toSorted( (a, b) => (a.type == ItemType.HOTDOG ? 1 : b.type == ItemType.HOTDOG ? -1 : 0), ) as item}
             <div
-                class="p-2 rounded-md {item.type == ItemType.MERANER
+                class="p-2 rounded-md {item.type == ItemType.HOTDOG
                     ? 'bg-red-800/50'
                     : ''}"
             >
