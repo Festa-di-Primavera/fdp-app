@@ -31,7 +31,7 @@
                 .filter((item) => item.type === ItemType.VEGETARIANO)
                 .reduce((total, item) => total + item.quantity, 0);
             return count + vegetarianItems;
-        }, 0)
+        }, 0),
     );
 
     let ontiCount = $derived(
@@ -41,7 +41,7 @@
                 .filter((item) => item.type === ItemType.ONTO)
                 .reduce((total, item) => total + item.quantity, 0);
             return count + ontiItems;
-        }, 0)
+        }, 0),
     );
 
     let basicCount = $derived(
@@ -51,7 +51,7 @@
                 .filter((item) => item.type === ItemType.BASIC)
                 .reduce((total, item) => total + item.quantity, 0);
             return count + basicItems;
-        }, 0)
+        }, 0),
     );
 
     let nonVegetarianCount = $derived(basicCount + ontiCount);
@@ -63,7 +63,7 @@
                 .filter((item) => item.glutenFree === true)
                 .reduce((total, item) => total + item.quantity, 0);
             return count + glutenFreeItems;
-        }, 0)
+        }, 0),
     );
 
     // Stats for completed orders - total sandwiches and hamburgers
@@ -72,10 +72,10 @@
             // Sum all order items regardless of type
             const sandwichesInOrder = order.items.reduce(
                 (total, item) => total + item.quantity,
-                0
+                0,
             );
             return count + sandwichesInOrder;
-        }, 0)
+        }, 0),
     );
 
     let totalHamburgersConsumed = $derived(
@@ -85,11 +85,22 @@
                 .filter(
                     (item) =>
                         item.type === ItemType.BASIC ||
-                        item.type === ItemType.ONTO
+                        item.type === ItemType.ONTO,
                 )
                 .reduce((total, item) => total + item.quantity, 0);
             return count + hamburgersInOrder;
-        }, 0)
+        }, 0),
+    );
+
+    let totalWurstelConsumed = $derived(
+        completedOrders.reduce((count, order) => {
+            return (
+                count +
+                order.items
+                    .filter((item) => item.type === ItemType.HOTDOG)
+                    .reduce((total, item) => total + item.quantity, 0)
+            );
+        }, 0),
     );
 
     // get orders from firestore - modified to fetch both in-progress and completed orders
@@ -114,7 +125,7 @@
                         addOrderToArray(
                             order,
                             inProgressOrders,
-                            completedOrders
+                            completedOrders,
                         );
                     }
                 } else if (change.type === "removed") {
@@ -137,7 +148,7 @@
                         addOrderToArray(
                             order,
                             completedOrders,
-                            inProgressOrders
+                            inProgressOrders,
                         );
                     }
                 } else if (change.type === "removed") {
@@ -151,14 +162,14 @@
     function addOrderToArray(
         order: Order,
         targetArray: Order[],
-        otherArray: Order[]
+        otherArray: Order[],
     ) {
         // First remove from the other array if it exists there
         removeOrderFromArray(order.firebaseId, otherArray);
 
         // Then check if it already exists in target array
         const index = targetArray.findIndex(
-            (o) => o.firebaseId === order.firebaseId
+            (o) => o.firebaseId === order.firebaseId,
         );
 
         if (index !== -1) {
@@ -194,9 +205,7 @@
 
 <div class="px-4 w-full flex flex-col">
     <!-- Card con statistiche di consumo -->
-    <div
-        class="grow flex flex-wrap gap-10 justify-evenly items-center my-16"
-    >
+    <div class="grow flex flex-wrap gap-10 justify-evenly items-center my-16">
         <Card.Root class="w-96 p-14">
             <Card.Content class="p-0">
                 <div class="flex flex-col items-center justify-center gap-3">
@@ -225,6 +234,23 @@
                         class="text-xl text-center font-medium dark:text-white"
                     >
                         Pane consumato
+                    </span>
+                </div>
+            </Card.Content>
+        </Card.Root>
+        <Card.Root class="w-96 p-14">
+            <Card.Content class="p-0">
+                <div class="flex flex-col items-center justify-center gap-3">
+                    <Beef class="w-10 h-10 text-red-500" />
+                    <span
+                        class="text-5xl font-bold text-red-600 dark:text-red-400"
+                    >
+                        {totalWurstelConsumed}
+                    </span>
+                    <span
+                        class="text-xl text-center font-medium dark:text-white"
+                    >
+                        Wurstel consumati
                     </span>
                 </div>
             </Card.Content>
