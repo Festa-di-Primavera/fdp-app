@@ -10,7 +10,6 @@
     import {
         TextAlignJustify,
         ChefHat,
-        CloudUpload,
         CoinsIcon,
         Dna,
         DollarSign,
@@ -31,6 +30,8 @@
         UtensilsCrossed,
         View,
         X,
+        ChartColumn,
+        ListOrdered,
     } from "@lucide/svelte";
     import Logo from "./Logo.svelte";
 
@@ -144,9 +145,25 @@
         },
         {
             label: "Cucina",
-            slug: "/kitchen",
             permission: UserPermissions.CUCINA,
             icon: ChefHat,
+            children: [
+                {
+                    label: "Ordini",
+                    slug: "/kitchen",
+                    icon: ScrollText,
+                },
+                {
+                    label: "Statistiche",
+                    slug: "/kitchen-stats",
+                    icon: ChartColumn,
+                },
+                {
+                    label: "Coda",
+                    slug: "/kitchen-queue",
+                    icon: ListOrdered,
+                },
+            ],
         },
         {
             label: "Ordini",
@@ -181,7 +198,7 @@
 
             if (route.children) {
                 route.children = route.children.filter((child) =>
-                    hasAnyPermissions($user?.permissions, child.permission)
+                    hasAnyPermissions($user?.permissions, child.permission),
                 );
                 return route.children.length > 0;
             }
@@ -242,7 +259,7 @@
                                                     acc ||
                                                     child.slug ===
                                                         page.url.pathname,
-                                                false
+                                                false,
                                             )
                                                 ? route.label
                                                 : ""}
@@ -321,7 +338,7 @@
                                                     {($user?.username ?? "")
                                                         .split(" ")
                                                         .map((word) =>
-                                                            word[0]?.toUpperCase()
+                                                            word[0]?.toUpperCase(),
                                                         )
                                                         .join("")
                                                         .slice(0, 3)}
