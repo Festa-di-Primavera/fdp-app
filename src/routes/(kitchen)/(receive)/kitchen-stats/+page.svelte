@@ -4,7 +4,9 @@
     import { type Order, ItemType } from "$models/order";
     import {
         Beef,
+        Hamburger,
         Leaf,
+        PawPrint,
         Sandwich,
         UtensilsCrossed,
         WheatOff,
@@ -24,7 +26,7 @@
     let completedOrders: Order[] = $state([]); // New state for completed orders
 
     // Stats data - calculated from order items
-    let vegetarianCount = $derived(
+    const vegetarianCount = $derived(
         inProgressOrders.reduce((count, order) => {
             // Count vegetarian items in the order
             const vegetarianItems = order.items
@@ -34,7 +36,7 @@
         }, 0),
     );
 
-    let ontiCount = $derived(
+    const ontiCount = $derived(
         inProgressOrders.reduce((count, order) => {
             // Count onti items in the order
             const ontiItems = order.items
@@ -44,7 +46,7 @@
         }, 0),
     );
 
-    let basicCount = $derived(
+    const basicCount = $derived(
         inProgressOrders.reduce((count, order) => {
             // Count basic items in the order
             const basicItems = order.items
@@ -54,9 +56,7 @@
         }, 0),
     );
 
-    let nonVegetarianCount = $derived(basicCount + ontiCount);
-
-    let glutenFreeCount = $derived(
+    const glutenFreeCount = $derived(
         inProgressOrders.reduce((count, order) => {
             // Count gluten-free items in the order
             const glutenFreeItems = order.items
@@ -66,19 +66,32 @@
         }, 0),
     );
 
+    const hotdogCount = $derived(
+        inProgressOrders.reduce((count, order) => {
+            // Count basic items in the order
+            const hotdogItems = order.items
+                .filter((item) => item.type === ItemType.HOTDOG)
+                .reduce((total, item) => total + item.quantity, 0);
+            return count + hotdogItems;
+        }, 0),
+    );
+
     // Stats for completed orders - total sandwiches and hamburgers
-    let totalSandwichesConsumed = $derived(
+    const totalSandwichesConsumed = $derived(
         completedOrders.reduce((count, order) => {
             // Sum all order items regardless of type
-            const sandwichesInOrder = order.items.reduce(
-                (total, item) => total + item.quantity,
-                0,
-            );
+            const sandwichesInOrder = order.items
+                .filter(
+                    (item) =>
+                        item.type === ItemType.BASIC ||
+                        item.type === ItemType.ONTO,
+                )
+                .reduce((total, item) => total + item.quantity, 0);
             return count + sandwichesInOrder;
         }, 0),
     );
 
-    let totalHamburgersConsumed = $derived(
+    const totalHamburgersConsumed = $derived(
         completedOrders.reduce((count, order) => {
             // Sum only BASIC and ONTO items (which contain meat)
             const hamburgersInOrder = order.items
@@ -92,7 +105,7 @@
         }, 0),
     );
 
-    let totalWurstelConsumed = $derived(
+    const totalWurstelConsumed = $derived(
         completedOrders.reduce((count, order) => {
             return (
                 count +
@@ -204,8 +217,17 @@
 </svelte:head>
 
 <div class="px-4 w-full flex flex-col">
+    <!-- <p>SENZA GLUTINE: {glutenFreeCount}</p> -->
+
+    <!-- <p class="my-5">=== FATTI ===</p>
+    <p>VEGETARIANI: {0}</p>
+    <p>ONTI: {0}</p>
+    <p>BASIC: {0}</p>
+    <p>SENZA GLUTINE: {0}</p>
+    <p>HOT DOG: {0}</p> -->
+
     <!-- Card con statistiche di consumo -->
-    <div class="grow flex flex-wrap gap-10 justify-evenly items-center my-16">
+    <div class="grow flex flex-wrap gap-10 justify-evenly items-center mt-16">
         <Card.Root class="w-96 p-14">
             <Card.Content class="p-0">
                 <div class="flex flex-col items-center justify-center gap-3">
@@ -226,7 +248,7 @@
         <Card.Root class="w-96 p-14">
             <Card.Content class="p-0">
                 <div class="flex flex-col items-center justify-center gap-3">
-                    <Sandwich class="w-10 h-10 text-app-accent" />
+                    <Hamburger class="w-10 h-10 text-app-accent" />
                     <span class="text-5xl font-bold text-app-accent/80">
                         {totalSandwichesConsumed}
                     </span>
@@ -257,6 +279,8 @@
         </Card.Root>
     </div>
 
+    <hr class="my-15" />
+
     <!-- Statistical Cards - centered vertically -->
     <div class="grow flex flex-wrap gap-10 justify-evenly items-center">
         <!-- Non-vegetarian Card Group -->
@@ -269,7 +293,7 @@
                     <span
                         class="text-6xl font-bold text-violet-600 dark:text-violet-400"
                     >
-                        {nonVegetarianCount}
+                        {basicCount + ontiCount}
                     </span>
                     <span
                         class="text-3xl text-center font-medium dark:text-white"
@@ -323,6 +347,27 @@
         >
             <Card.Content class="p-0 h-full flex items-center justify-center">
                 <div class="flex flex-col items-center justify-center gap-6">
+                    <PawPrint class="w-14 h-14 text-red-500" />
+                    <span
+                        class="text-6xl font-bold text-red-600 dark:text-red-400"
+                    >
+                        {hotdogCount}
+                    </span>
+                    <span
+                        class="text-3xl text-center font-medium dark:text-white"
+                    >
+                        Hotdog in coda
+                    </span>
+                </div>
+            </Card.Content>
+        </Card.Root>
+
+        <!-- Hotdog Card -->
+        <Card.Root
+            class="w-96 h-125 flex flex-col items-center justify-center py-8 p-16"
+        >
+            <Card.Content class="p-0 h-full flex items-center justify-center">
+                <div class="flex flex-col items-center justify-center gap-6">
                     <Leaf class="w-14 h-14 text-green-500" />
                     <span
                         class="text-6xl font-bold text-green-600 dark:text-green-400"
@@ -339,7 +384,7 @@
         </Card.Root>
 
         <!-- Gluten-free Card -->
-        <Card.Root
+        <!-- <Card.Root
             class="w-96 h-125 flex flex-col items-center justify-center py-8 p-16"
         >
             <Card.Content class="p-0 h-full flex items-center justify-center">
@@ -357,6 +402,6 @@
                     </span>
                 </div>
             </Card.Content>
-        </Card.Root>
+        </Card.Root> -->
     </div>
 </div>
