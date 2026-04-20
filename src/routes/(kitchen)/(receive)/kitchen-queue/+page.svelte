@@ -74,17 +74,19 @@
                             <div
                                 class="flex flex-col gap-2 justify-between items-center text-gray-800 dark:text-gray-300"
                             >
-                                <span class="font-mono flex flex-col items-center gap-1">
-                                    <span class="text-2xl">
-                                        <b>{order.ticketId}</b>
+                                <span
+                                    class="font-mono flex flex-col items-center gap-1"
+                                >
+                                    <span class="text-2xl font-bold">
+                                        {order.name}
+                                        {order.surname[0]}.
                                     </span>
-                                    <span class="text-lg">
+                                    <span class="text-xl">
                                         {order.fiscalMatrixNumber}
                                     </span>
                                 </span>
-                                <h2 class="text-xl">
-                                    {order.name}
-                                    {order.surname[0]}.
+                                <h2 class="text-lg">
+                                    {order.ticketId}
                                 </h2>
                             </div>
                         </Card.Content>
@@ -129,17 +131,19 @@
                                     <!-- <span class="text-xl font-mono">
                                         <b>{order.ticketId}</b>
                                     </span> -->
-                                    <span class="font-mono flex flex-col items-center gap-1">
-                                        <span class="text-lg">
-                                            <b>{order.ticketId}</b>
+                                    <span
+                                        class="font-mono flex flex-col items-center gap-1"
+                                    >
+                                        <span class="text-lg font-bold">
+                                            {order.name}
+                                            {order.surname[0]}.
                                         </span>
-                                        <span class="text-sm">
+                                        <span class="text-lg">
                                             {order.fiscalMatrixNumber}
                                         </span>
                                     </span>
-                                    <h2 class="text-lg w-full text-center">
-                                        {order.name}
-                                        {order.surname[0]}.
+                                    <h2 class="text-sm w-full text-center">
+                                        {order.ticketId}
                                     </h2>
                                 </div>
                             </div>
