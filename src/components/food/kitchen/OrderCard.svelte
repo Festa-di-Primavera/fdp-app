@@ -2,7 +2,12 @@
     import { Button } from "$lib/components/ui/button/index";
     import * as Card from "$lib/components/ui/card/index";
     import Separator from "$lib/components/ui/separator/separator.svelte";
-    import { ItemType, type Order, type OrderItem } from "$models/order";
+    import {
+        EXTRA_INGREDIENTS,
+        ItemType,
+        type Order,
+        type OrderItem,
+    } from "$models/order";
     import { Leaf, WheatOff } from "@lucide/svelte";
 
     interface Props {
@@ -130,13 +135,25 @@
                     </button>
                 </div>
 
-                {#if item.removedIngredients?.length}
+                {#if item.removedIngredients?.filter((i) => !EXTRA_INGREDIENTS[item.type].includes(i)).length}
                     <ul class="text-sm mt-1 font-semibold list-disc ml-5">
-                        {#each item.removedIngredients as ingredient}
-                            <li>NO {ingredient}</li>
+                        {#each item.removedIngredients?.filter((i) => !EXTRA_INGREDIENTS[item.type].includes(i)) as ingredient}
+                            <li><b class="text-red-400">NO</b> {ingredient}</li>
                         {/each}
                     </ul>
                 {/if}
+
+                {#if EXTRA_INGREDIENTS[item.type].filter((i) => !item.removedIngredients?.includes(i)).length}
+                    <ul class="text-sm mt-1 font-semibold list-disc ml-5">
+                        {#each EXTRA_INGREDIENTS[item.type].filter((i) => !item.removedIngredients?.includes(i)) as ingredient}
+                            <li>
+                                <b class="text-green-400">CON</b>
+                                {ingredient}
+                            </li>
+                        {/each}
+                    </ul>
+                {/if}
+
                 {#if item.notes}
                     <div class="text-sm text-red-500 mt-1">
                         {item.notes}

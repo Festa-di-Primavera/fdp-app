@@ -6,6 +6,7 @@ export enum BaseIngredient {
 
     // Hot Dog
     KETCHUP = "Ketchup",
+    MAIONESE = "Maionese",
 }
 
 export enum ItemType {
@@ -51,5 +52,12 @@ export const DEFAULT_INGREDIENTS: Record<ItemType, BaseIngredient[]> = {
         BaseIngredient.PEPERONI,
         BaseIngredient.CIPOLLA,
     ],
-    [ItemType.HOTDOG]: [BaseIngredient.KETCHUP],
+    [ItemType.HOTDOG]: [],
+};
+
+export const EXTRA_INGREDIENTS: Record<ItemType, BaseIngredient[]> = {
+    [ItemType.BASIC]: [BaseIngredient.KETCHUP, BaseIngredient.MAIONESE],
+    [ItemType.ONTO]: [BaseIngredient.KETCHUP, BaseIngredient.MAIONESE],
+    [ItemType.VEGETARIANO]: [BaseIngredient.KETCHUP, BaseIngredient.MAIONESE],
+    [ItemType.HOTDOG]: [BaseIngredient.KETCHUP, BaseIngredient.MAIONESE],
 };

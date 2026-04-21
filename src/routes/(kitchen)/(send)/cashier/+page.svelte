@@ -8,7 +8,13 @@
     import QrReader from "$components/QrReader.svelte";
     import OrderModal from "$components/food/cashier/OrderModal.svelte";
     import type { User } from "$lib/auth/user";
-    import { type Order, type OrderItem, ItemType } from "$models/order";
+    import {
+        type Order,
+        type OrderItem,
+        BaseIngredient,
+        EXTRA_INGREDIENTS,
+        ItemType,
+    } from "$models/order";
     import type { Ticket } from "$models/ticket";
     import { user } from "$store/store";
     import { toast } from "svelte-sonner";
@@ -37,7 +43,7 @@
                     ? "Biglietto non ancora venduto"
                     : res.status === 425
                       ? "Biglietto non ancora validato all'ingresso"
-                      : "Codice biglietto errato"
+                      : "Codice biglietto errato",
             );
             return;
         }
@@ -90,7 +96,10 @@
         currentItem = {
             type: type as ItemType,
             quantity: 1,
-            removedIngredients: [],
+            removedIngredients: [
+                BaseIngredient.KETCHUP,
+                BaseIngredient.MAIONESE,
+            ],
             glutenFree: false,
         };
         isEditing = false;
@@ -124,11 +133,11 @@
     function addToOrder() {
         if (isEditing) {
             orderItems = orderItems.map((item, index) =>
-                index === editingIndex ? { ...currentItem } : item
+                index === editingIndex ? { ...currentItem } : item,
             );
         } else {
             const existingIndex = orderItems.findIndex((item) =>
-                areOrderItemsEqual(item, currentItem)
+                areOrderItemsEqual(item, currentItem),
             );
 
             if (existingIndex !== -1) {
@@ -138,7 +147,7 @@
                               ...item,
                               quantity: item.quantity + currentItem.quantity,
                           }
-                        : item
+                        : item,
                 );
             } else {
                 orderItems = [...orderItems, { ...currentItem }];
@@ -166,7 +175,7 @@
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    order: finalOrder
+                    order: finalOrder,
                 }),
             });
 
@@ -331,7 +340,9 @@
                                                     >
                                                         {item.type}
                                                     </span>
-                                                    <span class="text-app-accent">
+                                                    <span
+                                                        class="text-app-accent"
+                                                    >
                                                         x{item.quantity}
                                                     </span>
                                                 </div>
@@ -343,14 +354,37 @@
                                                     </span>
                                                 {/if}
                                             </div>
-                                            {#if item.removedIngredients?.length}
+                                            {#if item.removedIngredients?.filter((i) => !EXTRA_INGREDIENTS[item.type].includes(i)).length}
                                                 <div
-                                                    class="text-sm text-red-400"
+                                                    class="text-sm text-red-400 font-bold"
                                                 >
-                                                    <b>Senza:</b>
-                                                    {item.removedIngredients.join(
-                                                        ", "
-                                                    )}
+                                                    Senza:
+                                                    {item.removedIngredients
+                                                        .filter(
+                                                            (i) =>
+                                                                !EXTRA_INGREDIENTS[
+                                                                    item.type
+                                                                ].includes(i),
+                                                        )
+                                                        .join(", ")}
+                                                </div>
+                                            {/if}
+
+                                            {#if EXTRA_INGREDIENTS[item.type].filter((i) => !item.removedIngredients?.includes(i)).length}
+                                                <div
+                                                    class="text-sm text-green-400 font-bold"
+                                                >
+                                                    Extra:
+                                                    {EXTRA_INGREDIENTS[
+                                                        item.type
+                                                    ]
+                                                        .filter(
+                                                            (i) =>
+                                                                !item.removedIngredients?.includes(
+                                                                    i,
+                                                                ),
+                                                        )
+                                                        .join(", ")}
                                                 </div>
                                             {/if}
                                         </div>

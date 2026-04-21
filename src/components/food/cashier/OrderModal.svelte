@@ -7,6 +7,7 @@
     import {
         BaseIngredient,
         DEFAULT_INGREDIENTS,
+        EXTRA_INGREDIENTS,
         type OrderItem,
     } from "$models/order";
     import { Minus, Plus } from "@lucide/svelte";
@@ -107,18 +108,18 @@
                         <Checkbox
                             id={ingredient}
                             checked={currentItem.removedIngredients?.includes(
-                                ingredient
+                                ingredient,
                             )}
                             onCheckedChange={() => {
                                 if (
                                     currentItem.removedIngredients?.includes(
-                                        ingredient
+                                        ingredient,
                                     )
                                 ) {
                                     currentItem.removedIngredients =
                                         currentItem.removedIngredients.filter(
                                             (i: BaseIngredient) =>
-                                                i !== ingredient
+                                                i !== ingredient,
                                         );
                                 } else {
                                     currentItem.removedIngredients = [
@@ -132,10 +133,10 @@
                         <Label for={ingredient}>
                             <span
                                 class:line-through={currentItem.removedIngredients?.includes(
-                                    ingredient
+                                    ingredient,
                                 )}
                                 class:text-red-400={currentItem.removedIngredients?.includes(
-                                    ingredient
+                                    ingredient,
                                 )}
                             >
                                 {ingredient}
@@ -144,6 +145,47 @@
                     </div>
                 {/each}
             </div>
+            {#if EXTRA_INGREDIENTS[currentItem.type]?.length > 0}
+                <span class="mb-2 text-green-400 font-bold"
+                    >Aggiungi ingredienti:</span
+                >
+                <div class="flex flex-col justify-center gap-2 mb-3">
+                    {#each EXTRA_INGREDIENTS[currentItem.type] as ingredient}
+                        <div class="flex items-center gap-2">
+                            <Checkbox
+                                id="extra_{ingredient}"
+                                checked={!currentItem.removedIngredients?.includes(
+                                    ingredient,
+                                )}
+                                onCheckedChange={() => {
+                                    if (
+                                        currentItem.removedIngredients?.includes(
+                                            ingredient,
+                                        )
+                                    ) {
+                                        currentItem.removedIngredients =
+                                            currentItem.removedIngredients.filter(
+                                                (i: BaseIngredient) =>
+                                                    i !== ingredient,
+                                            );
+                                    } else {
+                                        currentItem.removedIngredients = [
+                                            ...(currentItem.removedIngredients ||
+                                                []),
+                                            ingredient,
+                                        ];
+                                    }
+                                }}
+                            />
+                            <Label for="extra_{ingredient}">
+                                <span>
+                                    {ingredient}
+                                </span>
+                            </Label>
+                        </div>
+                    {/each}
+                </div>
+            {/if}
         </div>
 
         <Dialog.Footer>

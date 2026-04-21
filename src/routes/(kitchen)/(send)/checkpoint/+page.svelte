@@ -11,6 +11,7 @@
     import type { User } from "$lib/auth/user";
     import {
         DEFAULT_INGREDIENTS,
+        EXTRA_INGREDIENTS,
         ItemType,
         type Order,
         type OrderItem,
@@ -44,9 +45,7 @@
     let editingIndex = $state(-1);
 
     async function getOrder(code: string) {
-        const res = await fetch(
-            `/api/order/${encodeURIComponent(code)}`
-        );
+        const res = await fetch(`/api/order/${encodeURIComponent(code)}`);
         ticketCodeInput = "";
 
         const responseBody = await res.json();
@@ -84,7 +83,7 @@
                 return {
                     ...order,
                     items: order.items.map((item, index) =>
-                        index === editingIndex ? { ...currentItem } : item
+                        index === editingIndex ? { ...currentItem } : item,
                     ),
                 };
             }
@@ -124,7 +123,7 @@
 
         try {
             const ordersToSubmit = orders.filter((order) =>
-                selectedOrders.has(order.firebaseId!)
+                selectedOrders.has(order.firebaseId!),
             );
 
             // Submit each selected order
@@ -138,7 +137,7 @@
                         creationDate: new Date(Date.now()),
                         items: order.items,
                     }),
-                })
+                }),
             );
 
             const responses = await Promise.all(promises);
@@ -149,7 +148,7 @@
             }
 
             toast.success(
-                `${ordersToSubmit.length} ordine/i inviato/i in cucina`
+                `${ordersToSubmit.length} ordine/i inviato/i in cucina`,
             );
             reset();
         } catch (error) {
@@ -250,7 +249,7 @@
                     {#each orders as order (order.firebaseId)}
                         <Card.Root
                             class="transition-all cursor-pointer {selectedOrders.has(
-                                order.firebaseId!
+                                order.firebaseId!,
                             )
                                 ? 'border-app-accent border-2'
                                 : ''}"
@@ -271,11 +270,13 @@
                                                         >
                                                             <button
                                                                 class="p-1 hover:text-blue-500 rounded-full transition-colors"
-                                                                onclick={(e) => {
+                                                                onclick={(
+                                                                    e,
+                                                                ) => {
                                                                     e.stopPropagation();
                                                                     editOrder(
                                                                         order.firebaseId!,
-                                                                        itemIndex
+                                                                        itemIndex,
                                                                     );
                                                                 }}
                                                             >
@@ -305,15 +306,49 @@
                                                                     GLUTINE
                                                                 </div>
                                                             {/if}
-                                                            {#if item.removedIngredients?.length}
+                                                            {#if item.removedIngredients?.filter((i) => !EXTRA_INGREDIENTS[item.type].includes(i)).length}
                                                                 <div
-                                                                    class="text-sm text-red-400"
+                                                                    class="text-sm text-red-400 font-bold"
                                                                 >
-                                                                    <b>Senza:</b
-                                                                    >
-                                                                    {item.removedIngredients.join(
-                                                                        ", "
-                                                                    )}
+                                                                    Senza:
+                                                                    {item.removedIngredients
+                                                                        .filter(
+                                                                            (
+                                                                                i,
+                                                                            ) =>
+                                                                                !EXTRA_INGREDIENTS[
+                                                                                    item
+                                                                                        .type
+                                                                                ].includes(
+                                                                                    i,
+                                                                                ),
+                                                                        )
+                                                                        .join(
+                                                                            ", ",
+                                                                        )}
+                                                                </div>
+                                                            {/if}
+
+                                                            {#if EXTRA_INGREDIENTS[item.type].filter((i) => !item.removedIngredients?.includes(i)).length}
+                                                                <div
+                                                                    class="text-sm text-green-400 font-bold"
+                                                                >
+                                                                    Extra:
+                                                                    {EXTRA_INGREDIENTS[
+                                                                        item
+                                                                            .type
+                                                                    ]
+                                                                        .filter(
+                                                                            (
+                                                                                i,
+                                                                            ) =>
+                                                                                !item.removedIngredients?.includes(
+                                                                                    i,
+                                                                                ),
+                                                                        )
+                                                                        .join(
+                                                                            ", ",
+                                                                        )}
                                                                 </div>
                                                             {/if}
                                                             {#if item.notes}
@@ -400,7 +435,7 @@
                             <Checkbox
                                 id={ingredient}
                                 checked={currentItem.removedIngredients?.includes(
-                                    ingredient
+                                    ingredient,
                                 )}
                                 onCheckedChange={(checked) => {
                                     if (checked) {
@@ -412,7 +447,7 @@
                                     } else {
                                         currentItem.removedIngredients =
                                             currentItem.removedIngredients?.filter(
-                                                (i) => i !== ingredient
+                                                (i) => i !== ingredient,
                                             ) || [];
                                     }
                                 }}
@@ -420,7 +455,7 @@
                             <Label
                                 for={ingredient}
                                 class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 {currentItem.removedIngredients?.includes(
-                                    ingredient
+                                    ingredient,
                                 )
                                     ? 'line-through text-red-400'
                                     : ''}"
