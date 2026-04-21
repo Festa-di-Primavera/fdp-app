@@ -272,7 +272,7 @@
                     <span
                         class="text-xl text-center font-medium dark:text-white"
                     >
-                        Wurstel consumati
+                        Hotdog consumati
                     </span>
                 </div>
             </Card.Content>
