@@ -95,6 +95,7 @@
                 firebaseId: doc.id,
                 creationDate: (doc.data().creationDate as Timestamp).toDate(),
             })) as Order[];
+            console.log(totalOrders);
         });
 
         // Subscribe to in-progress orders with optimized handling
