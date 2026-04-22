@@ -93,7 +93,7 @@
             totalOrders = querySnapshot.docs.map((doc) => ({
                 ...doc.data(),
                 firebaseId: doc.id,
-                creationDate: (doc.data().creationDate as Timestamp).toDate(),
+                creationDate: (doc.data().creationDate as Timestamp)?.toDate(),
             })) as Order[];
             console.log(totalOrders);
         });
