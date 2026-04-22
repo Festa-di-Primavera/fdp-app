@@ -196,6 +196,8 @@
                         tot += item.quantity;
                     }
                 }
+            } else {
+                console.warn("Invalid order:", order);
             }
         }
 
