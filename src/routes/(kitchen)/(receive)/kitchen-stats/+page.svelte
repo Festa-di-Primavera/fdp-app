@@ -190,9 +190,11 @@
         let tot = 0;
 
         for (const order of orders) {
-            for (const item of order.items) {
-                if (items.includes(item.type)) {
-                    tot += item.quantity;
+            if (order.items) {
+                for (const item of order.items) {
+                    if (items.includes(item.type)) {
+                        tot += item.quantity;
+                    }
                 }
             }
         }
@@ -251,7 +253,7 @@
 </svelte:head>
 
 <div class="px-4 w-full flex flex-col">
-    {countItems(totalOrders, [ItemType.HOTDOG])}
+    <!-- {countItems(totalOrders, [ItemType.HOTDOG])} -->
 
     <!-- Card con statistiche di consumo -->
     <div class="grow flex flex-wrap gap-10 justify-evenly items-center mt-16">
