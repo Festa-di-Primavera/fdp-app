@@ -202,8 +202,8 @@
         return tot;
     }
 
-    const MAX_BEEF_AVAILABLE = 395;
-    const MAX_BREAD_AVAILABLE = 445;
+    const MAX_BEEF_AVAILABLE = 495;
+    const MAX_BREAD_AVAILABLE = 545;
     const MAX_HOTDOG_AVAILABLE = 295;
 
     const MAX_GLUTENFREE_HAMBURGERS = 12;
