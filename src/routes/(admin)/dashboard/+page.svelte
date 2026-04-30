@@ -210,7 +210,7 @@
                     <OrdersECharts {ordersStats} />
                 </div>
             </div>
-            <ExportToCsv bind:tickets />
+            <ExportToCsv bind:tickets {orders} />
         {/if}
     </div>
 </section>
