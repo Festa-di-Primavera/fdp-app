@@ -43,6 +43,22 @@
         link.click();
     }
 
+    function formatDate(date: Date): string {
+        return (
+            [
+                date.getDate().toString().padStart(2, "0"),
+                (date.getMonth() + 1).toString().padStart(2, "0"),
+                date.getFullYear(),
+            ].join("/") +
+            " " +
+            [
+                date.getHours().toString().padStart(2, "0"),
+                date.getMinutes().toString().padStart(2, "0"),
+                date.getSeconds().toString().padStart(2, "0"),
+            ].join(":")
+        );
+    }
+
     function downloadOrdersCSV() {
         if (!orders) {
             return;
@@ -66,9 +82,11 @@
             order.name,
             order.surname,
             order.creationDate
-                ? new Date(order.creationDate.seconds * 1000)
+                ? formatDate(new Date(order.creationDate.seconds * 1000))
                 : null,
-            order.closeDate ? new Date(order.closeDate.seconds * 1000) : null,
+            order.closeDate
+                ? formatDate(new Date(order.closeDate.seconds * 1000))
+                : null,
             "??",
             // JSON.stringify(order.items),
         ]);
