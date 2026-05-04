@@ -43,6 +43,16 @@
         link.click();
     }
 
+    function getCheckinDate(ticketId: string): Date | null {
+        const ticket = tickets.find((ticket) => ticket.ticketId == ticketId);
+
+        if (!ticket) {
+            return null;
+        }
+
+        return ticket.checkIn;
+    }
+
     function formatDate(date: Date): string {
         return (
             [
@@ -70,9 +80,10 @@
             "Done",
             "Name",
             "Surname",
+            "CheckIn",
             "CreatedAt",
             "ClosedAt",
-            "Items",
+            "ItemsCount",
         ];
 
         const data = orders.map((order) => [
@@ -81,14 +92,14 @@
             order.done,
             order.name,
             order.surname,
+            JSON.stringify(getCheckinDate(order.ticketId)),
             order.creationDate
                 ? formatDate(new Date(order.creationDate.seconds * 1000))
                 : null,
             order.closeDate
                 ? formatDate(new Date(order.closeDate.seconds * 1000))
                 : null,
-            "??",
-            // JSON.stringify(order.items),
+            order.items.length,
         ]);
 
         const rows = [header, ...data];
